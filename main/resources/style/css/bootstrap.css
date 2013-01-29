@@ -1,0 +1,49 @@
+/*------ Layout ------*/
+html {
+    height: 100%;
+}
+
+body {
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    height: 100%;
+}
+
+#mt-dashboard-frame {
+    -webkit-flex: 1;
+}
+
+#mt-video-window {
+    position: relative;
+}
+
+.mt-player {
+    position: absolute;
+}
+
+#mt-timeline-frame {
+    height: 100px;
+}
+
+#mt-timeline-list {
+    display: -webkit-flex;
+    -webkit-align-items: center;
+    height: 100%;
+}
+
+.mt-timeline-item {
+
+}
+
+/*------ Style ------*/
+#mt-dashboard-frame {
+    background-color: #faebd7;
+}
+
+.mt-player {
+    -webkit-transition: opacity 5s ease-in-out;
+}
+
+.mt-player.hidden {
+    opacity: 0;
+}

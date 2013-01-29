@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="../script/vendor/q.js"></script>
+    <script src="../script/player.js"></script>
+    <script src="//www.youtube.com/iframe_api"></script>
+    <script>
+        window.onYouTubeIframeAPIReady = function () {
+
+            var onReady = function (event) {
+                // the target is the YT.Player
+                var player = new mt.player.Player(event.target);
+
+                document.querySelector('body').addEventListener('click', function (evt) {
+                    console.log(evt);
+                    player.preloadVideoById(evt.target.getAttribute('data-video'), 3 * 60 * 1000, function() {
+                        console.log('Buffering done according to player');
+                        setTimeout(function() {
+                            player.in();
+                        }, 2000);
+                    });
+                });
+
+            };
+
+            new YT.Player('player', {
+                height: '390',
+                width: '640',
+                playerVars: {
+                    controls: 0,
+                    showinfo: 0,
+                    iv_load_policy: 3,
+                    disablekb: 1
+                },
+                events: {
+                    onReady: onReady
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+<div id="player"></div>
+
+<button id="btn1" type="button" data-video="35FbLhYG86M">Video 1</button>
+<button id="btn2" type="button" data-video="ypU6RHVb_Gw">Video 2</button>
+
+</body>
+</html>

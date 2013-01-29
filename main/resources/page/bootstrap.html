@@ -1,0 +1,33 @@
+<!doctype html>
+<html ng-app="mtMixTubeApp" ng-cloack>
+<head>
+    <title>MixTube</title>
+    <link rel="stylesheet" href="../style/css/vendor/reset.css" type="text/css">
+    <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
+    <script src="../script/vendor/angular.js"></script>
+    <script src="../script/vendor/angular-resource.js"></script>
+    <script src="../script/player.js"></script>
+    <script src="../script/bootstrap.js"></script>
+    <script src="//www.youtube.com/iframe_api"></script>
+</head>
+<body>
+<section id="mt-dashboard-frame">
+    <section ng-controller="mtVideoPlayerStageCtrl">
+        <div id="mt-video-window">
+            <div id="mt-player-0" class="mt-player"></div>
+            <div id="mt-player-1" class="mt-player"></div>
+        </div>
+    </section>
+</section>
+<section id="mt-timeline-frame" ng-controller="mtTimelineCtrl">
+    <ol id="mt-timeline-list">
+        <li class="mt-timeline-item" ng-repeat="videoInstance in videoInstances" style="position: relative">
+            <p style="position: absolute; color: white;">{{videoInstance.id}}</p>
+            <a href="#" ng-click="videoInstanceClicked(videoInstance)">
+                <img ng-src="{{videoInstance.thumbnailUrl}}">
+            </a>
+        </li>
+    </ol>
+</section>
+</body>
+</html>
