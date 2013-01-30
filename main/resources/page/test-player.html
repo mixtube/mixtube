@@ -2,46 +2,37 @@
 <html>
 <head>
     <title></title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
     <script src="../script/vendor/q.js"></script>
     <script src="../script/player.js"></script>
     <script src="//www.youtube.com/iframe_api"></script>
     <script>
         window.onYouTubeIframeAPIReady = function () {
+            // usage
+            var pool = new mt.player.PlayersPool(function () {
+                var playerDiv = document.createElement('div');
+                document.getElementById('players-container').appendChild(playerDiv)
+            });
 
-            var onReady = function (event) {
-                // the target is the YT.Player
-                var player = new mt.player.Player(event.target);
+            var lastHandle;
 
-                document.querySelector('body').addEventListener('click', function (evt) {
-                    console.log(evt);
-                    player.preloadVideoById(evt.target.getAttribute('data-video'), 3 * 60 * 1000, function() {
-                        console.log('Buffering done according to player');
-                        setTimeout(function() {
-                            player.in();
-                        }, 2000);
-                    });
-                });
+            $('button').click(function () {
+                var $button = $(this);
 
-            };
-
-            new YT.Player('player', {
-                height: '390',
-                width: '640',
-                playerVars: {
-                    controls: 0,
-                    showinfo: 0,
-                    iv_load_policy: 3,
-                    disablekb: 1
-                },
-                events: {
-                    onReady: onReady
-                }
+                var handle = pool.prepareVideo({id: $button.attr('data-video'), provider: 'youtube', coarseDuration: 1000});
+                handle.load().done(function () {
+                    if (lastHandle) lastHandle.out();
+                    handle.in();
+                    lastHandle = handle;
+                })
             });
         };
     </script>
 </head>
 <body>
-<div id="player"></div>
+<div id="players-container">
+
+</div>
 
 <button id="btn1" type="button" data-video="35FbLhYG86M">Video 1</button>
 <button id="btn2" type="button" data-video="ypU6RHVb_Gw">Video 2</button>
