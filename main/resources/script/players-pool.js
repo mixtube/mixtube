@@ -11,16 +11,16 @@
 
         self.delegate = delegate;
         self.busy = false;
+        self.lastSampledTime = 0;
         self.canPlayThroughDeferred = undefined;
         self.endOfFadeDeferred = undefined;
+        self.listeners = {timeupdate: {}};
+        self.timeupdateCallbacks = jQuery.Callbacks();
 
         self.delegate.addEventListener('onStateChange', function (evt) {
-            console.log("State of player " + self.instanceId + ' ' + evt.data);
             if (evt.data === YT.PlayerState.PLAYING) {
                 // end of first buffering phase is considered as a can play through event
-                if (!self.canPlayThroughDeferred.isResolved()) {
-                    self.canPlayThroughDeferred.resolve();
-                }
+                self.canPlayThroughDeferred.resolve();
             }
         });
     };
@@ -31,17 +31,19 @@
     mt.player.YoutubePlayer.prototype.reset = function () {
         var self = this;
 
+        self.lastSampledTime = 0;
+
         // clear previous state
-        if (self.canPlayThroughDeferred && !self.canPlayThroughDeferred.isResolved()) {
+        if (self.canPlayThroughDeferred) {
             self.canPlayThroughDeferred.reject();
         }
 
-        if (self.endOfFadeDeferred && !self.endOfFadeDeferred.isResolved()) {
+        if (self.endOfFadeDeferred) {
             self.endOfFadeDeferred.resolve();
         }
 
         // install new state
-        self.canPlayThroughDeferred = Q.defer();
+        self.canPlayThroughDeferred = jQuery.Deferred();
         self.canPlayThroughDeferred.done(function () {
             self.delegate.pauseVideo();
         });
@@ -51,20 +53,51 @@
     };
 
     /**
+     * @param {string} key the listener unique key, can be used to remove it later
+     * @param {function} listener the listener function
+     */
+    mt.player.YoutubePlayer.prototype.addTimeUpdateListener = function (key, listener) {
+        this.listeners.timeupdate[key] = this.listeners.timeupdate[key] || [];
+        this.listeners.timeupdate[key].push(listener);
+        this.timeupdateCallbacks.add(listener);
+    };
+
+    /**
+     * @param {string} key
+     */
+    mt.player.YoutubePlayer.prototype.removeTimeUpdateListener = function (key) {
+        if (key in this.listeners.timeupdate) {
+            this.timeupdateCallbacks.remove(this.listeners.timeupdate[key]);
+            this.listeners.timeupdate[key] = undefined;
+        }
+    };
+
+    /**
      * Clears the previous playback (stop a execute all promises) and start to load the given video.
      *
      * @param {string} videoId
-     * @return {Q.promise} resolved when the video can play through the end without stop
+     * @return {jQuery.promise} resolved when the video can play through the end without stop
      */
     mt.player.YoutubePlayer.prototype.loadVideo = function (videoId) {
         var self = this;
 
-        self.busy = true;
         self.reset();
 
-        // load the video, and when the video will start to play, we will pause it, see notifyBufferingDone
+        self.busy = true;
+
+        // load the video, and when the video will start to play, we will pause it, see canPlayThroughDeferred
         self.delegate.loadVideoById({videoId: videoId, suggestedQuality: 'small'});
-        return self.canPlayThroughDeferred.promise;
+
+        // poll the current video position to generate the timeupdate event
+        self.sampleTimeInterval = setInterval(function () {
+            var sampledTime = self.delegate.getCurrentTime() * 1000;
+            if (self.lastSampledTime !== sampledTime) {
+                self.timeupdateCallbacks.fire({currentTime: sampledTime});
+            }
+            self.lastSampledTime = sampledTime;
+        }, 100);
+
+        return self.canPlayThroughDeferred.promise();
     };
 
     /**
@@ -78,6 +111,7 @@
      * Stops the video and release the player for further usage.
      */
     mt.player.YoutubePlayer.prototype.stopVideo = function () {
+        clearInterval(this.sampleTimeInterval);
         this.delegate.stopVideo();
         this.busy = false;
     };
@@ -89,22 +123,22 @@
      *
      * @param {string} direction "in" or "out"
      * @param {boolean=} immediate should the fade operation go straight to the end
-     * @return {Q.promise} resolved when the fade operation is finished
+     * @return {jQuery.promise} resolved when the fade operation is finished
      */
     mt.player.YoutubePlayer.prototype.fade = function (direction, immediate) {
         var bounds = {'in': {start: 0, end: 100}, out: {start: 100, end: 0}};
         var self = this;
-        if (self.endOfFadeDeferred && !self.endOfFadeDeferred.isResolved()) {
-            // there is a pending fade operation, resolve it first
+        if (self.endOfFadeDeferred) {
+            // there is a pending fade operation, ensure it is resolved
             self.endOfFadeDeferred.resolve();
         }
 
-        self.endOfFadeDeferred = Q.defer();
+        self.endOfFadeDeferred = jQuery.Deferred();
 
         var playerStyle = self.delegate.getIframe().style;
 
         // remove transition and set extreme values when it is resolved
-        self.endOfFadeDeferred.done(function () {
+        self.endOfFadeDeferred.always(function () {
             playerStyle['-webkit-transition'] = '';
             playerStyle.opacity = bounds[direction].end;
             self.delegate.setVolume(bounds[direction].end);
@@ -133,12 +167,12 @@
                 self.delegate.setVolume(100 * (direction === 'in' ? ratio : 1 - ratio));
             }, 100);
 
-            self.endOfFadeDeferred.done(function () {
+            self.endOfFadeDeferred.always(function () {
                 clearInterval(fadeInterval);
             });
         }
 
-        return self.endOfFadeDeferred.promise;
+        return self.endOfFadeDeferred.promise();
     };
 
 
@@ -147,14 +181,16 @@
     /**
      * @param {mt.player.PlayersPool} playersPool
      * @param {{id: string, provider: string, coarseDuration: number}} video
+     * @param {string} uid a generated id that is unique to this handle
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, video) {
+    mt.player.VideoHandle = function (playersPool, video, uid) {
         this.playersPool = playersPool;
-        this.player = undefined;
         this.video = video;
-        this.canPlayThroughDeferred = Q.defer();
-        this.outDeferred = Q.defer();
+        this.uid = uid;
+        this.player = undefined;
+        this.canPlayThroughDeferred = jQuery.Deferred();
+        this.outDeferred = jQuery.Deferred();
     };
 
     /**
@@ -164,9 +200,12 @@
         var self = this;
         self.playersPool.ensurePlayerAvailableForProvider(this.video.provider).done(function (player) {
             self.player = player;
+            self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
+                // todo manage cues
+            });
             self.player.loadVideo(self.video).done(self.canPlayThroughDeferred.resolve);
         });
-        return self.canPlayThroughDeferred.promise;
+        return self.canPlayThroughDeferred.promise();
     };
 
     /**
@@ -182,16 +221,17 @@
     /**
      * Fades out and stops the video.
      *
-     * @return {Q.promise} resolved when the fade operation is finished and the player stopped
+     * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped
      */
     mt.player.VideoHandle.prototype.out = function () {
         if (!this.player) throw new Error('The video should be loaded before calling out');
 
         var self = this;
         self.player.fade('in').done(self.outDeferred.resolve).done(function () {
+            self.player.removeTimeUpdateListener(self.uid + '_cue');
             self.stopVideo();
         });
-        return this.outDeferred.promise;
+        return self.outDeferred.promise();
     };
 
 
@@ -223,7 +263,7 @@
      * If all the players for that provider are playing, instantiate a new one.
      *
      * @param {string} provider the video provider name
-     * @return {Q.promise} resolved when the player is ready to accept load requests
+     * @return {jQuery.promise} resolved when the player is ready to accept load requests
      */
     mt.player.PlayersPool.prototype.ensurePlayerAvailableForProvider = function (provider) {
         var self = this;
@@ -231,7 +271,7 @@
             throw new Error("Unknown provider " + provider);
         }
 
-        var playerDeferred = Q.defer();
+        var playerDeferred = jQuery.Deferred();
         var found = false;
 
         var playersByProvider = self.playersByProvider[provider];
@@ -272,7 +312,7 @@
             }
         }
 
-        return playerDeferred.promise;
+        return playerDeferred.promise();
     };
 
 })(window.mt = window.mt || {});

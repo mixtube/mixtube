@@ -18,8 +18,10 @@
 
             $('button').click(function () {
                 var $button = $(this);
+                var videoId = $button.attr('data-video');
 
-                var handle = pool.prepareVideo({id: $button.attr('data-video'), provider: 'youtube', coarseDuration: 1000});
+                var handle = pool.prepareVideo({id: videoId, provider: 'youtube', coarseDuration: 1000});
+
                 handle.load().done(function () {
                     if (lastHandle) lastHandle.out();
                     handle.in();
