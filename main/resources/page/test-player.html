@@ -3,15 +3,16 @@
 <head>
     <title></title>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-    <script src="../script/vendor/q.js"></script>
-    <script src="../script/player.js"></script>
+    <script src="../script/players-pool.js"></script>
     <script src="//www.youtube.com/iframe_api"></script>
     <script>
         window.onYouTubeIframeAPIReady = function () {
             // usage
             var pool = new mt.player.PlayersPool(function () {
                 var playerDiv = document.createElement('div');
-                document.getElementById('players-container').appendChild(playerDiv)
+                playerDiv.classList.add('player-frame');
+                document.getElementById('players-container').appendChild(playerDiv);
+                return playerDiv;
             });
 
             var lastHandle;
@@ -30,13 +31,24 @@
             });
         };
     </script>
+    <style>
+        #players-container {
+            position: relative;
+        }
+
+        .player-frame {
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+    </style>
 </head>
 <body>
 <div id="players-container">
 
 </div>
 
-<button id="btn1" type="button" data-video="35FbLhYG86M">Video 1</button>
+<button id="btn1" type="button" data-video="uUIyJzRdGcY">Video 1</button>
 <button id="btn2" type="button" data-video="ypU6RHVb_Gw">Video 2</button>
 
 </body>

@@ -9,6 +9,8 @@
     mt.player.YoutubePlayer = function (delegate) {
         var self = this;
 
+        self.fadeDuration = 5000;
+
         self.delegate = delegate;
         self.busy = false;
         self.lastSampledTime = 0;
@@ -18,6 +20,8 @@
         self.timeupdateCallbacks = jQuery.Callbacks();
 
         self.delegate.addEventListener('onStateChange', function (evt) {
+            console.debug('onStateChange executed', evt.data);
+
             if (evt.data === YT.PlayerState.PLAYING) {
                 // end of first buffering phase is considered as a can play through event
                 self.canPlayThroughDeferred.resolve();
@@ -154,7 +158,7 @@
             self.delegate.setVolume(bounds[direction].start);
 
             // use css transitions to animate opacity
-            playerStyle['-webkit-transition'] = 'opacity ' + this.fadeDuration + 'ms';
+            playerStyle['-webkit-transition'] = 'opacity ' + self.fadeDuration + 'ms';
             playerStyle.opacity = bounds[direction].end;
 
             // use classic js interval for sound fade
@@ -203,7 +207,7 @@
             self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
                 // todo manage cues
             });
-            self.player.loadVideo(self.video).done(self.canPlayThroughDeferred.resolve);
+            self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve);
         });
         return self.canPlayThroughDeferred.promise();
     };
@@ -227,9 +231,9 @@
         if (!this.player) throw new Error('The video should be loaded before calling out');
 
         var self = this;
-        self.player.fade('in').done(self.outDeferred.resolve).done(function () {
+        self.player.fade('out').done(self.outDeferred.resolve).done(function () {
             self.player.removeTimeUpdateListener(self.uid + '_cue');
-            self.stopVideo();
+            self.player.stopVideo();
         });
         return self.outDeferred.promise();
     };
@@ -274,9 +278,9 @@
         var playerDeferred = jQuery.Deferred();
         var found = false;
 
-        var playersByProvider = self.playersByProvider[provider];
-        for (var idx = 0; idx < playersByProvider.length; idx++) {
-            var player = playersByProvider[idx];
+        var players = self.playersByProvider[provider];
+        for (var idx = 0; idx < players.length; idx++) {
+            var player = players[idx];
             if (!player.busy) {
                 found = true;
                 playerDeferred.resolve(player);
@@ -287,11 +291,13 @@
 
             // we need to create a new instance, when done save it
             playerDeferred.done(function (player) {
-                self.playersByProvider.push(player);
+                players.push(player);
             });
 
             // get the dom node where we are going to insert the player
             var domNode = self.domNodeSupplierFn();
+            // avoid black flash
+            // domNode.style.display = 'none';
 
             if (provider === 'youtube') {
                 new YT.Player(domNode, {
