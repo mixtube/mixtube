@@ -148,7 +148,6 @@
             self.delegate.setVolume(bounds[direction].end);
         });
 
-
         if (immediate) {
             // no animation, resolve straight
             self.endOfFadeDeferred.resolve();
@@ -248,8 +247,8 @@
     mt.player.PlayersPool = function (domNodeSupplier) {
         this.domNodeSupplierFn = domNodeSupplier;
         this.playersByProvider = {youtube: []};
+        this.handlesCounter = 0;
     };
-
 
     /**
      * Prepares a video and gives back a handle to interact with it.
@@ -258,13 +257,14 @@
      * @return {mt.player.VideoHandle}
      */
     mt.player.PlayersPool.prototype.prepareVideo = function (video) {
-        return new mt.player.VideoHandle(this, video);
+        var uid = 'handle' + this.handlesCounter++;
+        return new mt.player.VideoHandle(this, video, uid);
     };
 
     /**
-     * Ensures that there is enough player available for the supplied provider.
+     * Ensures that there is enough players available for the supplied provider.
      *
-     * If all the players for that provider are playing, instantiate a new one.
+     * If all the players for that provider are playing, creates a new one.
      *
      * @param {string} provider the video provider name
      * @return {jQuery.promise} resolved when the player is ready to accept load requests
@@ -288,7 +288,6 @@
         }
 
         if (!found) {
-
             // we need to create a new instance, when done save it
             playerDeferred.done(function (player) {
                 players.push(player);
@@ -296,8 +295,9 @@
 
             // get the dom node where we are going to insert the player
             var domNode = self.domNodeSupplierFn();
-            // avoid black flash
-            // domNode.style.display = 'none';
+
+            // avoid black flash by hiding the container until the player is ready
+            domNode.style.display = 'none';
 
             if (provider === 'youtube') {
                 new YT.Player(domNode, {
@@ -307,10 +307,14 @@
                         controls: 0,
                         showinfo: 0,
                         iv_load_policy: 3,
-                        disablekb: 1
+                        disablekb: 1,
+                        modestbranding: 1,
+                        rel: 0
                     },
                     events: {
                         onReady: function (evt) {
+                            // now that the player is ready we can make it visible
+                            evt.target.getIframe().style.display = '';
                             playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target))
                         }
                     }

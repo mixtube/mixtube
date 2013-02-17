@@ -3,9 +3,9 @@ window.mt = window.mt || {};
 mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource']);
 
 mt.events = {
-    StartVideoPlayback: 'StartVideoPlayback',
-    NeedNextVideoInstance: 'NeedNextVideoInstance',
-    YouTubePlayerReady: 'YouTubePlayerReady'
+    LoadVideoRequest: 'LoadVideoRequest',
+    NextVideoInstanceRequest: 'NextVideoInstanceRequest',
+    PlayersPoolReady: 'PlayersPoolReady'
 };
 
 mt.model = {
@@ -18,36 +18,18 @@ mt.model = {
 
 
 window.onYouTubeIframeAPIReady = function () {
-    var PLAYERS_TOTAL_COUNT = 2;
-    var players = [];
+    // usage
+    var playersPool = new mt.player.PlayersPool(function () {
+        var playerDiv = document.createElement('div');
+        playerDiv.classList.add('mt-player-frame');
+        document.getElementById('mt-video-window').appendChild(playerDiv);
+        return playerDiv;
+    });
 
-    var onReady = function (event) {
-        // the target is the YT.Player
-        players.push(new mt.player.Player(event.target));
-        if (players.length === PLAYERS_TOTAL_COUNT) {
-            // when all players a ready, dispatch the event
-            var rootScope = angular.element(document).scope();
-            rootScope.$apply(function () {
-                rootScope.$broadcast(mt.events.YouTubePlayerReady, players);
-            });
-        }
-    };
-
-    for (var idx = 0; idx < PLAYERS_TOTAL_COUNT; idx++) {
-        new YT.Player('mt-player-' + idx, {
-            height: '390',
-            width: '640',
-            playerVars: {
-                controls: 0,
-                showinfo: 0,
-                iv_load_policy: 3,
-                disablekb: 1
-            },
-            events: {
-                onReady: onReady
-            }
-        });
-    }
+    var rootScope = angular.element(document).scope();
+    rootScope.$apply(function () {
+        rootScope.$broadcast(mt.events.PlayersPoolReady, playersPool);
+    });
 };
 
 // todo rename timeline to playlist
@@ -68,21 +50,22 @@ mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutu
         {"id": "XPhUUAjSKD8", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/XPhUUAjSKD8/default.jpg", "duration": 288000}
     ];
 
-    $scope.$on(mt.events.NeedNextVideoInstance, function () {
+    $scope.$on(mt.events.NextVideoInstanceRequest, function () {
         mtLogger.debug('Next video instance request received');
 
         $scope.currentVideoInstanceIdx++;
         if ($scope.currentVideoInstanceIdx < $scope.videoInstances.length) {
             var videoInstance = $scope.videoInstances[$scope.currentVideoInstanceIdx];
-            $rootScope.$broadcast(mt.events.StartVideoPlayback, {videoInstance: videoInstance, immediate: false});
+            $rootScope.$broadcast(mt.events.LoadVideoRequest, {videoInstance: videoInstance, autoplay: false});
         }
     });
 
     $scope.videoInstanceClicked = function (videoInstance) {
         $scope.currentVideoInstanceIdx = $scope.videoInstances.indexOf(videoInstance);
-        $rootScope.$broadcast(mt.events.StartVideoPlayback, {videoInstance: videoInstance, immediate: true});
+        $rootScope.$broadcast(mt.events.LoadVideoRequest, {videoInstance: videoInstance, autoplay: true});
     };
 
+    // used to generate a static array of videos for test purposes
     $scope.testLoad = function () {
         mtYoutubeClient.searchVideosByQuery('booba').then(function (videoInstances) {
             var videosIds = videoInstances.map(function (videoInstance) {
@@ -105,65 +88,29 @@ mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutu
 mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, mtLogger) {
 
     /**
-     * @type {Array.<mt.player.Player>}
+     * @type {mt.player.PlayersPool}
      */
-    $scope.players = [];
-    $scope.currentPlayerIdx = 0;
+    $scope.playersPool = undefined;
 
-    $scope.getCurrentPlayer = function () {
-        return $scope.players[$scope.currentPlayerIdx];
-    };
-
-    $scope.getNextPlayer = function () {
-        return $scope.players[$scope.currentPlayerIdx === 0 ? 1 : 0];
-    };
-
-    $scope.switchCurrentNextPlayers = function () {
-        $scope.currentPlayerIdx = $scope.currentPlayerIdx === 0 ? 1 : 0;
-    };
-
-    var startAndCrossFade = function () {
-        var nextPlayer = $scope.getNextPlayer();
-        var lastPlayer = $scope.getCurrentPlayer();
-
-        mtLogger.debug('Start cross fade operation from player %d to player %d', lastPlayer.instanceId, nextPlayer.instanceId);
-
-        nextPlayer.in();
-        lastPlayer.out();
-
-        $scope.switchCurrentNextPlayers();
-
-        // now that the new video is running ask for the next one
-//        $rootScope.$apply(function () {
-//            $rootScope.$broadcast(mt.events.NeedNextVideoInstance);
-//        });
-
-    };
-
-    $scope.$on(mt.events.YouTubePlayerReady, function (event, players) {
-        $scope.players = players;
-
-        $scope.players.forEach(function (player) {
-            player.addPlaybackProgressListener(10000, function () {
-                // seems that we don't need apply here because there already is a dispatch
-
-                mtLogger.debug('Progress listener executed, will start a cross fade operation');
-
-                // here we assume that video was preload by the listener bellow
-                startAndCrossFade();
-            })
-        });
+    $scope.$on(mt.events.PlayersPoolReady, function (event, players) {
+        $scope.playersPool = players;
     });
 
-    $scope.$on(mt.events.StartVideoPlayback, function (event, data) {
-        var nextPlayer = $scope.getNextPlayer();
+    $scope.$on(mt.events.LoadVideoRequest, function (event, data) {
+        mtLogger.debug('Start request for video %s received with autoplay flag %s', data.videoInstance.id, data.autoplay);
 
-        mtLogger.debug('Start request for video %s received with immediate flag %s, will be loaded on player', data.videoInstance.id, data.immediate, nextPlayer.instanceId);
+        var videoHandle = $scope.playersPool.prepareVideo({
+            id: data.videoInstance.id,
+            provider: data.videoInstance.provider,
+            coarseDuration: data.videoInstance.duration
+        });
 
-        if (data.immediate) {
-            nextPlayer.preloadVideoById(data.videoInstance.id, data.videoInstance.duration, startAndCrossFade);
-        } else {
-            nextPlayer.preloadVideoById(data.videoInstance.id, data.videoInstance.duration);
+        var loadDeferred = videoHandle.load();
+
+        if (data.autoplay) {
+            loadDeferred.done(function () {
+                loadDeferred.in();
+            });
         }
     });
 });

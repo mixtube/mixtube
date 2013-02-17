@@ -6,17 +6,15 @@
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
     <script src="../script/vendor/angular.js"></script>
     <script src="../script/vendor/angular-resource.js"></script>
-    <script src="../script/player.js"></script>
+    <!--<script src="../script/player.js"></script>-->
+    <script src="../script/player-pool.js"></script>
     <script src="../script/bootstrap.js"></script>
     <script src="//www.youtube.com/iframe_api"></script>
 </head>
 <body>
 <section id="mt-dashboard-frame">
     <section ng-controller="mtVideoPlayerStageCtrl">
-        <div id="mt-video-window">
-            <div id="mt-player-0" class="mt-player"></div>
-            <div id="mt-player-1" class="mt-player"></div>
-        </div>
+        <div id="mt-video-window"></div>
     </section>
 </section>
 <section id="mt-timeline-frame" ng-controller="mtTimelineCtrl">
