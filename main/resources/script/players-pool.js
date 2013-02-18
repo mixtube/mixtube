@@ -183,14 +183,16 @@
 
     /**
      * @param {mt.player.PlayersPool} playersPool
-     * @param {{id: string, provider: string, coarseDuration: number}} video
      * @param {string} uid a generated id that is unique to this handle
+     * @param {{id: string, provider: string, coarseDuration: number}} video
+     * @param {Array.<{time: number, callback: function}>} cues the cue points
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, video, uid) {
+    mt.player.VideoHandle = function (playersPool, uid, video, cues) {
         this.playersPool = playersPool;
-        this.video = video;
         this.uid = uid;
+        this.video = video;
+        this.cues = cues;
         this.player = undefined;
         this.canPlayThroughDeferred = jQuery.Deferred();
         this.outDeferred = jQuery.Deferred();
@@ -203,8 +205,15 @@
         var self = this;
         self.playersPool.ensurePlayerAvailableForProvider(this.video.provider).done(function (player) {
             self.player = player;
+            var lastCurrentTime = 0;
             self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
-                // todo manage cues
+                self.cues.forEach(function(cue) {
+                    if(cue.time <= evt.currentTime && lastCurrentTime <= cue.time) {
+                        console.log('%s executed', self.uid + '_cue');
+                        cue.callback();
+                    }
+                    lastCurrentTime = evt.currentTime;
+                })
             });
             self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve);
         });
@@ -254,11 +263,12 @@
      * Prepares a video and gives back a handle to interact with it.
      *
      * @param {{id: string, provider: string, coarseDuration: number}} video the video the load
+     * @param {Array.<{time: number, callback: function}>} cues the cues points
      * @return {mt.player.VideoHandle}
      */
-    mt.player.PlayersPool.prototype.prepareVideo = function (video) {
+    mt.player.PlayersPool.prototype.prepareVideo = function (video, cues) {
         var uid = 'handle' + this.handlesCounter++;
-        return new mt.player.VideoHandle(this, video, uid);
+        return new mt.player.VideoHandle(this, uid, video, cues);
     };
 
     /**

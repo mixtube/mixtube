@@ -87,10 +87,10 @@ mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutu
 
 mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, mtLogger) {
 
-    /**
-     * @type {mt.player.PlayersPool}
-     */
+    /** @type {mt.player.PlayersPool} */
     $scope.playersPool = undefined;
+    /** @type {mt.player.VideoHandle} */
+    $scope.currentVideoHandle = undefined;
 
     $scope.$on(mt.events.PlayersPoolReady, function (event, players) {
         $scope.playersPool = players;
@@ -99,20 +99,40 @@ mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope,
     $scope.$on(mt.events.LoadVideoRequest, function (event, data) {
         mtLogger.debug('Start request for video %s received with autoplay flag %s', data.videoInstance.id, data.autoplay);
 
-        var videoHandle = $scope.playersPool.prepareVideo({
+        $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
             id: data.videoInstance.id,
             provider: data.videoInstance.provider,
             coarseDuration: data.videoInstance.duration
-        });
+        }, [
+            {time: 10000, callback: function () {
+                // todo check that it is actually loaded
+                $scope.next();
+            }}
+        ]);
 
-        var loadDeferred = videoHandle.load();
+        var nextLoadDeferred = $scope.nextVideoHandle.load();
 
         if (data.autoplay) {
-            loadDeferred.done(function () {
-                loadDeferred.in();
+            nextLoadDeferred.done(function () {
+                $scope.next();
             });
         }
     });
+
+    $scope.next = function () {
+        if ($scope.currentVideoHandle) {
+            $scope.currentVideoHandle.out()
+        }
+
+        $scope.currentVideoHandle = $scope.nextVideoHandle;
+        $scope.nextVideoHandle = undefined;
+        $scope.currentVideoHandle.in();
+
+        // now that the new video is running ask for the next one
+        $rootScope.$apply(function () {
+            $rootScope.$broadcast(mt.events.NextVideoInstanceRequest);
+        });
+    };
 });
 
 mt.MixTubeApp.factory('mtYoutubeClient', function ($resource, $q) {

@@ -17,8 +17,9 @@ body {
     position: relative;
 }
 
-.mt-player {
+.mt-player-frame {
     position: absolute;
+    top: 0;
 }
 
 #mt-timeline-frame {
@@ -38,12 +39,4 @@ body {
 /*------ Style ------*/
 #mt-dashboard-frame {
     background-color: #faebd7;
-}
-
-.mt-player {
-    -webkit-transition: opacity 5s ease-in-out;
-}
-
-.mt-player.hidden {
-    opacity: 0;
 }
