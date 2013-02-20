@@ -15,11 +15,19 @@ body {
 
 #mt-video-window {
     position: relative;
+    width: 640px; /* keep these values coherent with the player */
+    height: 390px;
+}
+
+#mt-video-window:-webkit-full-screen {
+    width: 100%;
+    height: 100%;
 }
 
 .mt-player-frame {
     position: absolute;
-    top: 0;
+    width: 100%;
+    height: 100%;
 }
 
 #mt-timeline-frame {

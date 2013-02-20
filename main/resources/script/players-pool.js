@@ -17,7 +17,6 @@
         self.canPlayThroughDeferred = undefined;
         self.endOfFadeDeferred = undefined;
         self.listeners = {timeupdate: {}};
-        self.timeupdateCallbacks = jQuery.Callbacks();
 
         self.delegate.addEventListener('onStateChange', function (evt) {
             console.debug('onStateChange executed', evt.data);
@@ -63,7 +62,6 @@
     mt.player.YoutubePlayer.prototype.addTimeUpdateListener = function (key, listener) {
         this.listeners.timeupdate[key] = this.listeners.timeupdate[key] || [];
         this.listeners.timeupdate[key].push(listener);
-        this.timeupdateCallbacks.add(listener);
     };
 
     /**
@@ -71,8 +69,7 @@
      */
     mt.player.YoutubePlayer.prototype.removeTimeUpdateListener = function (key) {
         if (key in this.listeners.timeupdate) {
-            this.timeupdateCallbacks.remove(this.listeners.timeupdate[key]);
-            this.listeners.timeupdate[key] = undefined;
+            this.listeners.timeupdate[key] = [];
         }
     };
 
@@ -96,7 +93,13 @@
         self.sampleTimeInterval = setInterval(function () {
             var sampledTime = self.delegate.getCurrentTime() * 1000;
             if (self.lastSampledTime !== sampledTime) {
-                self.timeupdateCallbacks.fire({currentTime: sampledTime});
+                var event = {currentTime: sampledTime};
+
+                for (var key in self.listeners.timeupdate)
+                    for (var idxCallback = 0; idxCallback < self.listeners.timeupdate[key].length; idxCallback++) {
+                        var callback = self.listeners.timeupdate[key][idxCallback];
+                        callback(event);
+                    }
             }
             self.lastSampledTime = sampledTime;
         }, 100);
@@ -207,8 +210,8 @@
             self.player = player;
             var lastCurrentTime = 0;
             self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
-                self.cues.forEach(function(cue) {
-                    if(cue.time <= evt.currentTime && lastCurrentTime <= cue.time) {
+                self.cues.forEach(function (cue) {
+                    if (cue.time <= evt.currentTime && lastCurrentTime <= cue.time) {
                         console.log('%s executed', self.uid + '_cue');
                         cue.callback();
                     }

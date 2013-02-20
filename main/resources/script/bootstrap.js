@@ -126,13 +126,21 @@ mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope,
 
         $scope.currentVideoHandle = $scope.nextVideoHandle;
         $scope.nextVideoHandle = undefined;
-        $scope.currentVideoHandle.in();
 
-        // now that the new video is running ask for the next one
-        $rootScope.$apply(function () {
-            $rootScope.$broadcast(mt.events.NextVideoInstanceRequest);
-        });
+        // if there is a a current video start it, else it's the end of the sequence
+        if ($scope.currentVideoHandle) {
+            $scope.currentVideoHandle.in();
+
+            // now that the new video is running ask for the next one
+            $rootScope.$apply(function () {
+                $rootScope.$broadcast(mt.events.NextVideoInstanceRequest);
+            });
+        }
     };
+
+    $scope.requestFullscreen = function() {
+        document.getElementById('mt-video-window').webkitRequestFullscreen();
+    }
 });
 
 mt.MixTubeApp.factory('mtYoutubeClient', function ($resource, $q) {
