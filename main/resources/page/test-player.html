@@ -24,8 +24,8 @@
                 var handle = pool.prepareVideo({id: videoId, provider: 'youtube', coarseDuration: 1000});
 
                 handle.load().done(function () {
-                    if (lastHandle) lastHandle.out();
-                    handle.in();
+                    if (lastHandle) lastHandle.out(5000);
+                    handle.in(5000);
                     lastHandle = handle;
                 })
             });

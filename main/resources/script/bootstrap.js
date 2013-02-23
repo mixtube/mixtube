@@ -38,7 +38,8 @@ mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutu
     $scope.currentVideoInstanceIdx = 0;
 
     $scope.videoInstances = [
-        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 340000},
+//        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 340000},
+        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 60000},
         {"id": "ypU6RHVb_Gw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/ypU6RHVb_Gw/default.jpg", "duration": 255000},
         {"id": "YiC5SeRfLYw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/YiC5SeRfLYw/default.jpg", "duration": 282000},
         {"id": "-B8IKn-RrDc", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/-B8IKn-RrDc/default.jpg", "duration": 402000},
@@ -87,6 +88,8 @@ mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutu
 
 mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, mtLogger) {
 
+    var TRANSITION_DURATION = 5000;
+
     /** @type {mt.player.PlayersPool} */
     $scope.playersPool = undefined;
     /** @type {mt.player.VideoHandle} */
@@ -99,13 +102,15 @@ mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope,
     $scope.$on(mt.events.LoadVideoRequest, function (event, data) {
         mtLogger.debug('Start request for video %s received with autoplay flag %s', data.videoInstance.id, data.autoplay);
 
+        var transitionStartTime = data.videoInstance.duration - TRANSITION_DURATION;
+        mtLogger.debug('Preparing a video %s, the transition cue will start at %d', data.videoInstance.id, transitionStartTime);
         $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
             id: data.videoInstance.id,
             provider: data.videoInstance.provider,
             coarseDuration: data.videoInstance.duration
         }, [
-            {time: 10000, callback: function () {
-                // todo check that it is actually loaded
+            {time: transitionStartTime, callback: function () {
+                // starts the next prepared video at 5 seconds from the end of the current one and cross fade
                 $scope.next();
             }}
         ]);
@@ -121,7 +126,7 @@ mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope,
 
     $scope.next = function () {
         if ($scope.currentVideoHandle) {
-            $scope.currentVideoHandle.out()
+            $scope.currentVideoHandle.out(TRANSITION_DURATION)
         }
 
         $scope.currentVideoHandle = $scope.nextVideoHandle;
@@ -129,7 +134,7 @@ mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope,
 
         // if there is a a current video start it, else it's the end of the sequence
         if ($scope.currentVideoHandle) {
-            $scope.currentVideoHandle.in();
+            $scope.currentVideoHandle.in(TRANSITION_DURATION);
 
             // now that the new video is running ask for the next one
             $rootScope.$apply(function () {

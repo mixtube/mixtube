@@ -52,7 +52,7 @@
         });
 
         // make the player silent and invisible
-        self.fade('out', true);
+        self.fade('out', 0);
     };
 
     /**
@@ -126,15 +126,18 @@
     /**
      * Fades the player without modifying the playback status (no play or stop call).
      *
-     * If there was a pending fade operation, it is terminated so that it jumps to the end values.
+     * If there was a pending fade operation, it is terminated so that it jumps to the end values. If duration is equal
+     * to 0, it means immediate transition.
      *
      * @param {string} direction "in" or "out"
-     * @param {boolean=} immediate should the fade operation go straight to the end
+     * @param {number} duration the duration in milliseconds
      * @return {jQuery.promise} resolved when the fade operation is finished
      */
-    mt.player.YoutubePlayer.prototype.fade = function (direction, immediate) {
+    mt.player.YoutubePlayer.prototype.fade = function (direction, duration) {
         var bounds = {'in': {start: 0, end: 100}, out: {start: 100, end: 0}};
         var self = this;
+        var immediate = duration === 0;
+
         if (self.endOfFadeDeferred) {
             // there is a pending fade operation, ensure it is resolved
             self.endOfFadeDeferred.resolve();
@@ -160,13 +163,13 @@
             self.delegate.setVolume(bounds[direction].start);
 
             // use css transitions to animate opacity
-            playerStyle['-webkit-transition'] = 'opacity ' + self.fadeDuration + 'ms';
+            playerStyle['-webkit-transition'] = 'opacity ' + duration + 'ms';
             playerStyle.opacity = bounds[direction].end;
 
             // use classic js interval for sound fade
             var fadeStartTime = Date.now();
             var fadeInterval = setInterval(function () {
-                var ratio = Math.min((Date.now() - fadeStartTime) / self.fadeDuration, 1);
+                var ratio = Math.min((Date.now() - fadeStartTime) / duration, 1);
                 if (ratio === 1) {
                     self.endOfFadeDeferred.resolve();
                 }
@@ -209,9 +212,12 @@
         self.playersPool.ensurePlayerAvailableForProvider(this.video.provider).done(function (player) {
             self.player = player;
             var lastCurrentTime = 0;
+            // register the listener for cues
             self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
+                // go through each cue and execute it if it is the goode time slot
                 self.cues.forEach(function (cue) {
-                    if (cue.time <= evt.currentTime && lastCurrentTime <= cue.time) {
+                    // execute the cue if last time is before the cue time and current time is after
+                    if (lastCurrentTime <= cue.time && cue.time <= evt.currentTime) {
                         console.log('%s executed', self.uid + '_cue');
                         cue.callback();
                     }
@@ -225,24 +231,27 @@
 
     /**
      * Starts and fade in the video.
+     *
+     * @param {number} fade duration in milliseconds
      */
-    mt.player.VideoHandle.prototype.in = function () {
+    mt.player.VideoHandle.prototype.in = function (duration) {
         if (!this.player) throw new Error('The video should be loaded before calling in');
 
         this.player.playVideo();
-        this.player.fade('in');
+        this.player.fade('in', duration);
     };
 
     /**
      * Fades out and stops the video.
      *
+     * @param {number} fade duration in milliseconds
      * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped
      */
-    mt.player.VideoHandle.prototype.out = function () {
+    mt.player.VideoHandle.prototype.out = function (fadeDuration) {
         if (!this.player) throw new Error('The video should be loaded before calling out');
 
         var self = this;
-        self.player.fade('out').done(self.outDeferred.resolve).done(function () {
+        self.player.fade('out', fadeDuration).done(self.outDeferred.resolve).done(function () {
             self.player.removeTimeUpdateListener(self.uid + '_cue');
             self.player.stopVideo();
         });
