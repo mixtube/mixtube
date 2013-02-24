@@ -1,12 +1,16 @@
 (function (mt) {
 // todo rename timeline to playlist
-    mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, mtYoutubeClient, mtLogger) {
+    mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLogger) {
 
         $scope.currentVideoInstanceIdx = 0;
 
         $scope.videoInstances = [
 //        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 340000},
-            {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 60000},
+            // fake duration to make it easier to debug
+            {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 10000},
+            // erroneous video ids used to test ping video
+//            {"id": "ypU6RHVb_G", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/ypU6RHVb_Gw/default.jpg", "duration": 255000},
+//            {"id": "YiC5SeRfLY", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/YiC5SeRfLYw/default.jpg", "duration": 282000},
             {"id": "ypU6RHVb_Gw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/ypU6RHVb_Gw/default.jpg", "duration": 255000},
             {"id": "YiC5SeRfLYw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/YiC5SeRfLYw/default.jpg", "duration": 282000},
             {"id": "-B8IKn-RrDc", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/-B8IKn-RrDc/default.jpg", "duration": 402000},
@@ -20,13 +24,37 @@
 
         $scope.$on(mt.events.NextVideoInstanceRequest, function () {
             mtLogger.debug('Next video instance request received');
+            $scope.findNextExistingVideoInstance().then(function (videoInstance) {
+                $rootScope.$broadcast(mt.events.LoadVideoRequest, {videoInstance: videoInstance, autoplay: false});
+            });
+        });
+
+        /**
+         * Finds the first next video in the playlist that still exist.
+         *
+         * Video can be removed from the remote provider so we have to check that before loading a video to prevent
+         * sequence interruption.
+         *
+         * @return {Promise} a promise with that provides the video instance when an existing video is found
+         */
+        $scope.findNextExistingVideoInstance = function () {
+            var deferred = $q.defer();
 
             $scope.currentVideoInstanceIdx++;
             if ($scope.currentVideoInstanceIdx < $scope.videoInstances.length) {
                 var videoInstance = $scope.videoInstances[$scope.currentVideoInstanceIdx];
-                $rootScope.$broadcast(mt.events.LoadVideoRequest, {videoInstance: videoInstance, autoplay: false});
+
+                mtYoutubeClient.pingVideoById(videoInstance.id).then(function (videoExist) {
+                    if (videoExist) {
+                        deferred.resolve(videoInstance);
+                    } else {
+                        $scope.findNextExistingVideoInstance().then(deferred.resolve);
+                    }
+                });
             }
-        });
+
+            return deferred.promise;
+        };
 
         $scope.videoInstanceClicked = function (videoInstance) {
             $scope.currentVideoInstanceIdx = $scope.videoInstances.indexOf(videoInstance);

@@ -7,19 +7,20 @@
          * @const
          * @type {RegExp}
          */
-        var ISO8601_REGEXP = /PT(\d*)M(\d*)S/;
+        var ISO8601_REGEXP = /PT(?:(\d*)H)?(?:(\d*)M)?(?:(\d*)S)?/;
 
         /**
          * Converts a ISO8601 duration string to a duration in milliseconds.
          *
-         * @param duration {string} 'PT#M#S' format where M and S refer to length in minutes and seconds
+         * @param duration {string} 'PT#H#M#S' format where H, M and S refer to length in hours, minutes and seconds
          * @return {number} the duration in milliseconds
          */
         function convertISO8601DurationToMillis(duration) {
             var execResult = ISO8601_REGEXP.exec(duration);
-            var minutes = parseInt(execResult[1]);
-            var seconds = parseInt(execResult[2]);
-            return (minutes * 60 + seconds) * 1000;
+            var hours = parseInt(execResult[1]) || 0;
+            var minutes = parseInt(execResult[2]) || 0;
+            var seconds = parseInt(execResult[3]) || 0;
+            return (hours * 3600 + minutes * 60 + seconds) * 1000;
         }
 
         var searchResource = $resource('https://www.googleapis.com/youtube/v3/search',
@@ -37,7 +38,7 @@
                 key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg',
                 part: 'contentDetails',
                 callback: 'JSON_CALLBACK'
-            }, {query: {method: 'JSONP', isArray: false}}
+            }, {query: {method: 'JSONP'}}
         );
 
         return {
@@ -78,6 +79,24 @@
                         durationById[item.id] = convertISO8601DurationToMillis(item.contentDetails.duration);
                     });
                     deferred.resolve(durationById);
+                }, deferred.reject);
+
+                return deferred.promise;
+            },
+
+            /**
+             * Checks if the supplied video id matches a existing video in Youtube system.
+             *
+             * @param {string} id the video id
+             * @return {Promise} a promise that is resolved with true if the video exist, false else
+             */
+            pingVideoById: function (id) {
+                var deferred = $q.defer();
+
+                // todo use http backend instead because we don't use the rest of resource API
+                // we use query instead of get because it seems that it is the only method of resource that can handle JSONP
+                videosResource.query({id: id}, function (response) {
+                    deferred.resolve(response.items.length > 0);
                 }, deferred.reject);
 
                 return deferred.promise;
