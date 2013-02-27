@@ -12,6 +12,7 @@
     <script src="../script/bootstrap.js"></script>
     <script src="../script/services.js"></script>
     <script src="../script/controllers.js"></script>
+    <script src="../script/directives.js"></script>
     <script src="//www.youtube.com/iframe_api" async></script>
 </head>
 <body>
@@ -27,8 +28,7 @@
         </div>
         <div>
             <form name="searchForm" novalidate>
-                <input ng-model="searchTerm" id="mt-search-term-input" placeholder="Start typing" required>
-                <button ng-click="search();" ng-disabled="searchForm.$invalid">Search</button>
+                <input ng-model="searchTerm" id="mt-search-term-input" placeholder="Start typing" mt-focus="searchTermFocused" required>
             </form>
         </div>
         <div class="mt-results-frame">

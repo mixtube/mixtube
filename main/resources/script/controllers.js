@@ -159,12 +159,20 @@
 
         /** @type {string} */
         $scope.searchTerm = undefined;
+        /** @type {boolean} */
+        $scope.searchTermFocused = false;
         /** @type {Array.<mt.model.Video>} */
         $scope.youtubeSearchResults = staticVideosInstances;
         /** @type {boolean} */
         $scope.searchVisible = true;
         /** @type {Promise} */
         $scope.instantSearchPromise = undefined;
+
+        $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {
+            if (!$scope.searchVisible) {
+                $scope.open(data.typedChar);
+            }
+        });
 
         // when the user types we automatically execute the search
         $scope.$watch('searchTerm', function (newSearchTerm) {
@@ -194,6 +202,8 @@
         $scope.open = function (firstChar) {
             $scope.searchVisible = true;
             $scope.searchTerm = firstChar;
+            $scope.searchTermFocused = true;
+
         };
 
         $scope.close = function () {

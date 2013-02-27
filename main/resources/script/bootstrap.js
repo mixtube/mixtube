@@ -1,10 +1,21 @@
 (function (mt) {
-    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource']);
+    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource']).run(function ($rootScope) {
+        var wordCharRegExp = /\w/;
+        document.addEventListener('keyup', function (evt) {
+            var convertedString = String.fromCharCode(evt.which);
+            if (wordCharRegExp.test(convertedString)) {
+                $rootScope.$apply(function () {
+                    $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
+                });
+            }
+        });
+    });
 
     mt.events = {
         LoadVideoRequest: 'LoadVideoRequest',
         NextVideoInstanceRequest: 'NextVideoInstanceRequest',
-        PlayersPoolReady: 'PlayersPoolReady'
+        PlayersPoolReady: 'PlayersPoolReady',
+        OpenSearchFrameRequest: 'OpenSearchFrameRequest'
     };
 
     mt.model = {
