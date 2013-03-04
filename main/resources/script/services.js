@@ -1,5 +1,5 @@
 (function (mt) {
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($resource, $q) {
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $resource, $q) {
 
         /**
          * Allow to parse "exotic" time format form Youtube data API.
@@ -23,63 +23,147 @@
             return (hours * 3600 + minutes * 60 + seconds) * 1000;
         }
 
-        var searchResource = $resource('https://www.googleapis.com/youtube/v3/search',
-            {
-                key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg',
-                maxResults: 10,
-                type: 'video',
-                part: 'id,snippet',
-                callback: 'JSON_CALLBACK'
-            }, {query: {method: 'JSONP', isArray: false}}
-        );
+        /**
+         * Returns a list of detailed videos for the given ids.
+         *
+         * Note : The durations are in milliseconds for convenience but the precision is actually smaller (seconds).
+         *
+         * @param {Array.<string>} ids the youtube videos ids
+         * @return {Promise} a promise of detailed {@link  mt.model.Video}
+         */
+        var listVideosByIds = function (ids) {
+            var deferred = $q.defer();
 
-        var videosResource = $resource('https://www.googleapis.com/youtube/v3/videos',
-            {
-                key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg',
-                part: 'contentDetails',
-                callback: 'JSON_CALLBACK'
-            }, {query: {method: 'JSONP'}}
-        );
+            $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
+                params: {
+                    id: ids.join(','),
+                    part: 'snippet,statistics,contentDetails',
+                    callback: 'JSON_CALLBACK',
+                    key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                }
+            }).success(function (response) {
+                    var videos = [];
+                    response.items.forEach(function (item) {
+                        var video = {};
+                        video.id = item.id;
+                        video.title = item.snippet.title;
+                        video.thumbnailUrl = item.snippet.thumbnails.default.url;
+                        video.duration = convertISO8601DurationToMillis(item.contentDetails.duration);
+                        video.viewCount = item.statistics.viewCount;
+                        video.provider = 'youtube';
+                        videos.push(video);
+                    });
+                    deferred.resolve(videos);
+                }).error(deferred.reject);
+
+            return deferred.promise;
+        };
+
+        /**
+         * @param {Array.<string>} ids
+         * @return {Promise} a promise of Array.<{id: string, name: string}>
+         */
+        var listByIds = function (ids) {
+            var deferred = $q.defer();
+
+            $http.jsonp('https://www.googleapis.com/youtube/v3/channels', {
+                params: {
+                    id: ids.join(','),
+                    part: 'snippet',
+                    callback: 'JSON_CALLBACK',
+                    key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                }
+            }).success(function (response) {
+                    var channels = [];
+                    response.items.forEach(function (item) {
+                        channels.push({id: item.id, name: item.snippet.title});
+                    });
+                    deferred.resolve(channels);
+                }).error(deferred.reject);
+
+            return deferred.promise;
+        };
 
         return {
             /**
-             * Searches the 10 first videos on youtube matching the query.
+             * Searches the 20 first videos on youtube matching the query.
+             *
+             * The goal is to provide lite results as fast as possible and upgrade each item when is more details are available.
+             * It is impossible to get all the properties in one shot because of the design of the Youtube API.
+             *
+             * The videos objects are passed by callback to be able to update the model as the details arrive.
+             * The callback parameter is an array of {@link mt.model.Video} for the first call and a projection of
+             * videos after with only the properties available at the execution time.
              *
              * @param {string} queryString the query as used for a classic youtube search
-             * @return {Promise} a promise of {@link  mt.model.Video}
+             * @param {function(Array.<(mt.model.Video|Object)>)} dataCallback executed each time we receive additional data.
              */
-            searchVideosByQuery: function (queryString) {
+            searchVideosByQuery: function (queryString, dataCallback) {
                 var deferred = $q.defer();
 
-                searchResource.query({q: queryString}, function (response) {
-                    var videos = [];
-                    response.items.forEach(function (item) {
-                        videos.push(new mt.model.Video(item.id.videoId, 'youtube', item.snippet.thumbnails.default.url));
-                    });
-                    deferred.resolve(videos);
-                }, deferred.reject);
+                $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
+                    params: {
+                        q: queryString,
+                        type: 'video',
+                        part: 'snippet',
+                        order: 'relevance',
+                        maxResults: 20,
+                        callback: 'JSON_CALLBACK',
+                        key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                    }
+                }).success(function (response) {
+                        var videos = [];
+                        var videoIdxById = {};
+                        var videosIds = [];
+                        var channelsIds = [];
 
-                return deferred.promise;
-            },
+                        var index = 0;
+                        response.items.forEach(function (item) {
+                            var video = new mt.model.Video();
+                            video.id = item.id.videoId;
+                            video.title = item.snippet.title;
+                            video.thumbnailUrl = item.snippet.thumbnails.default.url
+                            video.provider = 'youtube';
+                            // temporary store the channel, see bellow
+                            video.__youtubeChannelId = item.snippet.channelId;
 
-            /**
-             * Fetches videos durations for the supplied ids. The durations are in milliseconds for convenience but the
-             * precision is actually smaller (seconds).
-             *
-             * @param ids {Array.<string>} the videos ids
-             * @return {Promise} a promise of the durations in milliseconds indexed by videos ids
-             */
-            collectVideoDurationByIds: function (ids) {
-                var deferred = $q.defer();
+                            videos.push(video);
+                            videoIdxById[video.id] = index;
+                            videosIds.push(video.id);
+                            channelsIds.push(item.snippet.channelId);
 
-                var durationById = {};
+                            index++;
+                        });
 
-                videosResource.query({id: ids.join(',')}, function (response) {
-                    response.items.forEach(function (item) {
-                        durationById[item.id] = convertISO8601DurationToMillis(item.contentDetails.duration);
-                    });
-                    deferred.resolve(durationById);
-                }, deferred.reject);
+                        listVideosByIds(videosIds).then(function (videoProjections) {
+                            // extend the current videos collections with new properties
+                            videoProjections.forEach(function (videoProjection) {
+                                var videoIdx = videoIdxById[videoProjection.id];
+                                var video = videos[videoIdx];
+                                angular.extend(video, videoProjection);
+                            });
+
+                            dataCallback(videos);
+                        });
+
+                        listByIds(channelsIds).then(function (channelProjections) {
+                            // index the channels by their ids
+                            var channelByIds = {};
+                            channelProjections.forEach(function (channelProjection) {
+                                channelByIds[channelProjection.id] = channelProjection;
+                            });
+
+                            // extend the video with the publisher name, for youtube it is the channel name
+                            videos.forEach(function (video) {
+                                video.publisherName = channelByIds[video.__youtubeChannelId].name;
+                                delete video.__youtubeChannelId;
+                            });
+
+                            dataCallback(videos);
+                        });
+
+                        dataCallback(videos);
+                    }).error(deferred.reject);
 
                 return deferred.promise;
             },
@@ -93,11 +177,16 @@
             pingVideoById: function (id) {
                 var deferred = $q.defer();
 
-                // todo use http backend instead because we don't use the rest of resource API
-                // we use query instead of get because it seems that it is the only method of resource that can handle JSONP
-                videosResource.query({id: id}, function (response) {
-                    deferred.resolve(response.items.length > 0);
-                }, deferred.reject);
+                $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
+                    params: {
+                        id: id,
+                        part: 'id',
+                        callback: 'JSON_CALLBACK',
+                        key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                    }
+                }).success(function (response) {
+                        deferred.resolve(response.items.length > 0);
+                    }).error(deferred.reject);
 
                 return deferred.promise;
             }

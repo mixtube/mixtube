@@ -19,10 +19,13 @@
     };
 
     mt.model = {
-        Video: function (id, provider, thumbnailUrl) {
-            this.id = id;
-            this.provider = provider;
-            this.thumbnailUrl = thumbnailUrl;
+        Video: function () {
+            this.id = undefined;
+            this.title = undefined;
+            this.thumbnailUrl = undefined;
+            this.duration = undefined;
+            this.viewCount = undefined;
+            this.provider = undefined;
         }
     };
 

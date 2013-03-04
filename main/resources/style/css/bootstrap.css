@@ -3,6 +3,10 @@
     box-sizing: border-box;
 }
 
+.mt-invisible {
+    visibility: hidden;
+}
+
 html {
     height: 100%;
 }
@@ -50,29 +54,41 @@ body {
 }
 
 #mt-search-frame {
+    display: -webkit-flex;
     position: absolute;
     top: 0;
     width: 100%;
     height: 100%;
     padding: 20px;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
+    -webkit-flex-direction: column;
 }
 
 .mt-results-frame {
     display: -webkit-flex;
+    height: 1px;
+    -webkit-flex: 1;
 }
 
 .mt-results-provider-column {
-    -webkit-flex: 1;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    -webkit-flex: 1 1;
 }
 
 .mt-results-provider {
     margin: 10px 0 10px 0;
 }
 
+.mt-results-scrollview {
+    height: 1px;
+    -webkit-flex: 1;
+    overflow-y: auto;
+}
+
 .mt-results-list {
     display: -webkit-flex;
-    -webkit-flex-wrap: wrap;
+    -webkit-flex-direction: column;
 }
 
 .mt-results-item {
@@ -82,11 +98,11 @@ body {
 }
 
 .mt-thumbnail-frame {
+    display: -webkit-flex;
     position: relative;
     width: 90px;
     height: 60px;
     overflow: hidden;
-    display: -webkit-flex;
     -webkit-align-items: center;
 }
 
@@ -103,10 +119,20 @@ body {
 
 .mt-video-details {
     padding: 0 10px 0 10px;
+    /* necessary to force flex column to respect the parent size */
+    width: 1px;
+    -webkit-flex: 1;
+}
+
+.mt-video-details-item {
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 #mt-search-close-button {
-    float: right;
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
 
 #mt-search-term-input {
@@ -116,6 +142,28 @@ body {
 /*------ Style ------*/
 html {
     font-family: BentonSans, 'Lucida Sans', 'Lucida Grande', sans-serif;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #FFF;
+    border-radius: 10px
+}
+
+::-webkit-scrollbar-thumb {
+    background: #CCC;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #AAA;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #888;
 }
 
 #mt-dashboard-frame {
@@ -168,7 +216,11 @@ html {
     line-height: 1.4em;
 }
 
-.mt-video-details-list .mt-title  {
+.mt-video-details-item {
+    text-overflow: ellipsis;
+}
+
+.mt-video-details-list .mt-title {
     font-weight: bold;
     font-size: 14px;
 }

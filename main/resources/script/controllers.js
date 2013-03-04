@@ -1,20 +1,15 @@
 (function (mt) {
     var staticVideosInstances = [
-//        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 340000},
-        // fake duration to make it easier to debug
-        {"id": "35FbLhYG86M", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 10000},
-        // erroneous video ids used to test ping video
-//            {"id": "ypU6RHVb_G", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/ypU6RHVb_Gw/default.jpg", "duration": 255000},
-//            {"id": "YiC5SeRfLY", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/YiC5SeRfLYw/default.jpg", "duration": 282000},
-        {"id": "ypU6RHVb_Gw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/ypU6RHVb_Gw/default.jpg", "duration": 255000},
-        {"id": "YiC5SeRfLYw", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/YiC5SeRfLYw/default.jpg", "duration": 282000},
-        {"id": "-B8IKn-RrDc", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/-B8IKn-RrDc/default.jpg", "duration": 402000},
-        {"id": "oBbHo8b4FDc", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/oBbHo8b4FDc/default.jpg", "duration": 270000},
-        {"id": "wvLv_Pem0BA", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/wvLv_Pem0BA/default.jpg", "duration": 268000},
-        {"id": "hhRWM-K5TD8", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/hhRWM-K5TD8/default.jpg", "duration": 258000},
-        {"id": "NNrporSoQf8", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/NNrporSoQf8/default.jpg", "duration": 261000},
-        {"id": "e3xXCfXxr70", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/e3xXCfXxr70/default.jpg", "duration": 192000},
-        {"id": "XPhUUAjSKD8", "provider": "youtube", "thumbnailUrl": "https://i.ytimg.com/vi/XPhUUAjSKD8/default.jpg", "duration": 288000}
+        {"id": "INnGGiL03Qc", "title": "La Fouine dans Touche Pas A Mon Poste clash Booba et parle de la fusillade", "thumbnailUrl": "https://i.ytimg.com/vi/INnGGiL03Qc/default.jpg", "duration": 840000, "viewCount": "188200", "provider": "youtube"},
+        {"id": "AFNEBA8sLJ0", "title": "Booba - Maître Yoda", "thumbnailUrl": "https://i.ytimg.com/vi/AFNEBA8sLJ0/default.jpg", "duration": 277000, "viewCount": "3676797", "provider": "youtube"},
+        {"id": "3q3vTegg9yc", "title": "Booba - T.L.T", "thumbnailUrl": "https://i.ytimg.com/vi/3q3vTegg9yc/default.jpg", "duration": 311000, "viewCount": "5000245", "provider": "youtube"},
+        {"id": "Jt_mfcf0ztg", "title": "Booba - A.C. Milan", "thumbnailUrl": "https://i.ytimg.com/vi/Jt_mfcf0ztg/default.jpg", "duration": 281000, "viewCount": "10624895", "provider": "youtube"},
+        {"id": "yYoejv3aLKA", "title": "Sefyu s'exprime a propos du Clash Booba La Fouine Rohff FDP TLT ...", "thumbnailUrl": "https://i.ytimg.com/vi/yYoejv3aLKA/default.jpg", "duration": 560000, "viewCount": "19860", "provider": "youtube"},
+        {"id": "bunATd9KWOc", "title": "Dam16 - Booba est un grand a moi mais je ne suis pas son petit part 1", "thumbnailUrl": "https://i.ytimg.com/vi/bunATd9KWOc/default.jpg", "duration": 601000, "viewCount": "20974", "provider": "youtube"},
+        {"id": "35FbLhYG86M", "title": "Booba - Tombé pour elle", "thumbnailUrl": "https://i.ytimg.com/vi/35FbLhYG86M/default.jpg", "duration": 340000, "viewCount": "9763352", "provider": "youtube"},
+        {"id": "alA6RVBi3_0", "title": "Ce que pense VRAIMENT la rue du clash BOOBA , LA FOUINE , ROHFF !!!", "thumbnailUrl": "https://i.ytimg.com/vi/alA6RVBi3_0/default.jpg", "duration": 1081000, "viewCount": "115864", "provider": "youtube"},
+        {"id": "4D0lpDRKWo4", "title": "Interview Booba Exclu 22/02/2013 international Qualité (HD)", "thumbnailUrl": "https://i.ytimg.com/vi/4D0lpDRKWo4/default.jpg", "duration": 334000, "viewCount": "12029", "provider": "youtube"},
+        {"id": "0GG0Vw5VD0Q", "title": "TLF clash Booba violent!", "thumbnailUrl": "https://i.ytimg.com/vi/0GG0Vw5VD0Q/default.jpg", "duration": 663000, "viewCount": "44283", "provider": "youtube"}
     ];
 
 // todo rename timeline to playlist
@@ -65,17 +60,13 @@
 
         // used to generate a static array of videos for test purposes
         $scope.testLoad = function () {
-            mtYoutubeClient.searchVideosByQuery('booba').then(function (videoInstances) {
-                var videosIds = videoInstances.map(function (videoInstance) {
-                    return videoInstance.id;
+            mtYoutubeClient.searchVideosByQuery('booba').then(function (summarizedVideos) {
+                var videosIds = summarizedVideos.map(function (summarizedVideo) {
+                    return summarizedVideo.id;
                 });
 
-                mtYoutubeClient.collectVideoDurationByIds(videosIds).then(function (durationsByIds) {
-                    videoInstances.forEach(function (videoInstance) {
-                        videoInstance.duration = durationsByIds[videoInstance.id];
-                    });
-
-                    console.log(JSON.stringify(videoInstances));
+                mtYoutubeClient.listVideosByIds(videosIds).then(function (videos) {
+                    console.log(JSON.stringify(videos));
                 });
             });
         };
@@ -167,6 +158,8 @@
         $scope.searchVisible = true;
         /** @type {Promise} */
         $scope.instantSearchPromise = undefined;
+        /** @type {number} */
+        $scope.searchRequestCount = 0;
 
         $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {
             if (!$scope.searchVisible) {
@@ -181,6 +174,8 @@
 
             // if the search has to be longer than two characters
             if (newSearchTerm && newSearchTerm.length > 2) {
+                $scope.searchRequestCount++;
+
                 $timeout.cancel($scope.instantSearchPromise);
                 $scope.instantSearchPromise = $timeout(function () {
                     $scope.search();
@@ -189,8 +184,14 @@
         });
 
         $scope.search = function () {
-            mtYoutubeClient.searchVideosByQuery($scope.searchTerm).then(function (videos) {
-                $scope.youtubeSearchResults = videos;
+            // store the current request count
+            var startSearchRequestCount = $scope.searchRequestCount;
+
+            mtYoutubeClient.searchVideosByQuery($scope.searchTerm, function (videos) {
+                // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests
+                if ($scope.searchRequestCount === startSearchRequestCount) {
+                    $scope.youtubeSearchResults = videos;
+                }
             });
         };
 

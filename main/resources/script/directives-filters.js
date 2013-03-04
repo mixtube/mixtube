@@ -32,6 +32,10 @@
         var singletonDate = new Date();
 
         return function (time) {
+            if(isNaN(time)) {
+                return '';
+            }
+
             // reset the time to the zero to calculate durations
             singletonDate.setTime(ABSOLUTE_DATE_ZERO);
             singletonDate.setMilliseconds(time);

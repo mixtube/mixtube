@@ -1,6 +1,7 @@
 <!doctype html>
 <html ng-app="mtMixTubeApp" ng-cloack>
 <head>
+    <meta charset='utf-8'>
     <title>MixTube</title>
     <link rel="stylesheet" href="../style/css/vendor/reset.css" type="text/css">
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
@@ -12,7 +13,7 @@
     <script src="../script/bootstrap.js"></script>
     <script src="../script/services.js"></script>
     <script src="../script/controllers.js"></script>
-    <script src="../script/directives.js"></script>
+    <script src="../script/directives-filters.js"></script>
     <script src="//www.youtube.com/iframe_api" async></script>
 </head>
 <body>
@@ -35,21 +36,33 @@
         <div class="mt-results-frame">
             <div class="mt-results-provider-column">
                 <h4 class="mt-results-provider">YouTube</h4>
-                <ul class="mt-results-list">
-                    <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
-                        <div class="mt-thumbnail-frame">
-                            <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
-                            <div class="mt-video-duration">{{searchResult.duration | mtDuration:'shortTime'}}</div>
-                        </div>
-                        <div class="mt-video-details">
-                            <ul class="mt-video-details-list">
-                                <li><span class="mt-title">Chanson</span> - Artist</li>
-                                <li>2000 views</li>
-                                <li>from <span class="mt-user">jojolastico<span></li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
+
+                <div class="mt-results-scrollview">
+                    <ul class="mt-results-list">
+                        <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
+                            <div class="mt-thumbnail-frame">
+                                <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
+
+                                <div class="mt-video-duration" ng-show="searchResult.duration">
+                                    {{searchResult.duration | mtDuration:'shortTime'}}
+                                </div>
+                            </div>
+                            <div class="mt-video-details">
+                                <ul class="mt-video-details-list">
+                                    <li class="mt-video-details-item mt-title">{{searchResult.title}}</li>
+                                    <li class="mt-video-details-item"
+                                        ng-class="{'mt-invisible': !searchResult.viewCount}">
+                                        {{searchResult.viewCount}} views
+                                    </li>
+                                    <li class="mt-video-details-item"
+                                        ng-class="{'mt-invisible': !searchResult.publisherName}">
+                                        from <span class="mt-user">{{searchResult.publisherName}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="mt-results-provider-column">
                 <h4 class="mt-results-provider">Dailymotion</h4>
