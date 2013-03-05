@@ -43,8 +43,15 @@
                         <div class="flex-greedy-box">
                             <div class="flex-inner mt-results-scrollview">
                                 <ul>
-                                    <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
-                                        <div class="flex-row flex-align-center">
+                                    <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
+                                        ng-mouseenter="showAddButton = true" ng-mouseleave="showAddButton = false">
+                                        <button ng-show="showAddButton"
+                                                ng-click="appendResultToPlaylist(searchResult)"
+                                                class="mt-addd-to-playlist-button">
+                                            Ajouter a la playlist
+                                        </button>
+                                        <div class="flex-row flex-align-center" style="position: relative">
+
                                             <div class="flex-row flex-align-center mt-thumbnail-frame">
                                                 <img ng-src="{{searchResult.thumbnailUrl}}"
                                                      class="mt-results-thumbnail">

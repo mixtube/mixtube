@@ -53,7 +53,18 @@ html, body {
 }
 
 .mt-results-item {
-    margin: 5px;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.mt-addd-to-playlist-button {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0; /* override webkit default style */
 }
 
 .mt-thumbnail-frame {
@@ -164,6 +175,14 @@ html {
 .mt-results-item {
     color: rgb(68, 68, 68);
     font-size: 12px;
+}
+
+.mt-addd-to-playlist-button {
+    border: none;
+    color: white;
+    background-color: rgba(0, 0, 0, .93);
+    border-radius: 2px;
+    cursor: pointer;
 }
 
 .mt-video-details-list {

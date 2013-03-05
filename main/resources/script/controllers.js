@@ -26,6 +26,10 @@
             });
         });
 
+        $scope.$on(mt.events.AppendVideoToPlaylistRequest, function (evt, data) {
+            $scope.videoInstances.push(data.video);
+        });
+
         /**
          * Finds the first next video in the playlist that still exist.
          *
@@ -193,6 +197,13 @@
                     $scope.youtubeSearchResults = videos;
                 }
             });
+        };
+
+        /**
+         * @param {mt.model.Video} video
+         */
+        $scope.appendResultToPlaylist = function (video) {
+            $rootScope.$broadcast(mt.events.AppendVideoToPlaylistRequest, {video: video});
         };
 
         /**

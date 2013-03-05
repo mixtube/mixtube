@@ -15,7 +15,8 @@
         LoadVideoRequest: 'LoadVideoRequest',
         NextVideoInstanceRequest: 'NextVideoInstanceRequest',
         PlayersPoolReady: 'PlayersPoolReady',
-        OpenSearchFrameRequest: 'OpenSearchFrameRequest'
+        OpenSearchFrameRequest: 'OpenSearchFrameRequest',
+        AppendVideoToPlaylistRequest: 'AppendVideoToPlaylistRequest'
     };
 
     mt.model = {
