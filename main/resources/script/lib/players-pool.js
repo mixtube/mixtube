@@ -202,13 +202,16 @@
         this.player = undefined;
         this.canPlayThroughDeferred = jQuery.Deferred();
         this.outDeferred = jQuery.Deferred();
+        this.disposed = false;
     };
 
     /**
-     * @return {Q.promise} when the video can play through
+     * @return {jQuery.promise} when the video can play through
      */
     mt.player.VideoHandle.prototype.load = function () {
         var self = this;
+
+        self.checkUsable();
         self.playersPool.ensurePlayerAvailableForProvider(this.video.provider).done(function (player) {
             self.player = player;
             var lastCurrentTime = 0;
@@ -230,12 +233,25 @@
     };
 
     /**
+     * Properly release the handle by removing all the listeners and stopping the video.
+     *
+     * After a call to that method, it is not possible to reuse the handle.
+     */
+    mt.player.VideoHandle.prototype.dispose = function () {
+        this.disposed = true;
+        this.player.removeTimeUpdateListener(this.uid + '_cue');
+        this.canPlayThroughDeferred.reject();
+        this.player.stopVideo();
+    };
+
+    /**
      * Starts and fade in the video.
      *
-     * @param {number} fade duration in milliseconds
+     * @param {number} duration fade duration in milliseconds
      */
     mt.player.VideoHandle.prototype.in = function (duration) {
         if (!this.player) throw new Error('The video should be loaded before calling in');
+        this.checkUsable();
 
         this.player.playVideo();
         this.player.fade('in', duration);
@@ -244,18 +260,30 @@
     /**
      * Fades out and stops the video.
      *
-     * @param {number} fade duration in milliseconds
+     * @param {number} fadeDuration fade duration in milliseconds
      * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped
      */
     mt.player.VideoHandle.prototype.out = function (fadeDuration) {
         if (!this.player) throw new Error('The video should be loaded before calling out');
+        this.checkUsable();
 
         var self = this;
         self.player.fade('out', fadeDuration).done(self.outDeferred.resolve).done(function () {
-            self.player.removeTimeUpdateListener(self.uid + '_cue');
-            self.player.stopVideo();
+            self.dispose();
         });
         return self.outDeferred.promise();
+    };
+
+    /**
+     * Throws an error if handle is disposed.
+     *
+     * @throws {Error}
+     * @private
+     */
+    mt.player.VideoHandle.prototype.checkUsable = function () {
+        if (this.disposed) {
+            throw new Error('Can not use a the disposed handle ' + this.uid);
+        }
     };
 
 

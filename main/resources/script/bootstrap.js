@@ -1,22 +1,27 @@
 (function (mt) {
-    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource']).run(function ($rootScope) {
-        var wordCharRegExp = /\w/;
-        document.addEventListener('keyup', function (evt) {
-            var convertedString = String.fromCharCode(evt.which);
-            if (wordCharRegExp.test(convertedString)) {
-                $rootScope.$apply(function () {
-                    $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
-                });
-            }
+    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource'])
+        .config(function ($locationProvider) {
+            $locationProvider.html5Mode(true);
+        }).run(function ($rootScope) {
+            var wordCharRegExp = /\w/;
+            document.addEventListener('keyup', function (evt) {
+                var convertedString = String.fromCharCode(evt.which);
+                if (wordCharRegExp.test(convertedString)) {
+                    $rootScope.$apply(function () {
+                        $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
+                    });
+                }
+            });
         });
-    });
 
     mt.events = {
         LoadVideoRequest: 'LoadVideoRequest',
         NextVideoInstanceRequest: 'NextVideoInstanceRequest',
-        PlayersPoolReady: 'PlayersPoolReady',
         OpenSearchFrameRequest: 'OpenSearchFrameRequest',
-        AppendVideoToPlaylistRequest: 'AppendVideoToPlaylistRequest'
+        AppendVideoToPlaylistRequest: 'AppendVideoToPlaylistRequest',
+        PlayersPoolReady: 'PlayersPoolReady',
+        PlaylistModified: 'PlaylistModified',
+        VideoStarted: 'VideoStarted'
     };
 
     mt.model = {

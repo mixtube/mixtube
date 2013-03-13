@@ -15,6 +15,8 @@ html, body {
     position: relative;
     width: 640px; /* keep these values coherent with the player */
     height: 390px;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 #mt-video-window:-webkit-full-screen {
@@ -57,16 +59,6 @@ html, body {
     margin-bottom: 5px;
 }
 
-.mt-addd-to-playlist-button {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0; /* override webkit default style */
-}
-
 .mt-thumbnail-frame {
     position: relative;
     width: 90px;
@@ -76,6 +68,14 @@ html, body {
 
 .mt-results-thumbnail {
     width: 100%;
+}
+
+.mt-add-to-playlist-button {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    margin: 0; /* override webkit default style */
 }
 
 .mt-video-duration {
@@ -104,6 +104,18 @@ html, body {
     width: 100%;
 }
 
+.mt-timeline-item {
+    position: relative;
+}
+
+.mt-remove-from-playlist-button {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    margin: 0; /* override webkit default style */
+}
+
 /*------ Style ------*/
 html {
     font-family: BentonSans, 'Lucida Sans', 'Lucida Grande', sans-serif;
@@ -114,7 +126,7 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-    background: #FFF;
+    background: #eaeaea;
     border-radius: 10px
 }
 
@@ -131,12 +143,18 @@ html {
     background: #888;
 }
 
-#mt-dashboard-frame {
-    background-color: #faebd7;
+body {
+    background-color: rgb(255, 255, 255);
+    background-image: url(../image/white-noisy.png);
+}
+
+#mt-timeline-frame {
+    background-color: rgb(0, 0, 0);
+    background-image: url(../image/black-noisy.png);
 }
 
 #mt-search-frame {
-    background-color: rgba(226, 226, 226, 0.80);
+    background-color: rgba(255, 255, 255, 0.80);
 }
 
 #mt-search-title {
@@ -177,12 +195,8 @@ html {
     font-size: 12px;
 }
 
-.mt-addd-to-playlist-button {
-    border: none;
-    color: white;
-    background-color: rgba(0, 0, 0, .93);
-    border-radius: 2px;
-    cursor: pointer;
+.mt-results-item:hover {
+    background-color: #eaeaea;
 }
 
 .mt-video-details-list {
@@ -196,6 +210,15 @@ html {
 .mt-video-details-list .mt-title {
     font-weight: bold;
     font-size: 14px;
+}
+
+.mt-add-to-playlist-button, .mt-remove-from-playlist-button {
+    border: none;
+    color: rgba(255, 255, 255, .8);
+    background-color: transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 30px;
 }
 
 .mt-video-duration {
