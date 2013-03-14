@@ -109,7 +109,7 @@
 </section>
 <section id="mt-timeline-frame" ng-controller="mtTimelineCtrl">
     <ol id="mt-timeline-list" class="flex-row flex-align-center">
-        <li class="mt-timeline-item" ng-repeat="videoInstance in videoInstances"
+        <li class="mt-timeline-item" ng-class="{'mt-current': isCurrent(videoInstance)}" ng-repeat="videoInstance in videoInstances"
             ng-mouseenter="overTimelineItem = true" ng-mouseleave="overTimelineItem = false">
             <a href="#" ng-click="videoInstanceClicked(videoInstance)">
                 <img class="mt-timeline-thumbnail" ng-src="{{videoInstance.thumbnailUrl}}">

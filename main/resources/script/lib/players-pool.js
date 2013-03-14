@@ -194,8 +194,9 @@
      * @param {Array.<{time: number, callback: function}>} cues the cue points
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, uid, video, cues) {
+    mt.player.VideoHandle = function (playersPool, key, uid, video, cues) {
         this.playersPool = playersPool;
+        this.key = key
         this.uid = uid;
         this.video = video;
         this.cues = cues;
@@ -306,9 +307,9 @@
      * @param {Array.<{time: number, callback: function}>} cues the cues points
      * @return {mt.player.VideoHandle}
      */
-    mt.player.PlayersPool.prototype.prepareVideo = function (video, cues) {
+    mt.player.PlayersPool.prototype.prepareVideo = function (key, video, cues) {
         var uid = 'handle' + this.handlesCounter++;
-        return new mt.player.VideoHandle(this, uid, video, cues);
+        return new mt.player.VideoHandle(this, key, uid, video, cues);
     };
 
     /**

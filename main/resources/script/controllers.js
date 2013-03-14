@@ -43,8 +43,8 @@
             $scope.triggerPlaylistModified();
         });
 
-        $scope.$on(mt.events.VideoStarted, function () {
-            $scope.currentVideoInstanceIdx++;
+        $scope.$on(mt.events.VideoStarted, function (evt, data) {
+            $scope.currentVideoInstanceIdx = $scope.videoInstances.indexOf(data.videoInstance);
         });
 
         $scope.triggerPlaylistModified = function () {
@@ -66,7 +66,7 @@
             var deferred = $q.defer();
 
             if ($scope.currentVideoInstanceIdx < $scope.videoInstances.length) {
-                var videoInstance = $scope.videoInstances[$scope.currentVideoInstanceIdx];
+                var videoInstance = $scope.videoInstances[$scope.currentVideoInstanceIdx + 1];
 
                 mtYoutubeClient.pingVideoById(videoInstance.id).then(function (videoExist) {
                     if (videoExist) {
@@ -90,6 +90,10 @@
             $scope.videoInstances.splice(index, 1);
 
             $scope.triggerPlaylistModified();
+        };
+
+        $scope.isCurrent = function (videoInstance) {
+            return videoInstance === $scope.videoInstances[$scope.currentVideoInstanceIdx];
         };
     });
 
@@ -136,7 +140,7 @@
             var transitionStartTime = 'duration' in $location.search() ? parseInt($location.search().duration, 10) : data.videoInstance.duration - TRANSITION_DURATION;
             mtLogger.debug('Preparing a video %s, the transition cue will start at %d', data.videoInstance.id, transitionStartTime);
 
-            $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
+            $scope.nextVideoHandle = $scope.playersPool.prepareVideo(data.videoInstance, {
                 id: data.videoInstance.id,
                 provider: data.videoInstance.provider,
                 coarseDuration: data.videoInstance.duration
@@ -170,7 +174,7 @@
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
-                    $rootScope.$broadcast(mt.events.VideoStarted);
+                    $rootScope.$broadcast(mt.events.VideoStarted, {videoInstance: $scope.currentVideoHandle.key});
                     $rootScope.$broadcast(mt.events.NextVideoInstanceRequest);
                 });
             }
