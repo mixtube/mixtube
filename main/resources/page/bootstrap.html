@@ -112,7 +112,7 @@
         <li class="mt-timeline-item" ng-repeat="videoInstance in videoInstances"
             ng-mouseenter="overTimelineItem = true" ng-mouseleave="overTimelineItem = false">
             <a href="#" ng-click="videoInstanceClicked(videoInstance)">
-                <img ng-src="{{videoInstance.thumbnailUrl}}">
+                <img class="mt-timeline-thumbnail" ng-src="{{videoInstance.thumbnailUrl}}">
             </a>
             <button class="mt-remove-from-playlist-button icon-minus-sign" ng-show="overTimelineItem"
                     ng-click="removeVideoInstanceClicked(videoInstance)"></button>

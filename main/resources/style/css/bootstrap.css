@@ -38,6 +38,14 @@ html, body {
     height: 100%;
 }
 
+.mt-timeline-item {
+    width: 140px;
+}
+
+.mt-timeline-thumbnail {
+    width: 100%;
+}
+
 #mt-search-frame {
     position: absolute;
     top: 0;
@@ -61,7 +69,7 @@ html, body {
 
 .mt-thumbnail-frame {
     position: relative;
-    width: 90px;
+    width: 106px;
     height: 60px;
     overflow: hidden;
 }

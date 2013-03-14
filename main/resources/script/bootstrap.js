@@ -2,7 +2,7 @@
     mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource'])
         .config(function ($locationProvider) {
             $locationProvider.html5Mode(true);
-        }).run(function ($rootScope) {
+        }).run(function ($rootScope, mtYoutubeClient) {
             var wordCharRegExp = /\w/;
             document.addEventListener('keyup', function (evt) {
                 var convertedString = String.fromCharCode(evt.which);
@@ -12,6 +12,19 @@
                     });
                 }
             });
+
+
+            // used to generate a static array of videos for test purposes
+            var dumpSearch = function () {
+                var callCount = 0;
+                mtYoutubeClient.searchVideosByQuery('booba', function (videos) {
+                    if (++callCount === 3) {
+                        console.log(JSON.stringify(videos));
+                    }
+                });
+            };
+
+            // dumpSearch();
         });
 
     mt.events = {

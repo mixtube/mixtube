@@ -24,7 +24,7 @@
         }
 
         /**
-         * Returns a list of detailed videos for the given ids.
+         * Returns a list of details for videos for the given ids (duration and view count).
          *
          * Note : The durations are in milliseconds for convenience but the precision is actually smaller (seconds).
          *
@@ -46,11 +46,8 @@
                     response.items.forEach(function (item) {
                         var video = {};
                         video.id = item.id;
-                        video.title = item.snippet.title;
-                        video.thumbnailUrl = item.snippet.thumbnails.default.url;
                         video.duration = convertISO8601DurationToMillis(item.contentDetails.duration);
                         video.viewCount = item.statistics.viewCount;
-                        video.provider = 'youtube';
                         videos.push(video);
                     });
                     deferred.resolve(videos);
@@ -122,7 +119,7 @@
                             var video = new mt.model.Video();
                             video.id = item.id.videoId;
                             video.title = item.snippet.title;
-                            video.thumbnailUrl = item.snippet.thumbnails.default.url
+                            video.thumbnailUrl = item.snippet.thumbnails.medium.url
                             video.provider = 'youtube';
                             // temporary store the channel, see bellow
                             video.__youtubeChannelId = item.snippet.channelId;
