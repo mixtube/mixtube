@@ -22,8 +22,7 @@
         {"id": "9YwN5ywiF20", "title": "Rohff : 1er Couplet Reponse Du Clash De Booba", "thumbnailUrl": "https://i.ytimg.com/vi/9YwN5ywiF20/mqdefault.jpg", "duration": 78000, "viewCount": "2928", "provider": "youtube", "publisherName": "Swagg TV"}
     ];
 
-// todo rename timeline to playlist
-    mt.MixTubeApp.controller('mtTimelineCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLogger) {
+    mt.MixTubeApp.controller('mtPlaylistCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLogger) {
 
         /**  @type {number} */
         $scope.currentVideoInstanceIdx = 0;

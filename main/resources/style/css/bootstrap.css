@@ -30,21 +30,21 @@ html, body {
     height: 100%;
 }
 
-#mt-timeline-frame {
+#mt-playlist-frame {
     height: 100px;
     overflow-x: auto
 }
 
-#mt-timeline-list {
+#mt-playlist-list {
     height: 100%;
 }
 
-.mt-timeline-item {
+.mt-playlist-item {
     position: relative;
     width: 140px;
 }
 
-.mt-timeline-item.mt-current:before {
+.mt-playlist-item.mt-current:before {
     display: block;
     position: absolute;
     color: rgb(14, 219, 247);
@@ -52,7 +52,7 @@ html, body {
     left: 54px;
 }
 
-.mt-timeline-thumbnail {
+.mt-playlist-thumbnail {
     width: 100%;
 }
 
@@ -162,7 +162,7 @@ body {
     background: rgb(255, 255, 255) url(../image/white-noisy.png);
 }
 
-#mt-timeline-frame {
+#mt-playlist-frame {
     background: rgb(0, 0, 0) url(../image/black-noisy.png);
 }
 
@@ -225,7 +225,7 @@ body {
     font-size: 14px;
 }
 
-.mt-timeline-item.mt-current:before {
+.mt-playlist-item.mt-current:before {
     content: '\f0d7';
     color: rgb(14, 219, 247);
     font-family: 'FontAwesome';

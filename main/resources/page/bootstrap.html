@@ -107,14 +107,14 @@
         </div>
     </section>
 </section>
-<section id="mt-timeline-frame" ng-controller="mtTimelineCtrl">
-    <ol id="mt-timeline-list" class="flex-row flex-align-center">
-        <li class="mt-timeline-item" ng-class="{'mt-current': isCurrent(videoInstance)}" ng-repeat="videoInstance in videoInstances"
-            ng-mouseenter="overTimelineItem = true" ng-mouseleave="overTimelineItem = false">
+<section id="mt-playlist-frame" ng-controller="mtPlaylistCtrl">
+    <ol id="mt-playlist-list" class="flex-row flex-align-center">
+        <li class="mt-playlist-item" ng-class="{'mt-current': isCurrent(videoInstance)}" ng-repeat="videoInstance in videoInstances"
+            ng-mouseenter="overPlaylistItem = true" ng-mouseleave="overPlaylistItem = false">
             <a href="#" ng-click="videoInstanceClicked(videoInstance)">
-                <img class="mt-timeline-thumbnail" ng-src="{{videoInstance.thumbnailUrl}}">
+                <img class="mt-playlist-thumbnail" ng-src="{{videoInstance.thumbnailUrl}}">
             </a>
-            <button class="mt-remove-from-playlist-button icon-minus-sign" ng-show="overTimelineItem"
+            <button class="mt-remove-from-playlist-button icon-minus-sign" ng-show="overPlaylistItem"
                     ng-click="removeVideoInstanceClicked(videoInstance)"></button>
         </li>
     </ol>
