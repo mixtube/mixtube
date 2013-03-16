@@ -109,13 +109,13 @@
 </section>
 <section id="mt-playlist-frame" ng-controller="mtPlaylistCtrl">
     <ol id="mt-playlist-list" class="flex-row flex-align-center">
-        <li class="mt-playlist-item" ng-class="{'mt-current': isCurrent(videoInstance)}" ng-repeat="videoInstance in videoInstances"
+        <li class="mt-playlist-item" ng-class="{'mt-current': playlistEntry == activePlaylistEntry}" ng-repeat="playlistEntry in playlistEntries"
             ng-mouseenter="overPlaylistItem = true" ng-mouseleave="overPlaylistItem = false">
-            <a href="#" ng-click="videoInstanceClicked(videoInstance)">
-                <img class="mt-playlist-thumbnail" ng-src="{{videoInstance.thumbnailUrl}}">
+            <a href="#" ng-click="playlistEntryClicked(playlistEntry)">
+                <img class="mt-playlist-thumbnail" ng-src="{{playlistEntry.video.thumbnailUrl}}">
             </a>
             <button class="mt-remove-from-playlist-button icon-minus-sign" ng-show="overPlaylistItem"
-                    ng-click="removeVideoInstanceClicked(videoInstance)"></button>
+                    ng-click="removePlaylistEntryClicked(playlistEntry)"></button>
         </li>
     </ol>
 </section>

@@ -194,9 +194,8 @@
      * @param {Array.<{time: number, callback: function}>} cues the cue points
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, key, uid, video, cues) {
+    mt.player.VideoHandle = function (playersPool, uid, video, cues) {
         this.playersPool = playersPool;
-        this.key = key
         this.uid = uid;
         this.video = video;
         this.cues = cues;
@@ -262,15 +261,15 @@
      * Fades out and stops the video.
      *
      * @param {number} fadeDuration fade duration in milliseconds
-     * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped
+     * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped. The argument it this handle.
      */
     mt.player.VideoHandle.prototype.out = function (fadeDuration) {
         if (!this.player) throw new Error('The video should be loaded before calling out');
         this.checkUsable();
 
         var self = this;
-        self.player.fade('out', fadeDuration).done(self.outDeferred.resolve).done(function () {
-            self.dispose();
+        self.player.fade('out', fadeDuration).done(function () {
+            self.outDeferred.resolve(self);
         });
         return self.outDeferred.promise();
     };
@@ -307,9 +306,8 @@
      * @param {Array.<{time: number, callback: function}>} cues the cues points
      * @return {mt.player.VideoHandle}
      */
-    mt.player.PlayersPool.prototype.prepareVideo = function (key, video, cues) {
-        var uid = 'handle' + this.handlesCounter++;
-        return new mt.player.VideoHandle(this, key, uid, video, cues);
+    mt.player.PlayersPool.prototype.prepareVideo = function (video, cues) {
+        return new mt.player.VideoHandle(this, mt.tools.uniqueId(), video, cues);
     };
 
     /**
