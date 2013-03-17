@@ -87,7 +87,7 @@
         self.busy = true;
 
         // load the video, and when the video will start to play, we will pause it, see canPlayThroughDeferred
-        self.delegate.loadVideoById({videoId: videoId, suggestedQuality: 'small'});
+        self.delegate.loadVideoById({videoId: videoId, suggestedQuality: 'default'});
 
         // poll the current video position to generate the timeupdate event
         self.sampleTimeInterval = setInterval(function () {
@@ -211,7 +211,7 @@
     mt.player.VideoHandle.prototype.load = function () {
         var self = this;
 
-        self.checkUsable();
+        self.checkNotDisposed();
         self.playersPool.ensurePlayerAvailableForProvider(this.video.provider).done(function (player) {
             self.player = player;
             var lastCurrentTime = 0;
@@ -250,8 +250,8 @@
      * @param {number} duration fade duration in milliseconds
      */
     mt.player.VideoHandle.prototype.in = function (duration) {
+        this.checkNotDisposed();
         if (!this.player) throw new Error('The video should be loaded before calling in');
-        this.checkUsable();
 
         this.player.playVideo();
         this.player.fade('in', duration);
@@ -264,8 +264,8 @@
      * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped. The argument it this handle.
      */
     mt.player.VideoHandle.prototype.out = function (fadeDuration) {
+        this.checkNotDisposed();
         if (!this.player) throw new Error('The video should be loaded before calling out');
-        this.checkUsable();
 
         var self = this;
         self.player.fade('out', fadeDuration).done(function () {
@@ -280,7 +280,7 @@
      * @throws {Error}
      * @private
      */
-    mt.player.VideoHandle.prototype.checkUsable = function () {
+    mt.player.VideoHandle.prototype.checkNotDisposed = function () {
         if (this.disposed) {
             throw new Error('Can not use a the disposed handle ' + this.uid);
         }
