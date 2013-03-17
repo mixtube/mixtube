@@ -1,17 +1,14 @@
 (function (mt) {
 
 
-    mt.MixTubeApp.controller('mtPlaylistCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLogger) {
+    mt.MixTubeApp.controller('mtPlaylistCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
+
+        var logger = mtLoggerFactory.logger('mtPlaylistCtrl');
 
         /**  @type {mt.model.PlaylistEntry} */
         $scope.activePlaylistEntry = undefined;
         /**  @type {Array.<mt.model.PlaylistEntry>} */
-        $scope.playlistEntries = mt.tools.TEST_VIDEOS.map(function (video) {
-            var playlistEntry = new mt.model.PlaylistEntry();
-            playlistEntry.id = mt.tools.uniqueId();
-            playlistEntry.video = video;
-            return playlistEntry;
-        });
+        $scope.playlistEntries = mtConfiguration.initialPlaylistEntries;
 
         /**
          * Finds the first next video in the playlist that still exist.
@@ -52,7 +49,7 @@
 
 
         $scope.$on(mt.events.NextPlaylistEntryRequest, function () {
-            mtLogger.debug('Next playlist entry request received');
+            logger.debug('Next playlist entry request received');
 
             var activePosition = $scope.playlistEntries.indexOf($scope.activePlaylistEntry);
             findNextValidPlaylistEntry(activePosition).then(function (playlistEntry) {
@@ -84,13 +81,9 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, $location, mtLogger) {
+    mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, $location, mtLoggerFactory, mtConfiguration) {
 
-        /**
-         * @type {number}
-         * @const
-         */
-        var TRANSITION_DURATION = 1000;
+        var logger = mtLoggerFactory.logger('mtVideoPlayerStageCtrl');
 
         /** @type {mt.player.PlayersPool} */
         $scope.playersPool = undefined;
@@ -113,7 +106,7 @@
 
         var next = function () {
             if ($scope.currentVideoHandle) {
-                $scope.currentVideoHandle.out(TRANSITION_DURATION).done(function (videoHandle) {
+                $scope.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
                     videoHandle.dispose();
                 });
             }
@@ -123,7 +116,7 @@
 
             // if there is a a current video start it, else it's the end of the sequence
             if ($scope.currentVideoHandle) {
-                $scope.currentVideoHandle.in(TRANSITION_DURATION);
+                $scope.currentVideoHandle.in(mtConfiguration.transitionDuration);
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
@@ -145,12 +138,12 @@
                 return data.activePosition + 1 === position;
             });
 
-            mtLogger.debug('Received a PlaylistModified event with relevant position %s', JSON.stringify(relevantPositions));
+            logger.debug('Received a PlaylistModified event with relevant position %s', JSON.stringify(relevantPositions));
 
             if (relevantPositions.length > 0) {
                 // a change in playlist require the player to query for the next video
                 if ($scope.nextVideoHandle) {
-                    mtLogger.debug('A handle (%s) for next video is prepared, we need to dispose it', $scope.nextVideoHandle.uid);
+                    logger.debug('A handle (%s) for next video is prepared, we need to dispose it', $scope.nextVideoHandle.uid);
 
                     // the next video was already prepared, we have to dispose it before preparing a new one
                     peekPlaylistEntryIdByHandleId($scope.nextVideoHandle.id);
@@ -164,11 +157,11 @@
         $scope.$on(mt.events.LoadPlaylistEntryRequest, function (event, data) {
             var playlistEntry = data.playlistEntry;
 
-            mtLogger.debug('Start request for video %s received with autoplay flag %s', playlistEntry.video.id, data.autoplay);
+            logger.debug('Start request for video %s received with autoplay flag %s', playlistEntry.video.id, data.autoplay);
 
-            var transitionStartTime = 'duration' in $location.search() ? parseInt($location.search().duration, 10)
-                : playlistEntry.video.duration - TRANSITION_DURATION;
-            mtLogger.debug('Preparing a video %s, the transition cue will start at %d', playlistEntry.video.id, transitionStartTime);
+            var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
+                : playlistEntry.video.duration + mtConfiguration.transitionStartTime;
+            logger.debug('Preparing a video %s, the transition cue will start at %d', playlistEntry.video.id, transitionStartTime);
 
             $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
                 id: playlistEntry.video.id,
@@ -197,7 +190,7 @@
         }
     });
 
-    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtLogger) {
+    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration) {
 
         /**
          * @const
@@ -210,9 +203,9 @@
         /** @type {boolean} */
         $scope.searchTermFocused = false;
         /** @type {Array.<mt.model.Video>} */
-        $scope.youtubeSearchResults = mt.tools.TEST_VIDEOS;
+        $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
         /** @type {boolean} */
-        $scope.searchVisible = true;
+        $scope.searchVisible = mtConfiguration.initialSearchOpen;
         /** @type {Promise} */
         $scope.instantSearchPromise = undefined;
         /** @type {number} */

@@ -190,29 +190,81 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtLogger', function ($window) {
-        function prependTime(arguments) {
+    mt.MixTubeApp.factory('mtConfiguration', function ($location) {
+        return {
+            get transitionStartTime() {
+                return 'test.duration' in $location.search() ? parseInt($location.search().duration, 10) : -1000;
+            },
+            get transitionDuration() {
+                return 1000;
+            },
+            get initialSearchResults() {
+                return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
+            },
+            get initialPlaylistEntries() {
+                return 'test.playlist' in $location.search() ?
+                    mt.tools.TEST_VIDEOS.map(function (video) {
+                        var playlistEntry = new mt.model.PlaylistEntry();
+                        playlistEntry.id = mt.tools.uniqueId();
+                        playlistEntry.video = video;
+                        return playlistEntry;
+                    }) : [];
+            },
+            get initialSearchOpen() {
+                return 'test.searchOpen' in $location.search();
+            }
+        };
+    });
+
+    mt.MixTubeApp.factory('mtLoggerFactory', function ($window) {
+        var console = $window.console;
+        var loggerByName = {};
+
+        function prepareLogTrace(arguments, loggerName) {
             var now = new Date();
             var newArguments = [];
-            newArguments[0] = '[%d:%d:%d] ' + arguments[0];
+            newArguments[0] = '[%d:%d:%d] %s : ' + arguments[0];
             newArguments[1] = now.getHours();
             newArguments[2] = now.getMinutes();
             newArguments[3] = now.getSeconds();
+            newArguments[4] = loggerName;
             for (var idx = 1; idx < arguments.length; idx++) {
-                newArguments[idx + 3] = arguments[idx];
+                newArguments[idx + 4] = arguments[idx];
             }
             return newArguments;
         }
 
-        return {
+        function Logger(name) {
+            this.name = name;
+        }
+
+        Logger.prototype = {
             log: function () {
-                $window.console.log.apply($window.console, arguments)
+                this.delegate(console.log, arguments);
             },
             dir: function () {
-                $window.console.dir.apply($window.console, arguments)
+                this.delegate(console.dir, arguments);
             },
             debug: function () {
-                $window.console.debug.apply($window.console, prependTime(arguments))
+                this.delegate(console.debug, arguments);
+            },
+            delegate: function (targetFn, delegateArguments) {
+                targetFn.apply(console, prepareLogTrace(delegateArguments, this.name));
+            }
+        };
+
+        return {
+            /**
+             * Returns a logger fir the given name or the global logger if no name provided.
+             *
+             * @param {string=} name the logger name. Empty means global logger.
+             */
+            logger: function (name) {
+                var loggerName = angular.isDefined(name) ? name : 'global';
+                if (!loggerByName.hasOwnProperty(loggerName)) {
+                    loggerByName[loggerName] = new Logger(loggerName);
+                }
+                return loggerByName[loggerName];
             }
         };
     });

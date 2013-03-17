@@ -2,7 +2,7 @@
     mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource'])
         .config(function ($locationProvider) {
             $locationProvider.html5Mode(true);
-        }).run(function ($rootScope, mtYoutubeClient) {
+        }).run(function ($rootScope, mtLoggerFactory) {
             var wordCharRegExp = /\w/;
             document.addEventListener('keyup', function (evt) {
                 var convertedString = String.fromCharCode(evt.which);
@@ -12,6 +12,21 @@
                     });
                 }
             });
+
+            // executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application
+            // that it is ready
+            window.onYouTubeIframeAPIReady = function () {
+                var playersPool = new mt.player.PlayersPool(function () {
+                    var playerDiv = document.createElement('div');
+                    playerDiv.classList.add('mt-player-frame');
+                    document.getElementById('mt-video-window').appendChild(playerDiv);
+                    return playerDiv;
+                }, mtLoggerFactory.logger('PlayersPool'));
+
+                $rootScope.$apply(function () {
+                    $rootScope.$broadcast(mt.events.PlayersPoolReady, playersPool);
+                });
+            };
         });
 
     mt.events = {
@@ -51,21 +66,5 @@
     };
     mt.tools.uniqueId = function () {
         return 'mt_uid_' + mt.tools.__uniqueIdCounter++;
-    };
-
-// executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application
-// that it is ready
-    window.onYouTubeIframeAPIReady = function () {
-        var playersPool = new mt.player.PlayersPool(function () {
-            var playerDiv = document.createElement('div');
-            playerDiv.classList.add('mt-player-frame');
-            document.getElementById('mt-video-window').appendChild(playerDiv);
-            return playerDiv;
-        });
-
-        var rootScope = angular.element(document).scope();
-        rootScope.$apply(function () {
-            rootScope.$broadcast(mt.events.PlayersPoolReady, playersPool);
-        });
     };
 })(window.mt = window.mt || {});

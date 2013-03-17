@@ -4,14 +4,16 @@
 
     /**
      * @param {YT.Player} delegate
+     * @param logger
      * @constructor
      */
-    mt.player.YoutubePlayer = function (delegate) {
+    mt.player.YoutubePlayer = function (delegate, logger) {
         var self = this;
 
         self.fadeDuration = 5000;
 
         self.delegate = delegate;
+        self.logger = logger;
         self.busy = false;
         self.lastSampledTime = 0;
         self.canPlayThroughDeferred = undefined;
@@ -19,7 +21,7 @@
         self.listeners = {timeupdate: {}};
 
         self.delegate.addEventListener('onStateChange', function (evt) {
-            console.debug('onStateChange executed', evt.data);
+            self.logger.debug('onStateChange executed', evt.data);
 
             if (evt.data === YT.PlayerState.PLAYING) {
                 // end of first buffering phase is considered as a can play through event
@@ -192,13 +194,15 @@
      * @param {string} uid a generated id that is unique to this handle
      * @param {{id: string, provider: string, coarseDuration: number}} video
      * @param {Array.<{time: number, callback: function}>} cues the cue points
+     * @param logger
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, uid, video, cues) {
+    mt.player.VideoHandle = function (playersPool, uid, video, cues, logger) {
         this.playersPool = playersPool;
         this.uid = uid;
         this.video = video;
         this.cues = cues;
+        this.logger = logger;
         this.player = undefined;
         this.canPlayThroughDeferred = jQuery.Deferred();
         this.outDeferred = jQuery.Deferred();
@@ -221,7 +225,7 @@
                 self.cues.forEach(function (cue) {
                     // execute the cue if last time is before the cue time and current time is after
                     if (lastCurrentTime <= cue.time && cue.time <= evt.currentTime) {
-                        console.log('%s executed', self.uid + '_cue');
+                        self.logger.log('%s executed', self.uid + '_cue');
                         cue.callback();
                     }
                     lastCurrentTime = evt.currentTime;
@@ -291,12 +295,13 @@
 
     /**
      * @param {function(): HTMLElement} domNodeSupplier a function that supply the dom to attach the player
+     * @param logger a pre configured logger object
      * @constructor
      */
-    mt.player.PlayersPool = function (domNodeSupplier) {
+    mt.player.PlayersPool = function (domNodeSupplier, logger) {
         this.domNodeSupplierFn = domNodeSupplier;
         this.playersByProvider = {youtube: []};
-        this.handlesCounter = 0;
+        this.logger = logger;
     };
 
     /**
@@ -307,7 +312,7 @@
      * @return {mt.player.VideoHandle}
      */
     mt.player.PlayersPool.prototype.prepareVideo = function (video, cues) {
-        return new mt.player.VideoHandle(this, mt.tools.uniqueId(), video, cues);
+        return new mt.player.VideoHandle(this, mt.tools.uniqueId(), video, cues, this.logger);
     };
 
     /**
@@ -364,7 +369,7 @@
                         onReady: function (evt) {
                             // now that the player is ready we can make it visible
                             evt.target.getIframe().style.display = '';
-                            playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target))
+                            playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target, self.logger));
                         }
                     }
                 });
