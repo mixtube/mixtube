@@ -47,7 +47,6 @@
             });
         };
 
-
         $scope.$on(mt.events.NextPlaylistEntryRequest, function () {
             logger.debug('Next playlist entry request received');
 
@@ -169,7 +168,7 @@
                 coarseDuration: playlistEntry.video.duration
             }, [
                 {time: transitionStartTime, callback: function () {
-                    // starts the next prepared video at 5 seconds from the end of the current one and cross fade
+                    // starts the next prepared video and cross fade
                     next();
                 }}
             ]);

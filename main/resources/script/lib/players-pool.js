@@ -10,8 +10,6 @@
     mt.player.YoutubePlayer = function (delegate, logger) {
         var self = this;
 
-        self.fadeDuration = 5000;
-
         self.delegate = delegate;
         self.logger = logger;
         self.busy = false;
@@ -345,6 +343,7 @@
             // we need to create a new instance, when done save it
             playerDeferred.done(function (player) {
                 players.push(player);
+                self.logger.debug('Created a new instance of player for %s, there are now %d instances', provider, players.length);
             });
 
             // get the dom node where we are going to insert the player

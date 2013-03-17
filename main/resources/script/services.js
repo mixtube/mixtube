@@ -1,5 +1,5 @@
 (function (mt) {
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $resource, $q) {
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $resource, $q, mtConfiguration) {
 
         /**
          * Allow to parse "exotic" time format form Youtube data API.
@@ -39,7 +39,7 @@
                     id: ids.join(','),
                     part: 'snippet,statistics,contentDetails',
                     callback: 'JSON_CALLBACK',
-                    key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                    key: mtConfiguration.youtubeAPIKey
                 }
             }).success(function (response) {
                     var videos = [];
@@ -68,7 +68,7 @@
                     id: ids.join(','),
                     part: 'snippet',
                     callback: 'JSON_CALLBACK',
-                    key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                    key: mtConfiguration.youtubeAPIKey
                 }
             }).success(function (response) {
                     var channels = [];
@@ -104,9 +104,9 @@
                         type: 'video',
                         part: 'snippet',
                         order: 'relevance',
-                        maxResults: 20,
+                        maxResults: mtConfiguration.maxSearchResults,
                         callback: 'JSON_CALLBACK',
-                        key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                        key: mtConfiguration.youtubeAPIKey
                     }
                 }).success(function (response) {
                         var videos = [];
@@ -179,7 +179,7 @@
                         id: id,
                         part: 'id',
                         callback: 'JSON_CALLBACK',
-                        key: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                        key: mtConfiguration.youtubeAPIKey
                     }
                 }).success(function (response) {
                         deferred.resolve(response.items.length > 0);
@@ -193,7 +193,7 @@
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
         return {
             get transitionStartTime() {
-                return 'test.duration' in $location.search() ? parseInt($location.search().duration, 10) : -1000;
+                return 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -1000;
             },
             get transitionDuration() {
                 return 1000;
@@ -212,7 +212,9 @@
             },
             get initialSearchOpen() {
                 return 'test.searchOpen' in $location.search();
-            }
+            },
+            youtubeAPIKey: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg',
+            maxSearchResults: 20
         };
     });
 
