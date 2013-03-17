@@ -26,7 +26,7 @@
             var deferred = $q.defer();
 
             var tryPosition = startPosition + 1;
-            if (startPosition < $scope.playlistEntries.length) {
+            if (tryPosition < $scope.playlistEntries.length) {
                 var playlistEntry = $scope.playlistEntries[tryPosition];
                 mtYoutubeClient.pingVideoById(playlistEntry.video.id).then(function (videoExists) {
                     if (videoExists) {
@@ -35,6 +35,8 @@
                         findNextValidPlaylistEntry(tryPosition).then(deferred.resolve);
                     }
                 });
+            } else {
+                deferred.reject();
             }
 
             return deferred.promise;
