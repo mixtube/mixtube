@@ -201,13 +201,13 @@
             get initialSearchResults() {
                 return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
             },
-            get initialPlaylistEntries() {
-                return 'test.playlist' in $location.search() ?
+            get initialQueueEntries() {
+                return 'test.queue' in $location.search() ?
                     mt.tools.TEST_VIDEOS.map(function (video) {
-                        var playlistEntry = new mt.model.PlaylistEntry();
-                        playlistEntry.id = mt.tools.uniqueId();
-                        playlistEntry.video = video;
-                        return playlistEntry;
+                        var queueEntry = new mt.model.QueueEntry();
+                        queueEntry.id = mt.tools.uniqueId();
+                        queueEntry.video = video;
+                        return queueEntry;
                     }) : [];
             },
             get initialSearchOpen() {

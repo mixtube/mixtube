@@ -48,24 +48,24 @@ html, body {
     z-index: 100;
 }
 
-#mt-playlist-frame {
+#mt-queue-frame {
     height: 130px;
     overflow-x: auto
 }
 
-.mt-playlist-item {
+.mt-queue-item {
     position: relative;
     width: 140px;
 }
 
-.mt-playlist-item.mt-current:before {
+.mt-queue-item.mt-current:before {
     display: block;
     position: absolute;
     top: -17px;
     left: 54px;
 }
 
-.mt-playlist-thumbnail {
+.mt-queue-thumbnail {
     width: 100%;
 }
 
@@ -101,7 +101,7 @@ html, body {
     width: 100%;
 }
 
-.mt-add-to-playlist-button {
+.mt-add-to-queue-button {
     position: absolute;
     z-index: 1;
     right: 0;
@@ -135,7 +135,7 @@ html, body {
     width: 100%;
 }
 
-.mt-remove-from-playlist-button {
+.mt-remove-from-queue-button {
     position: absolute;
     z-index: 1;
     right: 0;
@@ -193,7 +193,7 @@ body {
     font-size: 1.5rem;
 }
 
-#mt-playlist-frame {
+#mt-queue-frame {
     background: rgb(0, 0, 0) url(../image/black-noisy.png);
 }
 
@@ -256,14 +256,14 @@ body {
     font-size: 14px;
 }
 
-.mt-playlist-item.mt-current:before {
+.mt-queue-item.mt-current:before {
     content: '\f0d7';
     color: rgb(14, 219, 247);
     font-family: 'FontAwesome';
     font-size: 50px;
 }
 
-.mt-add-to-playlist-button, .mt-remove-from-playlist-button {
+.mt-add-to-queue-button, .mt-remove-from-queue-button {
     border: none;
     color: rgba(255, 255, 255, .8);
     background-color: transparent;

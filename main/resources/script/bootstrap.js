@@ -30,14 +30,14 @@
         });
 
     mt.events = {
-        LoadPlaylistEntryRequest: 'LoadPlaylistEntryRequest',
-        NextPlaylistEntryRequest: 'NextPlaylistEntryRequest',
+        LoadQueueEntryRequest: 'LoadQueueEntryRequest',
+        NextQueueEntryRequest: 'NextQueueEntryRequest',
         OpenSearchFrameRequest: 'OpenSearchFrameRequest',
-        AppendVideoToPlaylistRequest: 'AppendVideoToPlaylistRequest',
+        AppendVideoToQueueRequest: 'AppendVideoToQueueRequest',
         PlayersPoolReady: 'PlayersPoolReady',
-        PlaylistModified: 'PlaylistModified',
-        PlaylistEntryActivated: 'PlaylistEntryActivated',
-        PlaylistCleared: 'PlaylistCleared'
+        QueueModified: 'QueueModified',
+        QueueEntryActivated: 'QueueEntryActivated',
+        QueueCleared: 'QueueCleared'
     };
 
     mt.model = {
@@ -49,7 +49,7 @@
             this.viewCount = undefined;
             this.provider = undefined;
         },
-        PlaylistEntry: function () {
+        QueueEntry: function () {
             this.id = undefined;
             this.video = undefined;
         }

@@ -1,17 +1,17 @@
 (function (mt) {
 
 
-    mt.MixTubeApp.controller('mtPlaylistCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
+    mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
 
-        var logger = mtLoggerFactory.logger('mtPlaylistCtrl');
+        var logger = mtLoggerFactory.logger('mtQueueCtrl');
 
-        /**  @type {mt.model.PlaylistEntry} */
-        $scope.activePlaylistEntry = undefined;
-        /**  @type {Array.<mt.model.PlaylistEntry>} */
-        $scope.playlistEntries = mtConfiguration.initialPlaylistEntries;
+        /**  @type {mt.model.QueueEntry} */
+        $scope.activeQueueEntry = undefined;
+        /**  @type {Array.<mt.model.QueueEntry>} */
+        $scope.queueEntries = mtConfiguration.initialQueueEntries;
 
         /**
-         * Finds the first next video in the playlist that still exist.
+         * Finds the first next video in the queue that still exist.
          *
          * Video can be removed from the remote provider so we have to check that before loading a video to prevent
          * playback interruption.
@@ -19,17 +19,17 @@
          * @param {number} startPosition the position from where to start to look for the next valid video
          * @return {Promise} a promise with that provides the video instance when an existing video is found
          */
-        var findNextValidPlaylistEntry = function (startPosition) {
+        var findNextValidQueueEntry = function (startPosition) {
             var deferred = $q.defer();
 
             var tryPosition = startPosition + 1;
-            if (tryPosition < $scope.playlistEntries.length) {
-                var playlistEntry = $scope.playlistEntries[tryPosition];
-                mtYoutubeClient.pingVideoById(playlistEntry.video.id).then(function (videoExists) {
+            if (tryPosition < $scope.queueEntries.length) {
+                var queueEntry = $scope.queueEntries[tryPosition];
+                mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
                     if (videoExists) {
-                        deferred.resolve(playlistEntry);
+                        deferred.resolve(queueEntry);
                     } else {
-                        findNextValidPlaylistEntry(tryPosition).then(deferred.resolve);
+                        findNextValidQueueEntry(tryPosition).then(deferred.resolve);
                     }
                 });
             } else {
@@ -39,50 +39,50 @@
             return deferred.promise;
         };
 
-        var triggerPlaylistModified = function (modifiedPositions) {
-            var activePosition = $scope.playlistEntries.indexOf($scope.activePlaylistEntry);
-            $rootScope.$broadcast(mt.events.PlaylistModified, {
+        var triggerQueueModified = function (modifiedPositions) {
+            var activePosition = $scope.queueEntries.indexOf($scope.activeQueueEntry);
+            $rootScope.$broadcast(mt.events.QueueModified, {
                 activePosition: activePosition,
                 modifiedPositions: modifiedPositions
             });
         };
 
-        $scope.$on(mt.events.NextPlaylistEntryRequest, function () {
-            logger.debug('Next playlist entry request received');
+        $scope.$on(mt.events.NextQueueEntryRequest, function () {
+            logger.debug('Next queue entry request received');
 
-            var activePosition = $scope.playlistEntries.indexOf($scope.activePlaylistEntry);
-            findNextValidPlaylistEntry(activePosition).then(function (playlistEntry) {
-                $rootScope.$broadcast(mt.events.LoadPlaylistEntryRequest, {playlistEntry: playlistEntry, autoplay: false});
+            var activePosition = $scope.queueEntries.indexOf($scope.activeQueueEntry);
+            findNextValidQueueEntry(activePosition).then(function (queueEntry) {
+                $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: false});
             });
         });
 
-        $scope.$on(mt.events.AppendVideoToPlaylistRequest, function (evt, data) {
-            var playlistEntry = new mt.model.PlaylistEntry();
-            playlistEntry.id = mt.tools.uniqueId();
-            playlistEntry.video = data.video;
-            $scope.playlistEntries.push(playlistEntry);
-            triggerPlaylistModified([$scope.playlistEntries.length - 1]);
+        $scope.$on(mt.events.AppendVideoToQueueRequest, function (evt, data) {
+            var queueEntry = new mt.model.QueueEntry();
+            queueEntry.id = mt.tools.uniqueId();
+            queueEntry.video = data.video;
+            $scope.queueEntries.push(queueEntry);
+            triggerQueueModified([$scope.queueEntries.length - 1]);
         });
 
-        $scope.$on(mt.events.PlaylistEntryActivated, function (evt, data) {
-            $scope.activePlaylistEntry = mt.tools.findWhere($scope.playlistEntries, {id: data.playlistEntryId});
+        $scope.$on(mt.events.QueueEntryActivated, function (evt, data) {
+            $scope.activeQueueEntry = mt.tools.findWhere($scope.queueEntries, {id: data.queueEntryId});
         });
 
-        $scope.playlistEntryClicked = function (playlistEntry) {
-            $scope.activePlaylistEntryIdx = $scope.playlistEntries.indexOf(playlistEntry);
-            $rootScope.$broadcast(mt.events.LoadPlaylistEntryRequest, {playlistEntry: playlistEntry, autoplay: true});
+        $scope.queueEntryClicked = function (queueEntry) {
+            $scope.activeQueueEntryIdx = $scope.queueEntries.indexOf(queueEntry);
+            $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: true});
         };
 
-        $scope.removePlaylistEntryClicked = function (playlistEntry) {
-            var index = $scope.playlistEntries.indexOf(playlistEntry);
-            $scope.playlistEntries.splice(index, 1);
-            triggerPlaylistModified([index]);
+        $scope.removeQueueEntryClicked = function (queueEntry) {
+            var index = $scope.queueEntries.indexOf(queueEntry);
+            $scope.queueEntries.splice(index, 1);
+            triggerQueueModified([index]);
         };
 
-        $scope.newPlaylistButtonClicked = function () {
-            $scope.playlistEntries = [];
-            $scope.activePlaylistEntry = undefined;
-            $rootScope.$broadcast(mt.events.PlaylistCleared);
+        $scope.newQueueButtonClicked = function () {
+            $scope.queueEntries = [];
+            $scope.activeQueueEntry = undefined;
+            $rootScope.$broadcast(mt.events.QueueCleared);
         };
     });
 
@@ -95,18 +95,18 @@
         /** @type {mt.player.VideoHandle} */
         $scope.currentVideoHandle = undefined;
         /** @type {Object.<string, string>} */
-        $scope.playlistEntryIdByHandleId = {};
+        $scope.queueEntryIdByHandleId = {};
 
         /**
-         * Returns the playlist entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
+         * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
          *
          * @param {string} videoHandleId
          * @return {string}
          */
-        var peekPlaylistEntryIdByHandleId = function (videoHandleId) {
-            var activatedPlaylistEntryId = $scope.playlistEntryIdByHandleId[videoHandleId];
-            delete $scope.playlistEntryIdByHandleId[videoHandleId];
-            return activatedPlaylistEntryId;
+        var peekQueueEntryIdByHandleId = function (videoHandleId) {
+            var activatedQueueEntryId = $scope.queueEntryIdByHandleId[videoHandleId];
+            delete $scope.queueEntryIdByHandleId[videoHandleId];
+            return activatedQueueEntryId;
         };
 
         /**
@@ -134,10 +134,10 @@
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
-                    $rootScope.$broadcast(mt.events.PlaylistEntryActivated, {
-                        playlistEntryId: peekPlaylistEntryIdByHandleId($scope.currentVideoHandle.id)
+                    $rootScope.$broadcast(mt.events.QueueEntryActivated, {
+                        queueEntryId: peekQueueEntryIdByHandleId($scope.currentVideoHandle.id)
                     });
-                    $rootScope.$broadcast(mt.events.NextPlaylistEntryRequest);
+                    $rootScope.$broadcast(mt.events.NextQueueEntryRequest);
                 });
             }
         };
@@ -149,7 +149,7 @@
             logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', $scope.nextVideoHandle.uid);
 
             // the next video has already been prepared, we have to dispose it before preparing a new one
-            peekPlaylistEntryIdByHandleId($scope.nextVideoHandle.id);
+            peekQueueEntryIdByHandleId($scope.nextVideoHandle.id);
             $scope.nextVideoHandle.dispose();
             $scope.nextVideoHandle = undefined;
         };
@@ -158,24 +158,24 @@
             $scope.playersPool = players;
         });
 
-        $scope.$on(mt.events.PlaylistModified, function (event, data) {
+        $scope.$on(mt.events.QueueModified, function (event, data) {
             // filter only the positions that may require an action
             var relevantPositions = data.modifiedPositions.filter(function (position) {
                 return data.activePosition + 1 === position;
             });
 
-            logger.debug('Received a PlaylistModified event with relevant position %s', JSON.stringify(relevantPositions));
+            logger.debug('Received a QueueModified event with relevant position %s', JSON.stringify(relevantPositions));
 
             if (relevantPositions.length > 0) {
-                // a change in playlist require the player to query for the next video
+                // a change in queue require the player to query for the next video
                 if ($scope.nextVideoHandle) {
                     clearNextVideoHandle();
                 }
-                $rootScope.$broadcast(mt.events.NextPlaylistEntryRequest);
+                $rootScope.$broadcast(mt.events.NextQueueEntryRequest);
             }
         });
 
-        $scope.$on(mt.events.PlaylistCleared, function () {
+        $scope.$on(mt.events.QueueCleared, function () {
             if ($scope.nextVideoHandle) {
                 clearNextVideoHandle();
             }
@@ -185,19 +185,19 @@
             }
         });
 
-        $scope.$on(mt.events.LoadPlaylistEntryRequest, function (event, data) {
-            var playlistEntry = data.playlistEntry;
+        $scope.$on(mt.events.LoadQueueEntryRequest, function (event, data) {
+            var queueEntry = data.queueEntry;
 
-            logger.debug('Start request for video %s received with autoplay flag %s', playlistEntry.video.id, data.autoplay);
+            logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, data.autoplay);
 
             var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
-                : playlistEntry.video.duration + mtConfiguration.transitionStartTime;
-            logger.debug('Preparing a video %s, the transition cue will start at %d', playlistEntry.video.id, transitionStartTime);
+                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
+            logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
 
             $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
-                id: playlistEntry.video.id,
-                provider: playlistEntry.video.provider,
-                coarseDuration: playlistEntry.video.duration
+                id: queueEntry.video.id,
+                provider: queueEntry.video.provider,
+                coarseDuration: queueEntry.video.duration
             }, [
                 {time: transitionStartTime, callback: function () {
                     // starts the next prepared video and cross fade
@@ -205,7 +205,7 @@
                 }}
             ]);
 
-            $scope.playlistEntryIdByHandleId[$scope.nextVideoHandle.id] = playlistEntry.id;
+            $scope.queueEntryIdByHandleId[$scope.nextVideoHandle.id] = queueEntry.id;
 
             var nextLoadDeferred = $scope.nextVideoHandle.load();
 
@@ -279,8 +279,8 @@
         /**
          * @param {mt.model.Video} video
          */
-        $scope.appendResultToPlaylist = function (video) {
-            $rootScope.$broadcast(mt.events.AppendVideoToPlaylistRequest, {video: video});
+        $scope.appendResultToQueue = function (video) {
+            $rootScope.$broadcast(mt.events.AppendVideoToQueueRequest, {video: video});
         };
 
         /**

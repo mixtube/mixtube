@@ -56,8 +56,8 @@
                                                 <img ng-src="{{searchResult.thumbnailUrl}}"
                                                      class="mt-results-thumbnail">
                                                 <button ng-show="overResultItem"
-                                                        ng-click="appendResultToPlaylist(searchResult)"
-                                                        class="mt-add-to-playlist-button icon-plus-sign"></button>
+                                                        ng-click="appendResultToQueue(searchResult)"
+                                                        class="mt-add-to-queue-button icon-plus-sign"></button>
                                                 <div class="mt-video-duration"
                                                      ng-show="searchResult.duration && !overResultItem">
                                                     {{searchResult.duration | mtDuration:'shortTime'}}
@@ -112,17 +112,17 @@
         </div>
     </section>
 </section>
-<section id="mt-playlist-frame" ng-controller="mtPlaylistCtrl">
-    <button ng-click="newPlaylistButtonClicked()">Create a new playlist</button>
-    <ol id="mt-playlist-list" class="flex-row flex-align-center">
-        <li class="mt-playlist-item" ng-class="{'mt-current': playlistEntry == activePlaylistEntry}"
-            ng-repeat="playlistEntry in playlistEntries"
-            ng-mouseenter="overPlaylistItem = true" ng-mouseleave="overPlaylistItem = false">
-            <a href="#" ng-click="playlistEntryClicked(playlistEntry)">
-                <img class="mt-playlist-thumbnail" ng-src="{{playlistEntry.video.thumbnailUrl}}">
+<section id="mt-queue-frame" ng-controller="mtQueueCtrl">
+    <button ng-click="newQueueButtonClicked()">Create a new queue</button>
+    <ol id="mt-queue-list" class="flex-row flex-align-center">
+        <li class="mt-queue-item" ng-class="{'mt-current': queueEntry == activeQueueEntry}"
+            ng-repeat="queueEntry in queueEntries"
+            ng-mouseenter="overQueueItem = true" ng-mouseleave="overQueueItem = false">
+            <a href="#" ng-click="queueEntryClicked(queueEntry)">
+                <img class="mt-queue-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
             </a>
-            <button class="mt-remove-from-playlist-button icon-minus-sign" ng-show="overPlaylistItem"
-                    ng-click="removePlaylistEntryClicked(playlistEntry)"></button>
+            <button class="mt-remove-from-queue-button icon-minus-sign" ng-show="overQueueItem"
+                    ng-click="removeQueueEntryClicked(queueEntry)"></button>
         </li>
     </ol>
 </section>
