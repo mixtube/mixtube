@@ -109,6 +109,7 @@
     </section>
 </section>
 <section id="mt-playlist-frame" ng-controller="mtPlaylistCtrl">
+    <button ng-click="newPlaylistButtonClicked()">Create a new playlist</button>
     <ol id="mt-playlist-list" class="flex-row flex-align-center">
         <li class="mt-playlist-item" ng-class="{'mt-current': playlistEntry == activePlaylistEntry}" ng-repeat="playlistEntry in playlistEntries"
             ng-mouseenter="overPlaylistItem = true" ng-mouseleave="overPlaylistItem = false">

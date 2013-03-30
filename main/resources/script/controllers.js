@@ -78,6 +78,12 @@
             $scope.playlistEntries.splice(index, 1);
             triggerPlaylistModified([index]);
         };
+
+        $scope.newPlaylistButtonClicked = function () {
+            $scope.playlistEntries = [];
+            $scope.activePlaylistEntry = undefined;
+            $rootScope.$broadcast(mt.events.PlaylistCleared);
+        };
     });
 
     mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, $location, mtLoggerFactory, mtConfiguration) {
@@ -103,7 +109,16 @@
             return activatedPlaylistEntryId;
         };
 
-        var next = function () {
+        /**
+         * Executes the video transition steps :
+         * - starts the prepared video
+         * - references the prepared video as the new current one
+         * - cross fades the videos (out the current one / in the prepared one)
+         * - disposes the previous (the old current) video
+         * - broadcasts events to notify if the new state
+         * - sends a request to get the next video references
+         */
+        var executeTransition = function () {
             if ($scope.currentVideoHandle) {
                 $scope.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
                     videoHandle.dispose();
@@ -127,12 +142,24 @@
             }
         };
 
+        /**
+         * Properly clears the next video handle by disposing it and clearing all the references to it.
+         */
+        var clearNextVideoHandle = function () {
+            logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', $scope.nextVideoHandle.uid);
+
+            // the next video has already been prepared, we have to dispose it before preparing a new one
+            peekPlaylistEntryIdByHandleId($scope.nextVideoHandle.id);
+            $scope.nextVideoHandle.dispose();
+            $scope.nextVideoHandle = undefined;
+        };
+
         $scope.$on(mt.events.PlayersPoolReady, function (event, players) {
             $scope.playersPool = players;
         });
 
         $scope.$on(mt.events.PlaylistModified, function (event, data) {
-            // filter only the positions that may require a action
+            // filter only the positions that may require an action
             var relevantPositions = data.modifiedPositions.filter(function (position) {
                 return data.activePosition + 1 === position;
             });
@@ -142,14 +169,19 @@
             if (relevantPositions.length > 0) {
                 // a change in playlist require the player to query for the next video
                 if ($scope.nextVideoHandle) {
-                    logger.debug('A handle (%s) for next video is prepared, we need to dispose it', $scope.nextVideoHandle.uid);
-
-                    // the next video was already prepared, we have to dispose it before preparing a new one
-                    peekPlaylistEntryIdByHandleId($scope.nextVideoHandle.id);
-                    $scope.nextVideoHandle.dispose();
-                    $scope.nextVideoHandle = undefined;
+                    clearNextVideoHandle();
                 }
                 $rootScope.$broadcast(mt.events.NextPlaylistEntryRequest);
+            }
+        });
+
+        $scope.$on(mt.events.PlaylistCleared, function () {
+            if ($scope.nextVideoHandle) {
+                clearNextVideoHandle();
+            }
+            if ($scope.currentVideoHandle) {
+                $scope.currentVideoHandle.dispose();
+                $scope.currentVideoHandle = undefined;
             }
         });
 
@@ -169,7 +201,7 @@
             }, [
                 {time: transitionStartTime, callback: function () {
                     // starts the next prepared video and cross fade
-                    next();
+                    executeTransition();
                 }}
             ]);
 
@@ -179,7 +211,7 @@
 
             if (data.autoplay) {
                 nextLoadDeferred.done(function () {
-                    next();
+                    executeTransition();
                 });
             }
         });

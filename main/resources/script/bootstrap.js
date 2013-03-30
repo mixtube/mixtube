@@ -36,7 +36,8 @@
         AppendVideoToPlaylistRequest: 'AppendVideoToPlaylistRequest',
         PlayersPoolReady: 'PlayersPoolReady',
         PlaylistModified: 'PlaylistModified',
-        PlaylistEntryActivated: 'PlaylistEntryActivated'
+        PlaylistEntryActivated: 'PlaylistEntryActivated',
+        PlaylistCleared: 'PlaylistCleared'
     };
 
     mt.model = {
