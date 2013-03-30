@@ -49,12 +49,8 @@ html, body {
 }
 
 #mt-playlist-frame {
-    height: 100px;
+    height: 130px;
     overflow-x: auto
-}
-
-#mt-playlist-list {
-    height: 100%;
 }
 
 .mt-playlist-item {
