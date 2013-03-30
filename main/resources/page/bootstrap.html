@@ -21,7 +21,9 @@
 <body class="flex-column">
 <section id="mt-dashboard-frame" class="flex-greedy-box">
     <section ng-controller="mtVideoPlayerStageCtrl">
-        <div id="mt-video-window"></div>
+        <div id="mt-video-window">
+            <div id="mt-pointer-event-mask"></div>
+        </div>
         <button ng-click="requestFullscreen()">Full Screen</button>
     </section>
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
