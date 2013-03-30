@@ -22,9 +22,11 @@
 <section id="mt-dashboard-frame" class="flex-greedy-box">
     <section ng-controller="mtVideoPlayerStageCtrl">
         <div id="mt-video-window">
-            <div id="mt-pointer-event-mask"></div>
+            <div id="mt-pointer-event-mask" ng-mouseenter="overMask = true" ng-mouseleave="overMask = false">
+                <button id="mt-fullscreen-button" class="mt-unstyled-button icon-fullscreen"
+                        ng-click="requestFullscreen()" ng-show="overMask" title="Go full screen"></button>
+            </div>
         </div>
-        <button ng-click="requestFullscreen()">Full Screen</button>
     </section>
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
         <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign"></button>
@@ -113,7 +115,8 @@
 <section id="mt-playlist-frame" ng-controller="mtPlaylistCtrl">
     <button ng-click="newPlaylistButtonClicked()">Create a new playlist</button>
     <ol id="mt-playlist-list" class="flex-row flex-align-center">
-        <li class="mt-playlist-item" ng-class="{'mt-current': playlistEntry == activePlaylistEntry}" ng-repeat="playlistEntry in playlistEntries"
+        <li class="mt-playlist-item" ng-class="{'mt-current': playlistEntry == activePlaylistEntry}"
+            ng-repeat="playlistEntry in playlistEntries"
             ng-mouseenter="overPlaylistItem = true" ng-mouseleave="overPlaylistItem = false">
             <a href="#" ng-click="playlistEntryClicked(playlistEntry)">
                 <img class="mt-playlist-thumbnail" ng-src="{{playlistEntry.video.thumbnailUrl}}">
