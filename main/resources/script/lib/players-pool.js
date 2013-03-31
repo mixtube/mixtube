@@ -114,6 +114,10 @@
         this.delegate.playVideo();
     };
 
+    mt.player.YoutubePlayer.prototype.pauseVideo = function() {
+        this.delegate.pauseVideo();
+    };
+
     /**
      * Stops the video and release the player for further usage.
      */
@@ -232,6 +236,16 @@
             self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve);
         });
         return self.canPlayThroughDeferred.promise();
+    };
+
+    mt.player.VideoHandle.prototype.pause = function () {
+        this.checkNotDisposed();
+        this.player.pauseVideo();
+    };
+
+    mt.player.VideoHandle.prototype.unpause = function () {
+        this.checkNotDisposed();
+        this.player.playVideo();
     };
 
     /**

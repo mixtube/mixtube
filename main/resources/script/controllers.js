@@ -47,12 +47,12 @@
             });
         };
 
-        $scope.$on(mt.events.NextQueueEntryRequest, function () {
+        $scope.$on(mt.events.NextQueueEntryRequest, function (evt, data) {
             logger.debug('Next queue entry request received');
 
             var activePosition = $scope.queueEntries.indexOf($scope.activeQueueEntry);
             findNextValidQueueEntry(activePosition).then(function (queueEntry) {
-                $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: false});
+                $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: data.initialization});
             });
         });
 
@@ -69,7 +69,6 @@
         });
 
         $scope.queueEntryClicked = function (queueEntry) {
-            $scope.activeQueueEntryIdx = $scope.queueEntries.indexOf(queueEntry);
             $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: true});
         };
 
@@ -86,6 +85,28 @@
         };
     });
 
+    mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager) {
+
+        /**  @type {boolean} */
+        $scope.playing = false;
+
+        var broadcastToggleRequest = function () {
+            $rootScope.$broadcast(mt.events.PlaybackToggleRequest);
+        };
+
+        mtKeyboardShortcutManager.bind('space', function () {
+            broadcastToggleRequest();
+        });
+
+        $scope.$on(mt.events.PlaybackStateChanged, function (evt, data) {
+            $scope.playing = data.playing;
+        });
+
+        $scope.pauseButtonClicked = function () {
+            broadcastToggleRequest();
+        }
+    });
+
     mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, $location, mtLoggerFactory, mtConfiguration) {
 
         var logger = mtLoggerFactory.logger('mtVideoPlayerStageCtrl');
@@ -94,6 +115,8 @@
         $scope.playersPool = undefined;
         /** @type {mt.player.VideoHandle} */
         $scope.currentVideoHandle = undefined;
+        /**  @type {boolean} */
+        $scope.playing = false;
         /** @type {Object.<string, string>} */
         $scope.queueEntryIdByHandleId = {};
 
@@ -130,6 +153,7 @@
 
             // if there is a a current video start it, else it's the end of the sequence
             if ($scope.currentVideoHandle) {
+                $scope.playing = true;
                 $scope.currentVideoHandle.in(mtConfiguration.transitionDuration);
 
                 // now that the new video is running ask for the next one
@@ -137,8 +161,11 @@
                     $rootScope.$broadcast(mt.events.QueueEntryActivated, {
                         queueEntryId: peekQueueEntryIdByHandleId($scope.currentVideoHandle.id)
                     });
-                    $rootScope.$broadcast(mt.events.NextQueueEntryRequest);
+                    $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
                 });
+            } else {
+                // end of the road
+                $scope.playing = false;
             }
         };
 
@@ -153,6 +180,10 @@
             $scope.nextVideoHandle.dispose();
             $scope.nextVideoHandle = undefined;
         };
+
+        $scope.$watch('playing', function () {
+            $rootScope.$broadcast(mt.events.PlaybackStateChanged, {playing: $scope.playing});
+        });
 
         $scope.$on(mt.events.PlayersPoolReady, function (event, players) {
             $scope.playersPool = players;
@@ -171,7 +202,7 @@
                 if ($scope.nextVideoHandle) {
                     clearNextVideoHandle();
                 }
-                $rootScope.$broadcast(mt.events.NextQueueEntryRequest);
+                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
             }
         });
 
@@ -180,6 +211,7 @@
                 clearNextVideoHandle();
             }
             if ($scope.currentVideoHandle) {
+                $scope.playing = false;
                 $scope.currentVideoHandle.dispose();
                 $scope.currentVideoHandle = undefined;
             }
@@ -213,6 +245,20 @@
                 nextLoadDeferred.done(function () {
                     executeTransition();
                 });
+            }
+        });
+
+        $scope.$on(mt.events.PlaybackToggleRequest, function () {
+            if ($scope.currentVideoHandle) {
+                if ($scope.playing) {
+                    $scope.playing = false;
+                    $scope.currentVideoHandle.pause();
+                } else {
+                    $scope.playing = true;
+                    $scope.currentVideoHandle.unpause();
+                }
+            } else {
+                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: true});
             }
         });
 

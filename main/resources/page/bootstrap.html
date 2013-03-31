@@ -10,6 +10,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
     <script src="//code.angularjs.org/1.0.5/angular.js"></script>
     <script src="//code.angularjs.org/1.0.5/angular-resource.js"></script>
+    <script src="//raw.github.com/ccampbell/mousetrap/dd60d3aeb02f8bacf13b438bd9f7f8e5e0e8775d/mousetrap.js"></script>
     <script src="../script/lib/players-pool.js"></script>
     <script src="../script/bootstrap.js"></script>
     <script src="../script/test-dataset.js"></script>
@@ -27,6 +28,9 @@
                         ng-click="requestFullscreen()" ng-show="overMask" title="Go full screen"></button>
             </div>
         </div>
+    </section>
+    <section ng-controller="mtVideoPlayerControlsCtrl">
+        <button id="mt-pause-button" class="mt-unstyled-button" ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"></button>
     </section>
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
         <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign"></button>

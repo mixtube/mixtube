@@ -34,10 +34,12 @@
         NextQueueEntryRequest: 'NextQueueEntryRequest',
         OpenSearchFrameRequest: 'OpenSearchFrameRequest',
         AppendVideoToQueueRequest: 'AppendVideoToQueueRequest',
+        PlaybackToggleRequest: 'PlaybackToggleRequest',
         PlayersPoolReady: 'PlayersPoolReady',
         QueueModified: 'QueueModified',
         QueueEntryActivated: 'QueueEntryActivated',
-        QueueCleared: 'QueueCleared'
+        QueueCleared: 'QueueCleared',
+        PlaybackStateChanged: 'PlaybackStateChanged'
     };
 
     mt.model = {

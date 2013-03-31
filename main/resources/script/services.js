@@ -190,6 +190,18 @@
         };
     });
 
+    mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($location, $rootScope) {
+        return {
+            bind: function (combo, callback) {
+                Mousetrap.bind(combo, function () {
+                    $rootScope.$apply(function () {
+                        callback();
+                    });
+                });
+            }
+        };
+    });
+
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
         return {
             get transitionStartTime() {
