@@ -30,16 +30,18 @@
         </div>
     </section>
     <section ng-controller="mtVideoPlayerControlsCtrl">
-        <button id="mt-pause-button" class="mt-unstyled-button" ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"></button>
+        <button id="mt-pause-button" class="mt-unstyled-button"
+                ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"></button>
     </section>
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
-        <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign"></button>
+        <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign" title="Close [Esc]"></button>
         <div>
             <h3 id="mt-search-title">Search a video</h3>
         </div>
         <div>
             <form name="searchForm" novalidate>
-                <input ng-model="searchTerm" id="mt-search-term-input" placeholder="Start typing"
+                <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
+                <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
                        mt-focus="searchTermFocused" required>
             </form>
         </div>

@@ -267,7 +267,7 @@
         }
     });
 
-    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration) {
+    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration, mtKeyboardShortcutManager) {
 
         /**
          * @const
@@ -307,6 +307,14 @@
                 $scope.instantSearchPromise = $timeout(function () {
                     $scope.search();
                 }, INSTANT_SEARCH_DELAY);
+            }
+        });
+
+        $scope.$watch('searchVisible', function () {
+            if ($scope.searchVisible) {
+                mtKeyboardShortcutManager.bind('esc', $scope.close);
+            } else {
+                mtKeyboardShortcutManager.unbind('esc');
             }
         });
 

@@ -194,10 +194,11 @@
         return {
             bind: function (combo, callback) {
                 Mousetrap.bind(combo, function () {
-                    $rootScope.$apply(function () {
-                        callback();
-                    });
+                    $rootScope.$apply(callback);
                 });
+            },
+            unbind: function (combo) {
+                Mousetrap.unbind(combo);
             }
         };
     });
