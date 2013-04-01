@@ -48,6 +48,12 @@ html, body {
     z-index: 100;
 }
 
+#mt-player-controls {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+}
+
 #mt-pause-button {
     display: block;
     margin-left: auto;
