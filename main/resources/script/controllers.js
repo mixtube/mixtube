@@ -1,5 +1,13 @@
 (function (mt) {
 
+    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope) {
+        // todo save the data in a centralized model
+        $scope.queueName = undefined;
+        $scope.defaultQueueName = 'Unnamed queue';
+
+        $scope.save = function () {
+        };
+    });
 
     mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
 

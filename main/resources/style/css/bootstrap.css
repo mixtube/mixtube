@@ -11,6 +11,13 @@ html, body {
     height: 100%;
 }
 
+#mt-queue-name .mt-input, #mt-queue-name .mt-display {
+    display: inline-block;
+    padding: .2rem;
+    margin: 0;
+    line-height: normal;
+}
+
 #mt-video-window {
     position: relative;
     width: 640px; /* keep these values coherent with the player */
@@ -169,7 +176,7 @@ html, body {
 }
 
 html {
-    font-family: BentonSans, 'Lucida Sans', 'Lucida Grande', sans-serif;
+    font-family: sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -199,8 +206,31 @@ body {
     background: rgb(255, 255, 255) url(../image/white-noisy.png);
 }
 
+#mt-queue-name .mt-input, #mt-queue-name .mt-display {
+    font-size: 2rem;
+    border: 1px solid;
+    border-radius: 2px;
+    color: #393939;
+    outline: none;
+}
+
+#mt-queue-name .mt-input {
+    background-color: #e4e4e4;
+    border-color: #c2c2c2;
+    outline: none;
+}
+
+#mt-queue-name .mt-display {
+    border-color: transparent;
+    cursor: pointer;
+}
+
+#mt-queue-name .mt-display:hover {
+    background-color: #f2f2f2;
+}
+
 #mt-video-window:-webkit-full-screen {
-   cursor: none;
+    cursor: none;
 }
 
 #mt-fullscreen-button {

@@ -1,25 +1,75 @@
 (function (mt) {
+    // simple event listener directives for focus and blur events type
+    ['blur', 'focus'].forEach(function (evtName) {
+        var directiveName = 'mt' +  mt.tools.capitalize(evtName);
+        mt.MixTubeApp.directive(directiveName, function ($parse) {
+            return function (scope, elmt, attr) {
+                var fn = $parse(attr[directiveName]);
+                elmt.bind(evtName, function (event) {
+                    scope.$apply(function () {
+                        fn(scope, {$event: event});
+                    });
+                });
+            };
+        });
+    });
+
     // a directive to link focus state of a field with model expression
-    var FOCUS_DIRECTIVE_NAME = 'mtFocus';
-    mt.MixTubeApp.directive(FOCUS_DIRECTIVE_NAME, function ($parse, $timeout) {
+    var focusModelName = 'mtFocusModel';
+    mt.MixTubeApp.directive(focusModelName, function ($parse, $timeout) {
         return {
             restrict: 'A',
             link: function (scope, elmt, attrs) {
-                var fn = $parse(attrs[FOCUS_DIRECTIVE_NAME]);
+                var fn = $parse(attrs[focusModelName]);
+                elmt.bind('focus', function () {
+                    scope.$apply(function () {
+                        fn.assign(scope, true);
+                    });
+                });
                 elmt.bind('blur', function () {
                     scope.$apply(function () {
                         fn.assign(scope, false);
                     });
                 });
 
-                scope.$watch(attrs[FOCUS_DIRECTIVE_NAME], function (value) {
-                    if (value === true) {
+                scope.$watch(attrs[focusModelName], function (value) {
+                    if (value) {
                         $timeout(function () {
                             elmt[0].focus();
+                        }, 50);
+                    } else {
+                        $timeout(function () {
+                            elmt[0].blur();
                         }, 50);
                     }
                 });
             }
+        };
+    });
+
+    // ensures that the element (most likely an input) is selected on focus
+    mt.MixTubeApp.directive('mtSelectonfocus', function () {
+        return function (scope, elmt) {
+            elmt.bind('focus', function () {
+                elmt.select();
+            });
+        };
+    });
+
+    // allows to specify custom behavior when the user types enter key
+    var enterKeyName = 'mtEnterkey';
+    mt.MixTubeApp.directive(enterKeyName, function ($parse) {
+        return function (scope, elmt, attrs) {
+            var fn = $parse(attrs[enterKeyName]);
+            elmt.bind('keyup', function (evt) {
+                var code = evt.which;
+                if (code == 13) {
+                    evt.preventDefault();
+                    scope.$apply(function () {
+                        fn(scope, {$event: evt});
+                    });
+                }
+            });
         };
     });
 

@@ -21,6 +21,14 @@
 </head>
 <body class="flex-column">
 <section id="mt-dashboard-frame" class="flex-greedy-box">
+    <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
+        <div id="mt-queue-name">
+            <input class="mt-input" ng-model="queueName" ng-show="edition" mt-focus-model="edition"
+                   mt-blur="edition = false; save()" mt-enterkey="edition = false; save()" mt-selectonfocus size="30">
+            <span class="mt-display" ng-hide="edition"
+                  ng-click="edition = true">{{queueName || defaultQueueName}}</span>
+        </div>
+    </form>
     <section ng-controller="mtVideoPlayerStageCtrl">
         <div id="mt-video-window">
             <div id="mt-pointer-event-mask" ng-mouseenter="overMask = true" ng-mouseleave="overMask = false">
@@ -42,7 +50,7 @@
             <form name="searchForm" novalidate>
                 <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
                 <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
-                       mt-focus="searchTermFocused" required>
+                       mt-focus-model="searchTermFocused" required>
             </form>
         </div>
         <div class="flex-greedy-box"> <!-- providers section -->

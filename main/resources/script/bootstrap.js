@@ -5,11 +5,13 @@
         }).run(function ($rootScope, mtLoggerFactory) {
             var wordCharRegExp = /\w/;
             document.addEventListener('keyup', function (evt) {
-                var convertedString = String.fromCharCode(evt.which);
-                if (wordCharRegExp.test(convertedString)) {
-                    $rootScope.$apply(function () {
-                        $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
-                    });
+                if (!Mousetrap.stopCallback(evt, evt.target || evt.srcElement)) {
+                    var convertedString = String.fromCharCode(evt.which);
+                    if (wordCharRegExp.test(convertedString)) {
+                        $rootScope.$apply(function () {
+                            $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
+                        });
+                    }
                 }
             });
 
@@ -75,6 +77,7 @@
         });
         return result.length > 0 ? result[0] : null;
     };
+
     /**
      * Generates a "unique" id.
      *
@@ -83,6 +86,7 @@
     mt.tools.uniqueId = function () {
         return 'mt_uid_' + mt.tools.__uniqueIdCounter++;
     };
+
     /**
      * Pads a string to the left.
      *
@@ -99,4 +103,17 @@
         }
         return string;
     };
+
+    /**
+     * Capitalize (first letter to uppercase) the given string.
+     *
+     * @param {string} string
+     * @return {string}
+     */
+    mt.tools.capitalize = function (string) {
+        if (!angular.isString(string)) throw new Error('The string parameter should be a string');
+
+        return string.substr(0, 1).toUpperCase() + string.substr(1);
+    };
+
 })(window.mt = window.mt || {});
