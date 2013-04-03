@@ -15,7 +15,7 @@ html, body {
     display: inline-block;
     padding: .2rem;
     margin: 0;
-    line-height: normal;
+    line-height: normal; /*it is the only height supported by webkit for inputs*/
 }
 
 #mt-video-window {
