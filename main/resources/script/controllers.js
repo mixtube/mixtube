@@ -1,12 +1,45 @@
 (function (mt) {
 
-    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope) {
+    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtKeyboardShortcutManager) {
         // todo save the data in a centralized model
+        $scope.savedQueueName = undefined;
         $scope.queueName = undefined;
         $scope.defaultQueueName = 'Unnamed queue';
+        $scope.edition = false;
 
-        $scope.save = function () {
+        var save = function () {
+            if ($scope.queueName) {
+                $scope.queueName = $scope.queueName.trim();
+            }
+            passivate();
         };
+
+        var passivate = function () {
+            $scope.edition = false;
+            mtKeyboardShortcutManager.leaveContext('queueNameEdit');
+        };
+
+        var rollback = function () {
+            $scope.queueName = $scope.savedQueueName;
+            passivate();
+        };
+
+        $scope.activate = function () {
+            $scope.savedQueueName = $scope.queueName;
+            $scope.edition = true;
+            mtKeyboardShortcutManager.enterContext('queueNameEdit');
+        };
+
+        // can't bind save directly to blur because the blur event can be triggered after the input has been hidden
+        // we need to check the edition mode before to prevent to save at the wrong time
+        $scope.onInputBlur = function () {
+            if ($scope.edition) {
+                save();
+            }
+        };
+
+        mtKeyboardShortcutManager.register('queueNameEdit', 'return', save);
+        mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
     mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
@@ -102,9 +135,11 @@
             $rootScope.$broadcast(mt.events.PlaybackToggleRequest);
         };
 
-        mtKeyboardShortcutManager.bind('space', function () {
+        // register the global space shortcut and directly enter the shortcuts context
+        mtKeyboardShortcutManager.register('global', 'space', function () {
             broadcastToggleRequest();
         });
+        mtKeyboardShortcutManager.enterContext('global');
 
         $scope.$on(mt.events.PlaybackStateChanged, function (evt, data) {
             $scope.playing = data.playing;
@@ -318,14 +353,6 @@
             }
         });
 
-        $scope.$watch('searchVisible', function () {
-            if ($scope.searchVisible) {
-                mtKeyboardShortcutManager.bind('esc', $scope.close);
-            } else {
-                mtKeyboardShortcutManager.unbind('esc');
-            }
-        });
-
         $scope.search = function () {
             // store the current request count
             var startSearchRequestCount = $scope.searchRequestCount;
@@ -351,6 +378,7 @@
          * @param {string=} firstChar the first char to fill the input with
          */
         $scope.open = function (firstChar) {
+            mtKeyboardShortcutManager.enterContext('search');
             $scope.searchVisible = true;
             $scope.searchTerm = firstChar;
             $scope.searchTermFocused = true;
@@ -358,7 +386,10 @@
         };
 
         $scope.close = function () {
+            mtKeyboardShortcutManager.leaveContext('search');
             $scope.searchVisible = false;
         };
+
+        mtKeyboardShortcutManager.register('search', 'esc', $scope.close);
     });
 })(mt);

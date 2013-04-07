@@ -5,7 +5,10 @@
         }).run(function ($rootScope, mtLoggerFactory) {
             var wordCharRegExp = /\w/;
             document.addEventListener('keyup', function (evt) {
-                if (!Mousetrap.stopCallback(evt, evt.target || evt.srcElement)) {
+                var element = evt.target || evt.srcElement;
+                if (!(element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA'
+                    || (element.contentEditable && element.contentEditable == 'true'))) {
+
                     var convertedString = String.fromCharCode(evt.which);
                     if (wordCharRegExp.test(convertedString)) {
                         $rootScope.$apply(function () {

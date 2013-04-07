@@ -191,14 +191,69 @@
     });
 
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($location, $rootScope) {
-        return {
-            bind: function (combo, callback) {
-                Mousetrap.bind(combo, function () {
-                    $rootScope.$apply(callback);
+        /** @type {Object.<String, Function> */
+        var contexts = {};
+        /** @type {Array.<String>} */
+        var contextStack = [];
+
+        var bindContext = function (name) {
+            if (contexts.hasOwnProperty(name)) {
+                angular.forEach(contexts[name], function (callback, combo) {
+                    Mousetrap.bind(combo, function () {
+                        $rootScope.$apply(callback);
+                    });
                 });
+            }
+        };
+
+        var unbindContext = function (name) {
+            if (contexts.hasOwnProperty(name)) {
+                angular.forEach(contexts[name], function (callback, combo) {
+                    Mousetrap.unbind(combo);
+                });
+            }
+        };
+
+        return {
+            /**
+             * Registers a shortcut for the in the given context.
+             *
+             * @param {String} context the context name
+             * @param {String} combo
+             * @param {Function} callback
+             */
+            register: function (context, combo, callback) {
+                var callbackByCombo = contexts[context] = contexts.hasOwnProperty(context) ? contexts[context] : {};
+                callbackByCombo[combo] = callback;
             },
-            unbind: function (combo) {
-                Mousetrap.unbind(combo);
+            /**
+             * Unbinds the previous context shortcuts and binds the new ones.
+             *
+             * @param {String} name the context name
+             */
+            enterContext: function (name) {
+                if (contextStack.length > 0) {
+                    unbindContext(contextStack[contextStack.length - 1]);
+                }
+
+                contextStack.push(name);
+                bindContext(name);
+            },
+            /**
+             * Unbind the current context and restore the previous one.
+             *
+             * Calls to enter / leave should be balanced.
+             *
+             * @param {String} name context name
+             */
+            leaveContext: function (name) {
+                var popped = contextStack.pop();
+                if (name !== popped) throw new Error('Can not pop context ' + name + ' probably because of unbalanced enter / leave calls , found ' + popped);
+
+                unbindContext(name);
+                if (contextStack.length > 0) {
+                    bindContext(contextStack[contextStack.length - 1]);
+                }
             }
         };
     });

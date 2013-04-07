@@ -1,7 +1,7 @@
 (function (mt) {
     // simple event listener directives for focus and blur events type
     ['blur', 'focus'].forEach(function (evtName) {
-        var directiveName = 'mt' +  mt.tools.capitalize(evtName);
+        var directiveName = 'mt' + mt.tools.capitalize(evtName);
         mt.MixTubeApp.directive(directiveName, function ($parse) {
             return function (scope, elmt, attr) {
                 var fn = $parse(attr[directiveName]);
@@ -47,29 +47,31 @@
         };
     });
 
-    // ensures that the element (most likely an input) is selected on focus
-    mt.MixTubeApp.directive('mtSelectonfocus', function () {
-        return function (scope, elmt) {
-            elmt.bind('focus', function () {
-                elmt.select();
-            });
-        };
-    });
-
-    // allows to specify custom behavior when the user types enter key
-    var enterKeyName = 'mtEnterkey';
-    mt.MixTubeApp.directive(enterKeyName, function ($parse) {
+    // ensures that the element (most likely an input) is focus when shown. Works with ngShow or ngHide.
+    var focusWhenName = 'mtFocuswhen';
+    mt.MixTubeApp.directive(focusWhenName, function ($parse, $timeout) {
         return function (scope, elmt, attrs) {
-            var fn = $parse(attrs[enterKeyName]);
-            elmt.bind('keyup', function (evt) {
-                var code = evt.which;
-                if (code == 13) {
-                    evt.preventDefault();
-                    scope.$apply(function () {
-                        fn(scope, {$event: evt});
-                    });
-                }
-            });
+            var fn = $parse(attrs[focusWhenName]);
+            var config = angular.extend({}, {selectTextOnFocus: false}, fn(scope));
+            var watcher = function (shown) {
+                $timeout(function () {
+                    var action = (shown ? 'focus' : 'blur');
+                    elmt[action]();
+                    if (config.selectTextOnFocus && action === 'focus') {
+                        elmt.select();
+                    }
+                }, 50);
+            };
+
+            if (attrs.hasOwnProperty('ngShow')) {
+                scope.$watch(attrs['ngShow'], watcher);
+            } else if (attrs.hasOwnProperty('ngHide')) {
+                scope.$watch(attrs['ngHide'], function (hidden) {
+                    watcher(!hidden);
+                });
+            } else {
+                throw new Error(focusWhenName + ' directive must be used with ngShow or ngHide');
+            }
         };
     });
 
