@@ -1,5 +1,73 @@
 (function (mt) {
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $resource, $q, mtConfiguration) {
+
+    mt.MixTubeApp.factory('mtQueueManager', function ($rootScope, $location, $q, mtConfiguration, mtYoutubeClient, mtLoggerFactory) {
+        var providerNameLength = 2;
+        var youtubeShortName = 'youtube'.substr(0, providerNameLength);
+
+        var logger = mtLoggerFactory.logger('mtQueueManager');
+
+        var serialize = function (queue) {
+            var buffer = [];
+            buffer.push(queue.name || '');
+            queue.entries.forEach(function (queueEntry) {
+                buffer.push(queueEntry.video.provider.substr(0, providerNameLength) + queueEntry.video.id);
+            });
+            return CSV.arrayToCsv([buffer]);
+        };
+        var deserialize = function (string) {
+            var buffer = CSV.csvToArray(string)[0];
+
+            var queue = new mt.model.Queue();
+            queue.name = buffer[0];
+
+            var youtubeVideosIds = [];
+            for (var idx = 1; idx < buffer.length; idx++) {
+                var providerShortName = buffer[idx].substr(0, providerNameLength);
+                var videoId = buffer[idx].substr(providerNameLength);
+                if (providerShortName === youtubeShortName) {
+                    youtubeVideosIds.push(videoId);
+                } else {
+                    logger.debug('Unknown provider short name (%s) encountered during queue deserialization. Ignored the entry.', providerShortName);
+                }
+            }
+
+            var deferred = $q.defer();
+            mtYoutubeClient.searchVideosByIds(youtubeVideosIds).then(function (videos) {
+                videos.forEach(function (video) {
+                    var queueEntry = new mt.model.QueueEntry();
+                    queueEntry.id = mt.tools.uniqueId();
+                    queueEntry.video = video;
+                    queue.entries.push(queueEntry);
+                });
+                deferred.resolve(queue);
+            });
+            return deferred.promise;
+        };
+
+        // initialize queue
+        var queue = new mt.model.Queue();
+
+        return {
+            get queue() {
+                return queue;
+            },
+            deserialize: function (serialized) {
+                deserialize(serialized).then(function (newQueue) {
+                    // remove invalid entries
+                    newQueue.entries = newQueue.entries.filter(function (entry) {
+                        return entry.video.hasOwnProperty('publisherName');
+                    });
+
+                    angular.extend(queue, newQueue);
+                });
+            },
+            serialize: function () {
+                return serialize(queue);
+            }
+        };
+    });
+
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration) {
 
         /**
          * Allow to parse "exotic" time format form Youtube data API.
@@ -23,65 +91,89 @@
             return (hours * 3600 + minutes * 60 + seconds) * 1000;
         }
 
-        /**
-         * Returns a list of details for videos for the given ids (duration and view count).
-         *
-         * Note : The durations are in milliseconds for convenience but the precision is actually smaller (seconds).
-         *
-         * @param {Array.<string>} ids the youtube videos ids
-         * @return {Promise} a promise of detailed {@link  mt.model.Video}
-         */
-        var listVideosByIds = function (ids) {
+        var extendVideosWithDetails = function (videos) {
             var deferred = $q.defer();
+            var videosIds = _.pluck(videos, 'id');
 
             $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
-                    id: ids.join(','),
+                    id: videosIds.join(','),
                     part: 'snippet,statistics,contentDetails',
                     callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
             }).success(function (response) {
-                    var videos = [];
+                    var videoDetailsById = {};
                     response.items.forEach(function (item) {
-                        var video = {};
-                        video.id = item.id;
-                        video.duration = convertISO8601DurationToMillis(item.contentDetails.duration);
-                        video.viewCount = item.statistics.viewCount;
-                        videos.push(video);
+                        videoDetailsById[item.id] = {
+                            id: item.id,
+                            title: item.snippet.title,
+                            thumbnailUrl: item.snippet.thumbnails.medium.url,
+                            provider: 'youtube',
+                            duration: convertISO8601DurationToMillis(item.contentDetails.duration),
+                            viewCount: parseInt(item.statistics.viewCount, 10),
+                            // temporary store the channel, used after to add the video channel name
+                            __youtubeChannelId: item.snippet.channelId
+                        };
                     });
+
+                    // extend the video with the details
+                    videos.forEach(function (video) {
+                        angular.extend(video, videoDetailsById[video.id]);
+                    });
+
                     deferred.resolve(videos);
                 }).error(deferred.reject);
 
             return deferred.promise;
         };
 
-        /**
-         * @param {Array.<string>} ids
-         * @return {Promise} a promise of Array.<{id: string, name: string}>
-         */
-        var listByIds = function (ids) {
+        var extendVideosWithChannels = function (videos) {
             var deferred = $q.defer();
+            var channelsIds = _.pluck(videos, '__youtubeChannelId');
 
             $http.jsonp('https://www.googleapis.com/youtube/v3/channels', {
                 params: {
-                    id: ids.join(','),
+                    id: channelsIds.join(','),
                     part: 'snippet',
                     callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
             }).success(function (response) {
-                    var channels = [];
+                    var channelByIds = {};
                     response.items.forEach(function (item) {
-                        channels.push({id: item.id, name: item.snippet.title});
+                        channelByIds[item.id] = {id: item.id, name: item.snippet.title};
                     });
-                    deferred.resolve(channels);
+
+                    // extend the video with the publisher name, for youtube it is the channel name
+                    videos.forEach(function (video) {
+                        if (video.hasOwnProperty('__youtubeChannelId')) {
+                            video.publisherName = channelByIds[video.__youtubeChannelId].name;
+                            delete video.__youtubeChannelId;
+                        }
+                    });
+
+                    deferred.resolve(videos);
                 }).error(deferred.reject);
 
             return deferred.promise;
         };
 
         return {
+            searchVideosByIds: function (ids) {
+                var deferred = $q.defer();
+                // prepare an array of pseudo videos that have only the id property defined
+                var videos = ids.map(function (id) {
+                    return {id: id};
+                });
+
+                extendVideosWithDetails(videos).then(function (videos) {
+                    extendVideosWithChannels(videos).then(deferred.resolve, deferred.reject);
+                }, deferred.reject);
+
+                return deferred.promise;
+            },
+
             /**
              * Searches the 20 first videos on youtube matching the query.
              *
@@ -93,11 +185,9 @@
              * videos after with only the properties available at the execution time.
              *
              * @param {string} queryString the query as used for a classic youtube search
-             * @param {function(Array.<(mt.model.Video|Object)>)} dataCallback executed each time we receive additional data.
+             * @param {function(Array.<(mt.model.Video)>)} dataCallback executed each time we receive additional data
              */
             searchVideosByQuery: function (queryString, dataCallback) {
-                var deferred = $q.defer();
-
                 $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         q: queryString,
@@ -109,60 +199,21 @@
                         key: mtConfiguration.youtubeAPIKey
                     }
                 }).success(function (response) {
-                        var videos = [];
-                        var videoIdxById = {};
-                        var videosIds = [];
-                        var channelsIds = [];
-
-                        var index = 0;
-                        response.items.forEach(function (item) {
-                            var video = new mt.model.Video();
-                            video.id = item.id.videoId;
-                            video.title = item.snippet.title;
-                            video.thumbnailUrl = item.snippet.thumbnails.medium.url
-                            video.provider = 'youtube';
-                            // temporary store the channel, see bellow
-                            video.__youtubeChannelId = item.snippet.channelId;
-
-                            videos.push(video);
-                            videoIdxById[video.id] = index;
-                            videosIds.push(video.id);
-                            channelsIds.push(item.snippet.channelId);
-
-                            index++;
-                        });
-
-                        listVideosByIds(videosIds).then(function (videoProjections) {
-                            // extend the current videos collections with new properties
-                            videoProjections.forEach(function (videoProjection) {
-                                var videoIdx = videoIdxById[videoProjection.id];
-                                var video = videos[videoIdx];
-                                angular.extend(video, videoProjection);
-                            });
-
-                            dataCallback(videos);
-                        });
-
-                        listByIds(channelsIds).then(function (channelProjections) {
-                            // index the channels by their ids
-                            var channelByIds = {};
-                            channelProjections.forEach(function (channelProjection) {
-                                channelByIds[channelProjection.id] = channelProjection;
-                            });
-
-                            // extend the video with the publisher name, for youtube it is the channel name
-                            videos.forEach(function (video) {
-                                video.publisherName = channelByIds[video.__youtubeChannelId].name;
-                                delete video.__youtubeChannelId;
-                            });
-
-                            dataCallback(videos);
+                        var videos = response.items.map(function (item) {
+                            return {
+                                id: item.id.videoId,
+                                title: item.snippet.title,
+                                thumbnailUrl: item.snippet.thumbnails.medium.url,
+                                provider: 'youtube',
+                                // temporary store the channel, used after to add the video channel name
+                                __youtubeChannelId: item.snippet.channelId
+                            };
                         });
 
                         dataCallback(videos);
-                    }).error(deferred.reject);
-
-                return deferred.promise;
+                        extendVideosWithDetails(videos).then(dataCallback);
+                        extendVideosWithChannels(videos).then(dataCallback);
+                    });
             },
 
             /**
@@ -293,10 +344,10 @@
         function prepareLogTrace(arguments, loggerName) {
             var now = new Date();
             var newArguments = [];
-            newArguments[0] = '[%d:%d:%d] %s : ' + arguments[0];
-            newArguments[1] = now.getHours();
-            newArguments[2] = now.getMinutes();
-            newArguments[3] = now.getSeconds();
+            newArguments[0] = '[%s:%s:%s] %s : ' + arguments[0];
+            newArguments[1] = mt.tools.leftPad(now.getHours().toString(10), 2, '0');
+            newArguments[2] = mt.tools.leftPad(now.getMinutes().toString(10), 2, '0');
+            newArguments[3] = mt.tools.leftPad(now.getSeconds().toString(10), 2, '0');
             newArguments[4] = loggerName;
             for (var idx = 1; idx < arguments.length; idx++) {
                 newArguments[idx + 4] = arguments[idx];
@@ -313,10 +364,10 @@
                 this.delegate(console.log, arguments);
             },
             dir: function () {
-                this.delegate(console.dir, arguments);
+                this.delegate(console.dir || console.log, arguments);
             },
             debug: function () {
-                this.delegate(console.debug, arguments);
+                this.delegate(console.debug || console.log, arguments);
             },
             delegate: function (targetFn, delegateArguments) {
                 targetFn.apply(console, prepareLogTrace(delegateArguments, this.name));

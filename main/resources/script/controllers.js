@@ -1,16 +1,32 @@
 (function (mt) {
 
-    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtKeyboardShortcutManager) {
-        // todo save the data in a centralized model
+    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
+        $scope.queue = mtQueueManager.queue;
+
+        $scope.$watch('queue', function (newVal, oldVal) {
+            if (!angular.equals(newVal, oldVal)) {
+                $location.search({queue: mtQueueManager.serialize()});
+            }
+        }, true);
+
+        $scope.$on('$locationChangeSuccess', function () {
+            if ($location.search().hasOwnProperty('queue')) {
+                mtQueueManager.deserialize($location.search().queue);
+            }
+        });
+    });
+
+    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
+        $scope.currentQueueName = mtQueueManager.queue.name;
         $scope.savedQueueName = undefined;
-        $scope.queueName = undefined;
         $scope.defaultQueueName = 'Unnamed queue';
         $scope.edition = false;
 
         var save = function () {
-            if ($scope.queueName) {
-                $scope.queueName = $scope.queueName.trim();
+            if ($scope.currentQueueName) {
+                $scope.currentQueueName = $scope.currentQueueName.trim()
             }
+            mtQueueManager.queue.name = $scope.currentQueueName;
             passivate();
         };
 
@@ -20,12 +36,12 @@
         };
 
         var rollback = function () {
-            $scope.queueName = $scope.savedQueueName;
+            $scope.currentQueueName = $scope.savedQueueName;
             passivate();
         };
 
         $scope.activate = function () {
-            $scope.savedQueueName = $scope.queueName;
+            $scope.savedQueueName = $scope.currentQueueName = mtQueueManager.queue.name;
             $scope.edition = true;
             mtKeyboardShortcutManager.enterContext('queueNameEdit');
         };
@@ -42,14 +58,12 @@
         mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
-    mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtYoutubeClient, mtLoggerFactory, mtConfiguration) {
+    mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtLoggerFactory) {
 
         var logger = mtLoggerFactory.logger('mtQueueCtrl');
 
         /**  @type {mt.model.QueueEntry} */
         $scope.activeQueueEntry = undefined;
-        /**  @type {Array.<mt.model.QueueEntry>} */
-        $scope.queueEntries = mtConfiguration.initialQueueEntries;
 
         /**
          * Finds the first next video in the queue that still exist.
@@ -64,8 +78,8 @@
             var deferred = $q.defer();
 
             var tryPosition = startPosition + 1;
-            if (tryPosition < $scope.queueEntries.length) {
-                var queueEntry = $scope.queueEntries[tryPosition];
+            if (tryPosition < $scope.queue.entries.length) {
+                var queueEntry = $scope.queue.entries[tryPosition];
                 mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
                     if (videoExists) {
                         deferred.resolve(queueEntry);
@@ -81,7 +95,7 @@
         };
 
         var triggerQueueModified = function (modifiedPositions) {
-            var activePosition = $scope.queueEntries.indexOf($scope.activeQueueEntry);
+            var activePosition = $scope.queue.entries.indexOf($scope.activeQueueEntry);
             $rootScope.$broadcast(mt.events.QueueModified, {
                 activePosition: activePosition,
                 modifiedPositions: modifiedPositions
@@ -91,7 +105,7 @@
         $scope.$on(mt.events.NextQueueEntryRequest, function (evt, data) {
             logger.debug('Next queue entry request received');
 
-            var activePosition = $scope.queueEntries.indexOf($scope.activeQueueEntry);
+            var activePosition = $scope.queue.entries.indexOf($scope.activeQueueEntry);
             findNextValidQueueEntry(activePosition).then(function (queueEntry) {
                 $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: data.initialization});
             });
@@ -101,12 +115,12 @@
             var queueEntry = new mt.model.QueueEntry();
             queueEntry.id = mt.tools.uniqueId();
             queueEntry.video = data.video;
-            $scope.queueEntries.push(queueEntry);
-            triggerQueueModified([$scope.queueEntries.length - 1]);
+            $scope.queue.entries.push(queueEntry);
+            triggerQueueModified([$scope.queue.entries.length - 1]);
         });
 
         $scope.$on(mt.events.QueueEntryActivated, function (evt, data) {
-            $scope.activeQueueEntry = mt.tools.findWhere($scope.queueEntries, {id: data.queueEntryId});
+            $scope.activeQueueEntry = _.findWhere($scope.queue.entries, {id: data.queueEntryId});
         });
 
         $scope.queueEntryClicked = function (queueEntry) {
@@ -114,13 +128,13 @@
         };
 
         $scope.removeQueueEntryClicked = function (queueEntry) {
-            var index = $scope.queueEntries.indexOf(queueEntry);
-            $scope.queueEntries.splice(index, 1);
+            var index = $scope.queue.entries.indexOf(queueEntry);
+            $scope.queue.entries.splice(index, 1);
             triggerQueueModified([index]);
         };
 
         $scope.newQueueButtonClicked = function () {
-            $scope.queueEntries = [];
+            $scope.queue.entries = [];
             $scope.activeQueueEntry = undefined;
             $rootScope.$broadcast(mt.events.QueueCleared);
         };
@@ -322,7 +336,7 @@
         $scope.searchTerm = undefined;
         /** @type {boolean} */
         $scope.searchTermFocused = false;
-        /** @type {Array.<mt.model.Video>} */
+        /** @type {Array.<mt.model.VideoSearchResult>} */
         $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
         /** @type {boolean} */
         $scope.searchVisible = mtConfiguration.initialSearchOpen;
@@ -366,7 +380,7 @@
         };
 
         /**
-         * @param {mt.model.Video} video
+         * @param {mt.model.VideoSearchResult} video
          */
         $scope.appendResultToQueue = function (video) {
             $rootScope.$broadcast(mt.events.AppendVideoToQueueRequest, {video: video});

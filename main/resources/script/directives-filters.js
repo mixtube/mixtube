@@ -14,64 +14,26 @@
         });
     });
 
-    // a directive to link focus state of a field with model expression
-    var focusModelName = 'mtFocusModel';
-    mt.MixTubeApp.directive(focusModelName, function ($parse, $timeout) {
-        return {
-            restrict: 'A',
-            link: function (scope, elmt, attrs) {
-                var fn = $parse(attrs[focusModelName]);
-                elmt.bind('focus', function () {
-                    scope.$apply(function () {
-                        fn.assign(scope, true);
-                    });
-                });
-                elmt.bind('blur', function () {
-                    scope.$apply(function () {
-                        fn.assign(scope, false);
-                    });
-                });
-
-                scope.$watch(attrs[focusModelName], function (value) {
-                    if (value) {
-                        $timeout(function () {
-                            elmt[0].focus();
-                        }, 50);
-                    } else {
-                        $timeout(function () {
-                            elmt[0].blur();
-                        }, 50);
-                    }
-                });
-            }
-        };
-    });
-
-    // ensures that the element (most likely an input) is focus when shown. Works with ngShow or ngHide.
+    // ensures that the element (most likely an input) is focus when shown.
     var focusWhenName = 'mtFocuswhen';
     mt.MixTubeApp.directive(focusWhenName, function ($parse, $timeout) {
+        var defaultConfig = {selectTextOnFocus: false};
+
         return function (scope, elmt, attrs) {
-            var fn = $parse(attrs[focusWhenName]);
-            var config = angular.extend({}, {selectTextOnFocus: false}, fn(scope));
-            var watcher = function (shown) {
+            scope.$watch(attrs[focusWhenName], function (config) {
+                if (!angular.isObject(config)) {
+                    config = {model: config};
+                }
+                config = angular.extend({}, defaultConfig, config);
+
                 $timeout(function () {
-                    var action = (shown ? 'focus' : 'blur');
+                    var action = config.model ? 'focus' : 'blur';
                     elmt[action]();
                     if (config.selectTextOnFocus && action === 'focus') {
                         elmt.select();
                     }
                 }, 50);
-            };
-
-            if (attrs.hasOwnProperty('ngShow')) {
-                scope.$watch(attrs['ngShow'], watcher);
-            } else if (attrs.hasOwnProperty('ngHide')) {
-                scope.$watch(attrs['ngHide'], function (hidden) {
-                    watcher(!hidden);
-                });
-            } else {
-                throw new Error(focusWhenName + ' directive must be used with ngShow or ngHide');
-            }
+            }, true);
         };
     });
 

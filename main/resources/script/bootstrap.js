@@ -1,5 +1,5 @@
 (function (mt) {
-    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngResource'])
+    mt.MixTubeApp = angular.module('mtMixTubeApp', [])
         .config(function ($locationProvider) {
             $locationProvider.html5Mode(true);
         }).run(function ($rootScope, mtLoggerFactory) {
@@ -49,37 +49,36 @@
 
     mt.model = {
         Video: function () {
+            /** @type {string} */
             this.id = undefined;
+            /** @type {string} */
             this.title = undefined;
+            /** @type {string} */
             this.thumbnailUrl = undefined;
+            /** @type {number} */
             this.duration = undefined;
+            /** @type {number} */
             this.viewCount = undefined;
+            /** @type {string} */
+            this.publisherName = undefined;
+            /** @type {string} */
             this.provider = undefined;
         },
         QueueEntry: function () {
+            /** @type {string} */
             this.id = undefined;
+            /** @type {mt.model.Video} */
             this.video = undefined;
+        },
+        Queue: function () {
+            /** @type {string} */
+            this.name = undefined;
+            /** @type {Array.<mt.model.QueueEntry} */
+            this.entries = [];
         }
     };
 
-    mt.tools = {__uniqueIdCounter: 0};
-
-    /**
-     * Finds the first elements in a array where the properties match the ones given.
-     *
-     * @param {Array} array the arrays to look into
-     * @param {Object} properties the filter
-     * @return {?Object} the found element or null
-     */
-    mt.tools.findWhere = function (array, properties) {
-        var result = array.filter(function (value) {
-            for (var key in properties) {
-                if (properties[key] !== value[key]) return false;
-            }
-            return true;
-        });
-        return result.length > 0 ? result[0] : null;
-    };
+    mt.tools = {};
 
     /**
      * Generates a "unique" id.
@@ -87,7 +86,7 @@
      * @return {string}
      */
     mt.tools.uniqueId = function () {
-        return 'mt_uid_' + mt.tools.__uniqueIdCounter++;
+        return _.uniqueId('mt_uid_');
     };
 
     /**

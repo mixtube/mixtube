@@ -1,16 +1,17 @@
 <!doctype html>
-<html ng-app="mtMixTubeApp" ng-cloack>
+<html ng-app="mtMixTubeApp" ng-controller="mtRootController" ng-cloack>
 <head>
     <meta charset='utf-8'>
-    <title>MixTube</title>
+    <title>MixTube - {{queue.name}}</title>
     <link rel="stylesheet" href="../style/css/vendor/reset.css" type="text/css">
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
     <link rel="stylesheet" href="../style/css/flex-framework.css" type="text/css">
     <link rel="stylesheet" href="../font-awesome/css/font-awesome.css" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="//code.angularjs.org/1.0.5/angular.js"></script>
-    <script src="//code.angularjs.org/1.0.5/angular-resource.js"></script>
-    <script src="//raw.github.com/ccampbell/mousetrap/dd60d3aeb02f8bacf13b438bd9f7f8e5e0e8775d/mousetrap.js"></script>
+    <script src="//code.angularjs.org/1.1.4/angular.js"></script>
+    <script src="//cdn.jsdelivr.net/underscorejs/1.4.4/underscore.js"></script>
+    <script src="//cdn.jsdelivr.net/mousetrap/1.3/mousetrap.js"></script>
+    <script src="../script/lib/ucsv-1.1.0.js"></script>
     <script src="../script/lib/players-pool.js"></script>
     <script src="../script/bootstrap.js"></script>
     <script src="../script/test-dataset.js"></script>
@@ -23,9 +24,11 @@
 <section id="mt-dashboard-frame" class="flex-greedy-box">
     <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
         <div id="mt-queue-name">
-            <input size="30" class="mt-input mousetrap" ng-model="queueName" ng-show="edition" mt-blur="onInputBlur()"
-                   mt-focuswhen="{selectTextOnFocus: true}">
-            <span class="mt-display" ng-hide="edition" ng-click="activate()">{{queueName || defaultQueueName}}</span>
+            <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
+                   mt-blur="onInputBlur()"
+                   mt-focuswhen="{model: edition, selectTextOnFocus: true}">
+            <span class="mt-display" ng-hide="edition"
+                  ng-click="activate()">{{queue.name || defaultQueueName}}</span>
         </div>
     </form>
     <section ng-controller="mtVideoPlayerStageCtrl">
@@ -49,7 +52,7 @@
             <form name="searchForm" novalidate>
                 <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
                 <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
-                       mt-focus-model="searchTermFocused" required>
+                       required ng-show="searchVisible" mt-focuswhen="searchVisible">
             </form>
         </div>
         <div class="flex-greedy-box"> <!-- providers section -->
@@ -129,7 +132,7 @@
     <button ng-click="newQueueButtonClicked()">Create a new queue</button>
     <ol id="mt-queue-list" class="flex-row flex-align-center">
         <li class="mt-queue-item" ng-class="{'mt-current': queueEntry == activeQueueEntry}"
-            ng-repeat="queueEntry in queueEntries"
+            ng-repeat="queueEntry in queue.entries"
             ng-mouseenter="overQueueItem = true" ng-mouseleave="overQueueItem = false">
             <a href="#" ng-click="queueEntryClicked(queueEntry)">
                 <img class="mt-queue-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
