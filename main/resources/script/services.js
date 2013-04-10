@@ -1,33 +1,35 @@
 (function (mt) {
 
-    mt.MixTubeApp.factory('mtQueueManager', function ($rootScope, $location, $q, mtConfiguration, mtYoutubeClient, mtLoggerFactory) {
-        var providerNameLength = 2;
-        var youtubeShortName = 'youtube'.substr(0, providerNameLength);
-
+    mt.MixTubeApp.factory('mtQueueManager', function ($q, mtYoutubeClient, mtLoggerFactory) {
         var logger = mtLoggerFactory.logger('mtQueueManager');
 
         var serialize = function (queue) {
             var buffer = [];
-            buffer.push(queue.name || '');
+
+            buffer.push((queue.name || ''));
             queue.entries.forEach(function (queueEntry) {
-                buffer.push(queueEntry.video.provider.substr(0, providerNameLength) + queueEntry.video.id);
+                buffer.push(mtYoutubeClient.shortName + queueEntry.video.id);
             });
-            return CSV.arrayToCsv([buffer]);
+
+            var jsonString = JSON.stringify(buffer);
+            // remove useless array delimiters because we are actually not using it as an array
+            return jsonString.substr(1, jsonString.length - 2);
         };
-        var deserialize = function (string) {
-            var buffer = CSV.csvToArray(string)[0];
+
+        var deserialize = function (input) {
+            // add removed array delimiter
+            var buffer = JSON.parse('[' + input + ']');
 
             var queue = new mt.model.Queue();
             queue.name = buffer[0];
 
             var youtubeVideosIds = [];
             for (var idx = 1; idx < buffer.length; idx++) {
-                var providerShortName = buffer[idx].substr(0, providerNameLength);
-                var videoId = buffer[idx].substr(providerNameLength);
-                if (providerShortName === youtubeShortName) {
-                    youtubeVideosIds.push(videoId);
+                var serializedEntry = buffer[idx];
+                if (serializedEntry.indexOf(mtYoutubeClient.shortName) === 0) {
+                    youtubeVideosIds.push(serializedEntry.substring(mtYoutubeClient.shortName.length));
                 } else {
-                    logger.debug('Unknown provider short name (%s) encountered during queue deserialization. Ignored the entry.', providerShortName);
+                    logger.debug('Unable to find a provider for serialized entry %s', serializedEntry);
                 }
             }
 
@@ -51,16 +53,29 @@
             get queue() {
                 return queue;
             },
+
+            /**
+             * Deserialize the queue from the given string.
+             *
+             * @param {String} serialized
+             */
             deserialize: function (serialized) {
                 deserialize(serialized).then(function (newQueue) {
                     // remove invalid entries
                     newQueue.entries = newQueue.entries.filter(function (entry) {
                         return entry.video.hasOwnProperty('publisherName');
                     });
-
+                    // replacing the queue object prevents the Angular digest / watch mechanism to work
+                    // by extending the object it allows it to detect the changes
                     angular.extend(queue, newQueue);
                 });
             },
+
+            /**
+             * Serialize the queue.
+             *
+             * @returns {String} the serialized version of the queue
+             */
             serialize: function () {
                 return serialize(queue);
             }
@@ -68,6 +83,8 @@
     });
 
     mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration) {
+
+        var SHORT_NAME = 'yo';
 
         /**
          * Allow to parse "exotic" time format form Youtube data API.
@@ -160,6 +177,10 @@
         };
 
         return {
+            get shortName() {
+                return SHORT_NAME;
+            },
+
             searchVideosByIds: function (ids) {
                 var deferred = $q.defer();
                 // prepare an array of pseudo videos that have only the id property defined
@@ -241,7 +262,7 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($location, $rootScope) {
+    mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
         /** @type {Object.<String, Function> */
         var contexts = {};
         /** @type {Array.<String>} */

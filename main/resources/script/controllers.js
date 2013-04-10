@@ -4,12 +4,14 @@
         $scope.queue = mtQueueManager.queue;
 
         $scope.$watch('queue', function (newVal, oldVal) {
+            // this test is here to prevent to serialize during the init phase
             if (!angular.equals(newVal, oldVal)) {
                 $location.search({queue: mtQueueManager.serialize()});
             }
         }, true);
 
         $scope.$on('$locationChangeSuccess', function () {
+            // if the queue is available, deserialize it
             if ($location.search().hasOwnProperty('queue')) {
                 mtQueueManager.deserialize($location.search().queue);
             }
