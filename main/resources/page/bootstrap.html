@@ -3,6 +3,7 @@
 <head>
     <meta charset='utf-8'>
     <title>MixTube - {{queue.name}}</title>
+    <title>MixTube - {{queue.name}}</title>
     <link rel="stylesheet" href="../style/css/vendor/reset.css" type="text/css">
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
     <link rel="stylesheet" href="../style/css/flex-framework.css" type="text/css">
@@ -41,7 +42,8 @@
     </section>
     <section ng-controller="mtVideoPlayerControlsCtrl" id="mt-player-controls">
         <button id="mt-pause-button" class="mt-unstyled-button"
-                ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"></button>
+                ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"
+                title="Play / Pause [Space]"></button>
     </section>
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
         <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign" title="Close [Esc]"></button>
