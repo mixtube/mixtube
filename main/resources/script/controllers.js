@@ -1,21 +1,37 @@
 (function (mt) {
 
     mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
+
+        /**
+         * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
+         * infinite loops when changing the url internally.
+         *
+         * @type {string}
+         */
+        var serializedQueue = undefined;
+        /** type {mt.model.Queue} */
         $scope.queue = mtQueueManager.queue;
 
         $scope.$watch('queue', function (newVal, oldVal) {
             // this test is here to prevent to serialize during the init phase
             if (!angular.equals(newVal, oldVal)) {
-                $location.search({queue: mtQueueManager.serialize()});
+                var newSerializedQueue = mtQueueManager.serialize();
+                if (!angular.equals(serializedQueue, newSerializedQueue)) {
+                    serializedQueue = newSerializedQueue
+                    $location.search({queue: serializedQueue});
+                }
             }
         }, true);
 
-        $scope.$on('$locationChangeSuccess', function () {
-            // if the queue is available, deserialize it
-            if ($location.search().hasOwnProperty('queue')) {
-                mtQueueManager.deserialize($location.search().queue);
+        $scope.$watch(function () {
+            return $location.search().queue
+        }, function (newSerializedQueue) {
+            if (!angular.equals(serializedQueue, newSerializedQueue)) {
+                serializedQueue = newSerializedQueue
+                // change initiated by user (back / forward etc.), need to b deserialized
+                mtQueueManager.deserialize(serializedQueue);
             }
-        });
+        }, true);
     });
 
     mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
@@ -282,7 +298,7 @@
             logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, data.autoplay);
 
             var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
-                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
+                : queueEntry.video.duration + mtConfiguration.transitionStartOffset + mtConfiguration.transitionStartTime;
             logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
 
             $scope.nextVideoHandle = $scope.playersPool.prepareVideo({

@@ -17,7 +17,7 @@
         };
 
         var deserialize = function (input) {
-            // add removed array delimiter
+            // add removed array delimiters
             var buffer = JSON.parse('[' + input + ']');
 
             var queue = new mt.model.Queue();
@@ -34,7 +34,7 @@
             }
 
             var deferred = $q.defer();
-            mtYoutubeClient.searchVideosByIds(youtubeVideosIds).then(function (videos) {
+            mtYoutubeClient.listVideosByIds(youtubeVideosIds).then(function (videos) {
                 videos.forEach(function (video) {
                     var queueEntry = new mt.model.QueueEntry();
                     queueEntry.id = mt.tools.uniqueId();
@@ -50,6 +50,9 @@
         var queue = new mt.model.Queue();
 
         return {
+            /**
+             * @returns {mt.model.Queue}
+             */
             get queue() {
                 return queue;
             },
@@ -181,7 +184,16 @@
                 return SHORT_NAME;
             },
 
-            searchVideosByIds: function (ids) {
+            /**
+             * Lists the videos for the given ids.
+             *
+             * The returned collection always contains video pseudo objects (projection of {@link mt.model.Video} with at
+             * least the id. That doesn't mean that it was found, check properties values to know if it was.
+             *
+             * @param {Array.<string>} ids the list of youtube videos ids
+             * @returns {Array.<mt.model.Video>} a list of pseudo video
+             */
+            listVideosByIds: function (ids) {
                 var deferred = $q.defer();
                 // prepare an array of pseudo videos that have only the id property defined
                 var videos = ids.map(function (id) {
@@ -334,6 +346,10 @@
         return {
             get transitionStartTime() {
                 return 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -1000;
+            },
+            get transitionStartOffset() {
+                // an empiric value that appears to be needed to get smooth transitions
+                return -1000;
             },
             get transitionDuration() {
                 return 1000;
