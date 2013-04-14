@@ -3,16 +3,15 @@
 <head>
     <meta charset='utf-8'>
     <title>MixTube - {{queue.name}}</title>
-    <title>MixTube - {{queue.name}}</title>
-    <link rel="stylesheet" href="../style/css/vendor/reset.css" type="text/css">
+
+    <link rel="stylesheet" href="../style/vendor/css/reset.css" type="text/css">
+    <link rel="stylesheet" href="../style/vendor/css/unsemantic-grid-responsive-no-ie7.css" type="text/css">
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
-    <link rel="stylesheet" href="../style/css/flex-framework.css" type="text/css">
-    <link rel="stylesheet" href="../font-awesome/css/font-awesome.css" type="text/css">
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
     <script src="//code.angularjs.org/1.1.4/angular.js"></script>
     <script src="//cdn.jsdelivr.net/underscorejs/1.4.4/underscore.js"></script>
     <script src="//cdn.jsdelivr.net/mousetrap/1.3/mousetrap.js"></script>
-    <script src="../script/lib/ucsv-1.1.0.js"></script>
     <script src="../script/lib/players-pool.js"></script>
     <script src="../script/bootstrap.js"></script>
     <script src="../script/test-dataset.js"></script>
@@ -21,118 +20,112 @@
     <script src="../script/directives-filters.js"></script>
     <script src="//www.youtube.com/iframe_api" async></script>
 </head>
-<body class="flex-column">
-<section id="mt-dashboard-frame" class="flex-greedy-box">
-    <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
-        <div id="mt-queue-name">
-            <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
-                   mt-blur="onInputBlur()"
-                   mt-focuswhen="{model: edition, selectTextOnFocus: true}">
-            <span class="mt-display" ng-hide="edition"
-                  ng-click="activate()">{{queue.name || defaultQueueName}}</span>
+<body>
+
+<section ng-controller="mtVideoPlayerStageCtrl" style="display: none">
+    <div id="mt-video-window">
+        <div id="mt-pointer-event-mask" ng-mouseenter="overMask = true" ng-mouseleave="overMask = false">
+            <button id="mt-fullscreen-button" class="mt-unstyled-button icon-fullscreen"
+                    ng-click="requestFullscreen()" ng-show="overMask" title="Go full screen"></button>
         </div>
-    </form>
-    <section ng-controller="mtVideoPlayerStageCtrl">
-        <div id="mt-video-window">
-            <div id="mt-pointer-event-mask" ng-mouseenter="overMask = true" ng-mouseleave="overMask = false">
-                <button id="mt-fullscreen-button" class="mt-unstyled-button icon-fullscreen"
-                        ng-click="requestFullscreen()" ng-show="overMask" title="Go full screen"></button>
+    </div>
+</section>
+
+<section id="mt-search-frame-wrapper">
+    <section ng-controller="mtSearchCtrl" id="mt-search-frame" ng-show="searchVisible">
+        <div id="mt-search-form-frame">
+            <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign"
+                    title="Close [Esc]"></button>
+            <div>
+                <form name="searchForm" novalidate>
+                    <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
+                    <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
+                           required ng-show="searchVisible" mt-focuswhen="searchVisible">
+                </form>
             </div>
         </div>
-    </section>
-    <section ng-controller="mtVideoPlayerControlsCtrl" id="mt-player-controls">
-        <button id="mt-pause-button" class="mt-unstyled-button"
-                ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"
-                title="Play / Pause [Space]"></button>
-    </section>
-    <section ng-controller="mtSearchCtrl" id="mt-search-frame" class="flex-column" ng-show="searchVisible">
-        <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign" title="Close [Esc]"></button>
-        <div>
-            <h3 id="mt-search-title">Search a video</h3>
-        </div>
-        <div>
-            <form name="searchForm" novalidate>
-                <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-                <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
-                       required ng-show="searchVisible" mt-focuswhen="searchVisible">
-            </form>
-        </div>
-        <div class="flex-greedy-box"> <!-- providers section -->
-            <div class="flex-inner flex-row">
-                <div class="flex-greedy-box"> <!-- provider column -->
-                    <div class="flex-inner flex-column">
-                        <h4 class="mt-results-provider">YouTube</h4>
+        <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
+            <div class="mt-search-results-frame">
+                <h4 class="mt-results-provider">YouTube</h4>
 
-                        <div class="flex-greedy-box">
-                            <div class="flex-inner mt-results-scrollview">
-                                <ul>
-                                    <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
-                                        ng-mouseenter="overResultItem = true" ng-mouseleave="overResultItem = false">
-                                        <div class="flex-row flex-align-center">
+                <div class="mt-results-scrollview">
+                    <ul class="mt-results-list">
+                        <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
+                            ng-mouseenter="overResultItem = true" ng-mouseleave="overResultItem = false">
+                            <div class="flex-row flex-align-center">
 
-                                            <div class="flex-row flex-align-center mt-thumbnail-frame">
-                                                <img ng-src="{{searchResult.thumbnailUrl}}"
-                                                     class="mt-results-thumbnail">
-                                                <button ng-show="overResultItem"
-                                                        ng-click="appendResultToQueue(searchResult)"
-                                                        class="mt-add-to-queue-button icon-plus-sign"></button>
-                                                <div class="mt-video-duration"
-                                                     ng-show="searchResult.duration && !overResultItem">
-                                                    {{searchResult.duration | mtDuration:'shortTime'}}
-                                                </div>
-                                            </div>
-                                            <div class="flex-greedy-box mt-video-details">
-                                                <ul class="mt-video-details-list">
-                                                    <li class="mt-video-details-item mt-title">{{searchResult.title}}
-                                                    </li>
-                                                    <li class="mt-video-details-item"
-                                                        ng-class="{'mt-invisible': !searchResult.viewCount}">
-                                                        {{searchResult.viewCount}} views
-                                                    </li>
-                                                    <li class="mt-video-details-item"
-                                                        ng-class="{'mt-invisible': !searchResult.publisherName}">
-                                                        from <span class="mt-user">{{searchResult.publisherName}}</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="flex-row flex-align-center mt-thumbnail-frame">
+                                    <img ng-src="{{searchResult.thumbnailUrl}}"
+                                         class="mt-results-thumbnail">
+                                    <button ng-show="overResultItem"
+                                            ng-click="appendResultToQueue(searchResult)"
+                                            class="mt-add-to-queue-button icon-plus-sign"></button>
+                                    <div class="mt-video-duration"
+                                         ng-show="searchResult.duration && !overResultItem">
+                                        {{searchResult.duration | mtDuration:'shortTime'}}
+                                    </div>
+                                </div>
+                                <div class="flex-greedy-box mt-video-details">
+                                    <ul class="mt-video-details-list">
+                                        <li class="mt-video-details-item mt-title">{{searchResult.title}}
+                                        </li>
+                                        <li class="mt-video-details-item"
+                                            ng-class="{'mt-invisible': !searchResult.viewCount}">
+                                            {{searchResult.viewCount}} views
+                                        </li>
+                                        <li class="mt-video-details-item"
+                                            ng-class="{'mt-invisible': !searchResult.publisherName}">
+                                            from <span class="mt-user">{{searchResult.publisherName}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-greedy-box"> <!-- provider column -->
-                    <div class="flex-inner flex-column">
-                        <h4 class="mt-results-provider">Daylimotion</h4>
-
-                        <div class="flex-greedy-box">
-                            <div class="flex-inner mt-results-scrollview">
-                                <ul>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-greedy-box"> <!-- provider column -->
-                    <div class="flex-inner flex-column">
-                        <h4 class="mt-results-provider">Vimeo</h4>
-
-                        <div class="flex-greedy-box">
-                            <div class="flex-inner mt-results-scrollview">
-                                <ul>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
+            <div class="mt-search-results-frame">
+                <h4 class="mt-results-provider">Vimeo</h4>
+
+                <div class="mt-results-scrollview">
+                    <ul class="mt-results-list">
+
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-search-results-frame">
+                <h4 class="mt-results-provider">Daylimotion</h4>
+
+                <div class="mt-results-scrollview">
+                    <ul class="mt-results-list">
+
+                    </ul>
+                </div>
+            </div>
+
         </div>
     </section>
 </section>
+
 <section id="mt-queue-frame" ng-controller="mtQueueCtrl">
-    <button ng-click="newQueueButtonClicked()">Create a new queue</button>
-    <ol id="mt-queue-list" class="flex-row flex-align-center">
+    <section id="mt-queue-bar">
+        <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
+            <div id="mt-queue-name">
+                <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
+                       mt-blur="onInputBlur()"
+                       mt-focuswhen="{model: edition, selectTextOnFocus: true}">
+            <span class="mt-display" ng-hide="edition"
+                  ng-click="activate()">{{queue.name || defaultQueueName}}</span>
+            </div>
+        </form>
+        <section ng-controller="mtVideoPlayerControlsCtrl" id="mt-player-controls">
+            <button id="mt-pause-button" class="mt-unstyled-button"
+                    ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"
+                    title="Play / Pause [Space]"></button>
+        </section>
+        <button ng-click="newQueueButtonClicked()">Clear queue</button>
+    </section>
+    <ul id="mt-queue-list">
         <li class="mt-queue-item" ng-class="{'mt-current': queueEntry == activeQueueEntry}"
             ng-repeat="queueEntry in queue.entries"
             ng-mouseenter="overQueueItem = true" ng-mouseleave="overQueueItem = false">
@@ -142,7 +135,7 @@
             <button class="mt-remove-from-queue-button icon-minus-sign" ng-show="overQueueItem"
                     ng-click="removeQueueEntryClicked(queueEntry)"></button>
         </li>
-    </ol>
+    </ul>
 </section>
 </body>
 </html>
