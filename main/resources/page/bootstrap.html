@@ -4,6 +4,7 @@
     <meta charset='utf-8'>
     <title>MixTube - {{queue.name}}</title>
 
+    <link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../style/vendor/css/reset.css" type="text/css">
     <link rel="stylesheet" href="../style/vendor/css/unsemantic-grid-responsive-no-ie7.css" type="text/css">
     <link rel="stylesheet" href="../style/css/bootstrap.css" type="text/css">
@@ -22,64 +23,47 @@
 </head>
 <body>
 
-<section ng-controller="mtVideoPlayerStageCtrl" style="display: none">
-    <div id="mt-video-window">
-        <div id="mt-pointer-event-mask" ng-mouseenter="overMask = true" ng-mouseleave="overMask = false">
-            <button id="mt-fullscreen-button" class="mt-unstyled-button icon-fullscreen"
-                    ng-click="requestFullscreen()" ng-show="overMask" title="Go full screen"></button>
-        </div>
-    </div>
+<section id="mt-video-player-frame" ng-controller="mtVideoPlayerStageCtrl">
+    <div id="mt-video-window"></div>
 </section>
 
 <section id="mt-search-frame-wrapper">
     <section ng-controller="mtSearchCtrl" id="mt-search-frame" ng-show="searchVisible">
-        <div id="mt-search-form-frame">
-            <button ng-click="close()" id="mt-search-close-button" class="icon-remove-sign"
-                    title="Close [Esc]"></button>
-            <div>
-                <form name="searchForm" novalidate>
-                    <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-                    <input ng-model="searchTerm" id="mt-search-term-input" class="mousetrap" placeholder="Start typing"
-                           required ng-show="searchVisible" mt-focuswhen="searchVisible">
-                </form>
-            </div>
-        </div>
+        <button ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></button>
+        <form id="mt-search-form" name="searchForm" novalidate>
+            <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
+            <input id="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
+                   ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
+                   required>
+        </form>
         <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
             <div class="mt-search-results-frame">
                 <h4 class="mt-results-provider">YouTube</h4>
 
                 <div class="mt-results-scrollview">
                     <ul class="mt-results-list">
-                        <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
-                            ng-mouseenter="overResultItem = true" ng-mouseleave="overResultItem = false">
-                            <div class="flex-row flex-align-center">
-
-                                <div class="flex-row flex-align-center mt-thumbnail-frame">
-                                    <img ng-src="{{searchResult.thumbnailUrl}}"
-                                         class="mt-results-thumbnail">
-                                    <button ng-show="overResultItem"
-                                            ng-click="appendResultToQueue(searchResult)"
-                                            class="mt-add-to-queue-button icon-plus-sign"></button>
-                                    <div class="mt-video-duration"
-                                         ng-show="searchResult.duration && !overResultItem">
-                                        {{searchResult.duration | mtDuration:'shortTime'}}
-                                    </div>
-                                </div>
-                                <div class="flex-greedy-box mt-video-details">
-                                    <ul class="mt-video-details-list">
-                                        <li class="mt-video-details-item mt-title">{{searchResult.title}}
-                                        </li>
-                                        <li class="mt-video-details-item"
-                                            ng-class="{'mt-invisible': !searchResult.viewCount}">
-                                            {{searchResult.viewCount}} views
-                                        </li>
-                                        <li class="mt-video-details-item"
-                                            ng-class="{'mt-invisible': !searchResult.publisherName}">
-                                            from <span class="mt-user">{{searchResult.publisherName}}</span>
-                                        </li>
-                                    </ul>
+                        <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
+                            <div class="mt-thumbnail-frame">
+                                <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
+                                <button ng-click="appendResultToQueue(searchResult)"
+                                        class="mt-add-to-queue-button"></button>
+                                <div class="mt-video-duration" ng-show="searchResult.duration">
+                                    <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>
                                 </div>
                             </div>
+                            <ul class="mt-video-details-list">
+                                <li class="mt-video-details-item mt-title" title="{{searchResult.title}}">
+                                    {{searchResult.title}}
+                                </li>
+                                <li class="mt-video-details-item"
+                                    ng-class="{'mt-invisible': !searchResult.viewCount}">
+                                    {{searchResult.viewCount}} views
+                                </li>
+                                <li class="mt-video-details-item"
+                                    ng-class="{'mt-invisible': !searchResult.publisherName}">
+                                    from <span class="mt-user">{{searchResult.publisherName}}</span>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
@@ -132,7 +116,7 @@
             <a href="#" ng-click="queueEntryClicked(queueEntry)">
                 <img class="mt-queue-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
             </a>
-            <button class="mt-remove-from-queue-button icon-minus-sign" ng-show="overQueueItem"
+            <button class="mt-remove-from-queue-button" ng-show="overQueueItem"
                     ng-click="removeQueueEntryClicked(queueEntry)"></button>
         </li>
     </ul>

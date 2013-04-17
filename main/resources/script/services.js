@@ -352,7 +352,7 @@
                 return -1000;
             },
             get transitionDuration() {
-                return 1000;
+                return 10000;
             },
             get initialSearchResults() {
                 return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];

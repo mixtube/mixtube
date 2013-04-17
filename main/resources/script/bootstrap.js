@@ -23,7 +23,7 @@
             window.onYouTubeIframeAPIReady = function () {
                 var playersPool = new mt.player.PlayersPool(function () {
                     var playerDiv = document.createElement('div');
-                    playerDiv.classList.add('mt-player-frame');
+                    playerDiv.classList.add('mt-video-player');
                     document.getElementById('mt-video-window').appendChild(playerDiv);
                     return playerDiv;
                 }, mtLoggerFactory.logger('PlayersPool'));
