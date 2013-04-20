@@ -354,10 +354,10 @@
                 return 'test.searchOpen' in $location.search();
             },
             get youtubeAPIKey() {
-                return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+                return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
             },
             get maxSearchResults() {
-                return 20
+                return 20;
             }
         };
     });
