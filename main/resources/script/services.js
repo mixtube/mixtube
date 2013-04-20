@@ -343,34 +343,22 @@
     });
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
-        return {
+        return  {
             get transitionStartTime() {
-                return 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -1000;
-            },
-            get transitionStartOffset() {
-                // an empiric value that appears to be needed to get smooth transitions
-                return -1000;
-            },
-            get transitionDuration() {
-                return 10000;
+                return 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
             },
             get initialSearchResults() {
                 return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
             },
-            get initialQueueEntries() {
-                return 'test.queue' in $location.search() ?
-                    mt.tools.TEST_VIDEOS.map(function (video) {
-                        var queueEntry = new mt.model.QueueEntry();
-                        queueEntry.id = mt.tools.uniqueId();
-                        queueEntry.video = video;
-                        return queueEntry;
-                    }) : [];
-            },
             get initialSearchOpen() {
                 return 'test.searchOpen' in $location.search();
             },
-            youtubeAPIKey: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg',
-            maxSearchResults: 20
+            get youtubeAPIKey() {
+                return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+            },
+            get maxSearchResults() {
+                return 20
+            }
         };
     });
 

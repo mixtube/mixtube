@@ -218,7 +218,7 @@
          */
         var executeTransition = function () {
             if ($scope.currentVideoHandle) {
-                $scope.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
+                $scope.currentVideoHandle.out(Math.abs(mtConfiguration.transitionStartTime)).done(function (videoHandle) {
                     videoHandle.dispose();
                 });
             }
@@ -229,7 +229,7 @@
             // if there is a a current video start it, else it's the end of the sequence
             if ($scope.currentVideoHandle) {
                 $scope.playing = true;
-                $scope.currentVideoHandle.in(mtConfiguration.transitionDuration);
+                $scope.currentVideoHandle.in(Math.abs(mtConfiguration.transitionStartTime));
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
@@ -298,7 +298,7 @@
             logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, data.autoplay);
 
             var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
-                : queueEntry.video.duration + mtConfiguration.transitionStartOffset + mtConfiguration.transitionStartTime;
+                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
             logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
 
             $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
