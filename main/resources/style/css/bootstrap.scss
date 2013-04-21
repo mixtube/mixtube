@@ -1,0 +1,400 @@
+//----------- Commons and resets -----------
+$queueFrameHeight: 120px;
+$searchFormHeight: 72px;
+$resultsProviderHeight: 20px;
+$darkTextColor: #001413;
+$lightTextColor: #e5fffc;
+$iconFont: 'entypo', sans-serif;
+$regularMargin: 10px;
+
+@font-face {
+  font-family: 'entypo';
+  src: url('../vendor/font/entypo.eot');
+  src: url('../vendor/font/entypo.eot?#iefix') format('embedded-opentype'), url('../vendor/font/entypo.woff') format('woff'), url('../vendor/font/entypo.ttf') format('truetype'), url('../vendor/font/entypo.svg#entypo') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input, button {
+  font-family: 'Muli', sans-serif;
+  color: $lightTextColor;
+}
+
+button {
+  cursor: pointer;
+  margin: 0;
+}
+
+.mt-unstyled-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mt-unstyled-input {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+}
+
+@mixin mt-triangle($size, $color) {
+  width: 0px;
+  height: 0px;
+  border-style: solid;
+  border-width: 0 $size $size 0;
+  border-color: transparent $color transparent transparent;
+}
+
+@mixin mt-corner-button($color, $content) {
+  @include mt-triangle(35px, $color);
+  @extend .mt-unstyled-button;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0;
+  overflow: visible;
+
+  &:before {
+    position: absolute;
+    bottom: -23px;
+    right: -34px;
+
+    content: $content;
+    color: $darkTextColor;
+    font-size: 50px;
+    font-family: $iconFont;
+  }
+}
+
+@mixin mt-icon-font-button($fontSize, $content: '') {
+  @extend .mt-unstyled-button;
+
+  font-family: $iconFont;
+
+  &:before {
+    content: $content;
+    font-size: $fontSize;
+    line-height: 0;
+  }
+}
+
+//----------- Custom styling -----------
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Muli', sans-serif;
+  font-size: 14px;
+  color: $lightTextColor;
+  background-color: #000000;
+}
+
+#mt-video-player-frame {
+  height: 100%;
+}
+
+#mt-video-window {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.mt-video-player {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#mt-search-frame-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  padding-bottom: $queueFrameHeight;
+}
+
+#mt-search-frame-wrapper {
+  height: 100%;
+  width: 100%;
+  padding: {
+    top: $regularMargin;
+    left: $regularMargin;
+    right: $regularMargin;
+  }
+
+  background-color: rgba(26, 37, 38, .8);
+}
+
+#mt-search-frame {
+  position: relative;
+  height: 100%;
+}
+
+#mt-search-results-frame-wrapper {
+  height: 100%;
+  // 20px more for margin
+  padding-top: $searchFormHeight + 20px;
+}
+
+#mt-search-form {
+  position: absolute;
+  height: $searchFormHeight;
+  width: 100%;
+  padding-left: $regularMargin;
+  padding-right: 30px;
+}
+
+#mt-search-close-button {
+  @extend .mt-unstyled-button;
+
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  &:before {
+    content: '\2716';
+    font-size: 50px;
+    font-family: $iconFont;
+    line-height: 0;
+  }
+}
+
+#mt-search-term-input {
+  @extend .mt-unstyled-input;
+
+  width: 100%;
+
+  font-size: 3.57rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.mt-search-results-frame {
+  float: left;
+  position: relative;
+  height: 100%;
+  width: 33.33%;
+  padding-top: $resultsProviderHeight;
+}
+
+.mt-results-provider {
+  position: absolute;
+  top: 0;
+  height: $resultsProviderHeight;
+  margin-left: $regularMargin;
+}
+
+.mt-results-scrollview {
+  height: 100%;
+  overflow: auto;
+}
+
+.mt-results-item {
+  float: left;
+  padding: {
+    left: $regularMargin;
+    right: $regularMargin;
+  }
+  margin: {
+    top: $regularMargin;
+    bottom: $regularMargin;
+  }
+  width: 50%;
+  // prevent ribbon white space to overflow on the siblings items
+  overflow: hidden;
+}
+
+.mt-thumbnail-frame {
+  position: relative;
+}
+
+.mt-results-thumbnail {
+  max-width: 100%;
+}
+
+.mt-results-item:hover .mt-add-to-queue-button {
+  display: block;
+}
+
+.mt-add-to-queue-button {
+  @include mt-corner-button(#f3c621, '\2795');
+
+  display: none;
+}
+
+.mt-video-duration {
+  position: absolute;
+  left: 0;
+  bottom: $regularMargin;
+
+  font-size: 11px;
+  color: $darkTextColor;
+  letter-spacing: -1px;
+
+  &:before {
+    content: '\1F516';
+    position: absolute;
+    bottom: -40px;
+    left: -18px;
+
+    color: $lightTextColor;
+    font-family: $iconFont;
+    font-size: 92px;
+    -webkit-transform: rotate(-90deg);
+  }
+
+  .mt-value {
+    position: absolute;
+    bottom: 0;
+  }
+}
+
+.mt-video-details-list {
+  margin-top: 5px;
+  line-height: 17px;
+}
+
+.mt-video-details-item {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.mt-title {
+    font-weight: bold;
+  }
+}
+
+#mt-queue-frame {
+  position: absolute;
+  bottom: 0;
+  height: $queueFrameHeight;
+  width: 100%;
+}
+
+#mt-queue-bar {
+  height: 40px;
+  background-color: #031112;
+}
+
+#mt-queue-bar-table {
+  display: table;
+  height: 100%;
+  width: 100%;
+
+  .mt-left, .mt-middle, .mt-right {
+    vertical-align: middle;
+    display: table-cell;
+    width: 33.3333%;
+    white-space: nowrap;
+  }
+
+  .mt-left {
+    padding-left: $regularMargin;
+  }
+
+  .mt-middle {
+    text-align: center;
+  }
+
+  .mt-right {
+    text-align: right;
+    padding-right: $regularMargin;
+  }
+}
+
+#mt-open-search-button {
+  @include mt-icon-font-button(40px, '\1F50D');
+}
+
+#mt-clear-queue-button {
+  @include mt-icon-font-button(40px, '\E729');
+}
+
+#mt-playback-button {
+  @include mt-icon-font-button(70px);
+
+  &.mt-pause:before {
+    content: '\2016';
+  }
+
+  &.mt-play:before {
+    content: '\25B6';
+  }
+}
+
+#mt-queue-list {
+  // fixes the extra space generated by webkit engine when using inline blocks
+  word-spacing: -3px;
+  line-height: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mt-queue-item {
+  display: inline-block;
+  position: relative;
+  // size of youtube thumbnails when width is 140
+  height: 79px;
+  // we want to see at least 12 videos in the queue
+  width: 8.33333%;
+  max-width: 140px;
+  min-width: 70px;
+  // restores modified spacing
+  word-spacing: normal;
+  line-height: normal;
+  overflow: hidden;
+}
+
+.mt-queue-thumbnail {
+  display: block;
+  width: 140px;
+}
+
+.mt-queue-item:hover .mt-remove-from-queue-button {
+  display: block;
+}
+
+.mt-remove-from-queue-button {
+  @include mt-corner-button(#f3c621, '\274C');
+
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: $regularMargin
+}
+
+*:hover::-webkit-scrollbar-track {
+  background: #4d5b5c;
+}
+
+::-webkit-scrollbar-track:hover {
+  background: #273233;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: $regularMargin;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: #041c1d;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #031112;
+}

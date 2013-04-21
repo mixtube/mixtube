@@ -27,97 +27,102 @@
     <div id="mt-video-window"></div>
 </section>
 
-<section id="mt-search-frame-wrapper">
-    <section ng-controller="mtSearchCtrl" id="mt-search-frame" ng-show="searchVisible">
-        <button ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></button>
-        <form id="mt-search-form" name="searchForm" novalidate>
-            <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-            <input id="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
-                   ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
-                   required>
-        </form>
-        <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
-            <div class="mt-search-results-frame">
-                <h4 class="mt-results-provider">YouTube</h4>
+<section id="mt-search-frame-container" ng-controller="mtSearchCtrl" ng-show="searchVisible">
+    <div id="mt-search-frame-wrapper">
+        <div id="mt-search-frame">
+            <form id="mt-search-form" name="searchForm" novalidate>
+                <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
+                <input id="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
+                       ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
+                       required>
+            </form>
+            <button ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></button>
+            <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
+                <div class="mt-search-results-frame">
+                    <h4 class="mt-results-provider">YouTube</h4>
 
-                <div class="mt-results-scrollview">
-                    <ul class="mt-results-list">
-                        <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
-                            <div class="mt-thumbnail-frame">
-                                <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
-                                <button ng-click="appendResultToQueue(searchResult)"
-                                        class="mt-add-to-queue-button"></button>
-                                <div class="mt-video-duration" ng-show="searchResult.duration">
-                                    <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>
+                    <div class="mt-results-scrollview">
+                        <ul class="mt-results-list">
+                            <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
+                                <div class="mt-thumbnail-frame">
+                                    <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
+                                    <button ng-click="appendResultToQueue(searchResult)"
+                                            class="mt-add-to-queue-button"></button>
+                                    <div class="mt-video-duration" ng-show="searchResult.duration">
+                                        <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <ul class="mt-video-details-list">
-                                <li class="mt-video-details-item mt-title" title="{{searchResult.title}}">
-                                    {{searchResult.title}}
-                                </li>
-                                <li class="mt-video-details-item"
-                                    ng-class="{'mt-invisible': !searchResult.viewCount}">
-                                    {{searchResult.viewCount}} views
-                                </li>
-                                <li class="mt-video-details-item"
-                                    ng-class="{'mt-invisible': !searchResult.publisherName}">
-                                    from <span class="mt-user">{{searchResult.publisherName}}</span>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                                <ul class="mt-video-details-list">
+                                    <li class="mt-video-details-item mt-title" title="{{searchResult.title}}">
+                                        {{searchResult.title}}
+                                    </li>
+                                    <li class="mt-video-details-item"
+                                        ng-class="{'mt-invisible': !searchResult.viewCount}">
+                                        {{searchResult.viewCount}} views
+                                    </li>
+                                    <li class="mt-video-details-item"
+                                        ng-class="{'mt-invisible': !searchResult.publisherName}">
+                                        from <span class="mt-user">{{searchResult.publisherName}}</span>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-search-results-frame">
-                <h4 class="mt-results-provider">Vimeo</h4>
+                <div class="mt-search-results-frame">
+                    <h4 class="mt-results-provider">Vimeo</h4>
 
-                <div class="mt-results-scrollview">
-                    <ul class="mt-results-list">
+                    <div class="mt-results-scrollview">
+                        <ul class="mt-results-list">
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-search-results-frame">
-                <h4 class="mt-results-provider">Daylimotion</h4>
+                <div class="mt-search-results-frame">
+                    <h4 class="mt-results-provider">Daylimotion</h4>
 
-                <div class="mt-results-scrollview">
-                    <ul class="mt-results-list">
+                    <div class="mt-results-scrollview">
+                        <ul class="mt-results-list">
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </section>
+    </div>
 </section>
 
 <section id="mt-queue-frame" ng-controller="mtQueueCtrl">
-    <section id="mt-queue-bar">
-        <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
-            <div id="mt-queue-name">
-                <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
-                       mt-blur="onInputBlur()"
-                       mt-focuswhen="{model: edition, selectTextOnFocus: true}">
-            <span class="mt-display" ng-hide="edition"
-                  ng-click="activate()">{{queue.name || defaultQueueName}}</span>
+    <div id="mt-queue-bar">
+        <div id="mt-queue-bar-table">
+            <form id="mt-queue-meta" class="mt-left" ng-controller="mtQueueMetaFormCtrl" novalidate>
+                <div id="mt-queue-name">
+                    <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
+                           mt-blur="onInputBlur()"
+                           mt-focuswhen="{model: edition, selectTextOnFocus: true}">
+                    <span class="mt-display" ng-hide="edition"
+                          ng-click="activate()">{{queue.name || defaultQueueName}}</span>
+                </div>
+            </form>
+            <div id="mt-player-controls" class="mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
+                <button id="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
+                        ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></button>
             </div>
-        </form>
-        <section ng-controller="mtVideoPlayerControlsCtrl" id="mt-player-controls">
-            <button id="mt-pause-button" class="mt-unstyled-button"
-                    ng-class="{'icon-play': !playing, 'icon-pause': playing}" ng-click="pauseButtonClicked()"
-                    title="Play / Pause [Space]"></button>
-        </section>
-        <button ng-click="newQueueButtonClicked()">Clear queue</button>
-    </section>
+            <div class="mt-right">
+                <button id="mt-open-search-button" title="Open search panel (start typing to search)"></button>
+                <button id="mt-clear-queue-button" ng-click="newQueueButtonClicked()"
+                        title="Clear the current queue"></button>
+            </div>
+        </div>
+    </div>
     <ul id="mt-queue-list">
         <li class="mt-queue-item" ng-class="{'mt-current': queueEntry == activeQueueEntry}"
-            ng-repeat="queueEntry in queue.entries"
-            ng-mouseenter="overQueueItem = true" ng-mouseleave="overQueueItem = false">
+            ng-repeat="queueEntry in queue.entries">
             <a href="#" ng-click="queueEntryClicked(queueEntry)">
                 <img class="mt-queue-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
             </a>
-            <button class="mt-remove-from-queue-button" ng-show="overQueueItem"
-                    ng-click="removeQueueEntryClicked(queueEntry)"></button>
+            <button class="mt-remove-from-queue-button" ng-click="removeQueueEntryClicked(queueEntry)"></button>
         </li>
     </ul>
 </section>
