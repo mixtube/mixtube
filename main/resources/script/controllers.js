@@ -76,9 +76,9 @@
         mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
-    mt.MixTubeApp.controller('mtQueueCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtLoggerFactory) {
+    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtLoggerFactory) {
 
-        var logger = mtLoggerFactory.logger('mtQueueCtrl');
+        var logger = mtLoggerFactory.logger('mtQueueFrameCtrl');
 
         /**  @type {mt.model.QueueEntry} */
         $scope.activeQueueEntry = undefined;
@@ -151,10 +151,14 @@
             triggerQueueModified([index]);
         };
 
-        $scope.newQueueButtonClicked = function () {
+        $scope.clearQueueButtonClicked = function () {
             $scope.queue.entries = [];
             $scope.activeQueueEntry = undefined;
             $rootScope.$broadcast(mt.events.QueueCleared);
+        };
+
+        $scope.openSearchButtonClicked = function () {
+            $rootScope.$broadcast(mt.events.OpenSearchFrameRequest);
         };
     });
 
@@ -363,9 +367,22 @@
         /** @type {number} */
         $scope.searchRequestCount = 0;
 
+        /**
+         * Opens the search frame and optionally input the first char.
+         *
+         * @param {string=} firstChar the first char to fill the input with
+         */
+        var open = function (firstChar) {
+            mtKeyboardShortcutManager.enterContext('search');
+            $scope.searchVisible = true;
+            $scope.searchTerm = firstChar;
+            $scope.searchTermFocused = true;
+
+        };
+
         $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {
             if (!$scope.searchVisible) {
-                $scope.open(data.typedChar);
+                open(data ? data.typedChar : '');
             }
         });
 
@@ -402,19 +419,6 @@
          */
         $scope.appendResultToQueue = function (video) {
             $rootScope.$broadcast(mt.events.AppendVideoToQueueRequest, {video: video});
-        };
-
-        /**
-         * Opens the search frame and optionally input the first char.
-         *
-         * @param {string=} firstChar the first char to fill the input with
-         */
-        $scope.open = function (firstChar) {
-            mtKeyboardShortcutManager.enterContext('search');
-            $scope.searchVisible = true;
-            $scope.searchTerm = firstChar;
-            $scope.searchTermFocused = true;
-
         };
 
         $scope.close = function () {
