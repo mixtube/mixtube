@@ -343,9 +343,15 @@
     });
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
+
+        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+
         return  {
             get transitionStartTime() {
-                return 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+                return transitionStartTime;
+            },
+            get transitionDuration() {
+                return 5000;
             },
             get initialSearchResults() {
                 return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
@@ -358,6 +364,12 @@
             },
             get maxSearchResults() {
                 return 20;
+            },
+            get comingNextStartTime() {
+                return transitionStartTime - 5000;
+            },
+            get comingNextDuration() {
+                return 10000;
             }
         };
     });

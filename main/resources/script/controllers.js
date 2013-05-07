@@ -185,7 +185,7 @@
         }
     });
 
-    mt.MixTubeApp.controller('mtComingNextCtrl', function ($scope, $timeout) {
+    mt.MixTubeApp.controller('mtComingNextCtrl', function ($scope, $timeout, mtConfiguration) {
 
         /** @type {boolean} */
         $scope.comingNextVisible = false;
@@ -204,7 +204,7 @@
 
             hideTimeoutPromise = $timeout(function () {
                 $scope.comingNextVisible = false;
-            }, 5000);
+            }, mtConfiguration.comingNextDuration);
         });
     });
 
@@ -252,7 +252,7 @@
          */
         var executeTransition = function () {
             if (thisCtrl.currentVideoHandle) {
-                thisCtrl.currentVideoHandle.out(Math.abs(mtConfiguration.transitionStartTime)).done(function (videoHandle) {
+                thisCtrl.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
                     videoHandle.dispose();
                 });
             }
@@ -266,7 +266,7 @@
             if (thisCtrl.currentVideoHandle) {
                 thisCtrl.playing = true;
                 notifyPlayingChanged();
-                thisCtrl.currentVideoHandle.in(Math.abs(mtConfiguration.transitionStartTime));
+                thisCtrl.currentVideoHandle.in(mtConfiguration.transitionDuration);
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
@@ -320,20 +320,23 @@
             }
         };
 
+        var relativeTimeToAbsolute = function (relTime, duration) {
+            return relTime > 0 ? relTime : duration + relTime;
+        };
+
         var loadQueueEntry = function (queueEntry, autoplay) {
             logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, autoplay);
 
-            var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
-                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
-            logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
-
+            var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, queueEntry.video.duration);
+            var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, queueEntry.video.duration);
+            logger.debug('Preparing a video %s, the coming next cue will start at %d, the transition cue will start at %d', queueEntry.video.id, comingNextStartTime, transitionStartTime);
 
             thisCtrl.nextVideoHandle = thisCtrl.playersPool.prepareVideo({
                 id: queueEntry.video.id,
                 provider: queueEntry.video.provider,
                 coarseDuration: queueEntry.video.duration
             }, [
-                {time: transitionStartTime - 10000, callback: function () {
+                {time: comingNextStartTime, callback: function () {
                     triggerComingNext();
                 }},
                 {time: transitionStartTime, callback: function () {
