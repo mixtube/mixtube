@@ -1,15 +1,22 @@
+@import '../vendor/bourbon/bourbon';
+
 //----------- Commons and resets -----------
-$queueFrameHeight: 120px;
 $searchFormHeight: 72px;
 $resultsProviderHeight: 20px;
 $darkTextColor: #001413;
 $lightTextColor: #e5fffc;
 $iconFont: 'entypo', sans-serif;
-$regularMargin: 10px;
+$regularMargin: 10rem/14;
+$regularPadding: 10rem/14;
 $darkColor: #031112;
 $darkerColor: #020304;
+$queueHeight: 100px;
+$queueHeightBarHeight: 40px;
+$queueFrameHeight: $queueHeight + $queueHeightBarHeight;
 $queueThumbnailWidth: 140px;
 $queueThumbnailHeight: 79px;
+$tooltipDefaultColor: rgba(0, 6, 5, .7);
+$tooltipRadius: 5rem/14;
 
 @font-face {
   font-family: 'entypo';
@@ -48,24 +55,8 @@ button {
   outline: none;
 }
 
-@mixin mt-triangle-top-right($size, $color) {
-  width: 0px;
-  height: 0px;
-  border-style: solid;
-  border-width: 0 $size $size 0;
-  border-color: transparent $color transparent transparent;
-}
-
-@mixin mt-triangle-bottom($size, $color) {
-  width: 0px;
-  height: 0px;
-  border-style: solid;
-  border-width: $size $size 0 $size;
-  border-color: $color transparent transparent transparent;
-}
-
 @mixin mt-corner-button($color, $content) {
-  @include mt-triangle-top-right(35px, $color);
+  @include triangle(35px, $color, up-right);
   @extend .mt-unstyled-button;
 
   position: absolute;
@@ -76,13 +67,14 @@ button {
 
   &:before {
     position: absolute;
-    bottom: -23px;
-    right: -34px;
+    right: -1px;
+    top: -36px;
 
     content: $content;
     color: $darkTextColor;
     font-size: 50px;
     font-family: $iconFont;
+    line-height: 0;
   }
 }
 
@@ -98,29 +90,75 @@ button {
   }
 }
 
+@mixin mt-tooltip($arrowOrigin: left, $arrowPosition: 20px, $color: $tooltipDefaultColor, $arrowSize: 20px) {
+  position: absolute;
+  padding: $regularPadding;
+  text-align: center;
+  background: $color;
+  border-radius: $tooltipRadius;
+
+  &:after {
+    @include triangle($arrowSize, $color, down);
+
+    content: '';
+    position: absolute;
+    bottom: -$arrowSize;
+    #{$arrowOrigin}: $arrowPosition;
+  }
+}
+
 //----------- Custom styling -----------
 html, body {
   height: 100%;
 }
 
 body {
-  font-family: 'Muli', sans-serif;
+  font-family: $lucida-grande;
   font-size: 14px;
   color: $lightTextColor;
-  background-color: #000000;
+  //background-color: $darkerColor;
+  background-color: #ffffff;
 }
 
-#mt-video-player-frame {
+#mt-video-stage-frame {
+  position: relative;
   height: 100%;
 }
 
-#mt-video-window {
+#mt-coming-next {
+  position: absolute;
+  right: $regularMargin;
+  top: $regularMargin;
+  z-index: 1000;
+  padding: $regularPadding;
+
+  background-color: $tooltipDefaultColor;
+  font-size: (18rem/14);
+  border-radius: $tooltipRadius;
+}
+
+.mt-coming-next-item {
+  margin-bottom: 2 * $regularMargin;
+
+  // reset margin for last element
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  > .mt-header {
+    margin-bottom: $regularMargin / 2;
+
+    font-size: (12rem/14);
+  }
+}
+
+#mt-video-player-window {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-.mt-video-player {
+.mt-video-player-instance {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -203,11 +241,41 @@ body {
   top: 0;
   height: $resultsProviderHeight;
   margin-left: $regularMargin;
+
+  font-size: (16rem/14);
 }
 
 .mt-results-scrollview {
   height: 100%;
   overflow: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  // required to prevent visual artefacts on mouse leave
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  // styles when the mous is over the scroll view
+  &.hover::-webkit-scrollbar-track {
+    background: #4d5b5c;
+  }
+
+  &.hover::-webkit-scrollbar-thumb {
+    background: #041c1d;
+  }
+
+  // styles when the mous is over the scrollbar
+  &::-webkit-scrollbar-track:hover {
+    background: #273233;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $darkColor;
+  }
 }
 
 .mt-results-item {
@@ -294,12 +362,13 @@ body {
 }
 
 #mt-queue-bar {
-  height: 40px;
+  height: $queueHeightBarHeight;
   background-color: $darkColor;
 }
 
 #mt-queue-bar-table {
   display: table;
+  table-layout: fixed;
   height: 100%;
   width: 100%;
 
@@ -326,10 +395,6 @@ body {
     text-align: right;
     padding-right: $regularMargin;
   }
-}
-
-#mt-share-button {
-  @include mt-icon-font-button(40px, '\E73C');
 }
 
 #mt-queue-meta {
@@ -365,15 +430,64 @@ body {
 }
 
 #mt-open-search-button {
-  @include mt-icon-font-button(40px, '\1F50D');
+  @include mt-icon-font-button(40rem/14, '\1F50D');
+
+  position: relative;
+
+  &:hover .mt-open-search-tooltip {
+    visibility: visible;
+  }
+}
+
+.mt-open-search-tooltip {
+  @include mt-tooltip(right, 28px);
+
+  position: absolute;
+  right: -24px;
+  bottom: 43px;
+  z-index: 1000;
+
+  font-family: $lucida-grande;
+
+  visibility: hidden;
+
+  .mt-keyboard-icon:before {
+    content: '\2328';
+    position: relative;
+    top: (-4rem/14);
+    vertical-align: top;
+
+    font-family: $iconFont;
+    font-size: (40rem/14);
+    line-height: 0;
+  }
 }
 
 #mt-clear-queue-button {
-  @include mt-icon-font-button(40px, '\E729');
+  @include mt-icon-font-button(40rem/14, '\E729');
+
+  position: relative;
+
+  &:hover .mt-clear-queue-tooltip {
+    visibility: visible;
+  }
+}
+
+.mt-clear-queue-tooltip {
+  @include mt-tooltip(right, 9px);
+
+  position: absolute;
+  right: -7px;
+  bottom: 43px;
+  z-index: 1000;
+
+  font-family: $lucida-grande;
+
+  visibility: hidden;
 }
 
 #mt-playback-button {
-  @include mt-icon-font-button(70px);
+  @include mt-icon-font-button(70rem/14);
 
   &.mt-pause:before {
     content: '\2016';
@@ -386,6 +500,11 @@ body {
 
 #mt-queue-list-container {
   position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: $queueHeight;
+
+  background-color: $darkerColor;
 }
 
 // the sizing properties of queue item, used also by the playinh head container
@@ -403,7 +522,7 @@ body {
   z-index: 1;
 
   .mt-triangle {
-    @include mt-triangle-bottom(20px, $darkColor);
+    @include triangle(40px, $darkColor, down);
 
     margin: {
       left: auto;
@@ -413,11 +532,11 @@ body {
 }
 
 #mt-queue-list {
+  height: 100%;
   // fixes the extra space generated by webkit engine when using inline blocks
   word-spacing: -3px;
   line-height: 0;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 .mt-queue-item {
@@ -425,54 +544,56 @@ body {
 
   display: inline-block;
   position: relative;
-  // size of youtube thumbnails when width is 140
-  height: $queueThumbnailHeight;
+  vertical-align: top;
+  height: 100%;
   // restores modified spacing
   word-spacing: normal;
   line-height: normal;
   overflow: hidden;
+  // restores modified wrapping
+  white-space: normal;
+
+  .mt-remove-button {
+    @include mt-corner-button(#f3c621, '\274C');
+
+    display: none;
+  }
+
+  &:hover .mt-remove-button {
+    display: block;
+  }
+
+  .mt-thumbnail {
+    display: block;
+    width: $queueThumbnailWidth;
+    height: 100%;
+    max-height: $queueThumbnailHeight;
+  }
 }
 
-.mt-queue-thumbnail {
-  display: block;
-  width: $queueThumbnailWidth;
-}
+.mt-queue-call-to-action {
+  padding: (2rem/14);
 
-.mt-queue-item:hover .mt-remove-from-queue-button {
-  display: block;
-}
+  .mt-action-button {
+    @extend .mt-unstyled-button;
 
-.mt-remove-from-queue-button {
-  @include mt-corner-button(#f3c621, '\274C');
+    display: table;
+    table-layout: fixed;
+    height: 100%;
+    width: 100%;
 
-  display: none;
-}
+    border: (2rem/14) dashed $lightTextColor;
+    border-radius: (10rem/14);
+    opacity: .15;
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+    &:hover {
+      opacity: 1;
+    }
 
-::-webkit-scrollbar-track {
-  border-radius: $regularMargin
-}
-
-*:hover::-webkit-scrollbar-track {
-  background: #4d5b5c;
-}
-
-::-webkit-scrollbar-track:hover {
-  background: #273233;
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: $regularMargin;
-}
-
-*:hover::-webkit-scrollbar-thumb {
-  background: #041c1d;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: $darkColor;
+    .mt-text {
+      display: table-cell;
+      padding: (2rem/14);
+      vertical-align: middle;
+    }
+  }
 }

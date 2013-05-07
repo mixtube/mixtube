@@ -23,8 +23,8 @@
             window.onYouTubeIframeAPIReady = function () {
                 var playersPool = new mt.player.PlayersPool(function () {
                     var playerDiv = document.createElement('div');
-                    playerDiv.classList.add('mt-video-player');
-                    document.getElementById('mt-video-window').appendChild(playerDiv);
+                    playerDiv.classList.add('mt-video-player-instance');
+                    document.getElementById('mt-video-player-window').appendChild(playerDiv);
                     return playerDiv;
                 }, mtLoggerFactory.logger('PlayersPool'));
 
@@ -40,6 +40,7 @@
         OpenSearchFrameRequest: 'OpenSearchFrameRequest',
         AppendVideoToQueueRequest: 'AppendVideoToQueueRequest',
         PlaybackToggleRequest: 'PlaybackToggleRequest',
+        UpdateComingNextRequest: 'UpdateComingNextRequest',
         PlayersPoolReady: 'PlayersPoolReady',
         QueueModified: 'QueueModified',
         QueueEntryActivated: 'QueueEntryActivated',

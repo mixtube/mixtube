@@ -80,8 +80,8 @@
 
         var logger = mtLoggerFactory.logger('mtQueueFrameCtrl');
 
-        /**  @type {mt.model.QueueEntry} */
-        $scope.activeQueueEntry = undefined;
+        /** @type {number}*/
+        $scope.activePosition = 0;
 
         /**
          * Finds the first next video in the queue that still exist.
@@ -113,9 +113,8 @@
         };
 
         var triggerQueueModified = function (modifiedPositions) {
-            var activePosition = $scope.queue.entries.indexOf($scope.activeQueueEntry);
             $rootScope.$broadcast(mt.events.QueueModified, {
-                activePosition: activePosition,
+                activePosition: $scope.activePosition,
                 modifiedPositions: modifiedPositions
             });
         };
@@ -123,8 +122,7 @@
         $scope.$on(mt.events.NextQueueEntryRequest, function (evt, data) {
             logger.debug('Next queue entry request received');
 
-            var activePosition = $scope.queue.entries.indexOf($scope.activeQueueEntry);
-            findNextValidQueueEntry(activePosition).then(function (queueEntry) {
+            findNextValidQueueEntry($scope.activePosition).then(function (queueEntry) {
                 $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: data.initialization});
             });
         });
@@ -138,7 +136,8 @@
         });
 
         $scope.$on(mt.events.QueueEntryActivated, function (evt, data) {
-            $scope.activeQueueEntry = _.findWhere($scope.queue.entries, {id: data.queueEntryId});
+            var activeQueueEntry = _.findWhere($scope.queue.entries, {id: data.queueEntryId});
+            $scope.activePosition = $scope.queue.entries.indexOf(activeQueueEntry);
         });
 
         $scope.queueEntryClicked = function (queueEntry) {
@@ -186,18 +185,49 @@
         }
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerStageCtrl', function ($scope, $rootScope, $location, mtLoggerFactory, mtConfiguration) {
+    mt.MixTubeApp.controller('mtComingNextCtrl', function ($scope, $timeout) {
 
-        var logger = mtLoggerFactory.logger('mtVideoPlayerStageCtrl');
+        /** @type {boolean} */
+        $scope.comingNextVisible = false;
+        /** @type {string} */
+        $scope.titleCurrent = undefined;
+        /** @type {string} */
+        $scope.titleNext = undefined;
+
+        var hideTimeoutPromise;
+
+        $scope.$on(mt.events.UpdateComingNextRequest, function (evt, data) {
+            $timeout.cancel(hideTimeoutPromise);
+            $scope.comingNextVisible = true;
+            $scope.titleCurrent = data.currentVideo.title;
+            $scope.titleNext = data.nextVideo.title;
+
+            hideTimeoutPromise = $timeout(function () {
+                $scope.comingNextVisible = false;
+            }, 5000);
+        });
+    });
+
+    mt.MixTubeApp.controller('mtVideoPlayerWindowCtrl', function ($rootScope, $location, mtLoggerFactory, mtConfiguration) {
+
+        var logger = mtLoggerFactory.logger('mtVideoPlayerWindowCtrl');
+
+        var thisCtrl = {};
 
         /** @type {mt.player.PlayersPool} */
-        $scope.playersPool = undefined;
+        thisCtrl.playersPool = undefined;
         /** @type {mt.player.VideoHandle} */
-        $scope.currentVideoHandle = undefined;
+        thisCtrl.currentVideoHandle = undefined;
+        /** @type {mt.player.Video} */
+        thisCtrl.currentVideo = undefined;
+        /** @type {mt.player.VideoHandle} */
+        thisCtrl.nextVideoHandle = undefined;
+        /** @type {mt.player.Video} */
+        thisCtrl.nextVideo = undefined;
         /**  @type {boolean} */
-        $scope.playing = false;
+        thisCtrl.playing = false;
         /** @type {Object.<string, string>} */
-        $scope.queueEntryIdByHandleId = {};
+        thisCtrl.queueEntryIdByHandleId = {};
 
         /**
          * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
@@ -206,8 +236,8 @@
          * @return {string}
          */
         var peekQueueEntryIdByHandleId = function (videoHandleId) {
-            var activatedQueueEntryId = $scope.queueEntryIdByHandleId[videoHandleId];
-            delete $scope.queueEntryIdByHandleId[videoHandleId];
+            var activatedQueueEntryId = thisCtrl.queueEntryIdByHandleId[videoHandleId];
+            delete thisCtrl.queueEntryIdByHandleId[videoHandleId];
             return activatedQueueEntryId;
         };
 
@@ -221,129 +251,162 @@
          * - sends a request to get the next video references
          */
         var executeTransition = function () {
-            if ($scope.currentVideoHandle) {
-                $scope.currentVideoHandle.out(Math.abs(mtConfiguration.transitionStartTime)).done(function (videoHandle) {
+            if (thisCtrl.currentVideoHandle) {
+                thisCtrl.currentVideoHandle.out(Math.abs(mtConfiguration.transitionStartTime)).done(function (videoHandle) {
                     videoHandle.dispose();
                 });
             }
 
-            $scope.currentVideoHandle = $scope.nextVideoHandle;
-            $scope.nextVideoHandle = undefined;
+            thisCtrl.currentVideoHandle = thisCtrl.nextVideoHandle;
+            thisCtrl.currentVideo = thisCtrl.nextVideo;
+            thisCtrl.nextVideoHandle = undefined;
+            thisCtrl.nextVideo = undefined;
 
             // if there is a a current video start it, else it's the end of the sequence
-            if ($scope.currentVideoHandle) {
-                $scope.playing = true;
-                $scope.currentVideoHandle.in(Math.abs(mtConfiguration.transitionStartTime));
+            if (thisCtrl.currentVideoHandle) {
+                thisCtrl.playing = true;
+                notifyPlayingChanged();
+                thisCtrl.currentVideoHandle.in(Math.abs(mtConfiguration.transitionStartTime));
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
                     $rootScope.$broadcast(mt.events.QueueEntryActivated, {
-                        queueEntryId: peekQueueEntryIdByHandleId($scope.currentVideoHandle.id)
+                        queueEntryId: peekQueueEntryIdByHandleId(thisCtrl.currentVideoHandle.id)
                     });
                     $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
                 });
             } else {
                 // end of the road
-                $scope.playing = false;
+                thisCtrl.playing = false;
+                notifyPlayingChanged();
             }
+        };
+
+        var triggerComingNext = function () {
+            $rootScope.$apply(function () {
+                $rootScope.$broadcast(mt.events.UpdateComingNextRequest, {
+                    currentVideo: thisCtrl.currentVideo,
+                    nextVideo: thisCtrl.nextVideo
+                });
+            });
         };
 
         /**
          * Properly clears the next video handle by disposing it and clearing all the references to it.
          */
         var clearNextVideoHandle = function () {
-            logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', $scope.nextVideoHandle.uid);
+            logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', thisCtrl.nextVideoHandle.uid);
 
             // the next video has already been prepared, we have to dispose it before preparing a new one
-            peekQueueEntryIdByHandleId($scope.nextVideoHandle.id);
-            $scope.nextVideoHandle.dispose();
-            $scope.nextVideoHandle = undefined;
+            peekQueueEntryIdByHandleId(thisCtrl.nextVideoHandle.id);
+            thisCtrl.nextVideoHandle.dispose();
+            thisCtrl.nextVideoHandle = undefined;
+            thisCtrl.nextVideo = undefined;
         };
 
-        $scope.$watch('playing', function () {
-            $rootScope.$broadcast(mt.events.PlaybackStateChanged, {playing: $scope.playing});
-        });
+        var playbackToggle = function () {
+            if (thisCtrl.currentVideoHandle) {
+                if (thisCtrl.playing) {
+                    thisCtrl.playing = false;
+                    notifyPlayingChanged();
+                    thisCtrl.currentVideoHandle.pause();
+                } else {
+                    thisCtrl.playing = true;
+                    notifyPlayingChanged();
+                    thisCtrl.currentVideoHandle.unpause();
+                }
+            } else {
+                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: true});
+            }
+        };
 
-        $scope.$on(mt.events.PlayersPoolReady, function (event, players) {
-            $scope.playersPool = players;
-        });
+        var loadQueueEntry = function (queueEntry, autoplay) {
+            logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, autoplay);
 
-        $scope.$on(mt.events.QueueModified, function (event, data) {
+            var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
+                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
+            logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
+
+
+            thisCtrl.nextVideoHandle = thisCtrl.playersPool.prepareVideo({
+                id: queueEntry.video.id,
+                provider: queueEntry.video.provider,
+                coarseDuration: queueEntry.video.duration
+            }, [
+                {time: transitionStartTime - 10000, callback: function () {
+                    triggerComingNext();
+                }},
+                {time: transitionStartTime, callback: function () {
+                    // starts the next prepared video and cross fade
+                    executeTransition();
+                }}
+            ]);
+            thisCtrl.nextVideo = queueEntry.video;
+
+            thisCtrl.queueEntryIdByHandleId[thisCtrl.nextVideoHandle.id] = queueEntry.id;
+
+            var nextLoadDeferred = thisCtrl.nextVideoHandle.load();
+
+            if (autoplay) {
+                nextLoadDeferred.done(function () {
+                    executeTransition();
+                });
+            }
+        };
+
+        var clear = function () {
+            if (thisCtrl.nextVideoHandle) {
+                clearNextVideoHandle();
+            }
+            if (thisCtrl.currentVideoHandle) {
+                thisCtrl.playing = false;
+                notifyPlayingChanged();
+                thisCtrl.currentVideoHandle.dispose();
+                thisCtrl.currentVideoHandle = undefined;
+                thisCtrl.currentVideo = undefined;
+            }
+        };
+
+        var update = function (modifiedPositions, activePosition) {
             // filter only the positions that may require an action
-            var relevantPositions = data.modifiedPositions.filter(function (position) {
-                return data.activePosition + 1 === position;
+            var relevantPositions = modifiedPositions.filter(function (position) {
+                return activePosition + 1 === position;
             });
 
             logger.debug('Received a QueueModified event with relevant position %s', JSON.stringify(relevantPositions));
 
             if (relevantPositions.length > 0) {
                 // a change in queue require the player to query for the next video
-                if ($scope.nextVideoHandle) {
+                if (thisCtrl.nextVideoHandle) {
                     clearNextVideoHandle();
                 }
                 $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
             }
+        };
+
+        var notifyPlayingChanged = function () {
+            $rootScope.$broadcast(mt.events.PlaybackStateChanged, {playing: thisCtrl.playing});
+        };
+
+        $rootScope.$on(mt.events.PlayersPoolReady, function (event, players) {
+            thisCtrl.playersPool = players;
         });
 
-        $scope.$on(mt.events.QueueCleared, function () {
-            if ($scope.nextVideoHandle) {
-                clearNextVideoHandle();
-            }
-            if ($scope.currentVideoHandle) {
-                $scope.playing = false;
-                $scope.currentVideoHandle.dispose();
-                $scope.currentVideoHandle = undefined;
-            }
+        $rootScope.$on(mt.events.QueueModified, function (event, data) {
+            update(data.modifiedPositions, data.activePosition);
         });
 
-        $scope.$on(mt.events.LoadQueueEntryRequest, function (event, data) {
-            var queueEntry = data.queueEntry;
-
-            logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, data.autoplay);
-
-            var transitionStartTime = mtConfiguration.transitionStartTime > 0 ? mtConfiguration.transitionStartTime
-                : queueEntry.video.duration + mtConfiguration.transitionStartTime;
-            logger.debug('Preparing a video %s, the transition cue will start at %d', queueEntry.video.id, transitionStartTime);
-
-            $scope.nextVideoHandle = $scope.playersPool.prepareVideo({
-                id: queueEntry.video.id,
-                provider: queueEntry.video.provider,
-                coarseDuration: queueEntry.video.duration
-            }, [
-                {time: transitionStartTime, callback: function () {
-                    // starts the next prepared video and cross fade
-                    executeTransition();
-                }}
-            ]);
-
-            $scope.queueEntryIdByHandleId[$scope.nextVideoHandle.id] = queueEntry.id;
-
-            var nextLoadDeferred = $scope.nextVideoHandle.load();
-
-            if (data.autoplay) {
-                nextLoadDeferred.done(function () {
-                    executeTransition();
-                });
-            }
+        $rootScope.$on(mt.events.LoadQueueEntryRequest, function (event, data) {
+            loadQueueEntry(data.queueEntry, data.autoplay);
         });
 
-        $scope.$on(mt.events.PlaybackToggleRequest, function () {
-            if ($scope.currentVideoHandle) {
-                if ($scope.playing) {
-                    $scope.playing = false;
-                    $scope.currentVideoHandle.pause();
-                } else {
-                    $scope.playing = true;
-                    $scope.currentVideoHandle.unpause();
-                }
-            } else {
-                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: true});
-            }
+        $rootScope.$on(mt.events.PlaybackToggleRequest, function () {
+            playbackToggle();
         });
 
-        $scope.requestFullscreen = function () {
-            document.getElementById('mt-video-window').webkitRequestFullscreen();
-        }
+        $rootScope.$on(mt.events.QueueCleared, function () {
+            clear();
+        });
     });
 
     mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration, mtKeyboardShortcutManager) {

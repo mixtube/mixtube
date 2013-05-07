@@ -37,6 +37,18 @@
         };
     });
 
+    var transitionName = 'mtTransition';
+    mt.MixTubeApp.directive(transitionName, function () {
+        return function (scope, elmt, attrs) {
+            scope.$watch(attrs[transitionName], function (config) {
+                if (!angular.isObject(config)) {
+                    throw new Error('The attribute value should be a transition config object');
+                }
+                elmt.transition(config);
+            }, true);
+        };
+    });
+
     // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
     mt.MixTubeApp.filter('mtDuration', function () {
         // reuse the date object between invocation since it is only used as a formatting tool

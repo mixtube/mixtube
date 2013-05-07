@@ -227,11 +227,11 @@
                 self.cues.forEach(function (cue) {
                     // execute the cue if last time is before the cue time and current time is after
                     if (lastCurrentTime <= cue.time && cue.time <= evt.currentTime) {
-                        self.logger.log('%s executed', self.uid + '_cue');
+                        self.logger.debug('Cue point for %s executed', self.uid);
                         cue.callback();
                     }
-                    lastCurrentTime = evt.currentTime;
-                })
+                });
+                lastCurrentTime = evt.currentTime;
             });
             self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve);
         });
