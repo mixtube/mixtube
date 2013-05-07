@@ -114,7 +114,7 @@
         this.delegate.playVideo();
     };
 
-    mt.player.YoutubePlayer.prototype.pauseVideo = function() {
+    mt.player.YoutubePlayer.prototype.pauseVideo = function () {
         this.delegate.pauseVideo();
     };
 
@@ -138,7 +138,15 @@
      * @return {jQuery.promise} resolved when the fade operation is finished
      */
     mt.player.YoutubePlayer.prototype.fade = function (direction, duration) {
-        var bounds = {'in': {start: 0, end: 100}, out: {start: 100, end: 0}};
+        var boundsVolume = {
+            'in': {
+                start: {_opacity: 0, _volume: 0},
+                end: {_opacity: 1, _volume: 100}},
+            out: {
+                start: {_opacity: 1, _volume: 100},
+                end: {_opacity: 0, _volume: 0}}
+        };
+
         var self = this;
         var immediate = duration === 0;
 
@@ -149,39 +157,21 @@
 
         self.endOfFadeDeferred = jQuery.Deferred();
 
-        var playerStyle = self.delegate.getIframe().style;
-
-        // remove transition and set extreme values when it is resolved
-        self.endOfFadeDeferred.always(function () {
-            playerStyle['-webkit-transition'] = '';
-            playerStyle.opacity = bounds[direction].end;
-            self.delegate.setVolume(bounds[direction].end);
-        });
-
         if (immediate) {
             // no animation, resolve straight
             self.endOfFadeDeferred.resolve();
         } else {
-            // make sure we start form the beginning
-            playerStyle.opacity = bounds[direction].start;
-            self.delegate.setVolume(bounds[direction].start);
-
-            // use css transitions to animate opacity
-            playerStyle['-webkit-transition'] = 'opacity ' + duration + 'ms';
-            playerStyle.opacity = bounds[direction].end;
-
-            // use classic js interval for sound fade
-            var fadeStartTime = Date.now();
-            var fadeInterval = setInterval(function () {
-                var ratio = Math.min((Date.now() - fadeStartTime) / duration, 1);
-                if (ratio === 1) {
-                    self.endOfFadeDeferred.resolve();
-                }
-                self.delegate.setVolume(100 * (direction === 'in' ? ratio : 1 - ratio));
-            }, 100);
-
-            self.endOfFadeDeferred.always(function () {
-                clearInterval(fadeInterval);
+            jQuery(jQuery.extend({}, boundsVolume[direction].start)).animate(boundsVolume[direction].end, {
+                easing: 'linear',
+                duration: duration,
+                step: function (value, tween) {
+                    if (tween.prop === '_opacity') {
+                        self.delegate.getIframe().style.opacity = value;
+                    } else if (tween.prop === '_volume') {
+                        self.delegate.setVolume(value);
+                    }
+                },
+                complete: self.endOfFadeDeferred.resolve
             });
         }
 
@@ -364,7 +354,7 @@
             var domNode = self.domNodeSupplierFn();
 
             // avoid black flash by hiding the container until the player is ready
-            domNode.style.display = 'none';
+//            domNode.style.top = -99999;
 
             if (provider === 'youtube') {
                 new YT.Player(domNode, {
@@ -376,12 +366,13 @@
                         iv_load_policy: 3,
                         disablekb: 1,
                         modestbranding: 1,
-                        rel: 0
+                        rel: 0,
+                        wmode: 'opaque' /* needed by Firefox, else the video is not shown */
                     },
                     events: {
                         onReady: function (evt) {
                             // now that the player is ready we can make it visible
-                            evt.target.getIframe().style.display = '';
+                            evt.target.getIframe().style.top = 0;
                             playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target, self.logger));
                         }
                     }
