@@ -107,6 +107,29 @@ button {
   }
 }
 
+// common fade in/out animations that works with AngularJS animation framework
+// the current FLOC at startup has been fix on AngularJS master but not yet released
+// see https://github.com/angular/angular.js/commit/570463a465fae02efc33e5a1fa963437cdc275dd
+.mt-fade-in-setup, .mt-fade-out-setup {
+  @include transition(opacity 1s);
+}
+
+.mt-fade-in-setup {
+  opacity: 0;
+
+  &.mt-fade-in-start {
+    opacity: 1;
+  }
+}
+
+.mt-fade-out-setup {
+  opacity: 1;
+
+  &.mt-fade-out-start {
+    opacity: 0;
+  }
+}
+
 //----------- Custom styling -----------
 html, body {
   height: 100%;
@@ -125,7 +148,7 @@ body {
   height: 100%;
 }
 
-#mt-coming-next {
+.mt-coming-next {
   position: absolute;
   right: $regularMargin;
   top: $regularMargin;
