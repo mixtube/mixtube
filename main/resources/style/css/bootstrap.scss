@@ -17,6 +17,9 @@ $queueThumbnailWidth: 140px;
 $queueThumbnailHeight: 79px;
 $tooltipDefaultColor: rgba(0, 6, 5, .7);
 $tooltipRadius: 5rem/14;
+$zIndexLow: 10;
+$zIndexMedium: 20;
+$zIndexHigh: 30;
 
 @font-face {
   font-family: 'entypo';
@@ -152,7 +155,7 @@ body {
   position: absolute;
   right: $regularMargin;
   top: $regularMargin;
-  z-index: 1000;
+  z-index: $zIndexLow;
   padding: $regularPadding;
 
   background-color: $tooltipDefaultColor;
@@ -198,6 +201,8 @@ body {
 #mt-search-frame-wrapper {
   height: 100%;
   width: 100%;
+  z-index: $zIndexMedium;
+  position: relative;
   padding: {
     top: $regularMargin;
     left: $regularMargin;
@@ -468,7 +473,7 @@ body {
   position: absolute;
   right: -24px;
   bottom: 43px;
-  z-index: 1000;
+  z-index: $zIndexHigh;
 
   font-family: $lucida-grande;
 
@@ -502,7 +507,7 @@ body {
   position: absolute;
   right: -7px;
   bottom: 43px;
-  z-index: 1000;
+  z-index: $zIndexHigh;
 
   font-family: $lucida-grande;
 
@@ -542,7 +547,7 @@ body {
   @extend .mt-queue-item-width;
 
   position: absolute;
-  z-index: 1;
+  z-index: $zIndexLow;
 
   .mt-triangle {
     @include triangle(40px, $darkColor, down);
