@@ -374,8 +374,7 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtLoggerFactory', function ($window) {
-        var console = $window.console;
+    mt.MixTubeApp.factory('mtLoggerFactory', function ($log) {
         var loggerByName = {};
 
         function prepareLogTrace(arguments, loggerName) {
@@ -398,13 +397,10 @@
 
         Logger.prototype = {
             log: function () {
-                this.delegate(console.log, arguments);
-            },
-            dir: function () {
-                this.delegate(console.dir || console.log, arguments);
+                this.delegate($log.log, arguments);
             },
             debug: function () {
-                this.delegate(console.debug || console.log, arguments);
+                this.delegate($log.debug, arguments);
             },
             delegate: function (targetFn, delegateArguments) {
                 targetFn.apply(console, prepareLogTrace(delegateArguments, this.name));

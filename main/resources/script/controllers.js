@@ -1,38 +1,42 @@
 (function (mt) {
 
-    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
-
-        /**
-         * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
-         * infinite loops when changing the url internally.
-         *
-         * @type {string}
-         */
-        var serializedQueue = undefined;
-        /** type {mt.model.Queue} */
+    mt.MixTubeApp.controller('mtRootController', function ($scope, mtQueueManager) {
         $scope.queue = mtQueueManager.queue;
-
-        $scope.$watch('queue', function (newVal, oldVal) {
-            // this test is here to prevent to serialize during the init phase
-            if (!angular.equals(newVal, oldVal)) {
-                var newSerializedQueue = mtQueueManager.serialize();
-                if (!angular.equals(serializedQueue, newSerializedQueue)) {
-                    serializedQueue = newSerializedQueue
-                    $location.search({queue: serializedQueue});
-                }
-            }
-        }, true);
-
-        $scope.$watch(function () {
-            return $location.search().queue
-        }, function (newSerializedQueue) {
-            if (!angular.equals(serializedQueue, newSerializedQueue)) {
-                serializedQueue = newSerializedQueue
-                // change initiated by user (back / forward etc.), need to b deserialized
-                mtQueueManager.deserialize(serializedQueue);
-            }
-        }, true);
     });
+
+//    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
+//
+//        /**
+//         * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
+//         * infinite loops when changing the url internally.
+//         *
+//         * @type {string}
+//         */
+//        var serializedQueue = undefined;
+//        /** type {mt.model.Queue} */
+//        $scope.queue = mtQueueManager.queue;
+//
+//        $scope.$watch('queue', function (newVal, oldVal) {
+//            // this test is here to prevent to serialize during the init phase
+//            if (!angular.equals(newVal, oldVal)) {
+//                var newSerializedQueue = mtQueueManager.serialize();
+//                if (!angular.equals(serializedQueue, newSerializedQueue)) {
+//                    serializedQueue = newSerializedQueue
+//                    $location.search({queue: serializedQueue});
+//                }
+//            }
+//        }, true);
+//
+//        $scope.$watch(function () {
+//            return $location.search().queue
+//        }, function (newSerializedQueue) {
+//            if (!angular.equals(serializedQueue, newSerializedQueue)) {
+//                serializedQueue = newSerializedQueue
+//                // change initiated by user (back / forward etc.), need to b deserialized
+//                mtQueueManager.deserialize(serializedQueue);
+//            }
+//        }, true);
+//    });
 
     mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
         $scope.currentQueueName = mtQueueManager.queue.name;
