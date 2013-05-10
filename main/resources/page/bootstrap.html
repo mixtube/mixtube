@@ -2,6 +2,8 @@
 <html ng-app="mtMixTubeApp" ng-controller="mtRootController" ng-cloack>
 <head>
     <meta charset='utf-8'>
+    <base href="/page">
+
     <title>MixTube {{ queue.name && '- ' + queue.name}}</title>
 
     <link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css'>
@@ -19,7 +21,7 @@
     <script src="../script/services.js"></script>
     <script src="../script/controllers.js"></script>
     <script src="../script/directives-filters.js"></script>
-    <script src="//www.youtube.com/iframe_api" async></script>
+    <script src="//www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -144,7 +146,7 @@
         </div>
         <ul id="mt-queue-list">
             <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
-                <a href="#" ng-click="queueEntryClicked(queueEntry)">
+                <a href="#" ng-click="queueEntryClicked($event, queueEntry)">
                     <img class="mt-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
                 </a>
                 <button class="mt-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></button>

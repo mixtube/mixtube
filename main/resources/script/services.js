@@ -274,6 +274,27 @@
         };
     });
 
+    mt.MixTubeApp.factory('mtPlayerPoolProvider', function ($rootScope, $q, mtLoggerFactory) {
+        var deferred = $q.defer();
+
+        // executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application that it is ready
+        var playersPool = new mt.player.PlayersPool(function () {
+            var $playerDiv = jQuery('<div>', {'class': 'mt-video-player-instance'});
+            $('#mt-video-player-window').append($playerDiv);
+            return $playerDiv[0];
+        }, mtLoggerFactory.logger('PlayersPool'));
+
+        mtLoggerFactory.logger('mtMixTubeApp#run').debug('Youtube iFrame API ready and players pool created');
+
+        deferred.resolve(playersPool);
+
+        return {
+            'get': function () {
+                return deferred.promise;
+            }
+        }
+    });
+
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
         /** @type {Object.<String, Function> */
         var contexts = {};
@@ -342,9 +363,9 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtConfiguration', function ($location) {
+    mt.MixTubeApp.factory('mtConfiguration', function (mtLocation) {
 
-        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+        var transitionStartTime = 'test.duration' in mtLocation.search() ? parseInt(mtLocation.search()['test.duration'], 10) : -5000;
 
         return  {
             get transitionStartTime() {
@@ -354,10 +375,10 @@
                 return 5000;
             },
             get initialSearchResults() {
-                return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
+                return 'test.searchResults' in mtLocation.search() ? mt.tools.TEST_VIDEOS : [];
             },
             get initialSearchOpen() {
-                return 'test.searchOpen' in $location.search();
+                return 'test.searchOpen' in mtLocation.search();
             },
             get youtubeAPIKey() {
                 return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
@@ -374,7 +395,35 @@
         };
     });
 
+    mt.MixTubeApp.factory('mtLocation', function ($sniffer, $injector) {
+        function MockLocation() {
+        }
+
+        MockLocation.prototype.search = function () {
+            if (arguments.length > 0) {
+                return this;
+            } else {
+                return {};
+            }
+        };
+
+        // something makes $location service unusable when history api is not available and simply injecting it
+        // breaks everything. So we provide a mock of this service when the history api is not available.
+        if (!$sniffer.history) {
+            return $injector.get('$location');
+        } else {
+            return new MockLocation();
+        }
+    });
+
     mt.MixTubeApp.factory('mtLoggerFactory', function ($log) {
+
+        /**
+         * @type {RegExp}
+         * @const
+         */
+        var TOKEN_REGEXP = /%s|%d/g;
+
         var loggerByName = {};
 
         function prepareLogTrace(arguments, loggerName) {
@@ -403,7 +452,18 @@
                 this.delegate($log.debug, arguments);
             },
             delegate: function (targetFn, delegateArguments) {
-                targetFn.apply(console, prepareLogTrace(delegateArguments, this.name));
+                var preparedArguments = prepareLogTrace(delegateArguments, this.name);
+
+                var pattern = preparedArguments[0];
+                // parameters starts at position 1 because 0 is the whole pattern
+                var idx = 1;
+
+                var formatted = pattern.replace(TOKEN_REGEXP, function (token) {
+                    return '' + preparedArguments[idx++];
+                });
+
+                // extra empty string is to make AngularJS's IE9 log polyfill happy, else it appends "undefined" to the log trace
+                targetFn.apply(console, [formatted, '']);
             }
         };
 

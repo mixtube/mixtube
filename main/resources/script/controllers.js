@@ -4,39 +4,39 @@
         $scope.queue = mtQueueManager.queue;
     });
 
-//    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
-//
-//        /**
-//         * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
-//         * infinite loops when changing the url internally.
-//         *
-//         * @type {string}
-//         */
-//        var serializedQueue = undefined;
-//        /** type {mt.model.Queue} */
-//        $scope.queue = mtQueueManager.queue;
-//
-//        $scope.$watch('queue', function (newVal, oldVal) {
-//            // this test is here to prevent to serialize during the init phase
-//            if (!angular.equals(newVal, oldVal)) {
-//                var newSerializedQueue = mtQueueManager.serialize();
-//                if (!angular.equals(serializedQueue, newSerializedQueue)) {
-//                    serializedQueue = newSerializedQueue
-//                    $location.search({queue: serializedQueue});
-//                }
-//            }
-//        }, true);
-//
-//        $scope.$watch(function () {
-//            return $location.search().queue
-//        }, function (newSerializedQueue) {
-//            if (!angular.equals(serializedQueue, newSerializedQueue)) {
-//                serializedQueue = newSerializedQueue
-//                // change initiated by user (back / forward etc.), need to b deserialized
-//                mtQueueManager.deserialize(serializedQueue);
-//            }
-//        }, true);
-//    });
+    mt.MixTubeApp.controller('mtRootController', function ($scope, mtLocation, mtQueueManager) {
+
+        /**
+         * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
+         * infinite loops when changing the url internally.
+         *
+         * @type {string}
+         */
+        var serializedQueue = undefined;
+        /** type {mt.model.Queue} */
+        $scope.queue = mtQueueManager.queue;
+
+        $scope.$watch('queue', function (newVal, oldVal) {
+            // this test is here to prevent to serialize during the init phase
+            if (!angular.equals(newVal, oldVal)) {
+                var newSerializedQueue = mtQueueManager.serialize();
+                if (!angular.equals(serializedQueue, newSerializedQueue)) {
+                    serializedQueue = newSerializedQueue
+                    mtLocation.search({queue: serializedQueue});
+                }
+            }
+        }, true);
+
+        $scope.$watch(function () {
+            return mtLocation.search().queue
+        }, function (newSerializedQueue) {
+            if (!angular.equals(serializedQueue, newSerializedQueue)) {
+                serializedQueue = newSerializedQueue
+                // change initiated by user (back / forward etc.), need to b deserialized
+                mtQueueManager.deserialize(serializedQueue);
+            }
+        }, true);
+    });
 
     mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
         $scope.currentQueueName = mtQueueManager.queue.name;
@@ -144,7 +144,8 @@
             $scope.activePosition = $scope.queue.entries.indexOf(activeQueueEntry);
         });
 
-        $scope.queueEntryClicked = function (queueEntry) {
+        $scope.queueEntryClicked = function ($event, queueEntry) {
+            $event.preventDefault();
             $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: true});
         };
 
@@ -212,7 +213,7 @@
         });
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerWindowCtrl', function ($rootScope, $location, mtLoggerFactory, mtConfiguration) {
+    mt.MixTubeApp.controller('mtVideoPlayerWindowCtrl', function ($rootScope, mtPlayerPoolProvider, mtLoggerFactory, mtConfiguration) {
 
         var logger = mtLoggerFactory.logger('mtVideoPlayerWindowCtrl');
 
@@ -232,6 +233,10 @@
         thisCtrl.playing = false;
         /** @type {Object.<string, string>} */
         thisCtrl.queueEntryIdByHandleId = {};
+
+        mtPlayerPoolProvider.get().then(function (playersPool) {
+            thisCtrl.playersPool = playersPool;
+        });
 
         /**
          * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
@@ -394,10 +399,6 @@
         var notifyPlayingChanged = function () {
             $rootScope.$broadcast(mt.events.PlaybackStateChanged, {playing: thisCtrl.playing});
         };
-
-        $rootScope.$on(mt.events.PlayersPoolReady, function (event, players) {
-            thisCtrl.playersPool = players;
-        });
 
         $rootScope.$on(mt.events.QueueModified, function (event, data) {
             update(data.modifiedPositions, data.activePosition);

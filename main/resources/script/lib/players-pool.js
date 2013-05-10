@@ -353,30 +353,31 @@
             // get the dom node where we are going to insert the player
             var domNode = self.domNodeSupplierFn();
 
-            // avoid black flash by hiding the container until the player is ready
-//            domNode.style.top = -99999;
-
             if (provider === 'youtube') {
-                new YT.Player(domNode, {
-                    height: '390',
-                    width: '640',
-                    playerVars: {
-                        controls: 0,
-                        showinfo: 0,
-                        iv_load_policy: 3,
-                        disablekb: 1,
-                        modestbranding: 1,
-                        rel: 0,
-                        wmode: 'opaque' /* needed by Firefox, else the video is not shown */
-                    },
-                    events: {
-                        onReady: function (evt) {
-                            // now that the player is ready we can make it visible
-                            evt.target.getIframe().style.top = 0;
-                            playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target, self.logger));
+
+                // if the YouTube API is already loaded
+                if ('YT' in window) {
+                    new YT.Player(domNode, {
+                        height: '390',
+                        width: '640',
+                        playerVars: {
+                            controls: 0,
+                            showinfo: 0,
+                            iv_load_policy: 3,
+                            disablekb: 1,
+                            modestbranding: 1,
+                            rel: 0,
+                            wmode: 'opaque' /* needed by Firefox, else the video is not shown */
+                        },
+                        events: {
+                            onReady: function (evt) {
+                                // now that the player is ready we can make it visible
+                                evt.target.getIframe().style.top = 0;
+                                playerDeferred.resolve(new mt.player.YoutubePlayer(evt.target, self.logger));
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
 

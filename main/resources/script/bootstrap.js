@@ -1,19 +1,9 @@
 (function (mt) {
-//    if (!history.pushState) {
-//        //if hashbang url found and we are not on our base then go to base
-//        if (window.location.hash.charAt(1) === "!" && window.location.pathname !== '/') {
-//            window.location.replace('/#!' + window.location.hash.substring(2));
-//        }
-//        //if hasbang not found then convert link to hashbang mode
-//        if(window.location.hash.charAt(1) !== "!") {
-//            window.location.replace('/#!' + window.location.pathname + window.location.search+window.location.hash);
-//        }
-//    }
 
     mt.MixTubeApp = angular.module('mtMixTubeApp', [])
         .config(function ($locationProvider) {
-            $locationProvider.html5Mode(false).hashPrefix('!');
-        }).run(function ($rootScope, mtLoggerFactory) {
+            $locationProvider.html5Mode(false);
+        }).run(function ($rootScope) {
             var wordCharRegExp = /\w/;
             document.addEventListener('keyup', function (evt) {
                 var element = evt.target || evt.srcElement;
@@ -28,20 +18,6 @@
                     }
                 }
             });
-
-            // executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application
-            // that it is ready
-            window.onYouTubeIframeAPIReady = function () {
-                var playersPool = new mt.player.PlayersPool(function () {
-                    var $playerDiv = jQuery('<div>', {'class': 'mt-video-player-instance'});
-                    $('#mt-video-player-window').append($playerDiv);
-                    return $playerDiv[0];
-                }, mtLoggerFactory.logger('PlayersPool'));
-
-                $rootScope.$apply(function () {
-                    $rootScope.$broadcast(mt.events.PlayersPoolReady, playersPool);
-                });
-            };
         });
 
     mt.events = {
