@@ -459,7 +459,7 @@
                 var idx = 1;
 
                 var formatted = pattern.replace(TOKEN_REGEXP, function (token) {
-                    return '' + preparedArguments[idx++];
+                    return preparedArguments[idx++].toString();
                 });
 
                 // extra empty string is to make AngularJS's IE9 log polyfill happy, else it appends "undefined" to the log trace
