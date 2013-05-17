@@ -205,7 +205,8 @@
             $timeout.cancel(hideTimeoutPromise);
             $scope.comingNextVisible = true;
             $scope.titleCurrent = data.currentVideo.title;
-            $scope.titleNext = data.nextVideo.title;
+            // if no next video, clear the next title
+            $scope.titleNext = data.nextVideo ? data.nextVideo.title : undefined;
 
             hideTimeoutPromise = $timeout(function () {
                 $scope.comingNextVisible = false;

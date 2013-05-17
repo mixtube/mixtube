@@ -462,6 +462,8 @@ body {
   @include mt-icon-font-button(40rem/14, '\1F50D');
 
   position: relative;
+  // needed by IE, else the tooltip is hidden
+  overflow: visible;
 
   &:hover .mt-open-search-tooltip {
     visibility: visible;
@@ -496,6 +498,8 @@ body {
   @include mt-icon-font-button(40rem/14, '\E729');
 
   position: relative;
+  // needed by IE, else the tooltip is hidden
+  overflow: visible;
 
   &:hover .mt-clear-queue-tooltip {
     visibility: visible;
