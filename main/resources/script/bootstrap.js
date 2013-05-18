@@ -2,6 +2,8 @@
 
     mt.MixTubeApp = angular.module('mtMixTubeApp', [])
         .config(function ($locationProvider) {
+            // we want to be able to share URL between browsers that don't have the History API and the ones they have it
+            // sadly, we need to deactivate HTML5 mode on location provider
             $locationProvider.html5Mode(false);
         }).run(function ($rootScope) {
             var wordCharRegExp = /\w/;

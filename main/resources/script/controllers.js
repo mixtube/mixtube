@@ -4,7 +4,7 @@
         $scope.queue = mtQueueManager.queue;
     });
 
-    mt.MixTubeApp.controller('mtRootController', function ($scope, mtLocation, mtQueueManager) {
+    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -22,13 +22,13 @@
                 var newSerializedQueue = mtQueueManager.serialize();
                 if (!angular.equals(serializedQueue, newSerializedQueue)) {
                     serializedQueue = newSerializedQueue
-                    mtLocation.search({queue: serializedQueue});
+                    $location.search({queue: serializedQueue});
                 }
             }
         }, true);
 
         $scope.$watch(function () {
-            return mtLocation.search().queue
+            return $location.search().queue
         }, function (newSerializedQueue) {
             if (!angular.equals(serializedQueue, newSerializedQueue)) {
                 serializedQueue = newSerializedQueue

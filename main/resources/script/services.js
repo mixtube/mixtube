@@ -363,9 +363,9 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtConfiguration', function (mtLocation) {
+    mt.MixTubeApp.factory('mtConfiguration', function ($location) {
 
-        var transitionStartTime = 'test.duration' in mtLocation.search() ? parseInt(mtLocation.search()['test.duration'], 10) : -5000;
+        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
 
         return  {
             get transitionStartTime() {
@@ -375,10 +375,10 @@
                 return 5000;
             },
             get initialSearchResults() {
-                return 'test.searchResults' in mtLocation.search() ? mt.tools.TEST_VIDEOS : [];
+                return 'test.searchResults' in $location.search() ? mt.tools.TEST_VIDEOS : [];
             },
             get initialSearchOpen() {
-                return 'test.searchOpen' in mtLocation.search();
+                return 'test.searchOpen' in $location.search();
             },
             get youtubeAPIKey() {
                 return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
@@ -393,27 +393,6 @@
                 return 10000;
             }
         };
-    });
-
-    mt.MixTubeApp.factory('mtLocation', function ($sniffer, $injector) {
-        function MockLocation() {
-        }
-
-        MockLocation.prototype.search = function () {
-            if (arguments.length > 0) {
-                return this;
-            } else {
-                return {};
-            }
-        };
-
-        // something makes $location service unusable when history api is not available and simply injecting it
-        // breaks everything. So we provide a mock of this service when the history api is not available.
-        if (!$sniffer.history) {
-            return $injector.get('$location');
-        } else {
-            return new MockLocation();
-        }
     });
 
     mt.MixTubeApp.factory('mtLoggerFactory', function ($log) {
