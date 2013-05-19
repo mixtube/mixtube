@@ -12,21 +12,12 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
-    <script src="//cdn.jsdelivr.net/underscorejs/1.4.4/underscore.js"></script>
-    <script src="//cdn.jsdelivr.net/mousetrap/1.3/mousetrap.js"></script>
-    <script src="//cdn.jsdelivr.net/jquery.transit/0.9.9/jquery.transit.js"></script>
-    <script src="../script/lib/players-pool.js"></script>
-    <script src="../script/bootstrap.js"></script>
-    <script src="../script/test-dataset.js"></script>
-    <script src="../script/services.js"></script>
-    <script src="../script/controllers.js"></script>
-    <script src="../script/directives-filters.js"></script>
-    <script src="//www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
 <section id="mt-video-stage-frame">
-    <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible" ng-animate="{show: 'mt-fade-in', hide: 'mt-fade-out'}">
+    <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible"
+         ng-animate="{show: 'mt-fade-in', hide: 'mt-fade-out'}">
         <div class="mt-coming-next-item" ng-show="titleCurrent">
             <h4 class="mt-header">It was :</h4>
             <p class="mt-title">{{titleCurrent}}</p>
@@ -48,7 +39,8 @@
                        ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
                        required>
             </form>
-            <button ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></button>
+            <a ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></a>
+
             <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
                 <div class="mt-search-results-frame">
                     <h4 class="mt-results-provider">YouTube</h4>
@@ -60,8 +52,8 @@
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
                                 <div class="mt-thumbnail-frame">
                                     <img ng-src="{{searchResult.thumbnailUrl}}" class="mt-results-thumbnail">
-                                    <button ng-click="appendResultToQueue(searchResult)"
-                                            class="mt-add-to-queue-button"></button>
+                                    <a ng-click="appendResultToQueue(searchResult)" class="mt-add-to-queue-button"></a>
+
                                     <div class="mt-video-duration" ng-show="searchResult.duration">
                                         <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>
                                     </div>
@@ -107,12 +99,12 @@
     </div>
 </section>
 
-<section id="mt-queue-frame" ng-controller="mtQueueFrameCtrl">
-    <div id="mt-queue-bar">
-        <div id="mt-queue-bar-table">
+<section class="mt-queue-frame" ng-controller="mtQueueFrameCtrl">
+    <div class="mt-queue-bar">
+        <div class="mt-queue-bar-table">
             <div class="mt-column mt-left">
-                <form id="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
-                    <div id="mt-queue-name">
+                <form class="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
+                    <div class="mt-queue-name">
                         <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
                                mt-blur="onInputBlur()"
                                mt-focuswhen="{model: edition, selectTextOnFocus: true}">
@@ -122,20 +114,20 @@
                 </form>
             </div>
             <div id="mt-player-controls" class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
-                <button id="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
-                        ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></button>
+                <a id="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
+                   ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></a>
             </div>
             <div class="mt-column mt-right">
-                <button id="mt-open-search-button" ng-click="openSearchButtonClicked()">
+                <a class="mt-open-search-button" ng-click="openSearchButtonClicked()">
                     <div class="mt-open-search-tooltip">
                         <span class="mt-keyboard-icon"> </span>Start typing to search
                     </div>
-                </button>
-                <button id="mt-clear-queue-button" ng-click="clearQueueButtonClicked()">
+                </a>
+                <a class="mt-clear-queue-button" ng-click="clearQueueButtonClicked()">
                     <div class="mt-clear-queue-tooltip">
                         Clear the current queue (remove all the tracks)
                     </div>
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -146,18 +138,30 @@
         </div>
         <ul id="mt-queue-list">
             <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
-                <a href="#" ng-click="queueEntryClicked($event, queueEntry)">
-                    <img class="mt-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
+                <a class="mt-button-link" ng-click="queueEntryClicked(queueEntry)">
+                    <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
                 </a>
-                <button class="mt-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></button>
+                <a class="mt-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></a>
             </li>
             <li class="mt-queue-item mt-queue-call-to-action">
-                <button class="mt-action-button" ng-click="openSearchButtonClicked()">
+                <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">
                     <div class="mt-text">Use the search to add to this queue</div>
-                </button>
+                </a>
             </li>
         </ul>
     </div>
 </section>
+
+<script src="//cdn.jsdelivr.net/underscorejs/1.4.4/underscore.js"></script>
+<script src="//cdn.jsdelivr.net/mousetrap/1.3/mousetrap.js"></script>
+<script src="//cdn.jsdelivr.net/jquery.transit/0.9.9/jquery.transit.js"></script>
+<script src="../script/lib/players-pool.js"></script>
+<script src="../script/bootstrap.js"></script>
+<script src="../script/test-dataset.js"></script>
+<script src="../script/services.js"></script>
+<script src="../script/controllers.js"></script>
+<script src="../script/directives-filters.js"></script>
+<script src="//www.youtube.com/iframe_api" defer async></script>
+
 </body>
 </html>

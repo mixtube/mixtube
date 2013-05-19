@@ -144,8 +144,7 @@
             $scope.activePosition = $scope.queue.entries.indexOf(activeQueueEntry);
         });
 
-        $scope.queueEntryClicked = function ($event, queueEntry) {
-            $event.preventDefault();
+        $scope.queueEntryClicked = function (queueEntry) {
             $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: true});
         };
 

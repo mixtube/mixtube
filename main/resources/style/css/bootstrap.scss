@@ -38,16 +38,14 @@ input, button {
   color: $lightTextColor;
 }
 
-button {
-  cursor: pointer;
-  margin: 0;
-}
+// we use link instead of button as a workaround of IE9 button rendering
+// by using links we avoid text movement on click and allow CSS triangle
+.mt-button-link {
+  display: inline-block;
 
-.mt-unstyled-button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .mt-unstyled-input {
@@ -60,12 +58,11 @@ button {
 
 @mixin mt-corner-button($color, $content) {
   @include triangle(35px, $color, up-right);
-  @extend .mt-unstyled-button;
+  @extend .mt-button-link;
 
   position: absolute;
   top: 0;
   right: 0;
-  padding: 0;
   overflow: visible;
 
   &:before {
@@ -82,7 +79,7 @@ button {
 }
 
 @mixin mt-icon-font-button($fontSize, $content: '') {
-  @extend .mt-unstyled-button;
+  @extend .mt-button-link;
 
   font-family: $iconFont;
 
@@ -108,6 +105,14 @@ button {
     bottom: -$arrowSize;
     #{$arrowOrigin}: $arrowPosition;
   }
+}
+
+@mixin mt-ribbon($size, $color, $radius: 5px) {
+  border: $size solid $color;
+  border-right-color: transparent;
+  border-left-width: $size;
+  height: 0;
+  border-radius: $radius 0 0 $radius;
 }
 
 // common fade in/out animations that works with AngularJS animation framework
@@ -142,8 +147,7 @@ body {
   font-family: $lucida-grande;
   font-size: 14px;
   color: $lightTextColor;
-  //background-color: $darkerColor;
-  background-color: #ffffff;
+  background-color: $darkerColor;
 }
 
 #mt-video-stage-frame {
@@ -164,11 +168,10 @@ body {
 }
 
 .mt-coming-next-item {
-  margin-bottom: 2 * $regularMargin;
+  margin-top: 2 * $regularMargin;
 
-  // reset margin for last element
-  &:last-child {
-    margin-bottom: 0;
+  &:first-child {
+    margin-top: 0;
   }
 
   > .mt-header {
@@ -182,6 +185,18 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+// prevents click on player instances
+#mt-video-player-window:before {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: $zIndexLow;
+  // empty block with no background doesn't intercept clicks on IE9, so set a background color but totaly transparent
+  background-color: rgba(0, 0, 0, 0);
+
+  content: '';
 }
 
 .mt-video-player-instance {
@@ -233,7 +248,7 @@ body {
 }
 
 #mt-search-close-button {
-  @extend .mt-unstyled-button;
+  @extend .mt-button-link;
 
   position: absolute;
   right: 0;
@@ -342,28 +357,26 @@ body {
 
 .mt-video-duration {
   position: absolute;
-  left: 0;
-  bottom: $regularMargin;
+  left: -2px;
+  bottom: 7px;
 
   font-size: 11px;
   color: $darkTextColor;
   letter-spacing: -1px;
 
   &:before {
-    content: '\1F516';
-    position: absolute;
-    bottom: -40px;
-    left: -18px;
+    @include mt-ribbon(8px, $lightTextColor, 2px);
 
-    color: $lightTextColor;
-    font-family: $iconFont;
-    font-size: 92px;
-    @include transform(rotate(-90deg));
+    width: 25px;
+
+    content: '';
+    display: block;
   }
 
   > .mt-value {
     position: absolute;
-    bottom: 0;
+    top: 2px;
+    left: 4px;
   }
 }
 
@@ -383,25 +396,26 @@ body {
   }
 }
 
-#mt-queue-frame {
+.mt-queue-frame {
   position: absolute;
   bottom: 0;
   height: $queueFrameHeight;
   width: 100%;
+  z-index: $zIndexMedium;
 }
 
-#mt-queue-bar {
+.mt-queue-bar {
   height: $queueHeightBarHeight;
   background-color: $darkColor;
 }
 
-#mt-queue-bar-table {
+.mt-queue-bar-table {
   display: table;
   table-layout: fixed;
   height: 100%;
   width: 100%;
 
-  .mt-column {
+  > .mt-column {
     vertical-align: middle;
     display: table-cell;
     width: 33.3333%;
@@ -412,25 +426,25 @@ body {
     }
   }
 
-  .mt-left {
+  > .mt-left {
     padding-left: $regularMargin;
   }
 
-  .mt-middle {
+  > .mt-middle {
     text-align: center;
   }
 
-  .mt-right {
+  > .mt-right {
     text-align: right;
     padding-right: $regularMargin;
   }
 }
 
-#mt-queue-meta {
+.mt-queue-meta {
   display: inline-block;
 }
 
-#mt-queue-name {
+.mt-queue-name {
   .mt-input, .mt-display {
     display: inline-block;
     padding: .2rem;
@@ -458,14 +472,14 @@ body {
   }
 }
 
-#mt-open-search-button {
+.mt-open-search-button {
   @include mt-icon-font-button(40rem/14, '\1F50D');
 
   position: relative;
   // needed by IE, else the tooltip is hidden
   overflow: visible;
 
-  &:hover .mt-open-search-tooltip {
+  &:hover > .mt-open-search-tooltip {
     visibility: visible;
   }
 }
@@ -494,14 +508,14 @@ body {
   }
 }
 
-#mt-clear-queue-button {
+.mt-clear-queue-button {
   @include mt-icon-font-button(40rem/14, '\E729');
 
   position: relative;
   // needed by IE, else the tooltip is hidden
   overflow: visible;
 
-  &:hover .mt-clear-queue-tooltip {
+  &:hover > .mt-clear-queue-tooltip {
     visibility: visible;
   }
 }
@@ -554,7 +568,7 @@ body {
   position: absolute;
   z-index: $zIndexLow;
 
-  .mt-triangle {
+  > .mt-triangle {
     @include triangle(40px, $darkColor, down);
 
     margin: {
@@ -586,47 +600,49 @@ body {
   // restores modified wrapping
   white-space: normal;
 
-  .mt-remove-button {
+  > .mt-remove-button {
     @include mt-corner-button(#f3c621, '\274C');
 
     display: none;
   }
 
-  &:hover .mt-remove-button {
+  &:hover > .mt-remove-button {
     display: block;
   }
+}
 
-  .mt-thumbnail {
-    display: block;
-    width: $queueThumbnailWidth;
-    height: 100%;
-    max-height: $queueThumbnailHeight;
-  }
+.mt-queue-item-thumbnail {
+  display: block;
+  width: $queueThumbnailWidth;
+  height: 100%;
+  max-height: $queueThumbnailHeight;
 }
 
 .mt-queue-call-to-action {
   padding: (2rem/14);
+}
 
-  .mt-action-button {
-    @extend .mt-unstyled-button;
+.mt-queue-call-button {
+  @extend .mt-button-link;
 
-    display: table;
-    table-layout: fixed;
-    height: 100%;
-    width: 100%;
+  display: table;
+  table-layout: fixed;
+  height: 100%;
+  max-height: $queueThumbnailHeight;
+  width: 100%;
 
-    border: (2rem/14) dashed $lightTextColor;
-    border-radius: (10rem/14);
-    opacity: .15;
+  border: (2rem/14) dashed $lightTextColor;
+  border-radius: (10rem/14);
+  opacity: .15;
 
-    &:hover {
-      opacity: 1;
-    }
+  &:hover {
+    opacity: 1;
+  }
 
-    .mt-text {
-      display: table-cell;
-      padding: (2rem/14);
-      vertical-align: middle;
-    }
+  > .mt-text {
+    display: table-cell;
+    padding: (2rem/14);
+    vertical-align: middle;
+    text-align: center;
   }
 }
