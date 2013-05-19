@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<section id="mt-video-stage-frame">
+<section class="mt-video-stage-frame">
     <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible"
          ng-animate="{show: 'mt-fade-in', hide: 'mt-fade-out'}">
         <div class="mt-coming-next-item" ng-show="titleCurrent">
@@ -27,21 +27,21 @@
             <p class="mt-title">{{titleNext}}</p>
         </div>
     </div>
-    <div id="mt-video-player-window" ng-controller="mtVideoPlayerWindowCtrl"></div>
+    <div class="mt-video-player-window" ng-controller="mtVideoPlayerWindowCtrl"></div>
 </section>
 
-<section id="mt-search-frame-container" ng-controller="mtSearchCtrl" ng-show="searchVisible">
-    <div id="mt-search-frame-wrapper">
-        <div id="mt-search-frame">
-            <form id="mt-search-form" name="searchForm" novalidate>
+<section class="mt-search-frame-container" ng-controller="mtSearchCtrl" ng-show="searchVisible">
+    <div class="mt-search-frame-wrapper">
+        <div class="mt-search-frame">
+            <form class="mt-search-form" name="searchForm" novalidate>
                 <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-                <input id="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
+                <input class="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
                        ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
                        required>
             </form>
-            <a ng-click="close()" id="mt-search-close-button" title="Close [Esc]"></a>
+            <a class="mt-search-close-button" title="Close [Esc]" ng-click="close()"></a>
 
-            <div id="mt-search-results-frame-wrapper"> <!-- providers section -->
+            <div class="mt-search-results-frame-wrapper"> <!-- providers section -->
                 <div class="mt-search-results-frame">
                     <h4 class="mt-results-provider">YouTube</h4>
 
@@ -113,8 +113,8 @@
                     </div>
                 </form>
             </div>
-            <div id="mt-player-controls" class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
-                <a id="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
+            <div class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
+                <a class="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
                    ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></a>
             </div>
             <div class="mt-column mt-right">
@@ -131,12 +131,12 @@
             </div>
         </div>
     </div>
-    <div id="mt-queue-list-container">
+    <div class="mt-queue-list-container">
         <!-- the playing head as the same width as a queue item, so translating it of 100% is actually moving it to the next item -->
-        <div id="mt-playing-head" mt-transition="{'x': (activePosition * 100) + '%'}">
+        <div class="mt-playing-head" mt-transition="{'x': (activePosition * 100) + '%'}">
             <div class="mt-triangle"></div>
         </div>
-        <ul id="mt-queue-list">
+        <ul class="mt-queue-list">
             <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
                 <a class="mt-button-link" ng-click="queueEntryClicked(queueEntry)">
                     <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
