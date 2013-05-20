@@ -5,7 +5,7 @@ $searchFormHeight: 72px;
 $resultsProviderHeight: 20px;
 $darkTextColor: #001413;
 $lightTextColor: #e5fffc;
-$iconFont: 'entypo', sans-serif;
+$iconFont: 'fontello', sans-serif;
 $regularMargin: 10rem/14;
 $regularPadding: 10rem/14;
 $darkColor: #031112;
@@ -20,14 +20,8 @@ $tooltipRadius: 5rem/14;
 $zIndexLow: 10;
 $zIndexMedium: 20;
 $zIndexHigh: 30;
-
-@font-face {
-  font-family: 'entypo';
-  src: url('../vendor/font/entypo.eot');
-  src: url('../vendor/font/entypo.eot?#iefix') format('embedded-opentype'), url('../vendor/font/entypo.woff') format('woff'), url('../vendor/font/entypo.ttf') format('truetype'), url('../vendor/font/entypo.svg#entypo') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
+$smallIconFontSize: 17rem/14;
+$bigIconFontSize: 35rem/14;
 
 * {
   @include box-sizing(border-box);
@@ -67,12 +61,12 @@ input, button {
 
   &:before {
     position: absolute;
-    right: -1px;
-    top: -36px;
+    right: 3px;
+    top: -26px;
 
     content: $content;
     color: $darkTextColor;
-    font-size: 50px;
+    font-size: $smallIconFontSize;
     font-family: $iconFont;
     line-height: 0;
   }
@@ -86,7 +80,7 @@ input, button {
   &:before {
     content: $content;
     font-size: $fontSize;
-    line-height: 0;
+    vertical-align: middle;
   }
 }
 
@@ -242,18 +236,11 @@ body {
 }
 
 .mt-search-close-button {
-  @extend .mt-button-link;
+  @include mt-icon-font-button($smallIconFontSize, '\e802');
 
   position: absolute;
   right: 0;
   top: 0;
-
-  &:before {
-    content: '\2716';
-    font-size: 50px;
-    font-family: $iconFont;
-    line-height: 0;
-  }
 }
 
 .mt-search-term-input {
@@ -350,7 +337,7 @@ body {
 }
 
 .mt-add-to-queue-button {
-  @include mt-corner-button(#f3c621, '\2795');
+  @include mt-corner-button(#f3c621, '\e803');
 
   display: none;
 }
@@ -473,9 +460,10 @@ body {
 }
 
 .mt-open-search-button {
-  @include mt-icon-font-button(40rem/14, '\1F50D');
+  @include mt-icon-font-button($smallIconFontSize, '\e800');
 
   position: relative;
+  margin-right: (7rem/14);
   // needed by IE, else the tooltip is hidden
   overflow: visible;
 
@@ -497,19 +485,18 @@ body {
   visibility: hidden;
 
   .mt-keyboard-icon:before {
-    content: '\2328';
-    position: relative;
-    top: (-4rem/14);
-    vertical-align: top;
+    content: '\e804';
 
     font-family: $iconFont;
-    font-size: (40rem/14);
+    font-size: (25rem/14);
     line-height: 0;
+    vertical-align: middle;
+    margin-right: (7rem/14);
   }
 }
 
 .mt-clear-queue-button {
-  @include mt-icon-font-button(40rem/14, '\E729');
+  @include mt-icon-font-button($smallIconFontSize, '\e805');
 
   position: relative;
   // needed by IE, else the tooltip is hidden
@@ -534,14 +521,14 @@ body {
 }
 
 .mt-playback-button {
-  @include mt-icon-font-button(70rem/14);
+  @include mt-icon-font-button($bigIconFontSize);
 
   &.mt-pause:before {
-    content: '\2016';
+    content: '\e809';
   }
 
   &.mt-play:before {
-    content: '\25B6';
+    content: '\e80a';
   }
 }
 
@@ -601,7 +588,7 @@ body {
   white-space: normal;
 
   > .mt-remove-button {
-    @include mt-corner-button(#f3c621, '\274C');
+    @include mt-corner-button(#f3c621, '\e80b');
 
     display: none;
   }
