@@ -4,7 +4,7 @@
     <meta charset='utf-8'>
     <base href="/page">
 
-    <title>MixTube {{ queue.name && '- ' + queue.name}}</title>
+    <title ng-bind="'MixTube ' + (queue.name ? '- ' + queue.name : '')">MixTube (Loading)</title>
 
     <link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../style/vendor/css/reset.css" type="text/css">
@@ -12,11 +12,9 @@
     <link rel="stylesheet" href="../style/vendor/fontello/css/fontello.css" type="text/css">
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
 </head>
-<body>
-<!--prototype of mouse start /stop directives-->
-<!--<body mt-mousestart="doThat()" mt-mousestop="{expression: 'doThis()', delay: 500}">-->
+<body mt-mousestart="mouseStarted()" mt-mousestop="mouseStopped()" debounce="300">
 
 <section class="mt-video-stage-frame">
     <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible"
@@ -102,60 +100,62 @@
     </div>
 </section>
 
-<section class="mt-queue-frame" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-bar">
-        <div class="mt-queue-bar-table">
-            <div class="mt-column mt-left">
-                <form class="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
-                    <div class="mt-queue-name">
-                        <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
-                               mt-blur="onInputBlur()"
-                               mt-focuswhen="{model: edition, selectTextOnFocus: true}">
+<section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
+    <div class="mt-queue-frame" ng-show="mouseActive" ng-animate="'mt-appear'">
+        <div class="mt-queue-bar">
+            <div class="mt-queue-bar-table">
+                <div class="mt-column mt-left">
+                    <form class="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
+                        <div class="mt-queue-name">
+                            <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
+                                   mt-blur="onInputBlur()"
+                                   mt-focuswhen="{model: edition, selectTextOnFocus: true}">
                     <span class="mt-display" ng-hide="edition"
                           ng-click="activate()">{{queue.name || defaultQueueName}}</span>
-                    </div>
-                </form>
-            </div>
-            <div class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
-                <a class="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
-                   ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></a>
-            </div>
-            <div class="mt-column mt-right">
-                <a class="mt-open-search-button" ng-click="openSearchButtonClicked()">
-                    <div class="mt-open-search-tooltip">
-                        <span class="mt-keyboard-icon"> </span>Start typing to search
-                    </div>
-                </a>
-                <a class="mt-clear-queue-button" ng-click="clearQueueButtonClicked()">
-                    <div class="mt-clear-queue-tooltip">
-                        Clear the current queue (remove all the tracks)
-                    </div>
-                </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
+                    <a class="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
+                       ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></a>
+                </div>
+                <div class="mt-column mt-right">
+                    <a class="mt-open-search-button" ng-click="openSearchButtonClicked()">
+                        <div class="mt-open-search-tooltip">
+                            <span class="mt-keyboard-icon"> </span>Start typing to search
+                        </div>
+                    </a>
+                    <a class="mt-clear-queue-button" ng-click="clearQueueButtonClicked()">
+                        <div class="mt-clear-queue-tooltip">
+                            Clear the current queue (remove all the tracks)
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="mt-queue-list-container">
-        <!-- the playing head as the same width as a queue item, so translating it of 100% is actually moving it to the next item -->
-        <div class="mt-playing-head" mt-transition="{'x': (activePosition * 100) + '%'}">
-            <div class="mt-triangle"></div>
+        <div class="mt-queue-list-container">
+            <!-- the playing head as the same width as a queue item, so translating it of 100% is actually moving it to the next item -->
+            <div class="mt-playing-head" mt-transition="{'x': (activePosition * 100) + '%'}">
+                <div class="mt-triangle"></div>
+            </div>
+            <ul class="mt-queue-list">
+                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
+                    <a class="mt-button-link" ng-click="queueEntryClicked(queueEntry)">
+                        <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
+                    </a>
+                    <a class="mt-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></a>
+                </li>
+                <li class="mt-queue-item mt-queue-call-to-action">
+                    <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">
+                        <div class="mt-text">Use the search to add to this queue</div>
+                    </a>
+                </li>
+            </ul>
         </div>
-        <ul class="mt-queue-list">
-            <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
-                <a class="mt-button-link" ng-click="queueEntryClicked(queueEntry)">
-                    <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
-                </a>
-                <a class="mt-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></a>
-            </li>
-            <li class="mt-queue-item mt-queue-call-to-action">
-                <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">
-                    <div class="mt-text">Use the search to add to this queue</div>
-                </a>
-            </li>
-        </ul>
     </div>
 </section>
 
-<script src="//cdn.jsdelivr.net/underscorejs/1.4.4/underscore.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/1.2.1/lodash.compat.js"></script>
 <script src="//cdn.jsdelivr.net/mousetrap/1.3/mousetrap.js"></script>
 <script src="//cdn.jsdelivr.net/jquery.transit/0.9.9/jquery.transit.js"></script>
 <script src="../script/lib/players-pool.js"></script>
@@ -164,7 +164,7 @@
 <script src="../script/services.js"></script>
 <script src="../script/controllers.js"></script>
 <script src="../script/directives-filters.js"></script>
-<script src="//www.youtube.com/iframe_api" defer async></script>
+<script src="//www.youtube.com/iframe_api"></script>
 
 </body>
 </html>

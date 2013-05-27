@@ -1,10 +1,6 @@
 (function (mt) {
 
-    mt.MixTubeApp.controller('mtRootController', function ($scope, mtQueueManager) {
-        $scope.queue = mtQueueManager.queue;
-    });
-
-    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, mtQueueManager) {
+    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtLoggerFactory) {
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -13,6 +9,16 @@
          * @type {string}
          */
         var serializedQueue = undefined;
+
+        /**
+         * The promise for the timeout that will set the mouse active state to false.
+         *
+         * @type {Promise}
+         */
+        var mouseStoppedPromise = undefined;
+
+        /** type {boolean} */
+        $scope.mouseActive = false;
         /** type {mt.model.Queue} */
         $scope.queue = mtQueueManager.queue;
 
@@ -21,7 +27,7 @@
             if (!angular.equals(newVal, oldVal)) {
                 var newSerializedQueue = mtQueueManager.serialize();
                 if (!angular.equals(serializedQueue, newSerializedQueue)) {
-                    serializedQueue = newSerializedQueue
+                    serializedQueue = newSerializedQueue;
                     $location.search({queue: serializedQueue});
                 }
             }
@@ -31,11 +37,22 @@
             return $location.search().queue
         }, function (newSerializedQueue) {
             if (!angular.equals(serializedQueue, newSerializedQueue)) {
-                serializedQueue = newSerializedQueue
-                // change initiated by user (back / forward etc.), need to b deserialized
+                serializedQueue = newSerializedQueue;
+                // change initiated by user (back / forward etc.), need to be deserialized
                 mtQueueManager.deserialize(serializedQueue);
             }
         }, true);
+
+        $scope.mouseStarted = function () {
+            $timeout.cancel(mouseStoppedPromise);
+            $scope.mouseActive = true;
+        };
+
+        $scope.mouseStopped = function () {
+            mouseStoppedPromise = $timeout(function () {
+                $scope.mouseActive = false;
+            }, 2000);
+        };
     });
 
     mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
@@ -140,7 +157,7 @@
         });
 
         $scope.$on(mt.events.QueueEntryActivated, function (evt, data) {
-            var activeQueueEntry = _.findWhere($scope.queue.entries, {id: data.queueEntryId});
+            var activeQueueEntry = _.first(_.where($scope.queue.entries, {id: data.queueEntryId}));
             $scope.activePosition = $scope.queue.entries.indexOf(activeQueueEntry);
         });
 

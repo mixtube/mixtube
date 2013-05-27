@@ -383,12 +383,39 @@ body {
   }
 }
 
-.mt-queue-frame {
+.mt-queue-frame-container {
   position: absolute;
   bottom: 0;
   height: $queueFrameHeight;
   width: 100%;
   z-index: $zIndexMedium;
+  overflow: hidden;
+}
+
+.mt-queue-frame {
+  position: absolute;
+  height: 100%;
+
+  // animations slide in / out
+  &.mt-appear-show, &.mt-appear-hide {
+    @include transition(all 200ms ease-in-out);
+  }
+
+  &.mt-appear-show {
+    @include transform(translateY(100%));
+  }
+
+  &.mt-appear-hide {
+    @include transform(translateY(0));
+  }
+
+  &.mt-appear-show.mt-appear-show-active {
+    @include transform(translateY(0));
+  }
+
+  &.mt-appear-hide.mt-appear-hide-active {
+    @include transform(translateY(100%));
+  }
 }
 
 .mt-queue-bar {

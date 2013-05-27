@@ -49,6 +49,28 @@
         };
     });
 
+    // mouse start and stop directive which are mouse move listener with debouncing for respectively leading and
+    // trailing edge of the wait period defined by the related attribute "debounce"
+    [
+        {name: 'mtMousestart', debounceParams: {leading: true, trailing: false}},
+        {name: 'mtMousestop', debounceParams: {leading: false, trailing: true}}
+    ].forEach(function (config) {
+            mt.MixTubeApp.directive(config.name, function ($parse) {
+                return function (scope, elmt, attr) {
+
+                    var expressionAccessor = $parse(attr[config.name]);
+                    // get the debounce wait value
+                    var debounceWait = parseInt($parse(attr['debounce'])(scope)) || 0;
+
+                    elmt.bind('mousemove', _.debounce(function (event) {
+                        scope.$apply(function () {
+                            expressionAccessor(scope, {$event: event});
+                        });
+                    }, debounceWait, config.debounceParams));
+                };
+            });
+        });
+
     // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
     mt.MixTubeApp.filter('mtDuration', function () {
         // reuse the date object between invocation since it is only used as a formatting tool
