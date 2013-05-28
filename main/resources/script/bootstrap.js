@@ -1,4 +1,5 @@
-(function (mt) {
+(function (mt, undefined) {
+    'use strict';
 
     mt.MixTubeApp = angular.module('mtMixTubeApp', [])
         .config(function ($locationProvider) {

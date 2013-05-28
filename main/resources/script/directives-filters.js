@@ -1,4 +1,6 @@
-(function (mt) {
+(function (mt, undefined) {
+    'use strict';
+
     // simple event listener directives for focus and blur events type
     ['blur', 'focus'].forEach(function (evtName) {
         var directiveName = 'mt' + mt.tools.capitalize(evtName);

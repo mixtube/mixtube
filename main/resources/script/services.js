@@ -1,4 +1,5 @@
-(function (mt) {
+(function (mt, undefined) {
+    'use strict';
 
     mt.MixTubeApp.factory('mtQueueManager', function ($q, mtYoutubeClient, mtLoggerFactory) {
         var logger = mtLoggerFactory.logger('mtQueueManager');
@@ -405,16 +406,16 @@
 
         var loggerByName = {};
 
-        function prepareLogTrace(arguments, loggerName) {
+        function prepareLogTrace(params, loggerName) {
             var now = new Date();
             var newArguments = [];
-            newArguments[0] = '[%s:%s:%s] %s : ' + arguments[0];
+            newArguments[0] = '[%s:%s:%s] %s : ' + params[0];
             newArguments[1] = mt.tools.leftPad(now.getHours().toString(10), 2, '0');
             newArguments[2] = mt.tools.leftPad(now.getMinutes().toString(10), 2, '0');
             newArguments[3] = mt.tools.leftPad(now.getSeconds().toString(10), 2, '0');
             newArguments[4] = loggerName;
-            for (var idx = 1; idx < arguments.length; idx++) {
-                newArguments[idx + 4] = arguments[idx];
+            for (var idx = 1; idx < params.length; idx++) {
+                newArguments[idx + 4] = params[idx];
             }
             return newArguments;
         }

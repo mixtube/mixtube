@@ -1,4 +1,5 @@
-(function (mt) {
+(function (mt, undefined) {
+    'use strict';
 
     mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtLoggerFactory) {
 
@@ -8,14 +9,14 @@
          *
          * @type {string}
          */
-        var serializedQueue = undefined;
+        var serializedQueue;
 
         /**
          * The promise for the timeout that will set the mouse active state to false.
          *
          * @type {Promise}
          */
-        var mouseStoppedPromise = undefined;
+        var mouseStoppedPromise;
 
         /** type {boolean} */
         $scope.mouseActive = false;
