@@ -52,21 +52,24 @@
     // mouse start and stop directive which are mouse move listener with debouncing for respectively leading and
     // trailing edge of the wait period defined by the related attribute "debounce"
     [
-        {name: 'mtMousestart', debounceParams: {leading: true, trailing: false}},
-        {name: 'mtMousestop', debounceParams: {leading: false, trailing: true}}
-    ].forEach(function (config) {
-            mt.MixTubeApp.directive(config.name, function ($parse) {
+        {name: 'start', debounceParams: {leading: true, trailing: false}},
+        {name: 'stop', debounceParams: {leading: false, trailing: true}}
+    ].forEach(function (descriptor) {
+            var directiveName = 'mtMouse' + descriptor.name;
+
+            mt.MixTubeApp.directive(directiveName, function ($parse) {
                 return function (scope, elmt, attr) {
 
-                    var expressionAccessor = $parse(attr[config.name]);
-                    // get the debounce wait value
-                    var debounceWait = parseInt($parse(attr['debounce'])(scope)) || 0;
+                    var fn = $parse(attr[directiveName]);
 
-                    elmt.bind('mousemove', _.debounce(function (event) {
+                    // get the debounce wait value (default value if unspecified is 500ms)
+                    var waitTime = parseInt(attr.debounce) || 500;
+
+                    elmt.bind('mousemove', _.debounce(function (evt) {
                         scope.$apply(function () {
-                            expressionAccessor(scope, {$event: event});
+                            fn(scope, {$event: evt});
                         });
-                    }, debounceWait, config.debounceParams));
+                    }, waitTime, descriptor.debounceParams));
                 };
             });
         });
