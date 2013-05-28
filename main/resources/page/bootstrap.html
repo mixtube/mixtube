@@ -101,7 +101,7 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-frame" ng-show="mouseActive" ng-animate="'mt-appear'">
+    <div class="mt-queue-frame" ng-class="{'mt-appear': mouseActive}">
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">
                 <div class="mt-column mt-left">

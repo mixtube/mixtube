@@ -396,25 +396,13 @@ body {
   position: absolute;
   height: 100%;
 
-  // animations slide in / out
-  &.mt-appear-show, &.mt-appear-hide {
-    @include transition(all 200ms ease-in-out);
-  }
+  // I would love to use the AngularJS animation fwk on show but that shows some glitches propably because of the sequence
+  // of animation css and display none
+  @include transition(all 200ms ease-in-out);
+  @include transform(translateY(100%));
 
-  &.mt-appear-show {
-    @include transform(translateY(100%));
-  }
-
-  &.mt-appear-hide {
+  &:hover, &.mt-appear {
     @include transform(translateY(0));
-  }
-
-  &.mt-appear-show.mt-appear-show-active {
-    @include transform(translateY(0));
-  }
-
-  &.mt-appear-hide.mt-appear-hide-active {
-    @include transform(translateY(100%));
   }
 }
 
