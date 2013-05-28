@@ -1,7 +1,7 @@
 (function (mt, undefined) {
     'use strict';
 
-    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtLoggerFactory) {
+    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtUserInteractionManager) {
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -11,15 +11,6 @@
          */
         var serializedQueue;
 
-        /**
-         * The promise for the timeout that will set the mouse active state to false.
-         *
-         * @type {Promise}
-         */
-        var mouseStoppedPromise;
-
-        /** type {boolean} */
-        $scope.mouseActive = false;
         /** type {mt.model.Queue} */
         $scope.queue = mtQueueManager.queue;
 
@@ -45,14 +36,11 @@
         }, true);
 
         $scope.mouseStarted = function () {
-            $timeout.cancel(mouseStoppedPromise);
-            $scope.mouseActive = true;
+            mtUserInteractionManager.mouseStarted();
         };
 
         $scope.mouseStopped = function () {
-            mouseStoppedPromise = $timeout(function () {
-                $scope.mouseActive = false;
-            }, 2000);
+            mtUserInteractionManager.mouseStopped();
         };
     });
 
@@ -98,7 +86,7 @@
         mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
-    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtLoggerFactory) {
+    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtUserInteractionManager, mtLoggerFactory) {
 
         var logger = mtLoggerFactory.logger('mtQueueFrameCtrl');
 
@@ -180,6 +168,18 @@
 
         $scope.openSearchButtonClicked = function () {
             $rootScope.$broadcast(mt.events.OpenSearchFrameRequest);
+        };
+
+        $scope.mouseEntered = function () {
+            mtUserInteractionManager.enteredQueueFrame();
+        };
+
+        $scope.mouseLeaved = function () {
+            mtUserInteractionManager.leavedQueueFrame();
+        };
+
+        $scope.isUserInteracting = function () {
+            return mtUserInteractionManager.userInteracting;
         };
     });
 
@@ -435,7 +435,7 @@
         });
     });
 
-    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration, mtKeyboardShortcutManager) {
+    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration, mtKeyboardShortcutManager, mtUserInteractionManager) {
 
         /**
          * @const
@@ -488,6 +488,14 @@
                 $scope.instantSearchPromise = $timeout(function () {
                     $scope.search();
                 }, INSTANT_SEARCH_DELAY);
+            }
+        });
+
+        $scope.$watch('searchVisible', function (newSearchVisible) {
+            if (newSearchVisible) {
+                mtUserInteractionManager.searchOpened();
+            } else {
+                mtUserInteractionManager.searchClosed();
             }
         });
 

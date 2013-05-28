@@ -401,7 +401,7 @@ body {
   @include transition(all 200ms ease-in-out);
   @include transform(translateY(100%));
 
-  &:hover, &.mt-appear {
+  &.mt-appear {
     @include transform(translateY(0));
   }
 }

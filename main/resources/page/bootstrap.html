@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="mtMixTubeApp" ng-controller="mtRootController" ng-cloack>
+<html ng-app="mtMixTubeApp" ng-controller="mtRootController">
 <head>
     <meta charset='utf-8'>
     <base href="/page">
@@ -14,7 +14,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
 </head>
-<body mt-mousestart="mouseStarted()" mt-mousestop="mouseStopped()" debounce="300">
+<body mt-mousestart="mouseStarted()" mt-mousestop="mouseStopped()" debounce="300" ng-cloack>
 
 <section class="mt-video-stage-frame">
     <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible"
@@ -101,7 +101,8 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-frame" ng-class="{'mt-appear': mouseActive}">
+    <div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"
+         ng-mouseleave="mouseLeaved()">
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">
                 <div class="mt-column mt-left">

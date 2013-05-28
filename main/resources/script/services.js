@@ -296,6 +296,53 @@
         }
     });
 
+    mt.MixTubeApp.factory('mtUserInteractionManager', function ($timeout) {
+        /** @type {number} */
+        var TRAILING_DELAY = 1000;
+
+        /** @type {boolean} */
+        var overQueueFrame;
+        /** @type {boolean} */
+        var mouseMoving;
+        /** @type {boolean} */
+        var searchVisible;
+
+        /** @type {promise} */
+        var overQueueFramePromise;
+        /** @type {promise} */
+        var mouseMovingPromise;
+
+        return {
+            get userInteracting() {
+                return overQueueFrame || mouseMoving || searchVisible;
+            },
+            enteredQueueFrame: function () {
+                $timeout.cancel(overQueueFramePromise);
+                overQueueFrame = true;
+            },
+            leavedQueueFrame: function () {
+                overQueueFramePromise = $timeout(function () {
+                    overQueueFrame = false;
+                }, TRAILING_DELAY);
+            },
+            mouseStarted: function () {
+                $timeout.cancel(mouseMovingPromise);
+                mouseMoving = true;
+            },
+            mouseStopped: function () {
+                mouseMovingPromise = $timeout(function () {
+                    mouseMoving = false;
+                }, TRAILING_DELAY);
+            },
+            searchOpened: function () {
+                searchVisible = true;
+            },
+            searchClosed: function () {
+                searchVisible = false;
+            }
+        };
+    });
+
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
         /** @type {Object.<String, Function> */
         var contexts = {};
