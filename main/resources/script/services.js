@@ -297,7 +297,10 @@
     });
 
     mt.MixTubeApp.factory('mtUserInteractionManager', function ($timeout) {
-        /** @type {number} */
+        /**
+         * @const
+         * @type {number}
+         */
         var TRAILING_DELAY = 1000;
 
         /** @type {boolean} */
@@ -313,6 +316,11 @@
         var mouseMovingPromise;
 
         return {
+            /**
+             * Is the user actively interacting with the UI.
+             *
+             * @returns {boolean}
+             */
             get userInteracting() {
                 return overQueueFrame || mouseMoving || searchVisible;
             },
@@ -344,7 +352,7 @@
     });
 
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
-        /** @type {Object.<String, Function> */
+        /** @type {Object.<String, Function>} */
         var contexts = {};
         /** @type {Array.<String>} */
         var contextStack = [];
@@ -451,42 +459,42 @@
          */
         var TOKEN_REGEXP = /%s|%d/g;
 
+        /** @type {Object.<string, Logger>} */
         var loggerByName = {};
 
-        function prepareLogTrace(params, loggerName) {
-            var now = new Date();
-            var newArguments = [];
-            newArguments[0] = '[%s:%s:%s] %s : ' + params[0];
-            newArguments[1] = mt.tools.leftPad(now.getHours().toString(10), 2, '0');
-            newArguments[2] = mt.tools.leftPad(now.getMinutes().toString(10), 2, '0');
-            newArguments[3] = mt.tools.leftPad(now.getSeconds().toString(10), 2, '0');
-            newArguments[4] = loggerName;
-            for (var idx = 1; idx < params.length; idx++) {
-                newArguments[idx + 4] = params[idx];
-            }
-            return newArguments;
-        }
-
-        function Logger(name) {
-            this.name = name;
-        }
-
-        Logger.prototype = {
+        var Logger = {
+            init: function (name) {
+                this.name = name;
+            },
             log: function () {
                 this.delegate($log.log, arguments);
             },
             debug: function () {
                 this.delegate($log.debug, arguments);
             },
-            delegate: function (targetFn, delegateArguments) {
-                var preparedArguments = prepareLogTrace(delegateArguments, this.name);
+            delegate: function (targetFn, origArgs) {
 
-                var pattern = preparedArguments[0];
-                // parameters starts at position 1 because 0 is the whole pattern
-                var idx = 1;
+                var origPattern = _.first(origArgs);
+                var origParams = _.rest(origArgs);
 
-                var formatted = pattern.replace(TOKEN_REGEXP, function (token) {
-                    return preparedArguments[idx++].toString();
+                // prepend extra info to the original pattern (time and logger name)
+                var pattern = '[%s:%s:%s] %s : ' + origPattern;
+
+                // prepend time original params
+                var now = new Date();
+                var extraParams = [now.getHours(), now.getMinutes(), now.getSeconds()].map(function (timePart) {
+                    mt.tools.leftPad(timePart.toString(10), 2, '0');
+                });
+
+                // prepend logger name
+                extraParams.push(this.name);
+
+                // concatenate everything
+                var params = extraParams.concat(origParams);
+
+                var idxParams = 0;
+                var formatted = pattern.replace(TOKEN_REGEXP, function () {
+                    return params[idxParams++];
                 });
 
                 // extra empty string is to make AngularJS's IE9 log polyfill happy, else it appends "undefined" to the log trace
@@ -503,7 +511,9 @@
             logger: function (name) {
                 var loggerName = angular.isDefined(name) ? name : 'global';
                 if (!loggerByName.hasOwnProperty(loggerName)) {
-                    loggerByName[loggerName] = new Logger(loggerName);
+                    var newLogger = Object.create(Logger);
+                    newLogger.init(loggerName);
+                    loggerByName[loggerName] = newLogger;
                 }
                 return loggerByName[loggerName];
             }

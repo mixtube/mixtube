@@ -65,7 +65,7 @@
                     var fn = $parse(attr[directiveName]);
 
                     // get the debounce wait value (default value if unspecified is 500ms)
-                    var waitTime = parseInt(attr.debounce) || 500;
+                    var waitTime = parseInt(attr.debounce, 10) || 500;
 
                     elmt.bind('mousemove', _.debounce(function (evt) {
                         scope.$apply(function () {
