@@ -17,8 +17,7 @@
 <body mt-mousestart="mouseStarted()" mt-mousestop="mouseStopped()" debounce="300" ng-cloack>
 
 <section class="mt-video-stage-frame">
-    <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible"
-         ng-animate="{show: 'mt-fade-in', hide: 'mt-fade-out'}">
+    <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible" ng-animate="'mt-fade'">
         <div class="mt-coming-next-item" ng-show="titleCurrent">
             <h4 class="mt-header">It was :</h4>
             <p class="mt-title">{{titleCurrent}}</p>

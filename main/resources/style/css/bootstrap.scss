@@ -109,25 +109,22 @@ input, button {
   border-radius: $radius 0 0 $radius;
 }
 
-// common fade in/out animations that works with AngularJS animation framework
-// the current FLOC at startup has been fix on AngularJS master but not yet released
-// see https://github.com/angular/angular.js/commit/570463a465fae02efc33e5a1fa963437cdc275dd
-.mt-fade-in-setup, .mt-fade-out-setup {
+.mt-fade-show, .mt-fade-hide {
   @include transition(opacity 1s);
 }
 
-.mt-fade-in-setup {
+.mt-fade-show {
   opacity: 0;
 
-  &.mt-fade-in-start {
+  &.mt-fade-show-active {
     opacity: 1;
   }
 }
 
-.mt-fade-out-setup {
+.mt-fade-hide {
   opacity: 1;
 
-  &.mt-fade-out-start {
+  &.mt-fade-hide-active {
     opacity: 0;
   }
 }
@@ -142,6 +139,9 @@ body {
   font-size: 14px;
   color: $lightTextColor;
   background-color: $darkerColor;
+  // needed to allow elememts to overflow out of the window without activating scrollbars
+  // used for the queue bar when hidden for example
+  overflow: hidden;
 }
 
 .mt-video-stage-frame {
@@ -389,7 +389,6 @@ body {
   height: $queueFrameHeight;
   width: 100%;
   z-index: $zIndexMedium;
-  overflow: hidden;
 }
 
 .mt-queue-frame {

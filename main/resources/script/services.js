@@ -483,7 +483,7 @@
                 // prepend time original params
                 var now = new Date();
                 var extraParams = [now.getHours(), now.getMinutes(), now.getSeconds()].map(function (timePart) {
-                    mt.tools.leftPad(timePart.toString(10), 2, '0');
+                    return mt.tools.leftPad(timePart.toString(10), 2, '0');
                 });
 
                 // prepend logger name
