@@ -139,7 +139,7 @@
                 <div class="mt-triangle"></div>
             </div>
             <ul class="mt-queue-list">
-                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries">
+                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'">
                     <a class="mt-button-link" ng-click="queueEntryClicked(queueEntry)">
                         <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
                     </a>

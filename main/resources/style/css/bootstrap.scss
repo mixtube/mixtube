@@ -394,6 +394,7 @@ body {
 .mt-queue-frame {
   position: absolute;
   height: 100%;
+  width: 100%;
 
   // I would love to use the AngularJS animation fwk on show but that shows some glitches propably because of the sequence
   // of animation css and display none
@@ -609,6 +610,29 @@ body {
 
   &:hover > .mt-remove-button {
     display: block;
+  }
+
+  // appear / disappear animations
+  &.mt-appear-enter, &.mt-appear-leave {
+    @include transition(all 100ms ease-in-out);
+  }
+
+  &.mt-appear-enter {
+
+    @include transform(scale(0));
+
+    &.mt-appear-enter-active {
+      @include transform(scale(1));
+    }
+  }
+
+  &.mt-appear-leave {
+
+    @include transform(scale(1));
+
+    &.mt-appear-leave-active {
+      @include transform(scale(0));
+    }
   }
 }
 
