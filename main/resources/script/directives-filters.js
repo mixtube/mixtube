@@ -39,18 +39,6 @@
         };
     });
 
-    var transitionName = 'mtTransition';
-    mt.MixTubeApp.directive(transitionName, function () {
-        return function (scope, elmt, attrs) {
-            scope.$watch(attrs[transitionName], function (config) {
-                if (!angular.isObject(config)) {
-                    throw new Error('The attribute value should be a transition config object');
-                }
-                elmt.transition(config);
-            }, true);
-        };
-    });
-
     // mouse start and stop directive which are mouse move listener with debouncing for respectively leading and
     // trailing edge of the wait period defined by the related attribute "debounce"
     [
