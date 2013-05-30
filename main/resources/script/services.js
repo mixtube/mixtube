@@ -59,6 +59,60 @@
             },
 
             /**
+             * @param {mt.model.Video} video
+             */
+            appendVideo: function (video) {
+                var queueEntry = new mt.model.QueueEntry();
+                queueEntry.id = mt.tools.uniqueId();
+                queueEntry.video = video;
+                queue.entries.push(queueEntry);
+            },
+
+            /**
+             * @param {mt.model.QueueEntry} entry
+             */
+            removeEntry: function (entry) {
+                var index = queue.entries.indexOf(entry);
+                queue.entries.splice(index, 1);
+            },
+
+            clear: function () {
+                queue.entries = [];
+            },
+
+            /**
+             * Finds the first next video in the queue that exists.
+             *
+             * Video can be removed from the remote provider so we have to check that before loading a video to prevent
+             * playback interruption.
+             *
+             * @param {number} startPosition the position from where to start to look for the next valid video
+             * @return {Promise} a promise with that provides the video instance when an existing video is found
+             */
+            nextValidQueueEntry: function (startPosition) {
+                var self = this;
+                var deferred = $q.defer();
+
+                var tryPosition = startPosition + 1;
+
+                if (tryPosition < queue.entries.length) {
+                    var queueEntry = queue.entries[tryPosition];
+
+                    mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
+                        if (videoExists) {
+                            deferred.resolve(queueEntry);
+                        } else {
+                            self.nextValidQueueEntry(tryPosition).then(deferred.resolve);
+                        }
+                    });
+                } else {
+                    deferred.reject();
+                }
+
+                return deferred.promise;
+            },
+
+            /**
              * Deserialize the queue from the given string.
              *
              * @param {String} serialized
