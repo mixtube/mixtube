@@ -1,6 +1,18 @@
 (function (mt, undefined) {
     'use strict';
 
+    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($q, mtYoutubeClient, mtLoggerFactory) {
+        return {
+            /**
+             *
+             * @param {{queueEntry: mt.model.QueueEntry, autoplay: boolean}} params
+             */
+            loadQueueEntry: function (params) {
+
+            }
+        };
+    });
+
     mt.MixTubeApp.factory('mtQueueManager', function ($q, mtYoutubeClient, mtLoggerFactory) {
         var logger = mtLoggerFactory.logger('mtQueueManager');
 
@@ -47,8 +59,34 @@
             return deferred.promise;
         };
 
+        /**
+         * @param {number} startPosition the position from where to start to look for the next valid video
+         */
+        var nextValidQueueEntry = function (startPosition) {
+            var deferred = $q.defer();
+            var tryPosition = startPosition + 1;
+
+            if (tryPosition < queue.entries.length) {
+                var queueEntry = queue.entries[tryPosition];
+
+                mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
+                    if (videoExists) {
+                        deferred.resolve(queueEntry);
+                    } else {
+                        nextValidQueueEntry(tryPosition).then(deferred.resolve);
+                    }
+                });
+            } else {
+                deferred.reject();
+            }
+
+            return deferred.promise;
+        };
+
         // initialize queue
         var queue = new mt.model.Queue();
+        /** @type {mt.model.QueueEntry=} */
+        var playbackEntry;
 
         return {
             /**
@@ -56,6 +94,13 @@
              */
             get queue() {
                 return queue;
+            },
+
+            /**
+             * @returns {mt.model.QueueEntry}
+             */
+            get playbackEntry() {
+                return playbackEntry;
             },
 
             /**
@@ -78,6 +123,21 @@
 
             clear: function () {
                 queue.entries = [];
+                playbackEntry = undefined;
+            },
+
+            /**
+             * Notify the queue manager of the entry playing henceforth.
+             *
+             * @param {mt.model.QueueEntry} entry
+             */
+            positionPlaybackEntry: function (entry) {
+                var entryPosition = queue.entries.indexOf(entry);
+                if (entryPosition === -1) {
+                    throw new Error('The given entry is not in the queue array');
+                }
+
+                playbackEntry = entry;
             },
 
             /**
@@ -86,30 +146,16 @@
              * Video can be removed from the remote provider so we have to check that before loading a video to prevent
              * playback interruption.
              *
-             * @param {number} startPosition the position from where to start to look for the next valid video
              * @return {Promise} a promise with that provides the video instance when an existing video is found
              */
-            nextValidQueueEntry: function (startPosition) {
-                var self = this;
-                var deferred = $q.defer();
-
-                var tryPosition = startPosition + 1;
-
-                if (tryPosition < queue.entries.length) {
-                    var queueEntry = queue.entries[tryPosition];
-
-                    mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
-                        if (videoExists) {
-                            deferred.resolve(queueEntry);
-                        } else {
-                            self.nextValidQueueEntry(tryPosition).then(deferred.resolve);
-                        }
-                    });
-                } else {
-                    deferred.reject();
+            nextValidQueueEntry: function () {
+                var startPosition = playbackEntry ? queue.entries.indexOf(playbackEntry) : 0;
+                if (startPosition === -1) {
+                    // something is seriously broken here
+                    throw new Error('The active entry from the queue manager is not in the queue array');
                 }
 
-                return deferred.promise;
+                return nextValidQueueEntry(startPosition);
             },
 
             /**

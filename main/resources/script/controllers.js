@@ -86,28 +86,10 @@
         mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
-    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtYoutubeClient, mtUserInteractionManager, mtLoggerFactory) {
-
-        var logger = mtLoggerFactory.logger('mtQueueFrameCtrl');
-
-        /** @type {number}*/
-        $scope.activePosition = 0;
-
-        $scope.$on(mt.events.NextQueueEntryRequest, function (evt, data) {
-            logger.debug('Next queue entry request received');
-
-            mtQueueManager.nextValidQueueEntry($scope.activePosition).then(function (queueEntry) {
-                $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: data.initialization});
-            });
-        });
-
-        $scope.$on(mt.events.QueueEntryActivated, function (evt, data) {
-            var activeQueueEntry = _.first(_.where($scope.queue.entries, {id: data.queueEntryId}));
-            $scope.activePosition = $scope.queue.entries.indexOf(activeQueueEntry);
-        });
+    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager) {
 
         $scope.queueEntryClicked = function (queueEntry) {
-            $rootScope.$broadcast(mt.events.LoadQueueEntryRequest, {queueEntry: queueEntry, autoplay: true});
+            mtVideoPlayerManager.loadQueueEntry({queueEntry: queueEntry, autoplay: true});
         };
 
         $scope.removeQueueEntryClicked = function (queueEntry) {
@@ -116,7 +98,6 @@
 
         $scope.clearQueueButtonClicked = function () {
             mtQueueManager.clear();
-            $scope.activeQueueEntry = undefined;
         };
 
         $scope.openSearchButtonClicked = function () {
@@ -134,6 +115,10 @@
         $scope.isUserInteracting = function () {
             return mtUserInteractionManager.userInteracting;
         };
+
+        $scope.getPlaybackQueueEntry = function () {
+            return mtQueueManager.playbackEntry;
+        }
     });
 
     mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager) {
@@ -184,7 +169,7 @@
         });
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerWindowCtrl', function ($rootScope, mtPlayerPoolProvider, mtLoggerFactory, mtConfiguration) {
+    mt.MixTubeApp.controller('mtVideoPlayerWindowCtrl', function ($rootScope, mtPlayerPoolProvider, mtQueueManager, mtLoggerFactory, mtConfiguration) {
 
         var logger = mtLoggerFactory.logger('mtVideoPlayerWindowCtrl');
 
@@ -202,8 +187,8 @@
         thisCtrl.nextVideo = undefined;
         /**  @type {boolean} */
         thisCtrl.playing = false;
-        /** @type {Object.<string, string>} */
-        thisCtrl.queueEntryIdByHandleId = {};
+        /** @type {Object.<string, mt.model.QueueEntry>} */
+        thisCtrl.queueEntryByHandleId = {};
 
         mtPlayerPoolProvider.get().then(function (playersPool) {
             thisCtrl.playersPool = playersPool;
@@ -213,12 +198,12 @@
          * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
          *
          * @param {string} videoHandleId
-         * @return {string}
+         * @return {mt.model.QueueEntry}
          */
-        var peekQueueEntryIdByHandleId = function (videoHandleId) {
-            var activatedQueueEntryId = thisCtrl.queueEntryIdByHandleId[videoHandleId];
-            delete thisCtrl.queueEntryIdByHandleId[videoHandleId];
-            return activatedQueueEntryId;
+        var peekQueueEntryByHandleId = function (videoHandleId) {
+            var entry = thisCtrl.queueEntryByHandleId[videoHandleId];
+            delete thisCtrl.queueEntryByHandleId[videoHandleId];
+            return entry;
         };
 
         /**
@@ -250,10 +235,12 @@
 
                 // now that the new video is running ask for the next one
                 $rootScope.$apply(function () {
-                    $rootScope.$broadcast(mt.events.QueueEntryActivated, {
-                        queueEntryId: peekQueueEntryIdByHandleId(thisCtrl.currentVideoHandle.id)
+                    var activatedQueueEntry = peekQueueEntryByHandleId(thisCtrl.currentVideoHandle.id);
+                    mtQueueManager.positionPlaybackEntry(activatedQueueEntry);
+
+                    mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                        loadQueueEntry(queueEntry, false);
                     });
-                    $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
                 });
             } else {
                 // end of the road
@@ -278,7 +265,7 @@
             logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', thisCtrl.nextVideoHandle.uid);
 
             // the next video has already been prepared, we have to dispose it before preparing a new one
-            peekQueueEntryIdByHandleId(thisCtrl.nextVideoHandle.id);
+            peekQueueEntryByHandleId(thisCtrl.nextVideoHandle.id);
             thisCtrl.nextVideoHandle.dispose();
             thisCtrl.nextVideoHandle = undefined;
             thisCtrl.nextVideo = undefined;
@@ -296,7 +283,9 @@
                     thisCtrl.currentVideoHandle.unpause();
                 }
             } else {
-                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: true});
+                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                    loadQueueEntry(queueEntry, true);
+                });
             }
         };
 
@@ -326,7 +315,7 @@
             ]);
             thisCtrl.nextVideo = queueEntry.video;
 
-            thisCtrl.queueEntryIdByHandleId[thisCtrl.nextVideoHandle.id] = queueEntry.id;
+            thisCtrl.queueEntryByHandleId[thisCtrl.nextVideoHandle.id] = queueEntry;
 
             var nextLoadDeferred = thisCtrl.nextVideoHandle.load();
 
@@ -363,7 +352,9 @@
                 if (thisCtrl.nextVideoHandle) {
                     clearNextVideoHandle();
                 }
-                $rootScope.$broadcast(mt.events.NextQueueEntryRequest, {initialization: false});
+                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                    loadQueueEntry(queueEntry, false);
+                });
             }
         };
 
@@ -374,10 +365,6 @@
         $rootScope.$on(mt.events.QueueModified, function (event, data) {
             // todo orphan listener, won't receive any event since it was removed
             update(data.modifiedPositions, data.activePosition);
-        });
-
-        $rootScope.$on(mt.events.LoadQueueEntryRequest, function (event, data) {
-            loadQueueEntry(data.queueEntry, data.autoplay);
         });
 
         $rootScope.$on(mt.events.PlaybackToggleRequest, function () {
