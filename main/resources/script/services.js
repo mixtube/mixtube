@@ -1,14 +1,234 @@
 (function (mt, undefined) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($q, mtYoutubeClient, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory) {
+        var logger = mtLoggerFactory.logger('mtVideoPlayerManager');
+
+        var selfData = {};
+
+        /** @type {mt.player.PlayersPool} */
+        selfData.playersPool = undefined;
+        /** @type {mt.player.VideoHandle} */
+        selfData.currentVideoHandle = undefined;
+        /** @type {mt.player.Video} */
+        selfData.currentVideo = undefined;
+        /** @type {mt.player.VideoHandle} */
+        selfData.nextVideoHandle = undefined;
+        /** @type {mt.player.Video} */
+        selfData.nextVideo = undefined;
+        /**  @type {boolean} */
+        selfData.playing = false;
+        /** @type {Object.<string, mt.model.QueueEntry>} */
+        selfData.queueEntryByHandleId = {};
+
+        mtPlayerPoolProvider.get().then(function (playersPool) {
+            selfData.playersPool = playersPool;
+        });
+
+        /**
+         * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
+         *
+         * @param {string} videoHandleId
+         * @return {mt.model.QueueEntry}
+         */
+        var peekQueueEntryByHandleId = function (videoHandleId) {
+            var entry = selfData.queueEntryByHandleId[videoHandleId];
+            delete selfData.queueEntryByHandleId[videoHandleId];
+            return entry;
+        };
+
+        /**
+         * Executes the video transition steps :
+         * - starts the prepared video
+         * - references the prepared video as the new current one
+         * - cross fades the videos (out the current one / in the prepared one)
+         * - disposes the previous (the old current) video
+         * - broadcasts events to notify if the new state
+         * - sends a request to get the next video references
+         */
+        var executeTransition = function () {
+            if (selfData.currentVideoHandle) {
+                selfData.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
+                    videoHandle.dispose();
+                });
+            }
+
+            selfData.currentVideoHandle = selfData.nextVideoHandle;
+            selfData.currentVideo = selfData.nextVideo;
+            selfData.nextVideoHandle = undefined;
+            selfData.nextVideo = undefined;
+
+            // if there is a a current video start it, else it's the end of the sequence
+            if (selfData.currentVideoHandle) {
+                selfData.playing = true;
+                selfData.currentVideoHandle.in(mtConfiguration.transitionDuration);
+
+                // now that the new video is running ask for the next one
+
+                var activatedQueueEntry = peekQueueEntryByHandleId(selfData.currentVideoHandle.id);
+                mtQueueManager.positionPlaybackEntry(activatedQueueEntry);
+
+                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                    loadQueueEntry(queueEntry, false);
+                });
+            } else {
+                // end of the road
+                selfData.playing = false;
+            }
+        };
+
+        var triggerComingNext = function () {
+            $rootScope.$broadcast(mt.events.UpdateComingNextRequest, {
+                currentVideo: selfData.currentVideo,
+                nextVideo: selfData.nextVideo
+            });
+        };
+
+        /**
+         * Properly clears the next video handle by disposing it and clearing all the references to it.
+         */
+        var clearNextVideoHandle = function () {
+            logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', selfData.nextVideoHandle.uid);
+
+            // the next video has already been prepared, we have to dispose it before preparing a new one
+            peekQueueEntryByHandleId(selfData.nextVideoHandle.id);
+            selfData.nextVideoHandle.dispose();
+            selfData.nextVideoHandle = undefined;
+            selfData.nextVideo = undefined;
+        };
+
+        var playbackToggle = function () {
+            if (selfData.currentVideoHandle) {
+                if (selfData.playing) {
+                    selfData.playing = false;
+                    selfData.currentVideoHandle.pause();
+                } else {
+                    selfData.playing = true;
+                    selfData.currentVideoHandle.unpause();
+                }
+            } else {
+                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                    loadQueueEntry(queueEntry, true);
+                });
+            }
+        };
+
+        var relativeTimeToAbsolute = function (relTime, duration) {
+            return relTime > 0 ? relTime : duration + relTime;
+        };
+
+        var loadQueueEntry = function (queueEntry, autoplay) {
+            logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, autoplay);
+
+            var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, queueEntry.video.duration);
+            var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, queueEntry.video.duration);
+            logger.debug('Preparing a video %s, the coming next cue will start at %d, the transition cue will start at %d', queueEntry.video.id, comingNextStartTime, transitionStartTime);
+
+            selfData.nextVideoHandle = selfData.playersPool.prepareVideo({
+                id: queueEntry.video.id,
+                provider: queueEntry.video.provider,
+                coarseDuration: queueEntry.video.duration
+            }, [
+                {time: comingNextStartTime, callback: function () {
+                    $rootScope.$apply(function () {
+                        triggerComingNext();
+                    });
+                }},
+                {time: transitionStartTime, callback: function () {
+                    // starts the next prepared video and cross fade
+                    $rootScope.$apply(function () {
+                        executeTransition();
+                    });
+                }}
+            ]);
+            selfData.nextVideo = queueEntry.video;
+
+            selfData.queueEntryByHandleId[selfData.nextVideoHandle.id] = queueEntry;
+
+            var nextLoadDeferred = selfData.nextVideoHandle.load();
+
+            if (autoplay) {
+                nextLoadDeferred.done(function () {
+                    $rootScope.$apply(function () {
+                        executeTransition();
+                    });
+                });
+            }
+        };
+
+        var clear = function () {
+            if (selfData.nextVideoHandle) {
+                clearNextVideoHandle();
+            }
+            if (selfData.currentVideoHandle) {
+                selfData.playing = false;
+                selfData.currentVideoHandle.dispose();
+                selfData.currentVideoHandle = undefined;
+                selfData.currentVideo = undefined;
+            }
+        };
+
+        var replaceNextVideoHandle = function () {
+            logger.debug('Received a QueueModified event with relevant position %s', JSON.stringify(relevantPositions));
+
+            // a change in queue require the player to query for the next video
+            if (selfData.nextVideoHandle) {
+                clearNextVideoHandle();
+            }
+            mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                loadQueueEntry(queueEntry, false);
+            });
+        };
+
+        // watch on object full equality
+        $rootScope.$watch(function () {
+            return mtQueueManager.queue.entries;
+        }, function () {
+            if (mtQueueManager.queue.entries.length === 0) {
+                // the queue is empty, probably just cleared, do the same for the player
+                clear();
+            } else {
+                // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
+                mtQueueManager.nextValidQueueEntry().then(function (nextQueueEntry) {
+                    var needReplacingNextHandle;
+
+                    if (!selfData.nextVideoHandle) {
+                        if (nextQueueEntry) {
+                            // we were a the last position in the queue and a video was added just after
+                            needReplacingNextHandle = true;
+                        }
+                    } else {
+                        // is the next prepared handle stall ?
+                        var preparedQueueEntry = selfData.queueEntryByHandleId[selfData.nextVideoHandle.id];
+                        needReplacingNextHandle = preparedQueueEntry !== nextQueueEntry;
+                    }
+
+                    if (needReplacingNextHandle) {
+                        replaceNextVideoHandle();
+                    }
+                });
+            }
+        }, true);
+
+
         return {
+            get playing() {
+                return  selfData.playing;
+            },
+
             /**
-             *
              * @param {{queueEntry: mt.model.QueueEntry, autoplay: boolean}} params
              */
             loadQueueEntry: function (params) {
+                loadQueueEntry(params);
+            },
 
+            playbackToggle: function () {
+                playbackToggle();
+            },
+
+            clear: function () {
+                clear();
             }
         };
     });
@@ -105,12 +325,14 @@
 
             /**
              * @param {mt.model.Video} video
+             * @return {mt.mode.QueueEntry} the newly created entry in the queue
              */
             appendVideo: function (video) {
                 var queueEntry = new mt.model.QueueEntry();
                 queueEntry.id = mt.tools.uniqueId();
                 queueEntry.video = video;
                 queue.entries.push(queueEntry);
+                return queueEntry;
             },
 
             /**
