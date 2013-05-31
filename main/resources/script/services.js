@@ -85,16 +85,18 @@
         };
 
         /**
-         * Properly clears the next video handle by disposing it and clearing all the references to it.
+         * Properly clears the next video handle if needed by disposing it and clearing all the references to it.
          */
-        var clearNextVideoHandle = function () {
-            logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', selfData.nextVideoHandle.uid);
+        var ensureNextVideoHandleCleared = function () {
+            if (selfData.nextVideoHandle) {
+                logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', selfData.nextVideoHandle.uid);
 
-            // the next video has already been prepared, we have to dispose it before preparing a new one
-            peekQueueEntryByHandleId(selfData.nextVideoHandle.id);
-            selfData.nextVideoHandle.dispose();
-            selfData.nextVideoHandle = undefined;
-            selfData.nextVideo = undefined;
+                // the next video has already been prepared, we have to dispose it before preparing a new one
+                peekQueueEntryByHandleId(selfData.nextVideoHandle.id);
+                selfData.nextVideoHandle.dispose();
+                selfData.nextVideoHandle = undefined;
+                selfData.nextVideo = undefined;
+            }
         };
 
         var playbackToggle = function () {
@@ -157,27 +159,14 @@
         };
 
         var clear = function () {
-            if (selfData.nextVideoHandle) {
-                clearNextVideoHandle();
-            }
+            ensureNextVideoHandleCleared();
+
             if (selfData.currentVideoHandle) {
                 selfData.playing = false;
                 selfData.currentVideoHandle.dispose();
                 selfData.currentVideoHandle = undefined;
                 selfData.currentVideo = undefined;
             }
-        };
-
-        var replaceNextVideoHandle = function () {
-            logger.debug('Received a QueueModified event with relevant position %s', JSON.stringify(relevantPositions));
-
-            // a change in queue require the player to query for the next video
-            if (selfData.nextVideoHandle) {
-                clearNextVideoHandle();
-            }
-            mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
-                loadQueueEntry(queueEntry, false);
-            });
         };
 
         // watch on object full equality
@@ -204,12 +193,18 @@
                     }
 
                     if (needReplacingNextHandle) {
-                        replaceNextVideoHandle();
+                        logger.debug('Need to replace the next video handle it was made obsolete by queue update');
+
+                        // a change in queue require the player to query for the next video
+                        ensureNextVideoHandleCleared();
+                        loadQueueEntry(nextQueueEntry, false);
                     }
+                }, function () {
+                    // no next video available, clear the next handle
+                    ensureNextVideoHandleCleared();
                 });
             }
         }, true);
-
 
         return {
             get playing() {
@@ -220,7 +215,7 @@
              * @param {{queueEntry: mt.model.QueueEntry, autoplay: boolean}} params
              */
             loadQueueEntry: function (params) {
-                loadQueueEntry(params);
+                loadQueueEntry(params.queueEntry, params.autoplay);
             },
 
             playbackToggle: function () {
@@ -368,7 +363,7 @@
              * Video can be removed from the remote provider so we have to check that before loading a video to prevent
              * playback interruption.
              *
-             * @return {Promise} a promise with that provides the video instance when an existing video is found
+             * @return {Promise} resolved with a queue entry when an existing video is found, rejected else
              */
             nextValidQueueEntry: function () {
                 var startPosition = playbackEntry ? queue.entries.indexOf(playbackEntry) : 0;
