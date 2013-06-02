@@ -26,7 +26,7 @@
             <p class="mt-title">{{titleNext}}</p>
         </div>
     </div>
-    <div class="mt-video-player-window" ng-controller="mtVideoPlayerWindowCtrl"></div>
+    <div class="mt-video-player-window"></div>
 </section>
 
 <section class="mt-search-frame-container" ng-controller="mtSearchCtrl" ng-show="searchVisible">
@@ -115,7 +115,7 @@
                     </form>
                 </div>
                 <div class="mt-column mt-middle" ng-controller="mtVideoPlayerControlsCtrl">
-                    <a class="mt-playback-button" ng-class="{'mt-play': !playing, 'mt-pause': playing}"
+                    <a class="mt-playback-button" ng-class="{'mt-play': !isPlaying(), 'mt-pause': isPlaying()}"
                        ng-click="pauseButtonClicked()" title="Play / Pause [Space]"></a>
                 </div>
                 <div class="mt-column mt-right">
