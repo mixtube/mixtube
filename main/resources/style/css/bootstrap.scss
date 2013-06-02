@@ -638,8 +638,7 @@ body {
   top: 0;
   width: 100%;
   height: $queueThumbnailHeight;
-  // hidden by default, the "visible" display value is table for vertical centering purposes
-  display: none;
+  display: table;
 
   // vertical and horizontal centering of play button
   text-align: center;
@@ -647,25 +646,27 @@ body {
   > .mt-vertical-centering {
     display: table-cell;
     vertical-align: middle;
-
-    > .mt-play-button {
-      @include mt-icon-font-button($smallIconFontSize, '\e80a');
-
-      padding: {
-        left: 15px;
-        right: 15px;
-        top: 10px;
-        bottom: 10px;
-      }
-
-      border-radius: $tooltipRadius;
-      background-color: $tooltipDefaultColor;
-    }
   }
 }
 
-.mt-queue-item:hover  > .mt-queue-item-play-button-container {
-  display: table;
+.mt-play-button {
+  @include mt-icon-font-button($smallIconFontSize, '\e80a');
+
+  // hidden by default
+  display: none;
+  padding: {
+    left: 15px;
+    right: 15px;
+    top: 10px;
+    bottom: 10px;
+  }
+
+  border-radius: $tooltipRadius;
+  background-color: $tooltipDefaultColor;
+}
+
+.mt-queue-item:hover .mt-play-button {
+  display: inline-block;
 }
 
 .mt-queue-call-to-action {
