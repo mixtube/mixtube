@@ -137,7 +137,7 @@
                 <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'">
                     <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
 
-                    <div class="mt-playing-mark" ng-show="queueEntry == queue.entries[activePosition]"></div>
+                    <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
 
                     <!--this weird structure is just to be able to vertical center the play button-->
                     <div class="mt-queue-item-play-button-container">
