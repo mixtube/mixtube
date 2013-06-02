@@ -89,7 +89,7 @@
     mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager) {
 
         $scope.queueEntryClicked = function (queueEntry) {
-            mtVideoPlayerManager.loadQueueEntry({queueEntry: queueEntry, autoplay: true});
+            mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
         };
 
         $scope.removeQueueEntryClicked = function (queueEntry) {

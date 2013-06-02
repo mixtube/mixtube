@@ -119,8 +119,8 @@
             return relTime > 0 ? relTime : duration + relTime;
         };
 
-        var loadQueueEntry = function (queueEntry, autoplay) {
-            logger.debug('Start request for video %s received with autoplay flag %s', queueEntry.video.id, autoplay);
+        var loadQueueEntry = function (queueEntry, forcePlay) {
+            logger.debug('Start request for video %s received with forcePlay flag %s', queueEntry.video.id, forcePlay);
 
             var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, queueEntry.video.duration);
             var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, queueEntry.video.duration);
@@ -149,7 +149,7 @@
 
             var nextLoadDeferred = selfData.nextVideoHandle.load();
 
-            if (autoplay) {
+            if (forcePlay) {
                 nextLoadDeferred.done(function () {
                     $rootScope.$apply(function () {
                         executeTransition();
@@ -212,10 +212,15 @@
             },
 
             /**
-             * @param {{queueEntry: mt.model.QueueEntry, autoplay: boolean}} params
+             * Prepares the next video to ensure smooth transition.
+             *
+             * If forcePlay parameter is set to true it plays the video as soon as it is buffered enough.
+             *
+             * @param {mt.model.QueueEntry} queueEntry
+             * @param {boolean} forcePlay
              */
-            loadQueueEntry: function (params) {
-                loadQueueEntry(params.queueEntry, params.autoplay);
+            loadQueueEntry: function (queueEntry, forcePlay) {
+                loadQueueEntry(queueEntry, forcePlay);
             },
 
             playbackToggle: function () {
@@ -312,6 +317,8 @@
             },
 
             /**
+             * The current entry.
+             *
              * @returns {mt.model.QueueEntry}
              */
             get playbackEntry() {
@@ -319,6 +326,8 @@
             },
 
             /**
+             * Adds a video at the end of the queue.
+             *
              * @param {mt.model.Video} video
              * @return {mt.mode.QueueEntry} the newly created entry in the queue
              */
@@ -331,6 +340,8 @@
             },
 
             /**
+             * Removed an entry from the queue.
+             *
              * @param {mt.model.QueueEntry} entry
              */
             removeEntry: function (entry) {
@@ -338,6 +349,9 @@
                 queue.entries.splice(index, 1);
             },
 
+            /**
+             * Restores the queue in a pristine state.
+             */
             clear: function () {
                 queue.entries = [];
                 playbackEntry = undefined;
