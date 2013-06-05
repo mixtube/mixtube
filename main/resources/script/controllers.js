@@ -121,7 +121,11 @@
         }
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, mtKeyboardShortcutManager, mtVideoPlayerManager) {
+    mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager, mtVideoPlayerManager) {
+
+        mtKeyboardShortcutManager.register('global', /\w/, function (evt) {
+            $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: String.fromCharCode(evt.which)});
+        });
 
         // register the global space shortcut and directly enter the shortcuts context
         mtKeyboardShortcutManager.register('global', 'space', function () {

@@ -683,16 +683,19 @@
     });
 
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
-        /** @type {Object.<String, Function>} */
+        /** @type {Object.<String, {combo: String|RegExp, callback: Function}>} */
         var contexts = {};
         /** @type {Array.<String>} */
         var contextStack = [];
 
         var bindContext = function (name) {
             if (contexts.hasOwnProperty(name)) {
-                angular.forEach(contexts[name], function (callback, combo) {
-                    Mousetrap.bind(combo, function () {
-                        $rootScope.$apply(callback);
+                angular.forEach(contexts[name], function (binding) {
+                    var bindFn = Mousetrap[!_.isRegExp(binding.combo) ? 'bind' : 'bindRegExp'];
+                    bindFn(binding.combo, function (evt, combo) {
+                        $rootScope.$apply(function () {
+                            binding.callback(evt, combo);
+                        });
                     });
                 });
             }
@@ -700,8 +703,9 @@
 
         var unbindContext = function (name) {
             if (contexts.hasOwnProperty(name)) {
-                angular.forEach(contexts[name], function (callback, combo) {
-                    Mousetrap.unbind(combo);
+                angular.forEach(contexts[name], function (binding) {
+                    var unbindFn = Mousetrap[!_.isRegExp(binding.combo) ? 'unbind' : 'unbindRegExp'];
+                    unbindFn(binding.combo);
                 });
             }
         };
@@ -711,12 +715,12 @@
              * Registers a shortcut for the in the given context.
              *
              * @param {String} context the context name
-             * @param {String} combo
+             * @param {String|RegExp} combo
              * @param {Function} callback
              */
             register: function (context, combo, callback) {
-                var callbackByCombo = contexts[context] = contexts.hasOwnProperty(context) ? contexts[context] : {};
-                callbackByCombo[combo] = callback;
+                var bindings = contexts[context] = contexts.hasOwnProperty(context) ? contexts[context] : [];
+                bindings.push({combo: combo, callback: callback});
             },
             /**
              * Unbinds the previous context shortcuts and binds the new ones.

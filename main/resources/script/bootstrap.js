@@ -6,21 +6,6 @@
             // we want to be able to share URL between browsers that don't have the History API and the ones they have it
             // sadly, we need to deactivate HTML5 mode on location provider
             $locationProvider.html5Mode(false);
-        }).run(function ($rootScope) {
-            var wordCharRegExp = /\w/;
-            document.addEventListener('keyup', function (evt) {
-                var element = evt.target || evt.srcElement;
-                if (!(element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA'
-                    || (element.contentEditable && element.contentEditable == 'true'))) {
-
-                    var convertedString = String.fromCharCode(evt.which);
-                    if (wordCharRegExp.test(convertedString)) {
-                        $rootScope.$apply(function () {
-                            $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: convertedString});
-                        });
-                    }
-                }
-            });
         });
 
     mt.events = {
