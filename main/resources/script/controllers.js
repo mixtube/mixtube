@@ -177,8 +177,6 @@
 
         /** @type {string} */
         $scope.searchTerm = undefined;
-        /** @type {boolean} */
-        $scope.searchTermFocused = false;
         /** @type {Array.<mt.model.Video>} */
         $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
         /** @type {boolean} */
@@ -196,9 +194,12 @@
         var open = function (firstChar) {
             mtKeyboardShortcutManager.enterContext('search');
             $scope.searchVisible = true;
-            $scope.searchTerm = firstChar;
-            $scope.searchTermFocused = true;
-
+            // we need the input to be visible before set the value (and by focusing it thanks to model change)
+            // th only way from now is to delay the affectation thanks to timeout
+            // for details see https://github.com/angular/angular.js/issues/1250#issuecomment-8604033
+            $timeout(function () {
+                $scope.searchTerm = firstChar;
+            }, 0);
         };
 
         $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {

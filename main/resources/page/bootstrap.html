@@ -35,7 +35,7 @@
             <form class="mt-search-form" name="searchForm" novalidate>
                 <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
                 <input class="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
-                       ng-show="searchVisible" mt-focuswhen="searchVisible" spellcheck="false" autocomplete="false"
+                       ng-show="searchVisible" mt-focusonmodelchange spellcheck="false" autocomplete="false"
                        required>
             </form>
             <a class="mt-search-close-button" title="Close [Esc]" ng-click="close()"></a>

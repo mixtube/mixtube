@@ -16,7 +16,7 @@
         });
     });
 
-    // ensures that the element (most likely an input) is focus when shown.
+    // ensures that the element (most likely an input) is focused.
     var focusWhenName = 'mtFocuswhen';
     mt.MixTubeApp.directive(focusWhenName, function ($parse, $timeout) {
         var defaultConfig = {selectTextOnFocus: false};
@@ -36,6 +36,20 @@
                     }
                 }, 50);
             }, true);
+        };
+    });
+
+    mt.MixTubeApp.directive('mtFocusonmodelchange', function ($compile) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, element, attr, ctrl) {
+                var saved$Render = ctrl.$render;
+                ctrl.$render = function () {
+                    element.focus();
+                    saved$Render();
+                }
+            }
         };
     });
 
