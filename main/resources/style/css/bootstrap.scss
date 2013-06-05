@@ -284,28 +284,15 @@ body {
   &::-webkit-scrollbar {
     width: 8px;
     height: 8px;
+    // opacitiy used to fix rendering glitches, without the scrollbars are mot correctly repainted sonetimes
+    opacity: 0;
   }
 
-  // required to prevent visual artefacts on mouse leave
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  // styles when the mous is over the scroll view
-  &.hover::-webkit-scrollbar-track {
-    background: #4d5b5c;
+  &.hover::-webkit-scrollbar {
+    opacity: 1;
   }
 
   &.hover::-webkit-scrollbar-thumb {
-    background: #041c1d;
-  }
-
-  // styles when the mous is over the scrollbar
-  &::-webkit-scrollbar-track:hover {
-    background: #273233;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
     background: $darkColor;
   }
 }
