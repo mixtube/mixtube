@@ -3,6 +3,9 @@
  * RegExp. If a RegExp binding match a key, the chain is stopped so that no other (string based) binding callback will
  * be executed.
  *
+ * It listen for only keypress event because RegExp works only with characters and keypress is the only one reliable to get
+ * character code.
+ *
  * Needs v 1.4 of Mousetrap at least.
  */
 Mousetrap = (function (Mousetrap) {
@@ -12,15 +15,13 @@ Mousetrap = (function (Mousetrap) {
     Mousetrap.handleKey = function (character, modifiers, evt) {
         var matched = false;
 
-        // try to convert the key code to a string, if the typed key is not a character it will return en empty string
-        var typedString = String.fromCharCode(evt.which);
-
-        if (typedString.length > 0) {
+        // only keypress makes sense because we want to catch character and keypress is the only one reliable for that
+        if (evt.type === 'keypress') {
             for (var key in bindingByKey) {
                 var bindings = bindingByKey[key];
                 for (var idxBindings = 0; idxBindings < bindings.length; idxBindings++) {
                     var binding = bindings[idxBindings];
-                    if (binding.regExp.test(typedString)) {
+                    if (binding.regExp.test(character)) {
                         matched = true;
                         executeCallback(binding.callback, evt, binding.regExp);
                     }
@@ -53,44 +54,40 @@ Mousetrap = (function (Mousetrap) {
     /**
      * @param {Array.<RegExp>} regExps
      * @param {Function} callback
-     * @param {string=} action
      */
-    function bind(regExps, callback, action) {
+    function bind(regExps, callback) {
         for (var idx = 0; idx < regExps.length; idx++) {
             var regExp = regExps[idx];
-            // unique binding by pair regExp / action
-            var key = regExp.toString() + action;
+            // unique binding by regExp
+            var key = regExp.toString();
             bindingByKey[key] = bindingByKey[key] || [];
             bindingByKey[key].push({
                 regExp: regExps[idx],
-                callback: callback,
-                action: action
+                callback: callback
             });
         }
     }
 
     /**
      * @param {Array.<RegExp>} regExps
-     * @param {string=} action
      */
-    function unbind(regExps, action) {
+    function unbind(regExps) {
         for (var idx = 0; idx < regExps.length; idx++) {
             var regExp = regExps[idx];
-            delete bindingByKey[regExp.toString() + action];
+            delete bindingByKey[regExp.toString()];
         }
     }
 
     /**
      * @param {RegExp|Array.<RegExp>} regExp
      * @param {Function} callback
-     * @param {string=} action
      */
-    Mousetrap.bindRegExp = function (regExp, callback, action) {
-        bind(regExp instanceof Array ? regExp : [regExp], callback, action || 'keypress');
+    Mousetrap.bindRegExp = function (regExp, callback) {
+        bind(regExp instanceof Array ? regExp : [regExp], callback);
     };
 
-    Mousetrap.unbindRegExp = function (regExp, action) {
-        unbind(regExp instanceof Array ? regExp : [regExp], action || 'keypress');
+    Mousetrap.unbindRegExp = function (regExp) {
+        unbind(regExp instanceof Array ? regExp : [regExp]);
     };
 
     return Mousetrap;

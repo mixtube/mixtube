@@ -41,15 +41,15 @@
 
     // intercept rendering initiated by ngModel directive in order to focus the element on model change
     // it is useful to enforce good sequencing of focus then value affectation to get a proper caret position (FF and IE)
-    mt.MixTubeApp.directive('mtFocusonmodelchange', function ($compile) {
+    mt.MixTubeApp.directive('mtFocusonmodelchange', function () {
         return {
             restrict: 'A',
             require: 'ngModel',
-            link: function (scope, element, attr, ctrl) {
-                var saved$Render = ctrl.$render;
-                ctrl.$render = function () {
+            link: function (scope, element, attr, ngModelCtrl) {
+                var saved$render = ngModelCtrl.$render;
+                ngModelCtrl.$render = function () {
                     element.focus();
-                    saved$Render();
+                    saved$render();
                 };
             }
         };
