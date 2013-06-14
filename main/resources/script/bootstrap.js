@@ -9,17 +9,8 @@
         });
 
     mt.events = {
-        LoadQueueEntryRequest: 'LoadQueueEntryRequest',
-        NextQueueEntryRequest: 'NextQueueEntryRequest',
         OpenSearchFrameRequest: 'OpenSearchFrameRequest',
-        AppendVideoToQueueRequest: 'AppendVideoToQueueRequest',
-        PlaybackToggleRequest: 'PlaybackToggleRequest',
-        UpdateComingNextRequest: 'UpdateComingNextRequest',
-        PlayersPoolReady: 'PlayersPoolReady',
-        QueueModified: 'QueueModified',
-        QueueEntryActivated: 'QueueEntryActivated',
-        QueueCleared: 'QueueCleared',
-        PlaybackStateChanged: 'PlaybackStateChanged'
+        UpdateComingNextRequest: 'UpdateComingNextRequest'
     };
 
     mt.model = {
