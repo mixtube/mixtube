@@ -17,21 +17,16 @@
     });
 
     // ensures that the element (most likely an input) is focused.
-    var focusWhenName = 'mtFocuswhen';
+    var focusWhenName = 'mtFocusWhen';
     mt.MixTubeApp.directive(focusWhenName, function ($parse, $timeout) {
         var defaultConfig = {selectTextOnFocus: false};
 
         return function (scope, elmt, attrs) {
-            scope.$watch(attrs[focusWhenName], function (config) {
-                if (!angular.isObject(config)) {
-                    config = {model: config};
-                }
-                config = angular.extend({}, defaultConfig, config);
-
+            scope.$watch(attrs[focusWhenName], function (value) {
                 $timeout(function () {
-                    var action = config.model ? 'focus' : 'blur';
+                    var action = value ? 'focus' : 'blur';
                     elmt[action]();
-                    if (config.selectTextOnFocus && action === 'focus') {
+                    if (attrs['select-text-on-focus'] && action === 'focus') {
                         elmt.select();
                     }
                 }, 50);

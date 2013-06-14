@@ -107,10 +107,8 @@
                     <form class="mt-queue-meta" ng-controller="mtQueueMetaFormCtrl" novalidate>
                         <div class="mt-queue-name">
                             <input size="30" class="mt-input mousetrap" ng-model="currentQueueName" ng-show="edition"
-                                   mt-blur="onInputBlur()"
-                                   mt-focuswhen="{model: edition, selectTextOnFocus: true}">
-                    <span class="mt-display" ng-hide="edition"
-                          ng-click="activate()">{{queue.name || defaultQueueName}}</span>
+                                   mt-blur="onInputBlur()" mt-focus-when="edition" select-text-on-focus>
+                            <span class="mt-display" ng-hide="edition" ng-click="activate()">{{queue.name || defaultQueueName}}</span>
                         </div>
                     </form>
                 </div>
