@@ -75,6 +75,40 @@
             });
         });
 
+    mt.MixTubeApp.directive('mtScrollview', function () {
+        return {
+            restrict: 'E',
+            replace: true,
+            transclude: true,
+            template: '<div ng-transclude></div>',
+            controller: function ($element) {
+                var scrollViewRect = $element[0].getBoundingClientRect();
+
+                this.scrollIntoView = function ($targetElement) {
+                    var targetRect = $targetElement[0].getBoundingClientRect();
+                    $element.animate({scrollTop: targetRect.top - scrollViewRect.top}, 'fast');
+                };
+            }
+        };
+    });
+
+    var scrollIntoViewIfName = 'mtScrollIntoViewIf';
+    mt.MixTubeApp.directive(scrollIntoViewIfName, function ($timeout) {
+        return {
+            restrict: 'A',
+            require: '^mtScrollview',
+            link: function (scope, element, attrs, mtScrollviewCtrl) {
+                scope.$watch(attrs[scrollIntoViewIfName], function (value) {
+                    if (value) {
+                        $timeout(function () {
+                            mtScrollviewCtrl.scrollIntoView(element);
+                        }, 1000);
+                    }
+                });
+            }
+        };
+    });
+
     // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
     mt.MixTubeApp.filter('mtDuration', function () {
         // reuse the date object between invocation since it is only used as a formatting tool

@@ -23,6 +23,7 @@ $zIndexHigh: 30;
 $smallIconFontSize: 17rem/14;
 $bigIconFontSize: 35rem/14;
 $vibratingColor: #f3c621;
+$searchThumbnailRatio: (180 / 320  * 100%);
 
 * {
   @include box-sizing(border-box);
@@ -297,6 +298,10 @@ body {
   }
 }
 
+.mt-results-list {
+  @include clearfix;
+}
+
 .mt-results-item {
   float: left;
   padding: {
@@ -317,7 +322,11 @@ body {
 }
 
 .mt-results-thumbnail {
-  max-width: 100%;
+  // a percentage value for padding top is relative to the parent width, makes height of the thumbnail relative to its width
+  padding-top: $searchThumbnailRatio;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .mt-results-item:hover .mt-add-to-queue-button {
