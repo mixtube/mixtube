@@ -125,6 +125,33 @@
         };
     });
 
+    mt.MixTubeApp.directive('mtCarousel', function () {
+        return {
+            restrict: 'E',
+            replace: true,
+            transclude: true,
+            template: '<div ng-transclude></div>',
+            link: function (scope, element, attrs) {
+                var list = element.find('.mt-queue-list');
+                var backwardHandle = element.find('.mt-carousel-handle.backward');
+                var forwardHandle = element.find('.mt-carousel-handle.forward');
+
+                backwardHandle.bind('click', function () {
+                    if (list.position().left < 0) {
+                        list.animate({left: '+=' + element.width()});
+                    }
+                });
+
+                forwardHandle.bind('click', function () {
+                    var items = element.find('.mt-queue-item');
+                    if (list.position().left + items.length * items.width() > element.width()) {
+                        list.animate({left: '-=' + element.width()});
+                    }
+                });
+            }
+        };
+    });
+
     // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
     mt.MixTubeApp.filter('mtDuration', function () {
         // reuse the date object between invocation since it is only used as a formatting tool

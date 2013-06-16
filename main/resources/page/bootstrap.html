@@ -101,7 +101,8 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"
+    <div class="mt-queue-frame" ng-class="{'mt-appear': true}" ng-mouseenter="mouseEntered()"
+    <!--<div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"-->
          ng-mouseleave="mouseLeaved()">
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">
@@ -132,7 +133,9 @@
                 </div>
             </div>
         </div>
-        <div class="mt-queue-list-container">
+        <mt-carousel class="mt-queue-list-container">
+            <a class="mt-carousel-handle backward"></a>
+            <a class="mt-carousel-handle forward"></a>
             <ul class="mt-queue-list">
                 <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'">
                     <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
@@ -153,7 +156,7 @@
                     </a>
                 </li>
             </ul>
-        </div>
+        </mt-carousel>
     </div>
 </section>
 
