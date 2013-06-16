@@ -76,6 +76,22 @@
         });
 
     mt.MixTubeApp.directive('mtScrollview', function () {
+
+        /**
+         * Return the given element ClientRect including the margins.
+         *
+         * @param {jQuery} $elem
+         * @returns {ClientRect}
+         */
+        function getWholeClientRect($elem) {
+            var rect = angular.copy($elem[0].getBoundingClientRect());
+            rect.top -= parseFloat($elem.css('margin-top'));
+            rect.bottom += parseFloat($elem.css('margin-bottom'));
+            rect.left -= parseFloat($elem.css('margin-left'));
+            rect.rigth += parseFloat($elem.css('margin-right'));
+            return rect;
+        }
+
         return {
             restrict: 'E',
             replace: true,
@@ -85,7 +101,7 @@
                 var scrollViewRect = $element[0].getBoundingClientRect();
 
                 this.scrollIntoView = function ($targetElement) {
-                    var targetRect = $targetElement[0].getBoundingClientRect();
+                    var targetRect = getWholeClientRect($targetElement);
                     $element.animate({scrollTop: targetRect.top - scrollViewRect.top}, 'fast');
                 };
             }
@@ -102,7 +118,7 @@
                     if (value) {
                         $timeout(function () {
                             mtScrollviewCtrl.scrollIntoView(element);
-                        }, 1000);
+                        }, 0);
                     }
                 });
             }

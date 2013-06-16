@@ -50,7 +50,7 @@
                                    ng-class="{'hover': hover}">
                         <ul class="mt-results-list">
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
-                                mt-scroll-into-view-if="$first">
+                                mt-scroll-into-view-if="$first" mt-test>
                                 <div class="mt-thumbnail-frame">
                                     <div ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}"
                                          class="mt-results-thumbnail"></div>
