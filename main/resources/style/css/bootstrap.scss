@@ -55,6 +55,11 @@ input, button {
   outline: none;
 }
 
+.mt-vertical-centering {
+  display: table-cell;
+  vertical-align: middle;
+}
+
 @mixin mt-corner-button($color, $content) {
   @include triangle(35px, $color, up-right);
   @extend .mt-button-link;
@@ -557,16 +562,34 @@ body {
 
 .mt-carousel-handle {
   position: absolute;
-  height: 100%;
-  width: 30px;
   top: 0;
   z-index: $zIndexLow;
+  display: table;
+  height: 100%;
 
-  background-color: rgba(255, 0, 0, 0.31);
-}
+  &.forward {
+    right: 0;
+  }
 
-.mt-carousel-handle.forward {
-  right: 0;
+  .mt-link {
+    display: inline-block;
+    padding: $regularPadding;
+
+    cursor: pointer;
+    background-color: rgba($tooltipDefaultColor, .9);
+  }
+
+  &.backward .mt-link {
+    @include mt-icon-font-button($smallIconFontSize, '\e806');
+
+    border-radius: 0 $tooltipRadius $tooltipRadius 0;
+  }
+
+  &.forward .mt-link {
+    @include mt-icon-font-button($smallIconFontSize, '\e801');
+
+    border-radius: $tooltipRadius 0 0 $tooltipRadius;
+  }
 }
 
 .mt-queue-list {
@@ -655,11 +678,6 @@ body {
 
   // vertical and horizontal centering of play button
   text-align: center;
-
-  > .mt-vertical-centering {
-    display: table-cell;
-    vertical-align: middle;
-  }
 }
 
 .mt-play-button {

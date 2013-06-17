@@ -137,15 +137,23 @@
                 var forwardHandle = element.find('.mt-carousel-handle.forward');
 
                 backwardHandle.bind('click', function () {
-                    if (list.position().left < 0) {
-                        list.animate({left: '+=' + element.width()});
+                    if (!list.is(':animated')) {
+                        if (list.position().left < 0) {
+                            list.animate({left: '+=' + element.width()});
+                        }
                     }
                 });
 
                 forwardHandle.bind('click', function () {
-                    var items = element.find('.mt-queue-item');
-                    if (list.position().left + items.length * items.width() > element.width()) {
-                        list.animate({left: '-=' + element.width()});
+                    if (!list.is(':animated')) {
+                        var items = element.find('.mt-queue-item');
+
+                        var frameWidth = element.width();
+                        var bandWidth = items.length * items.width();
+
+                        if (list.position().left + bandWidth > frameWidth) {
+                            list.animate({left: '-=' + frameWidth});
+                        }
                     }
                 });
             }
