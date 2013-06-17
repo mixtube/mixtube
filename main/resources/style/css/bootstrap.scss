@@ -576,7 +576,7 @@ body {
     padding: $regularPadding;
 
     cursor: pointer;
-    background-color: rgba($tooltipDefaultColor, .9);
+    background-color: $darkColor;
   }
 
   &.backward .mt-link {
