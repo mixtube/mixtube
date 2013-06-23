@@ -24,7 +24,11 @@
 
             if (evt.data === YT.PlayerState.PLAYING) {
                 // end of first buffering phase is considered as a can play through event
-                self.canPlayThroughDeferred.resolve();
+                if (self.canPlayThroughDeferred) {
+                    // surprisingly this can be called before we told the player to load any video
+                    // so we need to check if the deferred has been created before calling it
+                    self.canPlayThroughDeferred.resolve();
+                }
             }
         });
     };
