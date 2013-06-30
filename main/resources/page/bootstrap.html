@@ -133,19 +133,20 @@
                 </div>
             </div>
         </div>
-        <mt-carousel class="mt-queue-list-container">
+        <div mt-carousel class="mt-queue-list-container">
             <div class="mt-carousel-handle backward">
                 <div class="mt-vertical-centering">
-                    <a class="mt-link"></a>
+                    <a mt-carousel-handle="backward" class="mt-link"></a>
                 </div>
             </div>
             <div class="mt-carousel-handle forward">
                 <div class="mt-vertical-centering">
-                    <a class="mt-link"></a>
+                    <a mt-carousel-handle="forward" class="mt-link"></a>
                 </div>
             </div>
             <ul class="mt-queue-list">
-                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'">
+                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'"
+                    mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()">
                     <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
 
                     <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
@@ -164,11 +165,11 @@
                     </a>
                 </li>
             </ul>
-        </mt-carousel>
+        </div>
     </div>
 </section>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/1.2.1/lodash.compat.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.js"></script>
 <script src="../script/lib/vendor/mousetrap.1.4.1.js"></script>
 <script src="../script/lib/mousetrap.regexpbinding.js"></script>
 <script src="../script/lib/players-pool.js"></script>
