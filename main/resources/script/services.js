@@ -46,11 +46,9 @@
          * - broadcasts events to notify if the new state
          * - sends a request to get the next video references
          */
-        var executeTransition = function () {
+        var executeTransition = function (playDeferred) {
             if (selfData.currentVideoHandle) {
-                selfData.currentVideoHandle.out(mtConfiguration.transitionDuration).done(function (videoHandle) {
-                    videoHandle.dispose();
-                });
+                selfData.currentVideoHandle.out(mtConfiguration.transitionDuration);
             }
 
             selfData.currentVideoHandle = selfData.nextVideoHandle;
@@ -63,8 +61,10 @@
                 selfData.playing = true;
                 selfData.currentVideoHandle.in(mtConfiguration.transitionDuration);
 
-                // now that the new video is running ask for the next one
+                // notify that we started to play the new entry
+                playDeferred.resolve();
 
+                // now that the new video is running ask for the next one
                 var activatedQueueEntry = peekQueueEntryByHandleId(selfData.currentVideoHandle.id);
                 mtQueueManager.positionPlaybackEntry(activatedQueueEntry);
 
@@ -77,8 +77,8 @@
             }
         };
 
-        var triggerComingNext = function () {
-            $rootScope.$broadcast(mt.events.UpdateComingNextRequest, {
+        var executeComingNext = function (comingNextDeferred) {
+            comingNextDeferred.resolve({
                 currentVideo: selfData.currentVideo,
                 nextVideo: selfData.nextVideo
             });
@@ -119,7 +119,16 @@
             return relTime > 0 ? relTime : duration + relTime;
         };
 
+        /**
+         * @param {mt.model.QueueEntry} queueEntry
+         * @param {boolean} forcePlay
+         * @returns {{playPromise: promise, comingNextPromise: promise}}
+         */
         var loadQueueEntry = function (queueEntry, forcePlay) {
+
+            var playDeferred = $q.defer();
+            var comingNextDeferred = $q.defer();
+
             logger.debug('Start request for video %s received with forcePlay flag %s', queueEntry.video.id, forcePlay);
 
             var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, queueEntry.video.duration);
@@ -133,13 +142,13 @@
             }, [
                 {time: comingNextStartTime, callback: function () {
                     $rootScope.$apply(function () {
-                        triggerComingNext();
+                        executeComingNext(comingNextDeferred);
                     });
                 }},
                 {time: transitionStartTime, callback: function () {
                     // starts the next prepared video and cross fade
                     $rootScope.$apply(function () {
-                        executeTransition();
+                        executeTransition(playDeferred);
                     });
                 }}
             ]);
@@ -152,10 +161,19 @@
             if (forcePlay) {
                 nextLoadDeferred.done(function () {
                     $rootScope.$apply(function () {
-                        executeTransition();
+                        executeTransition(playDeferred);
                     });
                 });
             }
+
+            comingNextDeferred.promise.then(function (data) {
+                $rootScope.$broadcast(mt.events.UpdateComingNextRequest, data);
+            });
+
+            return {
+                playPromise: playDeferred.promise,
+                comingNextPromise: comingNextDeferred.promise
+            };
         };
 
         var clear = function () {
@@ -218,9 +236,10 @@
              *
              * @param {mt.model.QueueEntry} queueEntry
              * @param {boolean} forcePlay
+             * @returns {{playPromise: promise, comingNextPromise: promise}}
              */
             loadQueueEntry: function (queueEntry, forcePlay) {
-                loadQueueEntry(queueEntry, forcePlay);
+                return loadQueueEntry(queueEntry, forcePlay);
             },
 
             playbackToggle: function () {

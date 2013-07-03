@@ -62,6 +62,12 @@
       "css": "pause",
       "code": 59401,
       "src": "entypo"
+    },
+    {
+      "uid": "fccd3ea0efb711b849045bee686b1ceb",
+      "css": "spinner1",
+      "code": 59399,
+      "src": "mfglabs"
     }
   ]
 }

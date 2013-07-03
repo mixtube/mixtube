@@ -145,8 +145,8 @@
                 </div>
             </div>
             <ul class="mt-queue-list">
-                <li class="mt-queue-item" ng-repeat="queueEntry in queue.entries" ng-animate="'mt-appear'"
-                    mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()">
+                <li class="mt-queue-item" ng-controller="mtQueueItemCtrl" ng-repeat="queueEntry in queue.entries"
+                    ng-animate="'mt-appear'" mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()">
                     <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
 
                     <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
@@ -154,7 +154,9 @@
                     <!--this weird structure is just to be able to vertical center the play button-->
                     <div class="mt-queue-item-play-button-container">
                         <div class="mt-vertical-centering">
-                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"></a>
+                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)" ng-hide="playPending"></a>
+
+                            <div class="mt-play-button-spinner" ng-show="playPending"></div>
                         </div>
                     </div>
                     <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></a>

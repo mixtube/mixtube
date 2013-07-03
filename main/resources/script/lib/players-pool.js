@@ -202,7 +202,6 @@
         this.logger = logger;
         this.player = undefined;
         this.canPlayThroughDeferred = jQuery.Deferred();
-        this.outDeferred = jQuery.Deferred();
         this.disposed = false;
     };
 
@@ -269,10 +268,9 @@
     };
 
     /**
-     * Fades out and stops the video.
+     * Fades out, stops the video and dispose the handle, so that it can be used anymore.
      *
      * @param {number} fadeDuration fade duration in milliseconds
-     * @return {jQuery.promise} resolved when the fade operation is finished and the player stopped. The argument it this handle.
      */
     mt.player.VideoHandle.prototype.out = function (fadeDuration) {
         this.checkNotDisposed();
@@ -280,9 +278,8 @@
 
         var self = this;
         self.player.fade('out', fadeDuration).done(function () {
-            self.outDeferred.resolve(self);
+            self.dispose();
         });
-        return self.outDeferred.promise();
     };
 
     /**

@@ -88,10 +88,6 @@
 
     mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager) {
 
-        $scope.queueEntryClicked = function (queueEntry) {
-            mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
-        };
-
         $scope.removeQueueEntryClicked = function (queueEntry) {
             mtQueueManager.removeEntry(queueEntry);
         };
@@ -119,6 +115,20 @@
         $scope.getPlaybackQueueEntry = function () {
             return mtQueueManager.playbackEntry;
         }
+    });
+
+    mt.MixTubeApp.controller('mtQueueItemCtrl', function ($scope, $q, mtVideoPlayerManager) {
+
+        /**  @type {boolean} */
+        $scope.playPending = false;
+
+        $scope.queueEntryClicked = function (queueEntry) {
+            $scope.playPending = true;
+            var promises = mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
+            promises.playPromise.always(function () {
+                $scope.playPending = false;
+            });
+        };
     });
 
     mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager, mtVideoPlayerManager) {

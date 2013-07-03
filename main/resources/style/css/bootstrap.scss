@@ -119,6 +119,18 @@ input, button {
   border-radius: $radius 0 0 $radius;
 }
 
+@mixin mt-spinner($fontSize, $color) {
+  @include animation(full-rotation 1.0s linear infinite);
+
+  font-family: $iconFont;
+
+  &:before {
+    content: '\e807';
+    color: $color;
+    font-size: $fontSize;
+  }
+}
+
 .mt-fade-show, .mt-fade-hide {
   @include transition(opacity 1s);
 }
@@ -136,6 +148,15 @@ input, button {
 
   &.mt-fade-hide-active {
     opacity: 0;
+  }
+}
+
+@include keyframes(full-rotation) {
+  from {
+    @include transform(rotate(0deg));
+  }
+  to {
+    @include transform(rotate(360deg));
   }
 }
 
@@ -403,7 +424,7 @@ body {
 
   // I would love to use the AngularJS animation fwk on show but that shows some glitches propably because of the sequence
   // of animation css and display none
-  @include transition(all 200ms ease-in-out);
+  @include transition(all 200ms $ease-in-out-quart);
   @include transform(translateY(100%));
 
   &.mt-appear {
@@ -694,6 +715,10 @@ body {
 
   border-radius: $tooltipRadius;
   background-color: $tooltipDefaultColor;
+}
+
+.mt-play-button-spinner {
+  @include mt-spinner($bigIconFontSize, $vibratingColor);
 }
 
 .mt-queue-item:hover .mt-play-button {
