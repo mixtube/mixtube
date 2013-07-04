@@ -122,6 +122,7 @@ input, button {
 @mixin mt-spinner($fontSize, $color) {
   @include animation(full-rotation 1.0s linear infinite);
 
+  display: inline-block;
   font-family: $iconFont;
 
   &:before {
@@ -305,6 +306,16 @@ body {
   margin-left: $regularMargin;
 
   font-size: (16rem/14);
+
+  > .mt-name {
+    display: inline-block;
+  }
+
+  > .mt-spinner {
+    @include mt-spinner($smallIconFontSize, $lightTextColor);
+
+    margin-left: .5em;
+  }
 }
 
 .mt-results-scrollview {

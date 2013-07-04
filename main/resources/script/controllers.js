@@ -183,7 +183,7 @@
          * @const
          * @type {number}
          */
-        var INSTANT_SEARCH_DELAY = 300;
+        var INSTANT_SEARCH_DELAY = 500;
 
         /** @type {string} */
         $scope.searchTerm = undefined;
@@ -195,6 +195,8 @@
         $scope.instantSearchPromise = undefined;
         /** @type {number} */
         $scope.searchRequestCount = 0;
+        /** @type {Object.<string, boolean>} */
+        $scope.searchPending = {youtube: false};
 
         /**
          * Opens the search frame and optionally input the first char.
@@ -246,9 +248,11 @@
             // store the current request count
             var startSearchRequestCount = $scope.searchRequestCount;
 
+            $scope.searchPending.youtube = true;
             mtYoutubeClient.searchVideosByQuery($scope.searchTerm, function (videos) {
                 // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests
                 if ($scope.searchRequestCount === startSearchRequestCount) {
+                    $scope.searchPending.youtube = false;
                     $scope.youtubeSearchResults = videos;
                 }
             });

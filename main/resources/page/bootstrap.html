@@ -41,8 +41,12 @@
             <a class="mt-search-close-button" title="Close [Esc]" ng-click="close()"></a>
 
             <div class="mt-search-results-frame-wrapper"> <!-- providers section -->
-                <div class="mt-search-results-frame">
-                    <h4 class="mt-results-provider">YouTube</h4>
+                <section class="mt-search-results-frame">
+                    <header class="mt-results-provider">
+                        <h4 class="mt-name">YouTube</h4>
+
+                        <div class="mt-spinner" ng-show="searchPending.youtube"></div>
+                    </header>
 
                     <!--mouse enter/leave stuff emulates hover pseudo class for scrollbar styling since it doesn't work for webkit-->
                     <mt-scrollview class="mt-results-scrollview" ng-mouseenter="hover = true"
@@ -76,8 +80,8 @@
                             </li>
                         </ul>
                     </mt-scrollview>
-                </div>
-                <div class="mt-search-results-frame">
+                </section>
+                <section class="mt-search-results-frame">
                     <h4 class="mt-results-provider">Vimeo</h4>
 
                     <div class="mt-results-scrollview">
@@ -85,8 +89,8 @@
 
                         </ul>
                     </div>
-                </div>
-                <div class="mt-search-results-frame">
+                </section>
+                <section class="mt-search-results-frame">
                     <h4 class="mt-results-provider">Dailymotion</h4>
 
                     <div class="mt-results-scrollview">
@@ -94,7 +98,7 @@
 
                         </ul>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
@@ -154,7 +158,8 @@
                     <!--this weird structure is just to be able to vertical center the play button-->
                     <div class="mt-queue-item-play-button-container">
                         <div class="mt-vertical-centering">
-                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)" ng-hide="playPending"></a>
+                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
+                               ng-hide="playPending"></a>
 
                             <div class="mt-play-button-spinner" ng-show="playPending"></div>
                         </div>
