@@ -24,6 +24,7 @@ $tooltipRadius: 5rem/14;
 $zIndexLow: 10;
 $zIndexMedium: 20;
 $zIndexHigh: 30;
+$zIndexModal: 100;
 $smallIconFontSize: 17rem/14;
 $bigIconFontSize: 35rem/14;
 $vibratingColor: #f3c621;
@@ -174,6 +175,29 @@ body {
   // needed to allow elememts to overflow out of the window without activating scrollbars
   // used for the queue bar when hidden for example
   overflow: hidden;
+}
+
+.mt-root-spinner-container {
+  position: absolute;
+  display: table;
+  width: 100%;
+  height: 100%;
+  z-index: $zIndexModal;
+}
+
+.mt-root-spinner-vc {
+  @extend .mt-vertical-centering;
+
+  text-align: center;
+  background-color: $tooltipDefaultColor;
+}
+
+.mt-root-spinner {
+  @include mt-spinner(100px, $lightTextColor);
+}
+
+.mt-root-spinner-message {
+  margin-top: 1rem;
 }
 
 .mt-video-stage-frame {

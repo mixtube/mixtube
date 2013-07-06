@@ -13,6 +13,8 @@
 
         /** type {mt.model.Queue} */
         $scope.queue = mtQueueManager.queue;
+        /** type {boolean} */
+        $scope.loadingQueue = false;
 
         $scope.$watch('queue', function (newVal, oldVal) {
             // this test is here to prevent to serialize during the init phase
@@ -31,7 +33,10 @@
             if (!angular.equals(serializedQueue, newSerializedQueue)) {
                 serializedQueue = newSerializedQueue;
                 // change initiated by user (back / forward etc.), need to be deserialized
-                mtQueueManager.deserialize(serializedQueue);
+                $scope.loadingQueue = true;
+                mtQueueManager.deserialize(serializedQueue).always(function () {
+                    $scope.loadingQueue = false;
+                });
             }
         }, true);
 

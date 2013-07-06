@@ -409,12 +409,14 @@
             },
 
             /**
-             * Deserialize the queue from the given string.
+             * Deserialize the queue from the given string, load the entry details from remote providers and "extends"
+             * the queue with the new entries.
              *
              * @param {String} serialized
+             * @return {promise}
              */
             deserialize: function (serialized) {
-                deserialize(serialized).then(function (newQueue) {
+                return deserialize(serialized).then(function (newQueue) {
                     // remove invalid entries
                     newQueue.entries = newQueue.entries.filter(function (entry) {
                         return entry.video.hasOwnProperty('publisherName');
