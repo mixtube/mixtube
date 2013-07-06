@@ -196,7 +196,7 @@
         $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
         /** @type {boolean} */
         $scope.searchVisible = mtConfiguration.initialSearchOpen;
-        /** @type {Promise} */
+        /** @type {promise} */
         $scope.instantSearchPromise = undefined;
         /** @type {number} */
         $scope.searchRequestCount = 0;
@@ -230,6 +230,8 @@
             // new inputs so we stop the previous request
             $timeout.cancel($scope.instantSearchPromise);
 
+            mtUserInteractionManager.searchActiveKeepAlive();
+
             // if the search has to be longer than two characters
             if (newSearchTerm && newSearchTerm.length > 2) {
                 $scope.searchRequestCount++;
@@ -243,9 +245,16 @@
 
         $scope.$watch('searchVisible', function (newSearchVisible) {
             if (newSearchVisible) {
-                mtUserInteractionManager.searchOpened();
-            } else {
-                mtUserInteractionManager.searchClosed();
+                mtUserInteractionManager.searchActiveKeepAlive();
+            }
+        });
+
+        // close the search pane if the user is not interacting anymore
+        $scope.$watch(function () {
+            return mtUserInteractionManager.userInteracting
+        }, function (newUserInteracting) {
+            if (!newUserInteracting && $scope.searchVisible) {
+                $scope.close();
             }
         });
 

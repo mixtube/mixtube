@@ -654,18 +654,25 @@
          * @type {number}
          */
         var TRAILING_DELAY = 1000;
+        /**
+         * @const
+         * @type {number}
+         */
+        var SEARCH_KEEP_ALIVE_DELAY = 10000;
 
         /** @type {boolean} */
         var overQueueFrame;
         /** @type {boolean} */
         var mouseMoving;
         /** @type {boolean} */
-        var searchVisible;
+        var searchActive;
 
         /** @type {promise} */
         var overQueueFramePromise;
         /** @type {promise} */
         var mouseMovingPromise;
+        /** @type {promise} */
+        var searchActivePromise;
 
         return {
             /**
@@ -674,7 +681,7 @@
              * @returns {boolean}
              */
             get userInteracting() {
-                return overQueueFrame || mouseMoving || searchVisible;
+                return overQueueFrame || mouseMoving || searchActive;
             },
             enteredQueueFrame: function () {
                 $timeout.cancel(overQueueFramePromise);
@@ -688,17 +695,22 @@
             mouseStarted: function () {
                 $timeout.cancel(mouseMovingPromise);
                 mouseMoving = true;
+                if (searchActive) {
+                    // if the mouse move when search is active we keep the search alive
+                    this.searchActiveKeepAlive();
+                }
             },
             mouseStopped: function () {
                 mouseMovingPromise = $timeout(function () {
                     mouseMoving = false;
                 }, TRAILING_DELAY);
             },
-            searchOpened: function () {
-                searchVisible = true;
-            },
-            searchClosed: function () {
-                searchVisible = false;
+            searchActiveKeepAlive: function () {
+                searchActive = true;
+                $timeout.cancel(searchActivePromise);
+                searchActivePromise = $timeout(function () {
+                    searchActive = false;
+                }, SEARCH_KEEP_ALIVE_DELAY);
             }
         };
     });
