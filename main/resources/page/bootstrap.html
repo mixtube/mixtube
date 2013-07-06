@@ -41,7 +41,7 @@
         <div class="mt-search-frame">
             <form class="mt-search-form" name="searchForm" novalidate>
                 <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-                <input class="mt-search-term-input" class="mousetrap" ng-model="searchTerm" placeholder="Start typing"
+                <input class="mt-search-term-input mousetrap" ng-model="searchTerm" placeholder="Start typing"
                        ng-show="searchVisible" mt-focus-on-render spellcheck="false" autocomplete="false"
                        required>
             </form>
@@ -57,8 +57,7 @@
 
                     <!--mouse enter/leave stuff emulates hover pseudo class for scrollbar styling since it doesn't work for webkit-->
                     <mt-scrollview class="mt-results-scrollview" ng-mouseenter="hover = true"
-                                   ng-mouseleave="hover = false"
-                                   ng-class="{'hover': hover}">
+                                   ng-mouseleave="hover = false" ng-class="{'hover': hover}">
                         <ul class="mt-results-list">
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
                                 mt-scroll-into-view-if="$first">
@@ -112,9 +111,9 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
+    <!--<div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"-->
     <div class="mt-queue-frame" ng-class="{'mt-appear': true}" ng-mouseenter="mouseEntered()"
          ng-mouseleave="mouseLeaved()">
-        <!--<div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"-->
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">
                 <div class="mt-column mt-left">
@@ -171,7 +170,12 @@
                             <div class="mt-play-button-spinner" ng-show="playPending"></div>
                         </div>
                     </div>
-                    <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"></a>
+                    <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"
+                       ng-hide="playPending"></a>
+
+                    <div class="mt-queue-item-tooltip">
+                        {{queueEntry.video.title}}
+                    </div>
                 </li>
                 <li class="mt-queue-item mt-queue-call-to-action">
                     <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">

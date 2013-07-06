@@ -21,6 +21,7 @@ $queueFrameHeight: $queueHeight + $queueHeightBarHeight;
 $queueVisibleVideoCount: 12;
 $tooltipDefaultColor: rgba(0, 6, 5, .7);
 $tooltipRadius: 5rem/14;
+$tooltipDefaultArrowSize: 20px;
 $zIndexLow: 10;
 $zIndexMedium: 20;
 $zIndexHigh: 30;
@@ -95,7 +96,7 @@ input, button {
   }
 }
 
-@mixin mt-tooltip($arrowOrigin: left, $arrowPosition: 20px, $color: $tooltipDefaultColor, $arrowSize: 20px) {
+@mixin mt-tooltip($arrowOrigin: left, $arrowPosition: 20px, $color: $tooltipDefaultColor, $arrowSize: $tooltipDefaultArrowSize) {
   position: absolute;
   padding: $regularPadding;
   text-align: center;
@@ -610,7 +611,6 @@ body {
 
 .mt-queue-list-container {
   position: relative;
-  overflow: hidden;
   height: $queueHeight;
 
   background-color: $darkerColor;
@@ -670,7 +670,6 @@ body {
   // restores modified spacing
   word-spacing: normal;
   line-height: normal;
-  overflow: hidden;
   // restores modified wrapping
   white-space: normal;
 
@@ -758,6 +757,19 @@ body {
 
 .mt-queue-item:hover .mt-play-button {
   display: inline-block;
+}
+
+.mt-queue-item-tooltip {
+  @include mt-tooltip(left, 9px);
+
+  // hidden by default and shown on queue item over
+  display: none;
+  bottom: $queueHeight + $tooltipDefaultArrowSize;
+  width: $queueThumbnailWidth * 1.5;
+}
+
+.mt-queue-item:hover .mt-queue-item-tooltip {
+  display: block;
 }
 
 .mt-queue-call-to-action {
