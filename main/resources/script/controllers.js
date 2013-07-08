@@ -91,14 +91,16 @@
         mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
     });
 
-    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager) {
+    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager, mtModal) {
 
         $scope.removeQueueEntryClicked = function (queueEntry) {
             mtQueueManager.removeEntry(queueEntry);
         };
 
         $scope.clearQueueButtonClicked = function () {
-            mtQueueManager.clear();
+            mtModal.confirm('Are you sure you want to clear the queue ?').then(function () {
+                mtQueueManager.clear();
+            });
         };
 
         $scope.openSearchButtonClicked = function () {

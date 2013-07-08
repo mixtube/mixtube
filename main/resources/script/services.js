@@ -696,7 +696,7 @@
                 $timeout.cancel(mouseMovingPromise);
                 mouseMoving = true;
                 if (searchActive) {
-                    // if the mouse move when search is active we keep the search alive
+                    // if the mouse moves when the search is active we keep the search alive
                     this.searchActiveKeepAlive();
                 }
             },
@@ -785,6 +785,66 @@
                 }
             }
         };
+    });
+
+    mt.MixTubeApp.factory('mtModal', function ($rootScope, $q, $templateCache, $compile, $document, mtKeyboardShortcutManager) {
+
+        function dispose() {
+            modalElement.remove();
+            modalElement = undefined;
+            mtKeyboardShortcutManager.leaveContext('modal');
+        }
+
+        /**
+         * The current modal element or undefined if no active modal.
+         *
+         * @type {jQuery=}
+         */
+        var modalElement = undefined;
+
+        var body = $document.find('body');
+        // need to trim the template because jQuery can not parse an HTML string that starts with a blank character
+        var modalLinker = $compile($templateCache.get('mtModalTemplate').trim());
+
+        // pressing escape key will close the current modal
+        mtKeyboardShortcutManager.register('modal', 'esc', function () {
+            dispose();
+        });
+
+        return {
+            /**
+             * Shows a confirmation dialog with the given message.
+             *
+             * @param {string} message the message to display. Can contains HTML.
+             * @returns {promise} resolved when the user confirms, rejected when the user cancels
+             */
+            confirm: function (message) {
+
+                var scope = $rootScope.$new();
+                scope.template = 'mtConfirmTemplate';
+                scope.message = message;
+                scope.confirmLabel = 'Confirm';
+                scope.cancelLabel = 'Cancel';
+
+                modalElement = modalLinker(scope);
+                body.prepend(modalElement);
+
+                mtKeyboardShortcutManager.enterContext('modal');
+
+                var deferred = $q.defer();
+
+                scope.confirm = function () {
+                    dispose();
+                    deferred.resolve();
+                };
+                scope.close = function () {
+                    dispose();
+                    deferred.reject();
+                };
+
+                return deferred.promise;
+            }
+        }
     });
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {

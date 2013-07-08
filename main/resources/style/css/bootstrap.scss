@@ -34,6 +34,11 @@ $vibratingColor: #f3c621;
   @include box-sizing(border-box);
 }
 
+// force link without href attribute and button to get pointer cursor
+a, button {
+  cursor: pointer;
+}
+
 input, button {
   font-family: 'Muli', sans-serif;
   color: $lightTextColor;
@@ -45,7 +50,6 @@ input, button {
   display: inline-block;
 
   color: inherit;
-  cursor: pointer;
   text-decoration: none;
 }
 
@@ -175,10 +179,11 @@ body {
   background-color: $darkerColor;
   // needed to allow elememts to overflow out of the window without activating scrollbars
   // used for the queue bar when hidden for example
+  // used for the queue bar when hidden for example
   overflow: hidden;
 }
 
-.mt-root-spinner-container {
+.mt-modal-container {
   position: absolute;
   display: table;
   width: 100%;
@@ -186,7 +191,7 @@ body {
   z-index: $zIndexModal;
 }
 
-.mt-root-spinner-vc {
+.mt-modal-vc {
   @extend .mt-vertical-centering;
 
   text-align: center;
@@ -199,6 +204,34 @@ body {
 
 .mt-root-spinner-message {
   margin-top: 1rem;
+}
+
+.mt-modal-window {
+  display: inline-block;
+  padding: $regularPadding * 1.5;
+  border-top: 4px solid $vibratingColor;
+  background-color: $darkColor;
+
+  .mt-message {
+    margin-bottom: $regularMargin * 3;
+
+    line-height: normal;
+    text-align: left;
+  }
+
+  .mt-commands-container {
+    text-align: right;
+  }
+
+  .mt-confirm-button {
+    padding: (4rem/14);
+    margin-right: (8rem/14);
+
+    border: none;
+    color: $darkTextColor;
+    background-color: $vibratingColor;
+    font-weight: bold;
+  }
 }
 
 .mt-video-stage-frame {
@@ -431,7 +464,7 @@ body {
 
 .mt-video-details-list {
   margin-top: 5px;
-  line-height: 17px;
+  line-height: normal;
 }
 
 .mt-video-details-item {
@@ -491,7 +524,7 @@ body {
   }
 
   > .mt-left {
-    padding-left: $regularMargin;
+    padding-left: $regularPadding;
   }
 
   > .mt-middle {
@@ -500,7 +533,7 @@ body {
 
   > .mt-right {
     text-align: right;
-    padding-right: $regularMargin;
+    padding-right: $regularPadding;
   }
 }
 
@@ -631,7 +664,6 @@ body {
     display: inline-block;
     padding: $regularPadding;
 
-    cursor: pointer;
     background-color: $darkColor;
   }
 
