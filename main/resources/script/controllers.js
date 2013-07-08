@@ -248,6 +248,8 @@
         $scope.$watch('searchVisible', function (newSearchVisible) {
             if (newSearchVisible) {
                 mtUserInteractionManager.searchActiveKeepAlive();
+            } else {
+                mtUserInteractionManager.searchClosed();
             }
         });
 

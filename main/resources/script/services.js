@@ -648,7 +648,7 @@
         }
     });
 
-    mt.MixTubeApp.factory('mtUserInteractionManager', function ($timeout) {
+    mt.MixTubeApp.factory('mtUserInteractionManager', function ($rootScope, $timeout) {
         /**
          * @const
          * @type {number}
@@ -661,6 +661,8 @@
         var SEARCH_KEEP_ALIVE_DELAY = 10000;
 
         /** @type {boolean} */
+        var userInteracting;
+        /** @type {boolean} */
         var overQueueFrame;
         /** @type {boolean} */
         var mouseMoving;
@@ -668,11 +670,23 @@
         var searchActive;
 
         /** @type {promise} */
-        var overQueueFramePromise;
-        /** @type {promise} */
-        var mouseMovingPromise;
+        var userInteractingPromise;
         /** @type {promise} */
         var searchActivePromise;
+
+        // according to the interaction detected set to true or false with a delay
+        $rootScope.$watch(function () {
+            return overQueueFrame || mouseMoving || searchActive;
+        }, function (newInteractionState) {
+            if (newInteractionState) {
+                $timeout.cancel(userInteractingPromise);
+                userInteracting = true;
+            } else {
+                userInteractingPromise = $timeout(function () {
+                    userInteracting = false;
+                }, TRAILING_DELAY);
+            }
+        });
 
         return {
             /**
@@ -681,19 +695,15 @@
              * @returns {boolean}
              */
             get userInteracting() {
-                return overQueueFrame || mouseMoving || searchActive;
+                return userInteracting;
             },
             enteredQueueFrame: function () {
-                $timeout.cancel(overQueueFramePromise);
                 overQueueFrame = true;
             },
             leavedQueueFrame: function () {
-                overQueueFramePromise = $timeout(function () {
-                    overQueueFrame = false;
-                }, TRAILING_DELAY);
+                overQueueFrame = false;
             },
             mouseStarted: function () {
-                $timeout.cancel(mouseMovingPromise);
                 mouseMoving = true;
                 if (searchActive) {
                     // if the mouse moves when the search is active we keep the search alive
@@ -701,16 +711,18 @@
                 }
             },
             mouseStopped: function () {
-                mouseMovingPromise = $timeout(function () {
-                    mouseMoving = false;
-                }, TRAILING_DELAY);
+                mouseMoving = false;
             },
             searchActiveKeepAlive: function () {
-                searchActive = true;
                 $timeout.cancel(searchActivePromise);
+                searchActive = true;
                 searchActivePromise = $timeout(function () {
                     searchActive = false;
                 }, SEARCH_KEEP_ALIVE_DELAY);
+            },
+            searchClosed: function () {
+                $timeout.cancel(searchActivePromise);
+                searchActive = false;
             }
         };
     });
