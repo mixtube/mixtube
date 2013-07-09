@@ -1,7 +1,7 @@
 (function (mt, undefined) {
     'use strict';
 
-    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtUserInteractionManager) {
+    mt.MixTubeApp.controller('mtRootController', function ($scope, $location, $timeout, mtQueueManager, mtUserInteractionManager, mtAlert) {
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -36,7 +36,9 @@
                 $scope.loadingQueue = true;
                 mtQueueManager.deserialize(serializedQueue).always(function () {
                     $scope.loadingQueue = false;
-                });
+                }).then(null, function (message) {
+                        mtAlert.error(message);
+                    });
             }
         }, true);
 

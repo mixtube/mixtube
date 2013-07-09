@@ -25,10 +25,12 @@ $tooltipDefaultArrowSize: 20px;
 $zIndexLow: 10;
 $zIndexMedium: 20;
 $zIndexHigh: 30;
+$zIndexAlert: 90;
 $zIndexModal: 100;
 $smallIconFontSize: 17rem/14;
 $bigIconFontSize: 35rem/14;
 $vibratingColor: #f3c621;
+$subtleRadius: 1px;
 
 * {
   @include box-sizing(border-box);
@@ -138,22 +140,22 @@ input, button {
   }
 }
 
-.mt-fade-show, .mt-fade-hide {
+.mt-fade-show, .mt-fade-hide, .mt-fade-enter, .mt-fade-leave {
   @include transition(opacity 1s);
 }
 
-.mt-fade-show {
+.mt-fade-show, .mt-fade-enter {
   opacity: 0;
 
-  &.mt-fade-show-active {
+  &.mt-fade-show-active, &.mt-fade-enter-active {
     opacity: 1;
   }
 }
 
-.mt-fade-hide {
+.mt-fade-hide, .mt-fade-leave {
   opacity: 1;
 
-  &.mt-fade-hide-active {
+  &.mt-fade-hide-active, &.mt-fade-leave-active {
     opacity: 0;
   }
 }
@@ -230,6 +232,43 @@ body {
     border: none;
     color: $darkTextColor;
     background-color: $vibratingColor;
+    font-weight: bold;
+  }
+}
+
+.mt-alert-container {
+  position: absolute;
+  // this padding is actually used as a margin for the child element
+  padding: $regularMargin $regularMargin 0 $regularMargin;
+  top: 0;
+  width: 100%;
+  z-index: $zIndexAlert;
+
+  // hides the container when it is empty. We don't want a empty box floating above everything
+  &:empty {
+    display: none;
+  }
+}
+
+.mt-alert {
+  display: table;
+  width: 100%;
+  margin-bottom: $regularMargin;
+
+  border-radius: $subtleRadius;
+
+  &.mt-level-error {
+    background-color: #f2dede;
+    color: #b94a48;
+  }
+
+  > .mt-text-container, > .mt-command-container {
+    display: table-cell;
+    padding: $regularPadding * 2;
+  }
+
+  > .mt-command-container {
+    text-align: right;
     font-weight: bold;
   }
 }

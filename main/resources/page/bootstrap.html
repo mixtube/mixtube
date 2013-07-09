@@ -22,6 +22,9 @@
     </div>
 </div>
 
+<!-- used by the mtAlert service -->
+<div class="mt-alert-container"></div>
+
 <section class="mt-video-stage-frame">
     <div class="mt-coming-next" ng-controller="mtComingNextCtrl" ng-show="comingNextVisible" ng-animate="'mt-fade'">
         <div class="mt-coming-next-item" ng-show="titleCurrent">
@@ -198,6 +201,14 @@
         <div class="mt-commands-container">
             <button class="mt-confirm-button" type="button" ng-click="confirm()">{{ confirmLabel }}</button>
             <a ng-click="close()">{{ cancelLabel }}</a>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="mtAlertTemplate">
+    <div class="mt-alert" ng-class="{'mt-level-error': level === 'error'}">
+        <div class="mt-text-container" ng-bind-html-unsafe="message"></div>
+        <div class="mt-command-container">
+            <a class="mt-alert-dismiss" ng-click="dismiss()">&times;</a>
         </div>
     </div>
 </script>

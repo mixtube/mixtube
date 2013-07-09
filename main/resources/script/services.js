@@ -270,7 +270,13 @@
 
         var deserialize = function (input) {
             // add removed array delimiters
-            var buffer = JSON.parse('[' + input + ']');
+            var buffer;
+            try {
+                buffer = JSON.parse('[' + input + ']');
+            } catch (e) {
+                logger.debug('Unable to parse a serialized queue because of an exception %s', e);
+                return $q.reject('Sorry we are unable to load your queue. Seems that the link you used is not valid.');
+            }
 
             var queue = new mt.model.Queue();
             queue.name = buffer[0];
@@ -282,20 +288,22 @@
                     youtubeVideosIds.push(serializedEntry.substring(mtYoutubeClient.shortName.length));
                 } else {
                     logger.debug('Unable to find a provider for serialized entry %s', serializedEntry);
+                    return $q.reject('Sorry we are unable to load your queue because of an internal error.');
                 }
             }
 
-            var deferred = $q.defer();
-            mtYoutubeClient.listVideosByIds(youtubeVideosIds).then(function (videos) {
+            return mtYoutubeClient.listVideosByIds(youtubeVideosIds).then(function (videos) {
                 videos.forEach(function (video) {
                     var queueEntry = new mt.model.QueueEntry();
                     queueEntry.id = mt.tools.uniqueId();
                     queueEntry.video = video;
                     queue.entries.push(queueEntry);
                 });
-                deferred.resolve(queue);
+
+                return queue;
+            }, function () {
+                return $q.reject('Sorry we are unable to load videos from YouTube to load your queue. May be you should try later.');
             });
-            return deferred.promise;
         };
 
         /**
@@ -438,17 +446,23 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration) {
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration, mtLoggerFactory) {
 
+        /**
+         * @const
+         * @type {string}
+         */
         var SHORT_NAME = 'yo';
 
         /**
-         * Allow to parse "exotic" time format form Youtube data API.
+         * Allow to parse "exotic" time format from Youtube data API.
          *
          * @const
          * @type {RegExp}
          */
         var ISO8601_REGEXP = /PT(?:(\d*)H)?(?:(\d*)M)?(?:(\d*)S)?/;
+
+        var logger = mtLoggerFactory.logger('mtYoutubeClient');
 
         /**
          * Converts a ISO8601 duration string to a duration in milliseconds.
@@ -465,56 +479,62 @@
         }
 
         var extendVideosWithDetails = function (videos) {
-            var deferred = $q.defer();
             var videosIds = _.pluck(videos, 'id');
 
-            $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
+            return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
                     id: videosIds.join(','),
                     part: 'snippet,statistics,contentDetails',
                     callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
-            }).success(function (response) {
-                    var videoDetailsById = {};
-                    response.items.forEach(function (item) {
-                        videoDetailsById[item.id] = {
-                            id: item.id,
-                            title: item.snippet.title,
-                            thumbnailUrl: item.snippet.thumbnails.medium.url,
-                            provider: 'youtube',
-                            duration: convertISO8601DurationToMillis(item.contentDetails.duration),
-                            viewCount: parseInt(item.statistics.viewCount, 10),
-                            // temporary store the channel, used after to add the video channel name
-                            __youtubeChannelId: item.snippet.channelId
-                        };
-                    });
+            }).then(function (response) {
+                    var data = response.data;
 
-                    // extend the video with the details
-                    videos.forEach(function (video) {
-                        angular.extend(video, videoDetailsById[video.id]);
-                    });
+                    if (data.hasOwnProperty('error')) {
+                        // youtube API does not return an error HTTP status in case of error but a success with a
+                        // special error object in the response
+                        logger.debug('An error occurred when loading videos from YouTube API : %s', data.error.errors);
+                        return $q.defer().reject();
+                    } else {
+                        var videoDetailsById = {};
+                        data.items.forEach(function (item) {
+                            videoDetailsById[item.id] = {
+                                id: item.id,
+                                title: item.snippet.title,
+                                thumbnailUrl: item.snippet.thumbnails.medium.url,
+                                provider: 'youtube',
+                                duration: convertISO8601DurationToMillis(item.contentDetails.duration),
+                                viewCount: parseInt(item.statistics.viewCount, 10),
+                                // temporary store the channel, used after to add the video channel name
+                                __youtubeChannelId: item.snippet.channelId
+                            };
+                        });
 
-                    deferred.resolve(videos);
-                }).error(deferred.reject);
+                        // extend the video with the details
+                        videos.forEach(function (video) {
+                            angular.extend(video, videoDetailsById[video.id]);
+                        });
 
-            return deferred.promise;
+                        return videos;
+                    }
+                });
         };
 
         var extendVideosWithChannels = function (videos) {
-            var deferred = $q.defer();
             var channelsIds = _.pluck(videos, '__youtubeChannelId');
 
-            $http.jsonp('https://www.googleapis.com/youtube/v3/channels', {
+            return $http.jsonp('https://www.googleapis.com/youtube/v3/channels', {
                 params: {
                     id: channelsIds.join(','),
                     part: 'snippet',
                     callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
-            }).success(function (response) {
+            }).then(function (response) {
                     var channelByIds = {};
-                    response.items.forEach(function (item) {
+
+                    response.data.items.forEach(function (item) {
                         channelByIds[item.id] = {id: item.id, name: item.snippet.title};
                     });
 
@@ -526,10 +546,8 @@
                         }
                     });
 
-                    deferred.resolve(videos);
-                }).error(deferred.reject);
-
-            return deferred.promise;
+                    return videos;
+                });
         };
 
         return {
@@ -544,20 +562,17 @@
              * least the id. That doesn't mean that it was found, check properties values to know if it was.
              *
              * @param {Array.<string>} ids the list of youtube videos ids
-             * @returns {Array.<mt.model.Video>} a list of pseudo video
+             * @returns {promise} a promise resolved with Array.<mt.model.Video>
              */
             listVideosByIds: function (ids) {
-                var deferred = $q.defer();
                 // prepare an array of pseudo videos that have only the id property defined
                 var videos = ids.map(function (id) {
                     return {id: id};
                 });
 
-                extendVideosWithDetails(videos).then(function (videos) {
-                    extendVideosWithChannels(videos).then(deferred.resolve, deferred.reject);
-                }, deferred.reject);
-
-                return deferred.promise;
+                return extendVideosWithDetails(videos).then(function (videos) {
+                    return extendVideosWithChannels(videos);
+                });
             },
 
             /**
@@ -799,12 +814,45 @@
         };
     });
 
+    mt.MixTubeApp.factory('mtAlert', function ($rootScope, $q, $templateCache, $compile, $document, $animator) {
+        var alertContainer = $document.find('.mt-alert-container');
+        // need to trim the template because jQuery can not parse an HTML string that starts with a blank character
+        var alertLinker = $compile($templateCache.get('mtAlertTemplate').trim());
+
+        function alert(level, message) {
+            var scope = $rootScope.$new();
+            var animate = $animator(scope, {ngAnimate: "'mt-fade'"});
+
+            scope.message = message;
+            scope.level = level;
+
+            alertLinker(scope, function (alertElement) {
+                animate.enter(alertElement, alertContainer);
+
+                scope.dismiss = function () {
+                    animate.leave(alertElement, alertContainer);
+                    scope.$destroy();
+                };
+            });
+        }
+
+        return {
+            error: function (message) {
+                alert('error', message);
+            }
+        };
+    });
+
+
     mt.MixTubeApp.factory('mtModal', function ($rootScope, $q, $templateCache, $compile, $document, mtKeyboardShortcutManager) {
 
-        function dispose() {
+        function close(resolve) {
             modalElement.remove();
-            modalElement = undefined;
+            modalElement = null;
+            modalScope.$destroy();
+            modalScope = null;
             mtKeyboardShortcutManager.leaveContext('modal');
+            resolve ? modalDeferred.resolve() : modalDeferred.reject();
         }
 
         /**
@@ -812,7 +860,15 @@
          *
          * @type {jQuery=}
          */
-        var modalElement = undefined;
+        var modalElement;
+        /**
+         * @type {Deferred=}
+         */
+        var modalDeferred;
+        /**
+         * @type {Object}
+         */
+        var modalScope;
 
         var body = $document.find('body');
         // need to trim the template because jQuery can not parse an HTML string that starts with a blank character
@@ -820,7 +876,7 @@
 
         // pressing escape key will close the current modal
         mtKeyboardShortcutManager.register('modal', 'esc', function () {
-            dispose();
+            close(false);
         });
 
         return {
@@ -831,30 +887,31 @@
              * @returns {promise} resolved when the user confirms, rejected when the user cancels
              */
             confirm: function (message) {
+                if (modalElement) {
+                    throw new Error('Can not open a new modal, there is already one active.');
+                }
 
-                var scope = $rootScope.$new();
-                scope.template = 'mtConfirmTemplate';
-                scope.message = message;
-                scope.confirmLabel = 'Confirm';
-                scope.cancelLabel = 'Cancel';
+                modalScope = $rootScope.$new();
+                modalScope.template = 'mtConfirmTemplate';
+                modalScope.message = message;
+                modalScope.confirmLabel = 'Confirm';
+                modalScope.cancelLabel = 'Cancel';
 
-                modalElement = modalLinker(scope);
+                modalElement = modalLinker(modalScope);
                 body.prepend(modalElement);
 
                 mtKeyboardShortcutManager.enterContext('modal');
 
-                var deferred = $q.defer();
+                modalDeferred = $q.defer();
 
-                scope.confirm = function () {
-                    dispose();
-                    deferred.resolve();
+                modalScope.confirm = function () {
+                    close(true);
                 };
-                scope.close = function () {
-                    dispose();
-                    deferred.reject();
+                modalScope.close = function () {
+                    close(false);
                 };
 
-                return deferred.promise;
+                return modalDeferred.promise;
             }
         }
     });
@@ -934,7 +991,14 @@
 
                 var idxParams = 0;
                 var formatted = pattern.replace(TOKEN_REGEXP, function () {
-                    return params[idxParams++];
+                    var param = params[idxParams++];
+                    if (param instanceof Error) {
+                        return param.hasOwnProperty('stack') ? param.stack : param.name;
+                    } else if (angular.isObject(param)) {
+                        return JSON.stringify(param);
+                    } else {
+                        return param;
+                    }
                 });
 
                 // extra empty string is to make AngularJS's IE9 log polyfill happy, else it appends "undefined" to the log trace
