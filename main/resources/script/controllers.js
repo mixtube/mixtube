@@ -53,7 +53,7 @@
 
     mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
         $scope.currentQueueName = mtQueueManager.queue.name;
-        $scope.savedQueueName = undefined;
+        $scope.savedQueueName = null;
         $scope.defaultQueueName = 'Unnamed queue';
         $scope.edition = false;
 
@@ -167,9 +167,9 @@
         /** @type {boolean} */
         $scope.comingNextVisible = false;
         /** @type {string} */
-        $scope.titleCurrent = undefined;
+        $scope.titleCurrent = null;
         /** @type {string} */
-        $scope.titleNext = undefined;
+        $scope.titleNext = null;
 
         var hideTimeoutPromise;
 
@@ -178,7 +178,7 @@
             $scope.comingNextVisible = true;
             $scope.titleCurrent = data.currentVideo.title;
             // if no next video, clear the next title
-            $scope.titleNext = data.nextVideo ? data.nextVideo.title : undefined;
+            $scope.titleNext = data.nextVideo ? data.nextVideo.title : null;
 
             hideTimeoutPromise = $timeout(function () {
                 $scope.comingNextVisible = false;
@@ -195,13 +195,13 @@
         var INSTANT_SEARCH_DELAY = 500;
 
         /** @type {string} */
-        $scope.searchTerm = undefined;
+        $scope.searchTerm = null;
         /** @type {Array.<mt.model.Video>} */
         $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
         /** @type {boolean} */
         $scope.searchVisible = mtConfiguration.initialSearchOpen;
         /** @type {promise} */
-        $scope.instantSearchPromise = undefined;
+        $scope.instantSearchPromise = null;
         /** @type {number} */
         $scope.searchRequestCount = 0;
         /** @type {Object.<string, boolean>} */

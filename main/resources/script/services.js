@@ -7,15 +7,15 @@
         var selfData = {};
 
         /** @type {mt.player.PlayersPool} */
-        selfData.playersPool = undefined;
+        selfData.playersPool = null;
         /** @type {mt.player.VideoHandle} */
-        selfData.currentVideoHandle = undefined;
+        selfData.currentVideoHandle = null;
         /** @type {mt.player.Video} */
-        selfData.currentVideo = undefined;
+        selfData.currentVideo = null;
         /** @type {mt.player.VideoHandle} */
-        selfData.nextVideoHandle = undefined;
+        selfData.nextVideoHandle = null;
         /** @type {mt.player.Video} */
-        selfData.nextVideo = undefined;
+        selfData.nextVideo = null;
         /**  @type {boolean} */
         selfData.playing = false;
         /** @type {Object.<string, mt.model.QueueEntry>} */
@@ -53,8 +53,8 @@
 
             selfData.currentVideoHandle = selfData.nextVideoHandle;
             selfData.currentVideo = selfData.nextVideo;
-            selfData.nextVideoHandle = undefined;
-            selfData.nextVideo = undefined;
+            selfData.nextVideoHandle = null;
+            selfData.nextVideo = null;
 
             // if there is a a current video start it, else it's the end of the sequence
             if (selfData.currentVideoHandle) {
@@ -94,8 +94,8 @@
                 // the next video has already been prepared, we have to dispose it before preparing a new one
                 peekQueueEntryByHandleId(selfData.nextVideoHandle.id);
                 selfData.nextVideoHandle.dispose();
-                selfData.nextVideoHandle = undefined;
-                selfData.nextVideo = undefined;
+                selfData.nextVideoHandle = null;
+                selfData.nextVideo = null;
             }
         };
 
@@ -182,8 +182,8 @@
             if (selfData.currentVideoHandle) {
                 selfData.playing = false;
                 selfData.currentVideoHandle.dispose();
-                selfData.currentVideoHandle = undefined;
-                selfData.currentVideo = undefined;
+                selfData.currentVideoHandle = null;
+                selfData.currentVideo = null;
             }
         };
 
@@ -381,7 +381,7 @@
              */
             clear: function () {
                 queue.entries = [];
-                playbackEntry = undefined;
+                playbackEntry = null;
             },
 
             /**
@@ -420,7 +420,7 @@
              * Deserialize the queue from the given string, load the entry details from remote providers and "extends"
              * the queue with the new entries.
              *
-             * @param {String} serialized
+             * @param {string} serialized
              * @return {promise}
              */
             deserialize: function (serialized) {
@@ -438,7 +438,7 @@
             /**
              * Serialize the queue.
              *
-             * @returns {String} the serialized version of the queue
+             * @returns {string} the serialized version of the queue
              */
             serialize: function () {
                 return serialize(queue);
@@ -613,35 +613,31 @@
              * Checks if the supplied video id matches a existing video in Youtube system.
              *
              * @param {string} id the video id
-             * @return {Promise} a promise that is resolved with true if the video exist, false else
+             * @return {promise} a promise that is resolved with true if the video exist, false else
              */
             pingVideoById: function (id) {
-                var deferred = $q.defer();
-
-                $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
+                return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
                     params: {
                         id: id,
                         part: 'id',
                         callback: 'JSON_CALLBACK',
                         key: mtConfiguration.youtubeAPIKey
                     }
-                }).success(function (response) {
-                        deferred.resolve(response.items.length > 0);
-                    }).error(deferred.reject);
-
-                return deferred.promise;
+                }).then(function (response) {
+                        return response.data.items.length > 0;
+                    });
             }
         };
     });
 
-    mt.MixTubeApp.factory('mtPlayerPoolProvider', function ($rootScope, $q, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtPlayerPoolProvider', function ($rootScope, $q, $document, mtLoggerFactory) {
         var deferred = $q.defer();
 
         // executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application that it is ready
         var playersPool = new mt.player.PlayersPool(function () {
-            var $playerDiv = jQuery('<div>', {'class': 'mt-video-player-instance'});
-            $('.mt-video-player-window').append($playerDiv);
-            return $playerDiv[0];
+            var playerDiv = angular.element('<div class="mt-video-player-instance"></div>');
+            $document.find('.mt-video-player-window').append(playerDiv);
+            return playerDiv[0];
         }, mtLoggerFactory.logger('PlayersPool'));
 
         mtLoggerFactory.logger('mtMixTubeApp#run').debug('Youtube iFrame API ready and players pool created');
@@ -735,9 +731,9 @@
     });
 
     mt.MixTubeApp.factory('mtKeyboardShortcutManager', function ($rootScope) {
-        /** @type {Object.<String, {combo: String|RegExp, callback: Function}>} */
+        /** @type {Object.<string, {combo: string|RegExp, callback: function}>} */
         var contexts = {};
-        /** @type {Array.<String>} */
+        /** @type {Array.<string>} */
         var contextStack = [];
 
         var bindContext = function (name) {
@@ -766,9 +762,9 @@
             /**
              * Registers a shortcut for the in the given context.
              *
-             * @param {String} context the context name
-             * @param {String|RegExp} combo
-             * @param {Function} callback
+             * @param {string} context the context name
+             * @param {string|RegExp} combo
+             * @param {function} callback
              */
             register: function (context, combo, callback) {
                 var bindings = contexts[context] = contexts.hasOwnProperty(context) ? contexts[context] : [];
@@ -777,7 +773,7 @@
             /**
              * Unbinds the previous context shortcuts and binds the new ones.
              *
-             * @param {String} name the context name
+             * @param {string} name the context name
              */
             enterContext: function (name) {
                 if (contextStack.length > 0) {
@@ -792,7 +788,7 @@
              *
              * Calls to enter / leave should be balanced.
              *
-             * @param {String} name context name
+             * @param {string} name context name
              */
             leaveContext: function (name) {
                 var popped = contextStack.pop();
@@ -848,7 +844,7 @@
         }
 
         /**
-         * The current modal element or undefined if no active modal.
+         * The current modal element or "falsy" if no active modal.
          *
          * @type {jQuery=}
          */
@@ -943,8 +939,8 @@
     mt.MixTubeApp.factory('mtLoggerFactory', function ($log) {
 
         /**
-         * @type {RegExp}
          * @const
+         * @type {RegExp}
          */
         var TOKEN_REGEXP = /%s|%d/g;
 

@@ -55,29 +55,29 @@
     mt.model = {
         Video: function () {
             /** @type {string} */
-            this.id = undefined;
+            this.id = null;
             /** @type {string} */
-            this.title = undefined;
+            this.title = null;
             /** @type {string} */
-            this.thumbnailUrl = undefined;
+            this.thumbnailUrl = null;
             /** @type {number} */
-            this.duration = undefined;
+            this.duration = null;
             /** @type {number} */
-            this.viewCount = undefined;
+            this.viewCount = null;
             /** @type {string} */
-            this.publisherName = undefined;
+            this.publisherName = null;
             /** @type {string} */
-            this.provider = undefined;
+            this.provider = null;
         },
         QueueEntry: function () {
             /** @type {string} */
-            this.id = undefined;
+            this.id = null;
             /** @type {mt.model.Video} */
-            this.video = undefined;
+            this.video = null;
         },
         Queue: function () {
             /** @type {string} */
-            this.name = undefined;
+            this.name = null;
             /** @type {Array.<mt.model.QueueEntry} */
             this.entries = [];
         }

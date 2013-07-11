@@ -15,8 +15,8 @@
         self.logger = logger;
         self.busy = false;
         self.lastSampledTime = 0;
-        self.canPlayThroughDeferred = undefined;
-        self.endOfFadeDeferred = undefined;
+        self.canPlayThroughDeferred = null;
+        self.endOfFadeDeferred = null;
         self.listeners = {timeupdate: {}};
 
         self.delegate.addEventListener('onStateChange', function (evt) {
@@ -200,7 +200,7 @@
         this.video = video;
         this.cues = cues;
         this.logger = logger;
-        this.player = undefined;
+        this.player = null;
         this.canPlayThroughDeferred = jQuery.Deferred();
         this.disposed = false;
     };
