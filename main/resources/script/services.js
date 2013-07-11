@@ -326,7 +326,7 @@
                     }
                 });
             } else {
-                return $q.defer().reject();
+                return $q.reject();
             }
         };
 
@@ -455,6 +455,17 @@
         var SHORT_NAME = 'yo';
 
         /**
+         * Youtube can not return more than 50 results in a row.
+         *
+         * For some resources it means we have to use paging, for others (list videos) we can not call them with
+         * more than 50 videos each time.
+         *
+         * @const
+         * @type {number}
+         */
+        var MAX_RESULT_LIMIT = 50;
+
+        /**
          * Allow to parse "exotic" time format from Youtube data API.
          *
          * @const
@@ -479,6 +490,10 @@
         }
 
         var extendVideosWithDetails = function (videos) {
+            if (videos.length > MAX_RESULT_LIMIT) {
+                throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.')
+            }
+
             var videosIds = _.pluck(videos, 'id');
 
             return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
@@ -500,14 +515,13 @@
                         var videoDetailsById = {};
                         data.items.forEach(function (item) {
                             videoDetailsById[item.id] = {
+                                provider: 'youtube',
                                 id: item.id,
                                 title: item.snippet.title,
                                 thumbnailUrl: item.snippet.thumbnails.medium.url,
-                                provider: 'youtube',
+                                publisherName: item.snippet.channelTitle,
                                 duration: convertISO8601DurationToMillis(item.contentDetails.duration),
-                                viewCount: parseInt(item.statistics.viewCount, 10),
-                                // temporary store the channel, used after to add the video channel name
-                                __youtubeChannelId: item.snippet.channelId
+                                viewCount: parseInt(item.statistics.viewCount, 10)
                             };
                         });
 
@@ -515,38 +529,7 @@
                         videos.forEach(function (video) {
                             angular.extend(video, videoDetailsById[video.id]);
                         });
-
-                        return videos;
                     }
-                });
-        };
-
-        var extendVideosWithChannels = function (videos) {
-            var channelsIds = _.pluck(videos, '__youtubeChannelId');
-
-            return $http.jsonp('https://www.googleapis.com/youtube/v3/channels', {
-                params: {
-                    id: channelsIds.join(','),
-                    part: 'snippet',
-                    callback: 'JSON_CALLBACK',
-                    key: mtConfiguration.youtubeAPIKey
-                }
-            }).then(function (response) {
-                    var channelByIds = {};
-
-                    response.data.items.forEach(function (item) {
-                        channelByIds[item.id] = {id: item.id, name: item.snippet.title};
-                    });
-
-                    // extend the video with the publisher name, for youtube it is the channel name
-                    videos.forEach(function (video) {
-                        if (video.hasOwnProperty('__youtubeChannelId')) {
-                            video.publisherName = channelByIds[video.__youtubeChannelId].name;
-                            delete video.__youtubeChannelId;
-                        }
-                    });
-
-                    return videos;
                 });
         };
 
@@ -570,23 +553,33 @@
                     return {id: id};
                 });
 
-                return extendVideosWithDetails(videos).then(function (videos) {
-                    return extendVideosWithChannels(videos);
+                var pagesPromises = [];
+
+                var pagesCount = videos.length / MAX_RESULT_LIMIT;
+                for (var pageIdx = 0; pageIdx < pagesCount; pageIdx++) {
+
+                    var pageStart = pageIdx * MAX_RESULT_LIMIT;
+                    var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULT_LIMIT, videos.length));
+                    pagesPromises.push(extendVideosWithDetails(videosPaged));
+                }
+
+                return $q.all(pagesPromises).then(function () {
+                    return videos;
                 });
             },
 
             /**
              * Searches the 20 first videos on youtube matching the query.
              *
-             * The goal is to provide lite results as fast as possible and upgrade each item when is more details are available.
-             * It is impossible to get all the properties in one shot because of the design of the Youtube API.
+             * The goal is to provide lite results as fast as possible and upgrade each item when there are more details
+             * available. It is impossible to get all the properties in one shot because of the design of the Youtube API.
              *
              * The videos objects are passed by callback to be able to update the model as the details arrive.
              * The callback parameter is an array of {@link mt.model.Video} for the first call and a projection of
              * videos after with only the properties available at the execution time.
              *
              * @param {string} queryString the query as used for a classic youtube search
-             * @param {function(Array.<(mt.model.Video)>)} dataCallback executed each time we receive additional data
+             * @param {function(Array.<(mt.model.Video)>)} dataCallback executed the first time we receive data
              */
             searchVideosByQuery: function (queryString, dataCallback) {
                 $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
@@ -612,8 +605,7 @@
                         });
 
                         dataCallback(videos);
-                        extendVideosWithDetails(videos).then(dataCallback);
-                        extendVideosWithChannels(videos).then(dataCallback);
+                        extendVideosWithDetails(videos);
                     });
             },
 
