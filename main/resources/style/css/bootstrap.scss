@@ -20,7 +20,6 @@ $queueFrameHeight: $queueHeight + $queueHeightBarHeight;
 // we want to see at least 12 videos in the queue
 $queueVisibleVideoCount: 12;
 $tooltipDefaultColor: rgba(0, 6, 5, .7);
-$tooltipRadius: 5rem/14;
 $tooltipDefaultArrowSize: 20px;
 $zIndexLow: 10;
 $zIndexMedium: 20;
@@ -107,7 +106,7 @@ input, button {
   padding: $regularPadding;
   text-align: center;
   background: $color;
-  border-radius: $tooltipRadius;
+  border-radius: $subtleRadius;
 
   &:after {
     @include triangle($arrowSize, $color, down);
@@ -287,7 +286,7 @@ body {
 
   background-color: $tooltipDefaultColor;
   font-size: (18rem/14);
-  border-radius: $tooltipRadius;
+  border-radius: $subtleRadius;
 }
 
 .mt-coming-next-item {
@@ -709,13 +708,13 @@ body {
   &.backward .mt-link {
     @include mt-icon-font-button($smallIconFontSize, '\e806');
 
-    border-radius: 0 $tooltipRadius $tooltipRadius 0;
+    border-radius: 0 $subtleRadius $subtleRadius 0;
   }
 
   &.forward .mt-link {
     @include mt-icon-font-button($smallIconFontSize, '\e801');
 
-    border-radius: $tooltipRadius 0 0 $tooltipRadius;
+    border-radius: $subtleRadius 0 0 $subtleRadius;
   }
 }
 
@@ -818,7 +817,7 @@ body {
     bottom: 10px;
   }
 
-  border-radius: $tooltipRadius;
+  border-radius: $subtleRadius;
   background-color: $tooltipDefaultColor;
 }
 
