@@ -139,22 +139,22 @@ input, button {
   }
 }
 
-.mt-fade-show, .mt-fade-hide, .mt-fade-enter, .mt-fade-leave {
-  @include transition(opacity 1s);
+.mt-fade-in, .mt-fade-out, {
+  @include transition(opacity 500ms);
 }
 
-.mt-fade-show, .mt-fade-enter {
+.mt-fade-in {
   opacity: 0;
 
-  &.mt-fade-show-active, &.mt-fade-enter-active {
+  &.mt-fade-in-active {
     opacity: 1;
   }
 }
 
-.mt-fade-hide, .mt-fade-leave {
+.mt-fade-out {
   opacity: 1;
 
-  &.mt-fade-hide-active, &.mt-fade-leave-active {
+  &.mt-fade-out-active {
     opacity: 0;
   }
 }

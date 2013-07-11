@@ -821,7 +821,7 @@
 
         function alert(level, message) {
             var scope = $rootScope.$new();
-            var animate = $animator(scope, {ngAnimate: "'mt-fade'"});
+            var animate = $animator(scope, {ngAnimate: "{enter: 'mt-fade-in', leave: 'mt-fade-out'}"});
 
             scope.message = message;
             scope.level = level;
