@@ -125,15 +125,16 @@
         };
     });
 
-    mt.MixTubeApp.directive('mtCarousel', function ($window, mtAnimationHooksManager) {
-
-        // once for all register the animation hooks to let the parent carousel be notified when a sub element enter
-        mtAnimationHooksManager.hooks.enter.after.push(function (element) {
-            var mtCarouselCtrl = element.controller('mtCarousel');
-            if (mtCarouselCtrl) {
-                mtCarouselCtrl.itemEntered(element);
-            }
-        });
+    mt.MixTubeApp.directive('mtCarousel', function () {
+//    mt.MixTubeApp.directive('mtCarousel', function ($window, mtAnimationHooksManager) {
+//
+//        // once for all register the animation hooks to let the parent carousel be notified when a sub element enter
+//        mtAnimationHooksManager.hooks.enter.after.push(function (element) {
+//            var mtCarouselCtrl = element.controller('mtCarousel');
+//            if (mtCarouselCtrl) {
+//                mtCarouselCtrl.itemEntered(element);
+//            }
+//        });
 
         return {
             restrict: 'A',
@@ -187,7 +188,7 @@
                 };
 
                 this.itemEntered = function (enteredElement) {
-                   // this.bringUp(angular.element(enteredElement));
+                    // this.bringUp(angular.element(enteredElement));
                 };
             }
         };

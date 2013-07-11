@@ -309,6 +309,7 @@
 
         /**
          * @param {number} startPosition the position from where to start to look for the next valid video
+         * @return {promise} resolved with the next valid queue entry, rejected if none found
          */
         var nextValidQueueEntry = function (startPosition) {
 
