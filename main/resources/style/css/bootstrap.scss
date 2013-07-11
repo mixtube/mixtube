@@ -434,6 +434,10 @@ body {
   }
 }
 
+.mt-results-no-result-message {
+  padding: $regularMargin;
+}
+
 .mt-results-list {
   @include clearfix;
 }

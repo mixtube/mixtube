@@ -62,7 +62,12 @@
                     <!--mouse enter/leave stuff emulates hover pseudo class for scrollbar styling since it doesn't work for webkit-->
                     <mt-scrollview class="mt-results-scrollview" ng-mouseenter="hover = true"
                                    ng-mouseleave="hover = false" ng-class="{'hover': hover}">
-                        <p ng-show="youtubeSearchResults.length == 0 && searchTerm">No video found for {{ searchTerm }}</p>
+
+                        <p ng-show="searchResultsDelivered.youtube && youtubeSearchResults.length === 0 && searchTerm"
+                                class="mt-results-no-result-message">
+                            No video found for "{{searchTerm}}"
+                        </p>
+
                         <ul class="mt-results-list">
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
                                 mt-scroll-into-view-if="$first">

@@ -206,6 +206,8 @@
         $scope.searchRequestCount = 0;
         /** @type {Object.<string, boolean>} */
         $scope.searchPending = {youtube: false};
+        /** @type {Object.<string, boolean>} */
+        $scope.searchResultsDelivered = {youtube: false};
 
         /**
          * Opens the search frame and optionally input the first char.
@@ -235,6 +237,8 @@
             $timeout.cancel($scope.instantSearchPromise);
 
             mtUserInteractionManager.searchActiveKeepAlive();
+
+            $scope.searchResultsDelivered.youtube = false;
 
             // if the search has to be longer than two characters
             if (newSearchTerm && newSearchTerm.length > 2) {
@@ -273,6 +277,7 @@
                 // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests
                 if ($scope.searchRequestCount === startSearchRequestCount) {
                     $scope.searchPending.youtube = false;
+                    $scope.searchResultsDelivered.youtube = true;
                     $scope.youtubeSearchResults = videos;
                 }
             });
