@@ -279,6 +279,7 @@
             }
 
             var queue = new mt.model.Queue();
+            // the first bucket is the name of the queue
             queue.name = buffer[0];
 
             var youtubeVideosIds = [];
@@ -302,7 +303,7 @@
 
                 return queue;
             }, function () {
-                return $q.reject('Sorry we are unable to load videos from YouTube to load your queue. May be you should try later.');
+                return $q.reject('Sorry we are unable to load videos from YouTube while loading your queue. May be you should try later.');
             });
         };
 
@@ -310,24 +311,22 @@
          * @param {number} startPosition the position from where to start to look for the next valid video
          */
         var nextValidQueueEntry = function (startPosition) {
-            var deferred = $q.defer();
+
             var tryPosition = startPosition + 1;
 
             if (tryPosition < queue.entries.length) {
                 var queueEntry = queue.entries[tryPosition];
 
-                mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
+                return mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
                     if (videoExists) {
-                        deferred.resolve(queueEntry);
+                        return queueEntry;
                     } else {
-                        nextValidQueueEntry(tryPosition).then(deferred.resolve);
+                        return nextValidQueueEntry(tryPosition);
                     }
                 });
             } else {
-                deferred.reject();
+                return $q.defer().reject();
             }
-
-            return deferred.promise;
         };
 
         // initialize queue
