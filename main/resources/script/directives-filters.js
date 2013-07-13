@@ -16,35 +16,25 @@
         });
     });
 
-    // ensures that the element (most likely an input) is focused.
-    var focusWhenName = 'mtFocusWhen';
-    mt.MixTubeApp.directive(focusWhenName, function ($parse, $timeout) {
-        var defaultConfig = {selectTextOnFocus: false};
-
-        return function (scope, elmt, attrs) {
-            scope.$watch(attrs[focusWhenName], function (value) {
-                $timeout(function () {
-                    var action = value ? 'focus' : 'blur';
-                    elmt[action]();
-                    if (attrs['select-text-on-focus'] && action === 'focus') {
-                        elmt.select();
-                    }
-                }, 50);
-            }, true);
-        };
-    });
-
     // intercept rendering initiated by ngModel directive in order to focus the element on model change
     // it is useful to enforce good sequencing of focus then value affectation to get a proper caret position (FF and IE)
-    mt.MixTubeApp.directive('mtFocusOnRender', function () {
+    mt.MixTubeApp.directive('mtFocusOnRender', function ($timeout) {
         return {
             restrict: 'A',
             require: 'ngModel',
             link: function (scope, element, attr, ngModelCtrl) {
                 var saved$render = ngModelCtrl.$render;
                 ngModelCtrl.$render = function () {
-                    element.focus();
-                    saved$render();
+                    // we need the input to be visible before set the value (and by focusing it thanks to model change)
+                    // the only way from now is to protectively defer the affectation thanks to timeout
+                    // for details see https://github.com/angular/angular.js/issues/1250#issuecomment-8604033
+                    $timeout(function () {
+                        element.focus();
+                        saved$render();
+                        if (attr.hasOwnProperty('autoSelect')) {
+                            element[0].select();
+                        }
+                    }, 0);
                 };
             }
         };
@@ -221,6 +211,72 @@
                     if (bringUp) {
                         mtCarouselCtrl.bringUp(element);
                     }
+                });
+            }
+        };
+    });
+
+    mt.MixTubeApp.directive('mtInlineEdit', function ($templateCache, $compile, $parse, mtKeyboardShortcutManager) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attr) {
+                var inputFacetLinker = $compile($templateCache.get('mtInlineEditTemplate').trim());
+
+                var mtInlineEditGet = $parse(attr.mtInlineEdit);
+                var mtInlineEditSet = mtInlineEditGet.assign;
+
+                // the insulated scope allows to choose when we want to send the updates to the parent model
+                // we can't use a directive wide insulated scope because the display element may need some properties
+                // from the parent scope to render
+                var inputScope = scope.$new(true);
+                inputScope.edition = false;
+                inputScope.model = null;
+                inputScope.blur = function () {
+                    rollback();
+                };
+
+                function save() {
+                    inputScope.edition = false;
+                    mtInlineEditSet(scope, inputScope.model);
+                    inputScope.model = null;
+                }
+
+                function rollback() {
+                    inputScope.edition = false;
+                    inputScope.model = null;
+                }
+
+                inputFacetLinker(inputScope, function (inputFacet) {
+                    // register keyboard shortcut context for the input element
+                    var keyboardShortcutContext = 'mtInlineEdit_' + inputScope.$id;
+                    mtKeyboardShortcutManager.register(keyboardShortcutContext, 'return', function () {
+                        save();
+                    });
+                    mtKeyboardShortcutManager.register(keyboardShortcutContext, 'esc', function () {
+                        rollback();
+                    });
+
+                    // place the input just after de display element
+                    element.after(inputFacet);
+
+                    inputScope.$watch('edition', function (newEdition, oldEdition) {
+                        if (newEdition !== oldEdition) {
+                            if (newEdition) {
+                                element.hide();
+                                mtKeyboardShortcutManager.enterContext(keyboardShortcutContext);
+                            } else {
+                                mtKeyboardShortcutManager.leaveContext(keyboardShortcutContext);
+                                element.show();
+                            }
+                        }
+                    });
+
+                    element.bind('click', function () {
+                        inputScope.$apply(function () {
+                            inputScope.edition = true;
+                            inputScope.model = mtInlineEditGet(scope);
+                        });
+                    });
                 });
             }
         };

@@ -41,7 +41,7 @@ a, button {
 }
 
 input, button {
-  font-family: 'Muli', sans-serif;
+  font-family: inherit;
   color: $lightTextColor;
 }
 
@@ -377,7 +377,6 @@ body {
   width: 100%;
 
   font-size: 3.57rem;
-  font-weight: bold;
   text-transform: uppercase;
 }
 

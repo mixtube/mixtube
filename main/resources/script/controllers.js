@@ -51,48 +51,6 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueMetaFormCtrl', function ($scope, mtQueueManager, mtKeyboardShortcutManager) {
-        $scope.currentQueueName = mtQueueManager.queue.name;
-        $scope.savedQueueName = null;
-        $scope.defaultQueueName = 'Unnamed queue';
-        $scope.edition = false;
-
-        var save = function () {
-            if ($scope.currentQueueName) {
-                $scope.currentQueueName = $scope.currentQueueName.trim()
-            }
-            mtQueueManager.queue.name = $scope.currentQueueName;
-            passivate();
-        };
-
-        var passivate = function () {
-            $scope.edition = false;
-            mtKeyboardShortcutManager.leaveContext('queueNameEdit');
-        };
-
-        var rollback = function () {
-            $scope.currentQueueName = $scope.savedQueueName;
-            passivate();
-        };
-
-        $scope.activate = function () {
-            $scope.savedQueueName = $scope.currentQueueName = mtQueueManager.queue.name;
-            $scope.edition = true;
-            mtKeyboardShortcutManager.enterContext('queueNameEdit');
-        };
-
-        // can't bind save directly to blur because the blur event can be triggered after the input has been hidden
-        // we need to check the edition mode before to prevent to save at the wrong time
-        $scope.onInputBlur = function () {
-            if ($scope.edition) {
-                save();
-            }
-        };
-
-        mtKeyboardShortcutManager.register('queueNameEdit', 'return', save);
-        mtKeyboardShortcutManager.register('queueNameEdit', 'esc', rollback);
-    });
-
     mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager, mtModal) {
 
         $scope.removeQueueEntryClicked = function (queueEntry) {
@@ -217,12 +175,7 @@
         var open = function (firstChar) {
             mtKeyboardShortcutManager.enterContext('search');
             $scope.searchVisible = true;
-            // we need the input to be visible before set the value (and by focusing it thanks to model change)
-            // th only way from now is to delay the affectation thanks to timeout
-            // for details see https://github.com/angular/angular.js/issues/1250#issuecomment-8604033
-            $timeout(function () {
-                $scope.searchTerm = firstChar;
-            }, 0);
+            $scope.searchTerm = firstChar;
         };
 
         $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {
