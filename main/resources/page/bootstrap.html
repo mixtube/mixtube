@@ -73,7 +73,7 @@
                                 <div class="mt-thumbnail-frame">
                                     <div ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}"
                                          class="mt-results-thumbnail"></div>
-                                    <a ng-click="appendResultToQueue(searchResult)" class="mt-add-to-queue-button"></a>
+                                    <a ng-click="!$event.redundantClick && appendResultToQueue(searchResult)" class="mt-add-to-queue-button"></a>
 
                                     <div class="mt-video-duration" ng-show="searchResult.duration">
                                         <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>

@@ -1,6 +1,25 @@
 (function (mt, undefined) {
     'use strict';
 
+    // add an event property "redundantClick" to tell that if the click was done quickly after the first one
+    // useful to filter out inadvertent in some scenario.
+    mt.MixTubeApp.directive('ngClick', function () {
+        return {
+            restrict: 'A',
+            priority: 10, // priority at 10 to be executed before the original angular click directive
+            link: function (scope, element) {
+                element.bind('click.mtLastClick', function (evt) {
+                    var now = Date.now();
+                    var lastClickTs = element.data('mtLastClickTS');
+                    if (lastClickTs && now - lastClickTs < 500) {
+                        evt.redundantClick = true;
+                    }
+                    element.data('mtLastClickTS', now);
+                });
+            }
+        };
+    });
+
     // simple event listener directives for focus and blur events type
     ['blur', 'focus'].forEach(function (evtName) {
         var directiveName = 'mt' + mt.tools.capitalize(evtName);
