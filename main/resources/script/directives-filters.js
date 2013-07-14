@@ -134,7 +134,7 @@
         };
     });
 
-    mt.MixTubeApp.directive('mtCarousel', function () {
+    mt.MixTubeApp.directive('mtCarousel', function ($window) {
 //    mt.MixTubeApp.directive('mtCarousel', function ($window, mtAnimationHooksManager) {
 //
 //        // once for all register the animation hooks to let the parent carousel be notified when a sub element enter
@@ -153,6 +153,7 @@
             controller: function ($element) {
 
                 var carousel = $element;
+                var leftItemIdx = 0;
 
                 /**
                  * Pick the carousel item available at the given x position.
@@ -182,23 +183,40 @@
                     }
                 };
 
-                this.bringUp = function (toBringUp) {
+                this.bringUp = function (toBringUp, force) {
                     var viewPortRect = carousel[0].getBoundingClientRect();
                     var toBringUpRect = toBringUp[0].getBoundingClientRect();
 
-                    if (toBringUpRect.left < viewPortRect.left || viewPortRect.right < toBringUpRect.right) {
+                    if (force || (toBringUpRect.left < viewPortRect.left || viewPortRect.right < toBringUpRect.right)) {
                         // the element to bring up is outside of the view port
                         // we want to make it the first visible item in the view port
                         var list = carousel.find('.mt-queue-list');
                         var listRect = list[0].getBoundingClientRect();
                         var newPosition = listRect.left - toBringUpRect.left;
                         list.animate({left: newPosition});
+
+                        leftItemIdx = carousel.find('.mt-queue-item').index(toBringUp);
                     }
                 };
 
                 this.itemEntered = function (enteredElement) {
                     // this.bringUp(angular.element(enteredElement));
                 };
+
+                this.adjust = function () {
+                    this.bringUp(carousel.find('.mt-queue-item').eq(leftItemIdx), true);
+                }
+            },
+            link: function (scope, element, attrs, controller) {
+                var window = angular.element($window);
+
+                window.bind('resize.mtCarousel', _.debounce(function () {
+                    controller.adjust();
+                }, 100));
+
+                scope.$on('$destroy', function () {
+                    window.unbind('resize.mtCarousel');
+                })
             }
         };
     });

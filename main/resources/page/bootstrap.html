@@ -71,9 +71,10 @@
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
                                 mt-scroll-into-view-if="$first">
                                 <div class="mt-thumbnail-frame">
-                                    <div ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}"
+                                    <div style="background-image: url({{searchResult.thumbnailUrl}})"
                                          class="mt-results-thumbnail"></div>
-                                    <a ng-click="!$event.redundantClick && appendResultToQueue(searchResult)" class="mt-add-to-queue-button"></a>
+                                    <a ng-click="!$event.redundantClick && appendResultToQueue(searchResult)"
+                                       class="mt-add-to-queue-button"></a>
 
                                     <div class="mt-video-duration" ng-show="searchResult.duration">
                                         <span class="mt-value">{{searchResult.duration | mtDuration:'shortTime'}}</span>
@@ -164,8 +165,8 @@
             </div>
             <ul class="mt-queue-list">
                 <li class="mt-queue-item" ng-controller="mtQueueItemCtrl" ng-repeat="queueEntry in queue.entries"
-                    ng-animate="'mt-appear'" mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()">
-                    <img class="mt-queue-item-thumbnail" ng-src="{{queueEntry.video.thumbnailUrl}}">
+                    ng-animate="'mt-appear'" mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()"
+                    style="background-image: url({{queueEntry.video.thumbnailUrl}})">
 
                     <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
 

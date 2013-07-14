@@ -746,6 +746,8 @@ body {
   // restores modified wrapping
   white-space: normal;
 
+  background-size: cover;
+
   // appear / disappear animations
   &.mt-appear-enter, &.mt-appear-leave {
     @include transition(all 100ms ease-in-out);
@@ -768,13 +770,6 @@ body {
       @include transform(scale(0));
     }
   }
-}
-
-.mt-queue-item-thumbnail {
-  display: block;
-  width: $queueThumbnailWidth;
-  height: 100%;
-  max-height: $queueThumbnailHeight;
 }
 
 .mt-playing-mark {
