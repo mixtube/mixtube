@@ -221,6 +221,81 @@
         }
     });
 
+//    mt.MixTubeApp.directive('mtCarousel', function ($compile) {
+//
+//        var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
+//
+//        /**
+//         * @param {string} expression
+//         * @returns {{valueIdentifier: string, listIdentifier: string}}
+//         */
+//        function parseExpression(expression) {
+//            var match = expression.match(CAROUSEL_EXPRESSION_REGEXP);
+//            if (!match) {
+//                throw new Error('Expected itemRepeat in form of "_item_ in _array_" but got "' + expression + '".');
+//            }
+//            return {
+//                valueIdentifier: match[1],
+//                listIdentifier: match[2]
+//            };
+//        }
+//
+//        return {
+//            restrict: 'E',
+//            replace: true,
+//            transclude: true,
+//            template: '<div class="mt-carousel-container">' +
+//                '    <div class="mt-carousel-slider">' +
+//                '        <div class="mt-carousel-list" ng-transclude></div>' +
+//                '    </div>' +
+//                '</div>',
+//            controller: function () {
+//                this.handleLinkers = [];
+//                this.itemLinker = null;
+//            },
+//            compile: function (cElement, cAttr) {
+//                var bucketTemplate = angular.element('<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>');
+//
+//                return function link(scope, element, attr, carouselCtrl) {
+//                    var carouselElement = element;
+//
+//                    // no nice way to reuse "ng-repeat" logic so we copy it here
+//                    var repeatExpression = attr.itemRepeat;
+//                    var identifiers = parseExpression(repeatExpression);
+//
+//                    scope.$watchCollection(identifiers.listIdentifier, function () {
+//                        // the content changed so we ensure that it is correctly displayed
+//                        // the real construction of the list is by the carousel item
+//                    });
+//
+//                    var bucketLinker = $compile(bucketTemplate, carouselCtrl.itemLinker);
+//                    bucketLinker(scope, function (clone) {
+////                        carouselElement.find('.mt-carousel-list');
+//                        carouselElement.find('.mt-carousel-list').empty().append(clone);
+//                    });
+//                }
+//            }
+//        };
+//    });
+
+//    mt.MixTubeApp.directive('mtCarouselHandle', function () {
+//        return {
+//            restrict: 'A',
+//            require: '^mtCarousel',
+//            link: function (scope, element, attrs, mtCarouselCtrl) {
+//                if (attrs.mtCarouselHandle === 'backward') {
+//                    scope.handle = function () {
+//                        mtCarouselCtrl.backward();
+//                    };
+//                } else if (attrs.mtCarouselHandle === 'forward') {
+//                    scope.handle = function () {
+//                        mtCarouselCtrl.forward();
+//                    };
+//                }
+//            }
+//        };
+//    });
+
     mt.MixTubeApp.directive('mtCarousel', function ($compile) {
 
         var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
@@ -243,52 +318,59 @@
         return {
             restrict: 'E',
             replace: true,
-            transclude: true,
+            transclude: 'element',
             template: '<div class="mt-carousel-container">' +
                 '    <div class="mt-carousel-slider">' +
                 '        <div class="mt-carousel-list" ng-transclude></div>' +
                 '    </div>' +
                 '</div>',
             controller: function () {
+                this.handleLinkers = {};
+                this.itemLinker = null;
             },
             compile: function (cElement, cAttr) {
-                var bucketTemplate = angular.element('<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>');
-
                 return function link(scope, element, attr, carouselCtrl) {
-                    var carouselElement = element;
-
-                    // no nice way to reuse "ng-repeat" logic so we copy it here
-                    var repeatExpression = attr.itemRepeat;
-                    var identifiers = parseExpression(repeatExpression);
-
-                    scope.$watchCollection(identifiers.listIdentifier, function () {
-                        // the content changed so we ensure that it is correctly displayed
-                        // the real construction of the list is by the carousel item
+                    angular.forEach(carouselCtrl.handleLinkers, function (handleLinker) {
+                        handleLinker(scope, function (handle) {
+                            element.append(handle);
+                        })
                     });
 
-                    var bucketLinker = $compile(bucketTemplate, carouselCtrl.itemLinker);
-                    bucketLinker(scope, function (clone) {
-//                        carouselElement.find('.mt-carousel-list');
-                        carouselElement.find('.mt-carousel-list').empty().append(clone);
+                    var bucketsLinker = $compile(
+                        '<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>',
+                        carouselCtrl.itemLinker
+                    );
+                    bucketsLinker(scope, function (buckets) {
+                        element.find('.mt-carousel-list').append(buckets);
                     });
                 }
             }
         };
     });
 
+
     mt.MixTubeApp.directive('mtCarouselHandle', function () {
         return {
             restrict: 'A',
+            transclude: 'element',
             require: '^mtCarousel',
-            link: function (scope, element, attrs, mtCarouselCtrl) {
-                if (attrs.mtCarouselHandle === 'backward') {
-                    scope.handle = function () {
-                        mtCarouselCtrl.backward();
-                    };
-                } else if (attrs.mtCarouselHandle === 'forward') {
-                    scope.handle = function () {
-                        mtCarouselCtrl.forward();
-                    };
+            compile: function (cElement, cAttr, cTransclude) {
+                return function link(scope, element, attrs, carouselCtrl) {
+                    carouselCtrl.handleLinkers[attrs.mtCarouselHandle] = cTransclude;
+                };
+            }
+        };
+    });
+
+    mt.MixTubeApp.directive('mtCarouselItem', function () {
+        return {
+            restrict: 'A',
+            transclude: 'element',
+            require: '^mtCarousel',
+            compile: function (cElement, cAttr, cTransclude) {
+                return function link(scope, element, attr, carouselCtrl) {
+                    carouselCtrl.itemLinker = cTransclude;
+                    carouselCtrl.itemTemplate = cElement;
                 }
             }
         };
@@ -309,16 +391,17 @@
 //    });
 
 
-    mt.MixTubeApp.directive('mtCarouselItem', function ($compile) {
-        return {
-            restrict: 'A',
-            require: '^mtCarousel',
-            compile: function (cElement) {
-                return function link(scope, element, attr, carouselCtrl) {
-                    carouselCtrl.itemLinker = $compile(cElement);
-//                    element.remove();
-                }
-            }
-        };
-    });
+//    mt.MixTubeApp.directive('mtCarouselItem', function ($compile) {
+//        return {
+//            restrict: 'A',
+//            require: '^mtCarousel',
+//            compile: function (cElement) {
+//                return function link(scope, element, attr, carouselCtrl) {
+//                    carouselCtrl.itemLinker = $compile(cElement);
+////                    element.remove();
+//                }
+//            }
+//        };
+//    });
+
 })(mt);
