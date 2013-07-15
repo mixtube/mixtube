@@ -121,7 +121,7 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"
+    <div class="mt-queue-frame" ng-class="{'mt-appear': true}" ng-mouseenter="mouseEntered()"
          ng-mouseleave="mouseLeaved()">
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">
@@ -152,47 +152,40 @@
                 </div>
             </div>
         </div>
-        <div mt-carousel class="mt-queue-list-container">
-            <div class="mt-carousel-handle backward">
+
+        <mt-carousel item-repeat="queueEntry in queue.entries" class="mt-queue-list-container">
+            <div mt-carousel-handle="backward" class="mt-carousel-handle backward">
                 <div class="mt-vertical-centering">
-                    <a mt-carousel-handle="backward" class="mt-link"></a>
+                    <a ng-click="handle()" class="mt-link"></a>
                 </div>
             </div>
-            <div class="mt-carousel-handle forward">
+            <div mt-carousel-handle="forward" class="mt-carousel-handle forward">
                 <div class="mt-vertical-centering">
-                    <a mt-carousel-handle="forward" class="mt-link"></a>
+                    <a ng-click="handle()" class="mt-link"></a>
                 </div>
             </div>
-            <ul class="mt-queue-list">
-                <li class="mt-queue-item" ng-controller="mtQueueItemCtrl" ng-repeat="queueEntry in queue.entries"
-                    ng-animate="'mt-appear'" mt-carousel-bring-up-if="queueEntry == getPlaybackQueueEntry()"
-                    style="background-image: url({{queueEntry.video.thumbnailUrl}})">
+            <div mt-carousel-item ng-controller="mtQueueItemCtrl"
+                 style="background-image: url({{queueEntry.video.thumbnailUrl}})" class="mt-queue-item">
 
-                    <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
+                <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
 
-                    <!--this weird structure is just to be able to vertical center the play button-->
-                    <div class="mt-queue-item-play-button-container">
-                        <div class="mt-vertical-centering">
-                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
-                               ng-hide="playPending"></a>
+                <!--this weird structure is just to be able to vertical center the play button-->
+                <div class="mt-queue-item-play-button-container">
+                    <div class="mt-vertical-centering">
+                        <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
+                           ng-hide="playPending"></a>
 
-                            <div class="mt-play-button-spinner" ng-show="playPending"></div>
-                        </div>
+                        <div class="mt-play-button-spinner" ng-show="playPending"></div>
                     </div>
-                    <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"
-                       ng-hide="playPending"></a>
+                </div>
+                <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"
+                   ng-hide="playPending"></a>
 
-                    <div class="mt-queue-item-tooltip">
-                        {{queueEntry.video.title}}
-                    </div>
-                </li>
-                <li class="mt-queue-item mt-queue-call-to-action">
-                    <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">
-                        <div class="mt-text">Use the search to add to this queue</div>
-                    </a>
-                </li>
-            </ul>
-        </div>
+                <div class="mt-queue-item-tooltip">
+                    {{queueEntry.video.title}}
+                </div>
+            </div>
+        </mt-carousel>
     </div>
 </section>
 

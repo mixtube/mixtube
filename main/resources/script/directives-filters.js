@@ -134,125 +134,6 @@
         };
     });
 
-    mt.MixTubeApp.directive('mtCarousel', function ($window) {
-//    mt.MixTubeApp.directive('mtCarousel', function ($window, mtAnimationHooksManager) {
-//
-//        // once for all register the animation hooks to let the parent carousel be notified when a sub element enter
-//        mtAnimationHooksManager.hooks.enter.after.push(function (element) {
-//            var mtCarouselCtrl = element.controller('mtCarousel');
-//            if (mtCarouselCtrl) {
-//                mtCarouselCtrl.itemEntered(element);
-//            }
-//        });
-
-        return {
-            restrict: 'A',
-            replace: true,
-            transclude: true,
-            template: '<div ng-transclude></div>',
-            controller: function ($element) {
-
-                var carousel = $element;
-                var leftItemIdx = 0;
-
-                /**
-                 * Pick the carousel item available at the given x position.
-                 *
-                 * @param {number} x the position
-                 * @returns {HTMLElement} the item at the position or undefined if none found
-                 */
-                function rawItemFromPosition(x) {
-                    var items = carousel.find('.mt-queue-item');
-                    return _.findWhere(items, function (item, idx) {
-                        var itemRect = item.getBoundingClientRect();
-                        return idx === 0 && itemRect.left > x || itemRect.left <= x && itemRect.right >= x;
-                    });
-                }
-
-                this.backward = function () {
-                    var toBringUp = rawItemFromPosition(-carousel[0].getBoundingClientRect().width);
-                    if (toBringUp) {
-                        this.bringUp(angular.element(toBringUp));
-                    }
-                };
-
-                this.forward = function () {
-                    var toBringUp = rawItemFromPosition(carousel[0].getBoundingClientRect().width);
-                    if (toBringUp) {
-                        this.bringUp(angular.element(toBringUp));
-                    }
-                };
-
-                this.bringUp = function (toBringUp, force) {
-                    var viewPortRect = carousel[0].getBoundingClientRect();
-                    var toBringUpRect = toBringUp[0].getBoundingClientRect();
-
-                    if (force || (toBringUpRect.left < viewPortRect.left || viewPortRect.right < toBringUpRect.right)) {
-                        // the element to bring up is outside of the view port
-                        // we want to make it the first visible item in the view port
-                        var list = carousel.find('.mt-queue-list');
-                        var listRect = list[0].getBoundingClientRect();
-                        var newPosition = listRect.left - toBringUpRect.left;
-                        list.animate({left: newPosition});
-
-                        leftItemIdx = carousel.find('.mt-queue-item').index(toBringUp);
-                    }
-                };
-
-                this.itemEntered = function (enteredElement) {
-                    // this.bringUp(angular.element(enteredElement));
-                };
-
-                this.adjust = function () {
-                    this.bringUp(carousel.find('.mt-queue-item').eq(leftItemIdx), true);
-                }
-            },
-            link: function (scope, element, attrs, controller) {
-                var window = angular.element($window);
-
-                window.bind('resize.mtCarousel', _.debounce(function () {
-                    controller.adjust();
-                }, 100));
-
-                scope.$on('$destroy', function () {
-                    window.unbind('resize.mtCarousel');
-                })
-            }
-        };
-    });
-
-    mt.MixTubeApp.directive('mtCarouselHandle', function () {
-        return {
-            restrict: 'A',
-            require: '^mtCarousel',
-            link: function (scope, element, attrs, mtCarouselCtrl) {
-                if (attrs.mtCarouselHandle === 'backward') {
-                    element.bind('click', function () {
-                        mtCarouselCtrl.backward();
-                    });
-                } else if (attrs.mtCarouselHandle === 'forward') {
-                    element.bind('click', function () {
-                        mtCarouselCtrl.forward();
-                    });
-                }
-            }
-        };
-    });
-
-    mt.MixTubeApp.directive('mtCarouselBringUpIf', function () {
-        return {
-            restrict: 'A',
-            require: '^mtCarousel',
-            link: function (scope, element, attrs, mtCarouselCtrl) {
-                scope.$watch(attrs.mtCarouselBringUpIf, function watchBringUpIf(bringUp) {
-                    if (bringUp) {
-                        mtCarouselCtrl.bringUp(element);
-                    }
-                });
-            }
-        };
-    });
-
     mt.MixTubeApp.directive('mtInlineEdit', function ($templateCache, $compile, $parse, mtKeyboardShortcutManager) {
         return {
             restrict: 'A',
@@ -338,5 +219,106 @@
 
             return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':' + mt.tools.leftPad(singletonDate.getSeconds().toString(10), 2, '0');
         }
+    });
+
+    mt.MixTubeApp.directive('mtCarousel', function ($compile) {
+
+        var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
+
+        /**
+         * @param {string} expression
+         * @returns {{valueIdentifier: string, listIdentifier: string}}
+         */
+        function parseExpression(expression) {
+            var match = expression.match(CAROUSEL_EXPRESSION_REGEXP);
+            if (!match) {
+                throw new Error('Expected itemRepeat in form of "_item_ in _array_" but got "' + expression + '".');
+            }
+            return {
+                valueIdentifier: match[1],
+                listIdentifier: match[2]
+            };
+        }
+
+        return {
+            restrict: 'E',
+            replace: true,
+            transclude: true,
+            template: '<div class="mt-carousel-container">' +
+                '    <div class="mt-carousel-slider">' +
+                '        <div class="mt-carousel-list" ng-transclude></div>' +
+                '    </div>' +
+                '</div>',
+            controller: function () {
+            },
+            compile: function (cElement, cAttr) {
+                var bucketTemplate = angular.element('<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>');
+
+                return function link(scope, element, attr, carouselCtrl) {
+                    var carouselElement = element;
+
+                    // no nice way to reuse "ng-repeat" logic so we copy it here
+                    var repeatExpression = attr.itemRepeat;
+                    var identifiers = parseExpression(repeatExpression);
+
+                    scope.$watchCollection(identifiers.listIdentifier, function () {
+                        // the content changed so we ensure that it is correctly displayed
+                        // the real construction of the list is by the carousel item
+                    });
+
+                    var bucketLinker = $compile(bucketTemplate, carouselCtrl.itemLinker);
+                    bucketLinker(scope, function (clone) {
+//                        carouselElement.find('.mt-carousel-list');
+                        carouselElement.find('.mt-carousel-list').empty().append(clone);
+                    });
+                }
+            }
+        };
+    });
+
+    mt.MixTubeApp.directive('mtCarouselHandle', function () {
+        return {
+            restrict: 'A',
+            require: '^mtCarousel',
+            link: function (scope, element, attrs, mtCarouselCtrl) {
+                if (attrs.mtCarouselHandle === 'backward') {
+                    scope.handle = function () {
+                        mtCarouselCtrl.backward();
+                    };
+                } else if (attrs.mtCarouselHandle === 'forward') {
+                    scope.handle = function () {
+                        mtCarouselCtrl.forward();
+                    };
+                }
+            }
+        };
+    });
+
+//    mt.MixTubeApp.directive('mtCarouselBringUpIf', function () {
+//        return {
+//            restrict: 'A',
+//            require: '^mtCarousel',
+//            link: function (scope, element, attrs, mtCarouselCtrl) {
+//                scope.$watch(attrs.mtCarouselBringUpIf, function watchBringUpIf(bringUp) {
+//                    if (bringUp) {
+//                        mtCarouselCtrl.bringUp(element);
+//                    }
+//                });
+//            }
+//        };
+//    });
+
+
+    mt.MixTubeApp.directive('mtCarouselItem', function ($compile) {
+        return {
+            restrict: 'A',
+            require: '^mtCarousel',
+            compile: function (cElement) {
+                return function link(scope, element, attr, carouselCtrl) {
+                    carouselCtrl.itemLinker = $compile(cElement);
+//                    element.remove();
+                }
+            }
+        };
     });
 })(mt);
