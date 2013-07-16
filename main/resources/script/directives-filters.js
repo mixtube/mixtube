@@ -200,6 +200,158 @@
         };
     });
 
+    mt.MixTubeApp.directive('mtCarousel', function ($rootScope, $window) {
+
+        var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
+
+        /**
+         * @param {string} expression
+         * @returns {{valueIdentifier: string, listIdentifier: string}}
+         */
+        function parseRepeatExpression(expression) {
+            var match = expression.match(CAROUSEL_EXPRESSION_REGEXP);
+            if (!match) {
+                throw new Error('Expected itemRepeat in form of "_item_ in _array_" but got "' + expression + '".');
+            }
+            return {
+                valueIdentifier: match[1],
+                listIdentifier: match[2]
+            };
+        }
+
+        return {
+            restrict: 'E',
+            replace: true,
+            transclude: 'element',
+            scope: true,
+            template: function (tElement, tAttr) {
+                return '<div class="mt-carousel-container">' +
+                    '    <div class="mt-carousel-slider">' +
+                    '        <div class="mt-carousel-list">' +
+                    '            <div class="mt-carousel-bucket js-mt-carousel-item-bucket" ng-repeat="' + tAttr.bucketsRepeat + '" ' +
+                    '                 mt-internal-bring-bucket-up-when="' + tAttr.bringBucketUpWhen + '"></div>' +
+                    '            <div class="mt-carousel-bucket js-mt-carousel-remainder-bucket"></div>' +
+                    '        </div>' +
+                    '    </div>' +
+                    '</div>';
+            },
+            controller: function ($element) {
+
+                var self = this;
+                var carousel = $element;
+                var slider = carousel.find('.mt-carousel-slider');
+
+                /**
+                 * Pick the best carousel bucket available around the given x position.
+                 *
+                 * @param {number} x the position
+                 * @returns {HTMLElement} the item at the position or undefined if none found
+                 */
+                function rawBucketFromPosition(x) {
+                    return _.findWhere(carousel.find('.mt-carousel-bucket'), function (bucket) {
+                        var bucketRect = bucket.getBoundingClientRect();
+                        if (x > 0) {
+                            // in forward we want the half visible bucket at the very right
+                            // means the first bucket where the right edge position is higher that the looked for position
+                            return x < bucketRect.right;
+                        } else {
+                            // in backward we want the fully visible bucket at 1 view port width distance from the left
+                            // means the first bucket where the left edge position is higher that the looked for position
+                            return x < bucketRect.left;
+                        }
+                    });
+                }
+
+                function page(forward) {
+                    // works because the carousel is full width
+                    var toBringUp = rawBucketFromPosition(carousel[0].getBoundingClientRect().width * (forward ? 1 : -1));
+                    if (toBringUp) {
+                        self.bringUp(angular.element(toBringUp));
+                    }
+                }
+
+                self.itemsUpdated = function () {
+
+                };
+
+                self.resized = function () {
+
+                };
+
+                self.bringUp = function (toBringUp) {
+                    var viewPortRect = carousel[0].getBoundingClientRect();
+                    var toBringUpRect = toBringUp[0].getBoundingClientRect();
+
+                    if (toBringUpRect.left < viewPortRect.left || viewPortRect.right < toBringUpRect.right) {
+                        // the element to bring up is outside of the view port
+                        // we want to make it the first visible item in the view port
+                        var sliderRect = slider[0].getBoundingClientRect();
+                        var newPosition = sliderRect.left - toBringUpRect.left;
+                        slider.animate({left: newPosition});
+                    }
+                };
+
+                self.backward = function () {
+                    page(false);
+                };
+
+                self.forward = function () {
+                    page(true);
+                };
+            },
+            compile: function (tElement, tAttr, originalLinker) {
+                // we get the original directive outer HTML by executing the linker on a empty scope
+                var tOriginal = originalLinker($rootScope.$new(true));
+                var tHandles = tOriginal.find('handle');
+                var tRenderer = tOriginal.find('renderer');
+                var tRemainder = tOriginal.find('remainder');
+
+                tElement.append(tHandles.contents());
+                tElement.find('.js-mt-carousel-item-bucket').append(tRenderer.contents());
+                tElement.find('.js-mt-carousel-remainder-bucket').append(tRemainder.contents());
+
+                return function link(scope, element, attr, carouselCtrl) {
+                    // react to items list changes
+                    var identifiers = parseRepeatExpression(attr.bucketsRepeat);
+                    scope.$watchCollection(identifiers.listIdentifier, function () {
+                        carouselCtrl.itemsUpdated();
+                    });
+
+                    // react to window resizing
+                    var window = angular.element($window);
+                    window.bind('resize.mtCarousel', _.debounce(function () {
+                        carouselCtrl.resized();
+                    }, 100));
+                    scope.$on('$destroy', function () {
+                        window.unbind('resize.mtCarousel');
+                    });
+
+                    // methods that can be used by sub components
+                    scope.backward = function () {
+                        carouselCtrl.backward();
+                    };
+                    scope.forward = function () {
+                        carouselCtrl.forward();
+                    };
+                }
+            }
+        };
+    });
+
+    mt.MixTubeApp.directive('mtInternalBringBucketUpWhen', function () {
+        return {
+            restrict: 'A',
+            require: '^mtCarousel',
+            link: function (scope, element, attrs, carouselCtrl) {
+                scope.$watch(attrs.mtInternalBringBucketUpWhen, function watchBringUpIf(bringUp) {
+                    if (bringUp) {
+                        carouselCtrl.bringUp(element);
+                    }
+                });
+            }
+        };
+    });
+
     // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
     mt.MixTubeApp.filter('mtDuration', function () {
         // reuse the date object between invocation since it is only used as a formatting tool
@@ -220,188 +372,4 @@
             return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':' + mt.tools.leftPad(singletonDate.getSeconds().toString(10), 2, '0');
         }
     });
-
-//    mt.MixTubeApp.directive('mtCarousel', function ($compile) {
-//
-//        var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
-//
-//        /**
-//         * @param {string} expression
-//         * @returns {{valueIdentifier: string, listIdentifier: string}}
-//         */
-//        function parseExpression(expression) {
-//            var match = expression.match(CAROUSEL_EXPRESSION_REGEXP);
-//            if (!match) {
-//                throw new Error('Expected itemRepeat in form of "_item_ in _array_" but got "' + expression + '".');
-//            }
-//            return {
-//                valueIdentifier: match[1],
-//                listIdentifier: match[2]
-//            };
-//        }
-//
-//        return {
-//            restrict: 'E',
-//            replace: true,
-//            transclude: true,
-//            template: '<div class="mt-carousel-container">' +
-//                '    <div class="mt-carousel-slider">' +
-//                '        <div class="mt-carousel-list" ng-transclude></div>' +
-//                '    </div>' +
-//                '</div>',
-//            controller: function () {
-//                this.handleLinkers = [];
-//                this.itemLinker = null;
-//            },
-//            compile: function (cElement, cAttr) {
-//                var bucketTemplate = angular.element('<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>');
-//
-//                return function link(scope, element, attr, carouselCtrl) {
-//                    var carouselElement = element;
-//
-//                    // no nice way to reuse "ng-repeat" logic so we copy it here
-//                    var repeatExpression = attr.itemRepeat;
-//                    var identifiers = parseExpression(repeatExpression);
-//
-//                    scope.$watchCollection(identifiers.listIdentifier, function () {
-//                        // the content changed so we ensure that it is correctly displayed
-//                        // the real construction of the list is by the carousel item
-//                    });
-//
-//                    var bucketLinker = $compile(bucketTemplate, carouselCtrl.itemLinker);
-//                    bucketLinker(scope, function (clone) {
-////                        carouselElement.find('.mt-carousel-list');
-//                        carouselElement.find('.mt-carousel-list').empty().append(clone);
-//                    });
-//                }
-//            }
-//        };
-//    });
-
-//    mt.MixTubeApp.directive('mtCarouselHandle', function () {
-//        return {
-//            restrict: 'A',
-//            require: '^mtCarousel',
-//            link: function (scope, element, attrs, mtCarouselCtrl) {
-//                if (attrs.mtCarouselHandle === 'backward') {
-//                    scope.handle = function () {
-//                        mtCarouselCtrl.backward();
-//                    };
-//                } else if (attrs.mtCarouselHandle === 'forward') {
-//                    scope.handle = function () {
-//                        mtCarouselCtrl.forward();
-//                    };
-//                }
-//            }
-//        };
-//    });
-
-    mt.MixTubeApp.directive('mtCarousel', function ($compile) {
-
-        var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
-
-        /**
-         * @param {string} expression
-         * @returns {{valueIdentifier: string, listIdentifier: string}}
-         */
-        function parseExpression(expression) {
-            var match = expression.match(CAROUSEL_EXPRESSION_REGEXP);
-            if (!match) {
-                throw new Error('Expected itemRepeat in form of "_item_ in _array_" but got "' + expression + '".');
-            }
-            return {
-                valueIdentifier: match[1],
-                listIdentifier: match[2]
-            };
-        }
-
-        return {
-            restrict: 'E',
-            replace: true,
-            transclude: 'element',
-            template: '<div class="mt-carousel-container">' +
-                '    <div class="mt-carousel-slider">' +
-                '        <div class="mt-carousel-list" ng-transclude></div>' +
-                '    </div>' +
-                '</div>',
-            controller: function () {
-                this.handleLinkers = {};
-                this.itemLinker = null;
-            },
-            compile: function (cElement, cAttr) {
-                return function link(scope, element, attr, carouselCtrl) {
-                    angular.forEach(carouselCtrl.handleLinkers, function (handleLinker) {
-                        handleLinker(scope, function (handle) {
-                            element.append(handle);
-                        })
-                    });
-
-                    var bucketsLinker = $compile(
-                        '<div class="mt-carousel-bucket" ng-repeat="' + cAttr.itemRepeat + '" ng-transclude></div>',
-                        carouselCtrl.itemLinker
-                    );
-                    bucketsLinker(scope, function (buckets) {
-                        element.find('.mt-carousel-list').append(buckets);
-                    });
-                }
-            }
-        };
-    });
-
-
-    mt.MixTubeApp.directive('mtCarouselHandle', function () {
-        return {
-            restrict: 'A',
-            transclude: 'element',
-            require: '^mtCarousel',
-            compile: function (cElement, cAttr, cTransclude) {
-                return function link(scope, element, attrs, carouselCtrl) {
-                    carouselCtrl.handleLinkers[attrs.mtCarouselHandle] = cTransclude;
-                };
-            }
-        };
-    });
-
-    mt.MixTubeApp.directive('mtCarouselItem', function () {
-        return {
-            restrict: 'A',
-            transclude: 'element',
-            require: '^mtCarousel',
-            compile: function (cElement, cAttr, cTransclude) {
-                return function link(scope, element, attr, carouselCtrl) {
-                    carouselCtrl.itemLinker = cTransclude;
-                    carouselCtrl.itemTemplate = cElement;
-                }
-            }
-        };
-    });
-
-//    mt.MixTubeApp.directive('mtCarouselBringUpIf', function () {
-//        return {
-//            restrict: 'A',
-//            require: '^mtCarousel',
-//            link: function (scope, element, attrs, mtCarouselCtrl) {
-//                scope.$watch(attrs.mtCarouselBringUpIf, function watchBringUpIf(bringUp) {
-//                    if (bringUp) {
-//                        mtCarouselCtrl.bringUp(element);
-//                    }
-//                });
-//            }
-//        };
-//    });
-
-
-//    mt.MixTubeApp.directive('mtCarouselItem', function ($compile) {
-//        return {
-//            restrict: 'A',
-//            require: '^mtCarousel',
-//            compile: function (cElement) {
-//                return function link(scope, element, attr, carouselCtrl) {
-//                    carouselCtrl.itemLinker = $compile(cElement);
-////                    element.remove();
-//                }
-//            }
-//        };
-//    });
-
 })(mt);

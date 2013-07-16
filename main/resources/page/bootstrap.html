@@ -153,38 +153,52 @@
             </div>
         </div>
 
-        <mt-carousel item-repeat="queueEntry in queue.entries" class="mt-queue-list-container">
-            <div mt-carousel-handle="backward" class="mt-carousel-handle backward">
-                <div class="mt-vertical-centering">
-                    <a ng-click="handle()" class="mt-link"></a>
-                </div>
-            </div>
-            <div mt-carousel-handle="forward" class="mt-carousel-handle forward">
-                <div class="mt-vertical-centering">
-                    <a ng-click="handle()" class="mt-link"></a>
-                </div>
-            </div>
-            <div mt-carousel-item ng-controller="mtQueueItemCtrl"
-                 style="background-image: url({{queueEntry.video.thumbnailUrl}})" class="mt-queue-item">
-
-                <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
-
-                <!--this weird structure is just to be able to vertical center the play button-->
-                <div class="mt-queue-item-play-button-container">
+        <mt-carousel buckets-repeat="queueEntry in queue.entries"
+                     bring-bucket-up-when="queueEntry == getPlaybackQueueEntry()" class="mt-queue-list-container">
+            <handle>
+                <div class="mt-carousel-handle backward">
                     <div class="mt-vertical-centering">
-                        <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
-                           ng-hide="playPending"></a>
-
-                        <div class="mt-play-button-spinner" ng-show="playPending"></div>
+                        <a ng-click="backward()" class="mt-link"></a>
                     </div>
                 </div>
-                <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"
-                   ng-hide="playPending"></a>
-
-                <div class="mt-queue-item-tooltip">
-                    {{queueEntry.video.title}}
+            </handle>
+            <handle>
+                <div class="mt-carousel-handle forward">
+                    <div class="mt-vertical-centering">
+                        <a ng-click="forward()" class="mt-link"></a>
+                    </div>
                 </div>
-            </div>
+            </handle>
+            <renderer>
+                <div ng-controller="mtQueueItemCtrl" style="background-image: url({{queueEntry.video.thumbnailUrl}})"
+                     class="mt-queue-item">
+
+                    <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
+
+                    <!--this weird structure is just to be able to vertical center the play button-->
+                    <div class="mt-queue-item-play-button-container">
+                        <div class="mt-vertical-centering">
+                            <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
+                               ng-hide="playPending"></a>
+
+                            <div class="mt-play-button-spinner" ng-show="playPending"></div>
+                        </div>
+                    </div>
+                    <a class="mt-queue-item-remove-button" ng-click="removeQueueEntryClicked(queueEntry)"
+                       ng-hide="playPending"></a>
+
+                    <div class="mt-queue-item-tooltip">
+                        {{queueEntry.video.title}}
+                    </div>
+                </div>
+            </renderer>
+            <remainder>
+                <div class="mt-queue-item mt-queue-call-to-action">
+                    <a class="mt-queue-call-button" ng-click="openSearchButtonClicked()">
+                        <div class="mt-text">Use the search to add to this queue</div>
+                    </a>
+                </div>
+            </remainder>
         </mt-carousel>
     </div>
 </section>
