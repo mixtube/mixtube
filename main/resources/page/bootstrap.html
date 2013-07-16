@@ -158,14 +158,14 @@
                      buckets-animate="{enter: 'mt-fade-in', leave: 'mt-fade-out'}"
                      class="mt-queue-list-container">
             <handle>
-                <div class="mt-carousel-handle backward">
+                <div class="mt-carousel-handle backward" ng-show="backwardAvailable">
                     <div class="mt-vertical-centering">
                         <a ng-click="backward()" class="mt-link"></a>
                     </div>
                 </div>
             </handle>
             <handle>
-                <div class="mt-carousel-handle forward">
+                <div class="mt-carousel-handle forward" ng-show="forwardAvailable">
                     <div class="mt-vertical-centering">
                         <a ng-click="forward()" class="mt-link"></a>
                     </div>

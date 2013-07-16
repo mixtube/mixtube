@@ -200,7 +200,7 @@
         };
     });
 
-    mt.MixTubeApp.directive('mtCarousel', function ($rootScope) {
+    mt.MixTubeApp.directive('mtCarousel', function ($rootScope, $window, $timeout) {
 
         var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
 
@@ -236,12 +236,15 @@
                     '    </div>' +
                     '</div>';
             },
-            controller: function ($element) {
+            controller: function ($scope, $element) {
 
                 var self = this;
                 var carousel = $element;
                 var slider = carousel.find('.mt-carousel-slider');
                 var savedList = [];
+
+                $scope.backwardAvailable = false;
+                $scope.forwardAvailable = false;
 
                 /**
                  * Pick the best carousel bucket available around the given x position.
@@ -272,6 +275,18 @@
                     }
                 }
 
+                function computeHandlesAvailability() {
+                    var sliderRect = slider[0].getBoundingClientRect();
+                    var carouselRect = carousel[0].getBoundingClientRect();
+
+                    $scope.backwardAvailable = sliderRect.left < carouselRect.left;
+                    $scope.forwardAvailable = carouselRect.right < sliderRect.right;
+                }
+
+                self.resized = function () {
+                    computeHandlesAvailability();
+                };
+
                 self.bucketsUpdated = function (newList) {
                     if (angular.isArray(newList)) {
                         if (savedList.length < newList.length) {
@@ -297,6 +312,11 @@
 
                         // shallow copy the list for next change detection
                         savedList = newList.slice();
+
+                        // todo what we need here is actually a way to know when the animation is ended instead of this random timeout
+                        $timeout(function () {
+                            computeHandlesAvailability();
+                        }, 1000);
                     }
                 };
 
@@ -309,7 +329,12 @@
                         // we want to make it the first visible item in the view port
                         var sliderRect = slider[0].getBoundingClientRect();
                         var newPosition = sliderRect.left - toBringUpRect.left;
-                        slider.animate({left: newPosition});
+
+                        slider.animate({left: newPosition}, function () {
+                            $scope.$apply(function () {
+                                computeHandlesAvailability();
+                            })
+                        });
                     }
                 };
 
@@ -339,6 +364,17 @@
                     scope.$watchCollection(identifiers.listIdentifier, function (newList) {
                         // works only with list of bucket
                         carouselCtrl.bucketsUpdated(newList);
+                    });
+
+                    // react to window resizing
+                    var window = angular.element($window);
+                    window.bind('resize.mtCarousel', _.debounce(function () {
+                        scope.$apply(function () {
+                            carouselCtrl.resized();
+                        });
+                    }, 100));
+                    scope.$on('$destroy', function () {
+                        window.unbind('resize.mtCarousel');
                     });
 
                     // methods that can be used by sub components
