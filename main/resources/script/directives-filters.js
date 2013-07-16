@@ -200,7 +200,7 @@
         };
     });
 
-    mt.MixTubeApp.directive('mtCarousel', function ($rootScope, $window) {
+    mt.MixTubeApp.directive('mtCarousel', function ($rootScope) {
 
         var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
 
@@ -229,7 +229,8 @@
                     '    <div class="mt-carousel-slider">' +
                     '        <div class="mt-carousel-list">' +
                     '            <div class="mt-carousel-bucket js-mt-carousel-item-bucket" ng-repeat="' + tAttr.bucketsRepeat + '" ' +
-                    '                 mt-internal-bring-bucket-up-when="' + tAttr.bringBucketUpWhen + '"></div>' +
+                    '                 mt-internal-bring-bucket-up-when="' + tAttr.bringBucketUpWhen + '" ' +
+                    '                 ng-animate="' + tAttr.bucketsAnimate + '"></div>' +
                     '            <div class="mt-carousel-bucket js-mt-carousel-remainder-bucket"></div>' +
                     '        </div>' +
                     '    </div>' +
@@ -240,6 +241,7 @@
                 var self = this;
                 var carousel = $element;
                 var slider = carousel.find('.mt-carousel-slider');
+                var savedList = [];
 
                 /**
                  * Pick the best carousel bucket available around the given x position.
@@ -270,12 +272,32 @@
                     }
                 }
 
-                self.itemsUpdated = function () {
+                self.bucketsUpdated = function (newList) {
+                    if (angular.isArray(newList)) {
+                        if (savedList.length < newList.length) {
+                            // some buckets were added, we want to detect the index of the first one
+                            // bellow the proper way to do it but because we now that we only add bucket at then
 
-                };
+                            var addedBucketIndex = -1;
+                            for (var idx = 0; idx < savedList.length; idx++) {
+                                if (savedList[idx] !== newList[idx]) {
+                                    // found a different, save the index and break
+                                    addedBucketIndex = idx;
+                                    break;
+                                }
+                            }
+                            if (addedBucketIndex === -1) {
+                                // unsuccessful search means the new bucket is in the not yet explored part of the new list
+                                addedBucketIndex = savedList.length;
+                            }
 
-                self.resized = function () {
+                            // the bucket has been just added bring it up
+                            self.bringUp(carousel.find('.mt-carousel-bucket').eq(addedBucketIndex));
+                        }
 
+                        // shallow copy the list for next change detection
+                        savedList = newList.slice();
+                    }
                 };
 
                 self.bringUp = function (toBringUp) {
@@ -313,17 +335,10 @@
                 return function link(scope, element, attr, carouselCtrl) {
                     // react to items list changes
                     var identifiers = parseRepeatExpression(attr.bucketsRepeat);
-                    scope.$watchCollection(identifiers.listIdentifier, function () {
-                        carouselCtrl.itemsUpdated();
-                    });
 
-                    // react to window resizing
-                    var window = angular.element($window);
-                    window.bind('resize.mtCarousel', _.debounce(function () {
-                        carouselCtrl.resized();
-                    }, 100));
-                    scope.$on('$destroy', function () {
-                        window.unbind('resize.mtCarousel');
+                    scope.$watchCollection(identifiers.listIdentifier, function (newList) {
+                        // works only with list of bucket
+                        carouselCtrl.bucketsUpdated(newList);
                     });
 
                     // methods that can be used by sub components

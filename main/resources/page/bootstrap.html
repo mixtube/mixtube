@@ -154,7 +154,9 @@
         </div>
 
         <mt-carousel buckets-repeat="queueEntry in queue.entries"
-                     bring-bucket-up-when="queueEntry == getPlaybackQueueEntry()" class="mt-queue-list-container">
+                     bring-bucket-up-when="queueEntry == getPlaybackQueueEntry()"
+                     buckets-animate="{enter: 'mt-fade-in', leave: 'mt-fade-out'}"
+                     class="mt-queue-list-container">
             <handle>
                 <div class="mt-carousel-handle backward">
                     <div class="mt-vertical-centering">
