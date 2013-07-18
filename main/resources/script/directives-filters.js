@@ -219,6 +219,36 @@
             };
         }
 
+        /**
+         * @param {jQuery} target
+         * @param {function()} callback
+         * @returns {{disconnect: function()}}
+         */
+        function observeChildList(target, callback) {
+            if (window.hasOwnProperty('MutationObserver')) {
+                return new MutationObserver(function () {
+                    $rootScope.$apply(function () {
+                        callback();
+                    });
+                }).observe(target[0], { childList: true });
+            } else {
+                // only IE10 in the range of supported browsers
+                // todo remove once IE11 has been released
+                target.bind('DOMNodeInserted.mtCarousel DOMNodeRemoved.mtCarousel', function () {
+                    // we need to let time for the node to be rendered before calling the callback
+                    $timeout(function () {
+                        callback();
+                    }, 0);
+                });
+
+                return {
+                    disconnect: function () {
+                        target.unbind('DOMNodeInserted.mtCarousel DOMNodeRemoved.mtCarousel');
+                    }
+                };
+            }
+        }
+
         return {
             restrict: 'E',
             replace: true,
@@ -283,7 +313,7 @@
                     $scope.forwardAvailable = carouselRect.right < sliderRect.right;
                 }
 
-                self.resized = function () {
+                self.computeSizeRelated = function () {
                     computeHandlesAvailability();
                 };
 
@@ -312,11 +342,6 @@
 
                         // shallow copy the list for next change detection
                         savedList = newList.slice();
-
-                        // todo what we need here is actually a way to know when the animation is ended instead of this random timeout
-                        $timeout(function () {
-                            computeHandlesAvailability();
-                        }, 1000);
                     }
                 };
 
@@ -370,11 +395,18 @@
                     var window = angular.element($window);
                     window.bind('resize.mtCarousel', _.debounce(function () {
                         scope.$apply(function () {
-                            carouselCtrl.resized();
+                            carouselCtrl.computeSizeRelated();
                         });
                     }, 100));
+
+                    // react to bucket insertion/removal
+                    var bucketListObserver = observeChildList(element.find('.mt-carousel-list'), function () {
+                        carouselCtrl.computeSizeRelated();
+                    });
+
                     scope.$on('$destroy', function () {
                         window.unbind('resize.mtCarousel');
+                        bucketListObserver.disconnect();
                     });
 
                     // methods that can be used by sub components
