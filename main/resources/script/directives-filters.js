@@ -203,6 +203,7 @@
     mt.MixTubeApp.directive('mtCarousel', function ($rootScope, $window, $timeout) {
 
         var CAROUSEL_EXPRESSION_REGEXP = /^\s*(.+)\s+in\s+(.*?)\s*$/;
+        var CSS_PREFIXES = ['-webkit-', ''];
         var EASE_IN_OUT_QUART = 'cubic-bezier(.77,0,.175,1)';
 
         /**
@@ -275,7 +276,9 @@
                 var savedList = [];
 
                 // allows to animate the slider
-                slider.css('transition', 'all .5s ' + EASE_IN_OUT_QUART);
+                CSS_PREFIXES.forEach(function (prefix) {
+                    slider.css(prefix + 'transition', prefix + 'transform .5s ' + EASE_IN_OUT_QUART);
+                });
 
                 $scope.backwardAvailable = false;
                 $scope.forwardAvailable = false;
@@ -359,9 +362,12 @@
                         var sliderRect = slider[0].getBoundingClientRect();
                         var newPosition = sliderRect.left - toBringUpRect.left;
 
-                        slider.css('transform', 'translateX(' + newPosition + 'px)');
+                        CSS_PREFIXES.forEach(function (prefix) {
+                            slider.css(prefix + 'transform', 'translateX(' + newPosition + 'px)');
+                        });
+
                         // listen for end of transition to compute handles availability
-                        slider.one('MSTransitionEnd.mtCarousel transitionend.mtCarousel', function (evt) {
+                        slider.one('transitionend.mtCarousel', function () {
                             $scope.$apply(function () {
                                 computeHandlesAvailability();
                             });
