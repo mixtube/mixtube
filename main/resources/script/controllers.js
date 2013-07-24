@@ -208,6 +208,7 @@
             if (newSearchVisible) {
                 mtUserInteractionManager.searchActiveKeepAlive();
             } else {
+                $scope.searchTerm = null;
                 mtUserInteractionManager.searchClosed();
             }
         });
