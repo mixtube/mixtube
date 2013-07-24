@@ -8,7 +8,7 @@
  *
  * Needs v 1.4 of Mousetrap at least.
  */
-Mousetrap = (function (Mousetrap) {
+(function (Mousetrap) {
     var savedHandleKeyFn = Mousetrap.handleKey;
     var bindingByKey = {};
 
@@ -16,7 +16,8 @@ Mousetrap = (function (Mousetrap) {
         var matched = false;
 
         // only keypress makes sense because we want to catch character and keypress is the only one reliable for that
-        if (evt.type === 'keypress') {
+        // only single character makes sense (we also filter out Mousetrep special characters like "space")
+        if (character.length === 1 && evt.type === 'keypress') {
             for (var key in bindingByKey) {
                 var bindings = bindingByKey[key];
                 for (var idxBindings = 0; idxBindings < bindings.length; idxBindings++) {
@@ -89,6 +90,4 @@ Mousetrap = (function (Mousetrap) {
     Mousetrap.unbindRegExp = function (regExp) {
         unbind(regExp instanceof Array ? regExp : [regExp]);
     };
-
-    return Mousetrap;
 })(Mousetrap);
