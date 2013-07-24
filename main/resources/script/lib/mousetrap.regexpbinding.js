@@ -16,7 +16,7 @@
         var matched = false;
 
         // only keypress makes sense because we want to catch character and keypress is the only one reliable for that
-        // only single character makes sense (we also filter out Mousetrep special characters like "space")
+        // only single character makes sense (we also filter out Mousetrap special characters like "space")
         if (character.length === 1 && evt.type === 'keypress') {
             for (var key in bindingByKey) {
                 var bindings = bindingByKey[key];
