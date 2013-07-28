@@ -20,7 +20,7 @@
         self.listeners = {timeupdate: {}};
 
         self.delegate.addEventListener('onStateChange', function (evt) {
-            self.logger.debug('onStateChange executed', evt.data);
+            self.logger.debug('Youtube player %s onStateChange executed, code %s', evt.target.id, evt.data);
 
             if (evt.data === YT.PlayerState.PLAYING) {
                 // end of first buffering phase is considered as a can play through event
@@ -30,6 +30,10 @@
                     self.canPlayThroughDeferred.resolve();
                 }
             }
+        });
+        self.delegate.addEventListener('onError', function (evt) {
+            self.logger.debug('Youtube player %s onError executed, code %s', evt.target.id, evt.data);
+            self.canPlayThroughDeferred.reject();
         });
     };
 
@@ -86,6 +90,8 @@
      */
     mt.player.YoutubePlayer.prototype.loadVideo = function (videoId) {
         var self = this;
+
+        self.logger.debug('Youtube player %s loadVideo executed with video %s', self.delegate.id, videoId);
 
         self.reset();
 
@@ -227,7 +233,7 @@
                 });
                 lastCurrentTime = evt.currentTime;
             });
-            self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve);
+            self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve).fail(self.canPlayThroughDeferred.reject);
         });
         return self.canPlayThroughDeferred.promise();
     };
