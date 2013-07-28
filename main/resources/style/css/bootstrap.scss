@@ -256,6 +256,11 @@ body {
 
   border-radius: $subtleRadius;
 
+  &.mt-level-info {
+    background-color: #d9edf7;
+    color: #3a87ad;
+  }
+
   &.mt-level-error {
     background-color: #f2dede;
     color: #b94a48;

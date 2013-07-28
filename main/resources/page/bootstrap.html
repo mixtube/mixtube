@@ -221,7 +221,7 @@
     </div>
 </script>
 <script type="text/ng-template" id="mtAlertTemplate">
-    <div class="mt-alert" ng-class="{'mt-level-error': level === 'error'}">
+    <div class="mt-alert" ng-class="{'mt-level-error': level === 'error', 'mt-level-info': level === 'info'}">
         <div class="mt-text-container" ng-bind-html-unsafe="message"></div>
         <div class="mt-command-container">
             <a class="mt-alert-dismiss" ng-click="dismiss()">&times;</a>
