@@ -2,6 +2,7 @@
   "name": "",
   "css_prefix_text": "mt-icon-",
   "css_use_suffix": false,
+  "hinting": true,
   "glyphs": [
     {
       "uid": "7222571caa5c15f83dcfd447c58d68d9",
@@ -37,6 +38,12 @@
       "uid": "2626e3a1bbcd90e45849af3b58a1d594",
       "css": "trash",
       "code": 59397,
+      "src": "entypo"
+    },
+    {
+      "uid": "29e7f6072d5935d7818204d9b088508b",
+      "css": "block",
+      "code": 59400,
       "src": "entypo"
     },
     {

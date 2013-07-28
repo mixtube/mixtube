@@ -1,7 +1,7 @@
 (function (mt, undefined) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory, mtAlert) {
         var logger = mtLoggerFactory.logger('mtVideoPlayerManager');
 
         var selfData = {};
@@ -18,35 +18,50 @@
         selfData.nextVideo = null;
         /**  @type {boolean} */
         selfData.playing = false;
-        /** @type {Object.<string, mt.model.QueueEntry>} */
-        selfData.queueEntryByHandleId = {};
+        // a Map like object to associate a queue entry to a video handle
+        selfData.queueEntryByHandle = {
+            /** @type {Object.<string, mt.model.QueueEntry>} */
+            queueEntryByHandleId: {},
+            /**
+             * @param {mt.player.VideoHandle} handle
+             * @returns {mt.model.QueueEntry}
+             */
+            get: function (handle) {
+                return this.queueEntryByHandleId[handle.uid];
+            },
+            /**
+             * @param {mt.player.VideoHandle} handle
+             * @param {mt.model.QueueEntry} entry
+             */
+            set: function (handle, entry) {
+                this.queueEntryByHandleId[handle.uid] = entry;
+            },
+            /**
+             * Removes the mapping for the given handle.
+             *
+             * @param {mt.player.VideoHandle} handle
+             * @return {mt.model.QueueEntry} the removed entry
+             */
+            delete: function (handle) {
+                var entry = this.queueEntryByHandleId[handle.uid];
+                delete this.queueEntryByHandleId[handle.uid];
+                return entry;
+            }
+        };
 
         mtPlayerPoolProvider.get().then(function (playersPool) {
             selfData.playersPool = playersPool;
         });
 
         /**
-         * Returns the queue entry id that is associated to the given video handle id, and removes the mapping from the dictionary.
-         *
-         * @param {string} videoHandleId
-         * @return {mt.model.QueueEntry}
-         */
-        var peekQueueEntryByHandleId = function (videoHandleId) {
-            var entry = selfData.queueEntryByHandleId[videoHandleId];
-            delete selfData.queueEntryByHandleId[videoHandleId];
-            return entry;
-        };
-
-        /**
          * Executes the video transition steps :
          * - starts the prepared video
          * - references the prepared video as the new current one
          * - cross fades the videos (out the current one / in the prepared one)
-         * - disposes the previous (the old current) video
-         * - broadcasts events to notify if the new state
-         * - sends a request to get the next video references
+         *
+         * @param {Deferred} playDeferred to be resolved when the "new" video starts playing
          */
-        var executeTransition = function (playDeferred) {
+        function executeTransition(playDeferred) {
             if (selfData.currentVideoHandle) {
                 selfData.currentVideoHandle.out(mtConfiguration.transitionDuration);
             }
@@ -64,10 +79,9 @@
                 // notify that we started to play the new entry
                 playDeferred.resolve();
 
-                // now that the new video is running ask for the next one
-                var activatedQueueEntry = peekQueueEntryByHandleId(selfData.currentVideoHandle.id);
+                // when the video starts playing, position the playback head and start loading the next one
+                var activatedQueueEntry = selfData.queueEntryByHandle.delete(selfData.currentVideoHandle);
                 mtQueueManager.positionPlaybackEntry(activatedQueueEntry);
-
                 mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
                     loadQueueEntry(queueEntry, false);
                 });
@@ -75,31 +89,34 @@
                 // end of the road
                 selfData.playing = false;
             }
-        };
+        }
 
-        var executeComingNext = function (comingNextDeferred) {
+        function executeComingNext(comingNextDeferred) {
             comingNextDeferred.resolve({
                 currentVideo: selfData.currentVideo,
                 nextVideo: selfData.nextVideo
             });
-        };
+        }
 
         /**
          * Properly clears the next video handle if needed by disposing it and clearing all the references to it.
          */
-        var ensureNextVideoHandleCleared = function () {
+        function ensureNextVideoHandleCleared() {
             if (selfData.nextVideoHandle) {
                 logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', selfData.nextVideoHandle.uid);
 
                 // the next video has already been prepared, we have to dispose it before preparing a new one
-                peekQueueEntryByHandleId(selfData.nextVideoHandle.id);
+                selfData.queueEntryByHandle.delete(selfData.nextVideoHandle);
                 selfData.nextVideoHandle.dispose();
                 selfData.nextVideoHandle = null;
                 selfData.nextVideo = null;
             }
-        };
+        }
 
-        var playbackToggle = function () {
+        /**
+         * Switches the queue between playing and paused. Handles the case where the queue was not playing.
+         */
+        function playbackToggle() {
             if (selfData.currentVideoHandle) {
                 if (selfData.playing) {
                     selfData.playing = false;
@@ -109,22 +126,31 @@
                     selfData.currentVideoHandle.unpause();
                 }
             } else {
+                // if play action is requested on an non playing queue, the first item and force play
                 mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
                     loadQueueEntry(queueEntry, true);
                 });
             }
-        };
+        }
 
-        var relativeTimeToAbsolute = function (relTime, duration) {
+        /**
+         * Converts a milliseconds "relative" time (negative means from the end) to an "absolute" time (milliseconds
+         * from the end).
+         *
+         * @param {number} relTime
+         * @param {number} duration
+         * @returns {number}
+         */
+        function relativeTimeToAbsolute(relTime, duration) {
             return relTime > 0 ? relTime : duration + relTime;
-        };
+        }
 
         /**
          * @param {mt.model.QueueEntry} queueEntry
          * @param {boolean} forcePlay
          * @returns {{playPromise: promise, comingNextPromise: promise}}
          */
-        var loadQueueEntry = function (queueEntry, forcePlay) {
+        function loadQueueEntry(queueEntry, forcePlay) {
 
             var playDeferred = $q.defer();
             var comingNextDeferred = $q.defer();
@@ -154,7 +180,7 @@
             ]);
             selfData.nextVideo = queueEntry.video;
 
-            selfData.queueEntryByHandleId[selfData.nextVideoHandle.id] = queueEntry;
+            selfData.queueEntryByHandle.set(selfData.nextVideoHandle, queueEntry);
 
             var nextLoadDeferred = selfData.nextVideoHandle.load();
 
@@ -166,6 +192,23 @@
                 });
             }
 
+            nextLoadDeferred.fail(function () {
+                $rootScope.$apply(function () {
+                    mtAlert.info('Unable to preload "' + _.escape(selfData.nextVideo.title) + '". Will be skipped.', 5000);
+
+                    var nextEntry = selfData.queueEntryByHandle.get(selfData.nextVideoHandle);
+
+                    // flag the entry so that the we know that this entry is not valid
+                    nextEntry.skippedAtRuntime = true;
+
+                    // now try to find the nex valid entry and load it if found
+                    mtQueueManager.nextValidQueueEntry(nextEntry).then(function (queueEntry) {
+                        loadQueueEntry(queueEntry, false);
+                    });
+                    ensureNextVideoHandleCleared();
+                });
+            });
+
             comingNextDeferred.promise.then(function (data) {
                 $rootScope.$broadcast(mt.events.UpdateComingNextRequest, data);
             });
@@ -174,9 +217,9 @@
                 playPromise: playDeferred.promise,
                 comingNextPromise: comingNextDeferred.promise
             };
-        };
+        }
 
-        var clear = function () {
+        function clear() {
             ensureNextVideoHandleCleared();
 
             if (selfData.currentVideoHandle) {
@@ -185,16 +228,17 @@
                 selfData.currentVideoHandle = null;
                 selfData.currentVideo = null;
             }
-        };
+        }
 
         // watch on object full equality
+        // todo use watchCollection instead ?
         $rootScope.$watch(function () {
             return mtQueueManager.queue.entries;
         }, function () {
             if (mtQueueManager.queue.entries.length === 0) {
                 // the queue is empty, probably just cleared, do the same for the player
                 clear();
-            } else {
+            } else if (selfData.currentVideoHandle) {
                 // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
                 mtQueueManager.nextValidQueueEntry().then(function (nextQueueEntry) {
                     var needReplacingNextHandle;
@@ -206,7 +250,7 @@
                         }
                     } else {
                         // is the next prepared handle stall ?
-                        var preparedQueueEntry = selfData.queueEntryByHandleId[selfData.nextVideoHandle.id];
+                        var preparedQueueEntry = selfData.queueEntryByHandle.get(selfData.nextVideoHandle);
                         needReplacingNextHandle = preparedQueueEntry !== nextQueueEntry;
                     }
 
@@ -313,15 +357,20 @@
          */
         var nextValidQueueEntry = function (startPosition) {
 
-            var tryPosition = startPosition + 1;
+            var tryPosition = startPosition;
+            var queueEntry;
+
+            // filters out skipped entries so that we don't retry them
+            do {
+                queueEntry = queue.entries[++tryPosition];
+            } while (queueEntry.skippedAtRuntime);
 
             if (tryPosition < queue.entries.length) {
-                var queueEntry = queue.entries[tryPosition];
-
                 return mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
                     if (videoExists) {
                         return queueEntry;
                     } else {
+                        queueEntry.skippedAtRuntime = true;
                         return nextValidQueueEntry(tryPosition);
                     }
                 });
@@ -404,10 +453,14 @@
              * Video can be removed from the remote provider so we have to check that before loading a video to prevent
              * playback interruption.
              *
-             * @return {Promise} resolved with a queue entry when an existing video is found, rejected else
+             * @param {mt.model.QueueEntry=} startEntry the starting point of the search. If not given the current playback entry is used.
+             * @return {promise} resolved with a queue entry when an existing video is found, rejected else
              */
-            nextValidQueueEntry: function () {
-                var startPosition = playbackEntry ? queue.entries.indexOf(playbackEntry) : 0;
+            nextValidQueueEntry: function (startEntry) {
+                startEntry = startEntry || playbackEntry;
+
+                var startPosition = startEntry ? queue.entries.indexOf(startEntry) : 0;
+
                 if (startPosition === -1) {
                     // something is seriously broken here
                     throw new Error('The active entry from the queue manager is not in the queue array');
@@ -802,31 +855,48 @@
         };
     });
 
-    mt.MixTubeApp.factory('mtAlert', function ($rootScope, $q, $templateCache, $compile, $document, $animator) {
+    mt.MixTubeApp.factory('mtAlert', function ($rootScope, $q, $templateCache, $compile, $document, $animator, $timeout) {
         var alertContainer = $document.find('.mt-alert-container');
         // need to trim the template because jQuery can not parse an HTML string that starts with a blank character
-        var alertLinker = $compile($templateCache.get('mtAlertTemplate').trim());
+        var alertLinker;
 
-        function alert(level, message) {
+        // we need to lazy instantiate the alert linker because the template may not be available at load time
+        function getAlertLinker() {
+            return alertLinker || (alertLinker = $compile($templateCache.get('mtAlertTemplate').trim()));
+        }
+
+        function alert(level, message, closeDelay) {
             var scope = $rootScope.$new();
             var animate = $animator(scope, {ngAnimate: "{enter: 'mt-fade-in', leave: 'mt-fade-out'}"});
 
             scope.message = message;
             scope.level = level;
 
-            alertLinker(scope, function (alertElement) {
+            getAlertLinker()(scope, function (alertElement) {
                 animate.enter(alertElement, alertContainer);
 
+                var closePromise;
+                if (closeDelay > 0)
+                    closePromise = $timeout(function () {
+                        scope.dismiss();
+                    }, closeDelay);
+
                 scope.dismiss = function () {
+                    $timeout.cancel(closePromise);
                     animate.leave(alertElement, alertContainer);
                     scope.$destroy();
                 };
+
+
             });
         }
 
         return {
             error: function (message) {
                 alert('error', message);
+            },
+            info: function (message, closeDelay) {
+                alert('info', message, closeDelay);
             }
         };
     });
@@ -906,7 +976,8 @@
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
 
-        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+//        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+        var transitionStartTime = 15000;
 
         return  {
             get transitionStartTime() {

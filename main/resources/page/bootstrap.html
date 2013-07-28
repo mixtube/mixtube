@@ -71,7 +71,7 @@
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
                                 mt-scroll-into-view-if="$first">
                                 <div class="mt-thumbnail-frame">
-                                    <div style="background-image: url({{searchResult.thumbnailUrl}})"
+                                    <div mg-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}"
                                          class="mt-results-thumbnail"></div>
                                     <a ng-click="!$event.redundantClick && appendResultToQueue(searchResult)"
                                        class="mt-add-to-queue-button"></a>
@@ -172,16 +172,20 @@
                 </div>
             </handle>
             <renderer>
-                <div ng-controller="mtQueueItemCtrl" style="background-image: url({{queueEntry.video.thumbnailUrl}})"
-                     class="mt-queue-item">
+                <div ng-controller="mtQueueItemCtrl" class="mt-queue-item"
+                     ng-class="{'mt-skipped': queueEntry.skippedAtRuntime}"
+                     ng-style="{'background-image': 'url(' + queueEntry.video.thumbnailUrl + ')'}">
 
                     <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
 
                     <!--this weird structure is just to be able to vertical center the play button-->
-                    <div class="mt-queue-item-play-button-container">
+                    <div class="mt-queue-item-centering-container">
                         <div class="mt-vertical-centering">
                             <a class="mt-play-button" ng-click="queueEntryClicked(queueEntry)"
-                               ng-hide="playPending"></a>
+                               ng-hide="playPending || queueEntry.skippedAtRuntime"></a>
+
+                            <div class="mt-skipped-icon" ng-click="queueEntryClicked(queueEntry)"
+                                 ng-show="queueEntry.skippedAtRuntime"></div>
 
                             <div class="mt-play-button-spinner" ng-show="playPending"></div>
                         </div>

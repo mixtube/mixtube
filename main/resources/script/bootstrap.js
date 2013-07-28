@@ -74,6 +74,8 @@
             this.id = null;
             /** @type {mt.model.Video} */
             this.video = null;
+            /** @type {boolean} */
+            this.skippedAtRuntime = false;
         },
         Queue: function () {
             /** @type {string} */

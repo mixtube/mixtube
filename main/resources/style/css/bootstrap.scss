@@ -30,6 +30,7 @@ $smallIconFontSize: 17rem/14;
 $bigIconFontSize: 35rem/14;
 $vibratingColor: #f3c621;
 $subtleRadius: 1px;
+$errorForgroundColor: #b94a48;
 
 * {
   @include box-sizing(border-box);
@@ -263,7 +264,7 @@ body {
 
   &.mt-level-error {
     background-color: #f2dede;
-    color: #b94a48;
+    color: $errorForgroundColor;
   }
 
   > .mt-text-container, > .mt-command-container {
@@ -761,6 +762,9 @@ body {
 
   background-size: cover;
 
+  &.mt-skipped {
+  }
+
   // appear / disappear animations
   &.mt-appear-enter, &.mt-appear-leave {
     @include transition(all 100ms ease-in-out);
@@ -804,14 +808,14 @@ body {
   display: block;
 }
 
-.mt-queue-item-play-button-container {
+.mt-queue-item-centering-container {
   position: absolute;
   top: 0;
   width: 100%;
   height: $queueThumbnailHeight;
   display: table;
 
-  // vertical and horizontal centering of play button
+  // vertical and horizontal centering of content
   text-align: center;
 }
 
@@ -829,6 +833,12 @@ body {
 
   border-radius: $subtleRadius;
   background-color: $tooltipDefaultColor;
+}
+
+.mt-skipped-icon {
+  @include mt-icon-font-button($bigIconFontSize, ' \e808');
+
+  color: $errorForgroundColor;
 }
 
 .mt-play-button-spinner {
