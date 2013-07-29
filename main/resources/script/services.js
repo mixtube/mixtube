@@ -4,53 +4,36 @@
     mt.MixTubeApp.factory('mtVideoPlayerManager', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory, mtAlert) {
         var logger = mtLoggerFactory.logger('mtVideoPlayerManager');
 
-        var selfData = {};
-
-        /** @type {mt.player.PlayersPool} */
-        selfData.playersPool = null;
-        /** @type {mt.player.VideoHandle} */
-        selfData.currentVideoHandle = null;
-        /** @type {mt.player.Video} */
-        selfData.currentVideo = null;
-        /** @type {mt.player.VideoHandle} */
-        selfData.nextVideoHandle = null;
-        /** @type {mt.player.Video} */
-        selfData.nextVideo = null;
-        /**  @type {boolean} */
-        selfData.playing = false;
-        // a Map like object to associate a queue entry to a video handle
-        selfData.queueEntryByHandle = {
-            /** @type {Object.<string, mt.model.QueueEntry>} */
-            queueEntryByHandleId: {},
-            /**
-             * @param {mt.player.VideoHandle} handle
-             * @returns {mt.model.QueueEntry}
-             */
-            get: function (handle) {
-                return this.queueEntryByHandleId[handle.uid];
-            },
+        /**
+         * @type {{handle: mt.player.VideoHandle, entry: mt.model.QueueEntry, playDeferred: Deferred, init: Function}}
+         */
+        var PlaybackSlot = {
+            handle: null,
+            entry: null,
+            playDeferred: null,
             /**
              * @param {mt.player.VideoHandle} handle
              * @param {mt.model.QueueEntry} entry
+             * @param {Deferred} playDeferred
              */
-            set: function (handle, entry) {
-                this.queueEntryByHandleId[handle.uid] = entry;
-            },
-            /**
-             * Removes the mapping for the given handle.
-             *
-             * @param {mt.player.VideoHandle} handle
-             * @return {mt.model.QueueEntry} the removed entry
-             */
-            delete: function (handle) {
-                var entry = this.queueEntryByHandleId[handle.uid];
-                delete this.queueEntryByHandleId[handle.uid];
-                return entry;
+            init: function (handle, entry, playDeferred) {
+                this.handle = handle;
+                this.entry = entry;
+                this.playDeferred = playDeferred;
             }
         };
 
-        mtPlayerPoolProvider.get().then(function (playersPool) {
-            selfData.playersPool = playersPool;
+        /** @type {mt.player.PlayersPool} */
+        var playersPool = null;
+        /** @type {PlaybackSlot} */
+        var currentSlot = null;
+        /** @type {PlaybackSlot} */
+        var nextSlot = null;
+        /**  @type {boolean} */
+        var playing = false;
+
+        mtPlayerPoolProvider.get().then(function (pool) {
+            playersPool = pool;
         });
 
         /**
@@ -58,58 +41,51 @@
          * - starts the prepared video
          * - references the prepared video as the new current one
          * - cross fades the videos (out the current one / in the prepared one)
-         *
-         * @param {Deferred} playDeferred to be resolved when the "new" video starts playing
          */
-        function executeTransition(playDeferred) {
-            if (selfData.currentVideoHandle) {
-                selfData.currentVideoHandle.out(mtConfiguration.transitionDuration);
+        function executeTransition() {
+            if (currentSlot) {
+                currentSlot.handle.out(mtConfiguration.transitionDuration);
             }
 
-            selfData.currentVideoHandle = selfData.nextVideoHandle;
-            selfData.currentVideo = selfData.nextVideo;
-            selfData.nextVideoHandle = null;
-            selfData.nextVideo = null;
+            currentSlot = nextSlot;
+            nextSlot = null;
 
             // if there is a a current video start it, else it's the end of the sequence
-            if (selfData.currentVideoHandle) {
-                selfData.playing = true;
-                selfData.currentVideoHandle.in(mtConfiguration.transitionDuration);
+            if (currentSlot) {
+                playing = true;
+                currentSlot.handle.in(mtConfiguration.transitionDuration);
 
                 // notify that we started to play the new entry
-                playDeferred.resolve();
+                currentSlot.playDeferred.resolve();
 
                 // when the video starts playing, position the playback head and start loading the next one
-                var activatedQueueEntry = selfData.queueEntryByHandle.delete(selfData.currentVideoHandle);
-                mtQueueManager.positionPlaybackEntry(activatedQueueEntry);
+                mtQueueManager.positionPlaybackEntry(currentSlot.entry);
                 mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
                     loadQueueEntry(queueEntry, false);
                 });
             } else {
                 // end of the road
-                selfData.playing = false;
+                playing = false;
             }
         }
 
-        function executeComingNext(comingNextDeferred) {
-            comingNextDeferred.resolve({
-                currentVideo: selfData.currentVideo,
-                nextVideo: selfData.nextVideo
+        function executeComingNext() {
+            $rootScope.$broadcast(mt.events.UpdateComingNextRequest, {
+                currentVideo: currentSlot.entry.video,
+                nextVideo: nextSlot.entry.video
             });
         }
 
         /**
-         * Properly clears the next video handle if needed by disposing it and clearing all the references to it.
+         * Properly clears the next slot if needed by disposing it and clearing all the references to it.
          */
-        function ensureNextVideoHandleCleared() {
-            if (selfData.nextVideoHandle) {
-                logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', selfData.nextVideoHandle.uid);
+        function ensureNextSlotCleared() {
+            if (nextSlot) {
+                logger.debug('A handle (%s) for next video has been prepared, we need to dispose it', nextSlot.handle.uid);
 
                 // the next video has already been prepared, we have to dispose it before preparing a new one
-                selfData.queueEntryByHandle.delete(selfData.nextVideoHandle);
-                selfData.nextVideoHandle.dispose();
-                selfData.nextVideoHandle = null;
-                selfData.nextVideo = null;
+                nextSlot.handle.dispose();
+                nextSlot = null;
             }
         }
 
@@ -117,13 +93,13 @@
          * Switches the queue between playing and paused. Handles the case where the queue was not playing.
          */
         function playbackToggle() {
-            if (selfData.currentVideoHandle) {
-                if (selfData.playing) {
-                    selfData.playing = false;
-                    selfData.currentVideoHandle.pause();
+            if (currentSlot) {
+                if (playing) {
+                    playing = false;
+                    currentSlot.handle.pause();
                 } else {
-                    selfData.playing = true;
-                    selfData.currentVideoHandle.unpause();
+                    playing = true;
+                    currentSlot.handle.unpause();
                 }
             } else {
                 // if play action is requested on an non playing queue, the first item and force play
@@ -148,12 +124,11 @@
         /**
          * @param {mt.model.QueueEntry} queueEntry
          * @param {boolean} forcePlay
-         * @returns {{playPromise: promise, comingNextPromise: promise}}
+         * @returns {promise} resolved when the loaded video starts playing
          */
         function loadQueueEntry(queueEntry, forcePlay) {
 
-            var playDeferred = $q.defer();
-            var comingNextDeferred = $q.defer();
+            var nextPlayDeferred = $q.defer();
 
             logger.debug('Start request for video %s received with forcePlay flag %s', queueEntry.video.id, forcePlay);
 
@@ -161,72 +136,66 @@
             var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, queueEntry.video.duration);
             logger.debug('Preparing a video %s, the coming next cue will start at %d, the transition cue will start at %d', queueEntry.video.id, comingNextStartTime, transitionStartTime);
 
-            selfData.nextVideoHandle = selfData.playersPool.prepareVideo({
-                id: queueEntry.video.id,
-                provider: queueEntry.video.provider,
-                coarseDuration: queueEntry.video.duration
-            }, [
-                {time: comingNextStartTime, callback: function () {
-                    $rootScope.$apply(function () {
-                        executeComingNext(comingNextDeferred);
-                    });
-                }},
-                {time: transitionStartTime, callback: function () {
-                    // starts the next prepared video and cross fade
-                    $rootScope.$apply(function () {
-                        executeTransition(playDeferred);
-                    });
-                }}
-            ]);
-            selfData.nextVideo = queueEntry.video;
+            nextSlot = Object.create(PlaybackSlot);
+            nextSlot.init(
+                playersPool.prepareVideo({
+                    id: queueEntry.video.id,
+                    provider: queueEntry.video.provider,
+                    coarseDuration: queueEntry.video.duration
+                }, [
+                    {time: comingNextStartTime, callback: function () {
+                        $rootScope.$apply(function () {
+                            executeComingNext();
+                        });
+                    }},
+                    {time: transitionStartTime, callback: function () {
+                        // starts the next prepared video and cross fade
+                        $rootScope.$apply(function () {
+                            executeTransition();
+                        });
+                    }}
+                ]),
+                queueEntry,
+                nextPlayDeferred
+            );
 
-            selfData.queueEntryByHandle.set(selfData.nextVideoHandle, queueEntry);
-
-            var nextLoadDeferred = selfData.nextVideoHandle.load();
+            var nextLoadJQDeferred = nextSlot.handle.load();
 
             if (forcePlay) {
-                nextLoadDeferred.done(function () {
+                nextLoadJQDeferred.done(function () {
                     $rootScope.$apply(function () {
-                        executeTransition(playDeferred);
+                        executeTransition();
                     });
                 });
             }
 
-            nextLoadDeferred.fail(function () {
+            nextLoadJQDeferred.fail(function () {
                 $rootScope.$apply(function () {
-                    mtAlert.info('Unable to preload "' + _.escape(selfData.nextVideo.title) + '". Will be skipped.', 5000);
-
-                    var nextEntry = selfData.queueEntryByHandle.get(selfData.nextVideoHandle);
+                    mtAlert.info('Unable to preload "' + _.escape(nextSlot.entry.video.title) + '". Will be skipped.', 5000);
 
                     // flag the entry so that the we know that this entry is not valid
-                    nextEntry.skippedAtRuntime = true;
+                    nextSlot.entry.skippedAtRuntime = true;
+                    nextSlot.playDeferred.reject();
 
                     // now try to find the nex valid entry and load it if found
-                    mtQueueManager.nextValidQueueEntry(nextEntry).then(function (queueEntry) {
+                    mtQueueManager.nextValidQueueEntry(nextSlot.entry).then(function (queueEntry) {
                         loadQueueEntry(queueEntry, false);
                     });
-                    ensureNextVideoHandleCleared();
+
+                    ensureNextSlotCleared();
                 });
             });
 
-            comingNextDeferred.promise.then(function (data) {
-                $rootScope.$broadcast(mt.events.UpdateComingNextRequest, data);
-            });
-
-            return {
-                playPromise: playDeferred.promise,
-                comingNextPromise: comingNextDeferred.promise
-            };
+            return nextPlayDeferred.promise;
         }
 
         function clear() {
-            ensureNextVideoHandleCleared();
+            ensureNextSlotCleared();
 
-            if (selfData.currentVideoHandle) {
-                selfData.playing = false;
-                selfData.currentVideoHandle.dispose();
-                selfData.currentVideoHandle = null;
-                selfData.currentVideo = null;
+            if (currentSlot) {
+                playing = false;
+                currentSlot.handle.dispose();
+                currentSlot = null;
             }
         }
 
@@ -238,39 +207,38 @@
             if (mtQueueManager.queue.entries.length === 0) {
                 // the queue is empty, probably just cleared, do the same for the player
                 clear();
-            } else if (selfData.currentVideoHandle) {
+            } else if (currentSlot) {
                 // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
                 mtQueueManager.nextValidQueueEntry().then(function (nextQueueEntry) {
                     var needReplacingNextHandle;
 
-                    if (!selfData.nextVideoHandle) {
+                    if (!nextSlot) {
                         if (nextQueueEntry) {
                             // we were a the last position in the queue and a video was added just after
                             needReplacingNextHandle = true;
                         }
                     } else {
                         // is the next prepared handle stall ?
-                        var preparedQueueEntry = selfData.queueEntryByHandle.get(selfData.nextVideoHandle);
-                        needReplacingNextHandle = preparedQueueEntry !== nextQueueEntry;
+                        needReplacingNextHandle = nextSlot.entry !== nextQueueEntry;
                     }
 
                     if (needReplacingNextHandle) {
                         logger.debug('Need to replace the next video handle it was made obsolete by queue update');
 
                         // a change in queue require the player to query for the next video
-                        ensureNextVideoHandleCleared();
+                        ensureNextSlotCleared();
                         loadQueueEntry(nextQueueEntry, false);
                     }
                 }, function () {
                     // no next video available, clear the next handle
-                    ensureNextVideoHandleCleared();
+                    ensureNextSlotCleared();
                 });
             }
         }, true);
 
         return {
             get playing() {
-                return  selfData.playing;
+                return  playing;
             },
 
             /**
@@ -280,7 +248,7 @@
              *
              * @param {mt.model.QueueEntry} queueEntry
              * @param {boolean} forcePlay
-             * @returns {{playPromise: promise, comingNextPromise: promise}}
+             * @returns {promise} resolved when the loaded entry starts playing, rejected in case of error
              */
             loadQueueEntry: function (queueEntry, forcePlay) {
                 return loadQueueEntry(queueEntry, forcePlay);

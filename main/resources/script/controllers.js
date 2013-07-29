@@ -91,8 +91,8 @@
 
         $scope.queueEntryClicked = function (queueEntry) {
             $scope.playPending = true;
-            var promises = mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
-            promises.playPromise.always(function () {
+            var playPromise = mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
+            playPromise.always(function () {
                 $scope.playPending = false;
             });
         };
