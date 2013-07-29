@@ -683,7 +683,7 @@
          * @const
          * @type {number}
          */
-        var SEARCH_KEEP_ALIVE_DELAY = 10000;
+        var SEARCH_KEEP_ALIVE_DELAY = 3000;
 
         /** @type {boolean} */
         var userInteracting;
@@ -948,8 +948,7 @@
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
 
-//        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
-        var transitionStartTime = 15000;
+        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
 
         return  {
             get transitionStartTime() {

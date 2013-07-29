@@ -121,7 +121,7 @@
 </section>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
-    <div class="mt-queue-frame" ng-class="{'mt-appear': true}" ng-mouseenter="mouseEntered()"
+    <div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"
          ng-mouseleave="mouseLeaved()">
         <div class="mt-queue-bar">
             <div class="mt-queue-bar-table">

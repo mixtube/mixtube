@@ -186,21 +186,23 @@
 
         // when the user types we automatically execute the search
         $scope.$watch('searchTerm', function (newSearchTerm) {
-            // new inputs so we stop the previous request
-            $timeout.cancel($scope.instantSearchPromise);
-
-            mtUserInteractionManager.searchActiveKeepAlive();
-
-            $scope.searchResultsDelivered.youtube = false;
-
-            // if the search has to be longer than two characters
-            if (newSearchTerm && newSearchTerm.length > 2) {
-                $scope.searchRequestCount++;
-
+            if (newSearchTerm !== null) {
+                // new inputs so we stop the previous request
                 $timeout.cancel($scope.instantSearchPromise);
-                $scope.instantSearchPromise = $timeout(function () {
-                    $scope.search();
-                }, INSTANT_SEARCH_DELAY);
+
+                mtUserInteractionManager.searchActiveKeepAlive();
+
+                $scope.searchResultsDelivered.youtube = false;
+
+                // if the search has to be longer than two characters
+                if (newSearchTerm.length > 2) {
+                    $scope.searchRequestCount++;
+
+                    $timeout.cancel($scope.instantSearchPromise);
+                    $scope.instantSearchPromise = $timeout(function () {
+                        $scope.search();
+                    }, INSTANT_SEARCH_DELAY);
+                }
             }
         });
 
