@@ -683,7 +683,7 @@
          * @const
          * @type {number}
          */
-        var SEARCH_KEEP_ALIVE_DELAY = 3000;
+        var SEARCH_KEEP_ALIVE_DELAY = 10000;
 
         /** @type {boolean} */
         var userInteracting;
