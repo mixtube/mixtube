@@ -172,9 +172,10 @@
                 </div>
             </handle>
             <renderer>
-                <div ng-controller="mtQueueItemCtrl" class="mt-queue-item"
-                     ng-class="{'mt-skipped': queueEntry.skippedAtRuntime}"
-                     ng-style="{'background-image': 'url(' + queueEntry.video.thumbnailUrl + ')'}">
+                <div ng-controller="mtQueueItemCtrl" class="mt-queue-item">
+
+                    <div class="mt-queue-item-thumbnail" ng-class="{'mt-skipped': queueEntry.skippedAtRuntime}"
+                         ng-style="{'background-image': 'url(' + queueEntry.video.thumbnailUrl + ')'}"></div>
 
                     <div class="mt-playing-mark" ng-show="queueEntry == getPlaybackQueueEntry()"></div>
 
@@ -225,7 +226,8 @@
     </div>
 </script>
 <script type="text/ng-template" id="mtAlertTemplate">
-    <div class="mt-alert" ng-class="{'mt-level-error': level === 'error', 'mt-level-info': level === 'info'}">
+    <div class="mt-alert"
+         ng-class="{'mt-level-info': level === 'info', 'mt-level-warning': level === 'warning', 'mt-level-error': level === 'error'}">
         <div class="mt-text-container" ng-bind-html-unsafe="message"></div>
         <div class="mt-command-container">
             <a class="mt-alert-dismiss" ng-click="dismiss()">&times;</a>

@@ -262,6 +262,11 @@ body {
     color: #3a87ad;
   }
 
+  &.mt-level-warning {
+    background-color: #fcf8e3;
+    color: #c09853;
+  }
+
   &.mt-level-error {
     background-color: #f2dede;
     color: $errorForgroundColor;
@@ -276,6 +281,12 @@ body {
     text-align: right;
     font-weight: bold;
   }
+}
+
+.mt-alert-dismiss {
+  color: #000000;
+  opacity: .5;
+  font-weight: bold;
 }
 
 .mt-video-stage-frame {
@@ -760,11 +771,6 @@ body {
   height: 100%;
   width: $queueThumbnailWidth;
 
-  background-size: cover;
-
-  &.mt-skipped {
-  }
-
   // appear / disappear animations
   &.mt-appear-enter, &.mt-appear-leave {
     @include transition(all 100ms ease-in-out);
@@ -786,6 +792,16 @@ body {
     &.mt-appear-leave-active {
       @include transform(scale(0));
     }
+  }
+}
+
+.mt-queue-item-thumbnail {
+  @include position(absolute, 0px 0px 0px 0px);
+
+  background-size: cover;
+
+  &.mt-skipped {
+    opacity: .2;
   }
 }
 

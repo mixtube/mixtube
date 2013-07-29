@@ -171,7 +171,7 @@
 
             nextLoadJQDeferred.fail(function () {
                 $rootScope.$apply(function () {
-                    mtAlert.info('Unable to preload "' + _.escape(nextSlot.entry.video.title) + '". Will be skipped.', 5000);
+                    mtAlert.warning('Unable to preload "' + _.escape(nextSlot.entry.video.title) + '". Will be skipped.', 5000);
 
                     // flag the entry so that the we know that this entry is not valid
                     nextSlot.entry.skippedAtRuntime = true;
@@ -861,11 +861,14 @@
         }
 
         return {
-            error: function (message) {
-                alert('error', message);
-            },
             info: function (message, closeDelay) {
                 alert('info', message, closeDelay);
+            },
+            warning: function (message, closeDelay) {
+                alert('warning', message, closeDelay);
+            },
+            error: function (message) {
+                alert('error', message);
             }
         };
     });
