@@ -71,7 +71,7 @@
                             <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
                                 mt-scroll-into-view-if="$first">
                                 <div class="mt-thumbnail-frame">
-                                    <div mg-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}"
+                                    <div ng-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}"
                                          class="mt-results-thumbnail"></div>
                                     <a ng-click="!$event.redundantClick && appendResultToQueue(searchResult)"
                                        class="mt-add-to-queue-button"></a>
