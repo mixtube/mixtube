@@ -179,7 +179,8 @@
 
                     // now try to find the nex valid entry and load it if found
                     mtQueueManager.nextValidQueueEntry(nextSlot.entry).then(function (queueEntry) {
-                        loadQueueEntry(queueEntry, false);
+                        // keep the force play value of the original call
+                        loadQueueEntry(queueEntry, forcePlay);
                     });
 
                     ensureNextSlotCleared();
