@@ -17,6 +17,7 @@
         self.lastSampledTime = 0;
         self.canPlayThroughDeferred = null;
         self.endOfFadeDeferred = null;
+        self.activeFadeTween = null;
         self.listeners = {timeupdate: {}};
 
         self.delegate.addEventListener('onStateChange', function (evt) {
@@ -123,10 +124,16 @@
      */
     mt.player.YoutubePlayer.prototype.playVideo = function () {
         this.delegate.playVideo();
+        if (this.activeFadeTween) {
+            this.activeFadeTween.play();
+        }
     };
 
     mt.player.YoutubePlayer.prototype.pauseVideo = function () {
         this.delegate.pauseVideo();
+        if (this.activeFadeTween) {
+            this.activeFadeTween.pause();
+        }
     };
 
     /**
@@ -149,15 +156,6 @@
      * @return {jQuery.promise} resolved when the fade operation is finished
      */
     mt.player.YoutubePlayer.prototype.fade = function (direction, duration) {
-        var boundsVolume = {
-            'in': {
-                start: {_opacity: 0, _volume: 0},
-                end: {_opacity: 1, _volume: 100}},
-            out: {
-                start: {_opacity: 1, _volume: 100},
-                end: {_opacity: 0, _volume: 0}}
-        };
-
         var self = this;
         var immediate = duration === 0;
 
@@ -172,18 +170,26 @@
             // no animation, resolve straight
             self.endOfFadeDeferred.resolve();
         } else {
-            jQuery(jQuery.extend({}, boundsVolume[direction].start)).animate(boundsVolume[direction].end, {
-                easing: 'linear',
-                duration: duration,
-                step: function (value, tween) {
-                    if (tween.prop === '_opacity') {
-                        self.delegate.getIframe().style.opacity = value;
-                    } else if (tween.prop === '_volume') {
-                        self.delegate.setVolume(value);
-                    }
+            var playerIFrameStyle = self.delegate.getIframe().style;
+            self.activeFadeTween = mt.tools.tween({
+                target: function (values) {
+                    playerIFrameStyle.opacity = values.opacity;
+                    self.delegate.setVolume(values.volume);
                 },
-                complete: self.endOfFadeDeferred.resolve
-            });
+                from: {
+                    opacity: direction === 'in' ? 0 : 1,
+                    volume: direction === 'in' ? 0 : 100
+                },
+                to: {
+                    opacity: direction === 'in' ? 1 : 0,
+                    volume: direction === 'in' ? 100 : 0
+                },
+                duration: duration,
+                complete: function () {
+                    self.endOfFadeDeferred.resolve();
+                    self.activeFadeTween = null;
+                }
+            }).play();
         }
 
         return self.endOfFadeDeferred.promise();
@@ -277,14 +283,16 @@
      * Fades out, stops the video and dispose the handle, so that it can be used anymore.
      *
      * @param {number} fadeDuration fade duration in milliseconds
+     * @return {jQuery.promise} resolved when the fade out action is done
      */
     mt.player.VideoHandle.prototype.out = function (fadeDuration) {
         this.checkNotDisposed();
         if (!this.player) throw new Error('The video should be loaded before calling out');
 
         var self = this;
-        self.player.fade('out', fadeDuration).done(function () {
+        return self.player.fade('out', fadeDuration).then(function () {
             self.dispose();
+            return self;
         });
     };
 

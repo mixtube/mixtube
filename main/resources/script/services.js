@@ -26,6 +26,8 @@
         /** @type {mt.player.PlayersPool} */
         var playersPool = null;
         /** @type {PlaybackSlot} */
+        var previousSlot = null;
+        /** @type {PlaybackSlot} */
         var currentSlot = null;
         /** @type {PlaybackSlot} */
         var nextSlot = null;
@@ -43,12 +45,20 @@
          * - cross fades the videos (out the current one / in the prepared one)
          */
         function executeTransition() {
-            if (currentSlot) {
-                currentSlot.handle.out(mtConfiguration.transitionDuration);
-            }
-
+            previousSlot = currentSlot;
             currentSlot = nextSlot;
             nextSlot = null;
+
+            if (previousSlot) {
+                previousSlot.handle.out(mtConfiguration.transitionDuration).done(function (handle) {
+                    if (previousSlot.handle === handle) {
+                        $rootScope.$apply(function () {
+                            // prevents race condition: handle that just finished the out is still the current slot one
+                            previousSlot = null;
+                        });
+                    }
+                });
+            }
 
             // if there is a a current video start it, else it's the end of the sequence
             if (currentSlot) {
@@ -96,9 +106,17 @@
             if (currentSlot) {
                 if (playing) {
                     playing = false;
+                    if (previousSlot) {
+                        // in transition
+                        previousSlot.handle.pause();
+                    }
                     currentSlot.handle.pause();
                 } else {
                     playing = true;
+                    if (previousSlot) {
+                        // in transition
+                        previousSlot.handle.unpause();
+                    }
                     currentSlot.handle.unpause();
                 }
             } else {
