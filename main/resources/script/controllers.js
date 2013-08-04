@@ -105,7 +105,8 @@
         });
 
         // register the global space shortcut and directly enter the shortcuts context
-        mtKeyboardShortcutManager.register('global', 'space', function () {
+        mtKeyboardShortcutManager.register('global', 'space', function (evt) {
+            evt.preventDefault();
             mtVideoPlayerManager.playbackToggle();
         });
 
@@ -251,6 +252,9 @@
             $scope.searchVisible = false;
         };
 
-        mtKeyboardShortcutManager.register('search', 'esc', $scope.close);
+        mtKeyboardShortcutManager.register('search', 'esc', function (evt) {
+            evt.preventDefault();
+            $scope.close();
+        });
     });
 })(mt);
