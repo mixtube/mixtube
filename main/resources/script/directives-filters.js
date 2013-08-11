@@ -328,7 +328,7 @@
                     if (angular.isArray(newList)) {
                         if (savedList.length < newList.length) {
                             // some buckets were added, we want to detect the index of the first one
-                            // bellow the proper way to do it but because we now that we only add bucket at then
+                            // bellow the proper way to do it but because we now that we only add bucket at the end
 
                             var addedBucketIndex = -1;
                             for (var idx = 0; idx < savedList.length; idx++) {

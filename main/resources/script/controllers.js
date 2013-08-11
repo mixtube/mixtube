@@ -91,7 +91,7 @@
 
         $scope.queueEntryClicked = function (queueEntry) {
             $scope.playPending = true;
-            var playPromise = mtConductor.loadQueueEntry(queueEntry, true);
+            var playPromise = mtConductor.forceQueueEntryPlay(queueEntry);
             playPromise.always(function () {
                 $scope.playPending = false;
             });

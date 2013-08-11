@@ -69,9 +69,9 @@
                 currentSlot.playDeferred.resolve();
 
                 // when the video starts playing, start loading the next one
-                var nextQueueEntry = mtQueueManager.nextEntry(currentSlot.entry);
-                if (nextQueueEntry) {
-                    loadQueueEntry(nextQueueEntry, false);
+                var nextEntry = mtQueueManager.closestValidEntry(currentSlot.entry);
+                if (nextEntry) {
+                    prepareNextSlot(nextEntry, false);
                 }
             } else {
                 // end of the road
@@ -121,9 +121,9 @@
                 }
             } else {
                 // if play action is requested on a non playing queue, grab the first item and force play
-                var firstEntry = mtQueueManager.nextEntry();
+                var firstEntry = mtQueueManager.closestValidEntry();
                 if (firstEntry) {
-                    loadQueueEntry(firstEntry, true);
+                    prepareNextSlot(firstEntry, true);
                 }
             }
         }
@@ -145,7 +145,7 @@
          * @param {boolean} forcePlay
          * @returns {promise} resolved when the loaded video starts playing
          */
-        function loadQueueEntry(queueEntry, forcePlay) {
+        function prepareNextSlot(queueEntry, forcePlay) {
 
             var nextPlayDeferred = $q.defer();
 
@@ -197,12 +197,12 @@
                     nextSlot.playDeferred.reject();
 
                     // now get the entry after the failed one and load it
-                    var nextEntry = mtQueueManager.nextEntry(nextSlot.entry);
+                    var nextEntry = mtQueueManager.closestValidEntry(nextSlot.entry);
 
                     ensureNextSlotCleared();
 
                     if (nextEntry) {
-                        loadQueueEntry(nextEntry, forcePlay);
+                        prepareNextSlot(nextEntry, forcePlay);
                     }
                 });
             });
@@ -221,38 +221,45 @@
         }
 
         // watch on collection change only (we don't want this watcher to be called when an entry property is updated)
-        $rootScope.$watchCollection(function () {
+        $rootScope.$watchArray(function () {
             return mtQueueManager.queue.entries;
-        }, function () {
-            if (mtQueueManager.queue.entries.length === 0) {
+        }, function (newEntries, oldEntries) {
+            if (newEntries.length === 0) {
                 // the queue is empty, probably just cleared, do the same for the player
                 clear();
             } else if (currentSlot) {
-                // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
-                var nextQueueEntry = mtQueueManager.nextEntry(currentSlot.entry);
+                if (newEntries.indexOf(currentSlot.entry) === -1) {
+                    // the current playing entry has just been removed
+                    ensureNextSlotCleared();
+                    // play the entry that is now at the position where was the removed entry
+                    prepareNextSlot(mtQueueManager.closestValidEntry(newEntries[oldEntries.indexOf(currentSlot.entry)], true), true);
+                } else {
+                    // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
+                    var nextEntry = mtQueueManager.closestValidEntry(currentSlot.entry);
 
-                if (nextQueueEntry) {
-                    var needReplacingNextHandle;
+                    if (nextEntry) {
+                        var needReplacingNextHandle;
 
-                    if (!nextSlot) {
-                        if (nextQueueEntry) {
-                            // we were a the last position in the queue and a video was added just after
-                            needReplacingNextHandle = true;
+                        if (!nextSlot) {
+                            if (nextEntry) {
+                                // we were a the last position in the queue and a video was added just after
+                                needReplacingNextHandle = true;
+                            }
+                        } else {
+                            // is the next prepared handle stall ?
+                            needReplacingNextHandle = nextSlot.entry !== nextEntry;
+                        }
+
+                        if (needReplacingNextHandle) {
+                            logger.debug('Need to replace the next video handle it was made obsolete by queue update');
+
+                            // a change in queue require the player to query for the next video
+                            ensureNextSlotCleared();
+                            prepareNextSlot(nextEntry, false);
                         }
                     } else {
-                        // is the next prepared handle stall ?
-                        needReplacingNextHandle = nextSlot.entry !== nextQueueEntry;
-                    }
-
-                    if (needReplacingNextHandle) {
-                        logger.debug('Need to replace the next video handle it was made obsolete by queue update');
-
-                        // a change in queue require the player to query for the next video
                         ensureNextSlotCleared();
-                        loadQueueEntry(nextQueueEntry, false);
                     }
-                } else {
-                    ensureNextSlotCleared();
                 }
             }
         });
@@ -272,16 +279,14 @@
             },
 
             /**
-             * Prepares the next video to ensure smooth transition.
-             *
-             * If forcePlay parameter is set to true it plays the video as soon as it is buffered enough.
+             * Plays the given entry as soon as the video is buffered enough.
              *
              * @param {mt.model.QueueEntry} queueEntry
-             * @param {boolean} forcePlay
-             * @returns {promise} resolved when the loaded entry starts playing, rejected in case of error
+             * @returns {promise} resolved when the entry starts playing, rejected in case of error
              */
-            loadQueueEntry: function (queueEntry, forcePlay) {
-                return loadQueueEntry(queueEntry, forcePlay);
+            forceQueueEntryPlay: function (queueEntry) {
+                ensureNextSlotCleared();
+                return prepareNextSlot(queueEntry, true);
             },
 
             playbackToggle: function () {

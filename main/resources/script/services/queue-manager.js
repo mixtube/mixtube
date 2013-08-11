@@ -71,7 +71,7 @@
              * Adds a video at the end of the queue.
              *
              * @param {mt.model.Video} video
-             * @return {mt.mode.QueueEntry} the newly created entry in the queue
+             * @return {mt.model.QueueEntry} the newly created entry in the queue
              */
             appendVideo: function (video) {
                 var queueEntry = new mt.model.QueueEntry();
@@ -82,13 +82,16 @@
             },
 
             /**
-             * Removed an entry from the queue.
+             * Removes an entry from the queue.
              *
              * @param {mt.model.QueueEntry} entry
              */
             removeEntry: function (entry) {
-                var index = queue.entries.indexOf(entry);
-                queue.entries.splice(index, 1);
+                var position = queue.entries.indexOf(entry);
+                if (position === -1) {
+                    throw new Error('The given entry is not in the queue array');
+                }
+                queue.entries.splice(position, 1);
             },
 
             /**
@@ -99,21 +102,23 @@
             },
 
             /**
-             * Returns the next video in the queue from the given entry or the first entry if none is given.
+             * Returns the closest valid (not skipped yet) video in the queue from the given entry or the first entry if
+             * none is given.
              *
              * @param {mt.model.QueueEntry=} from an optional entry to start the search from
+             * @param {boolean=} includeFrom should the given entry be included in the search
              * @return {mt.model.QueueEntry} the next entry or null if none
              */
-            nextEntry: function (from) {
+            closestValidEntry: function (from, includeFrom) {
                 var position = 0;
 
                 if (from) {
                     position = queue.entries.indexOf(from);
                     if (position === -1) {
                         // something is seriously broken here
-                        throw new Error('The active entry from the queue manager is not in the queue array');
+                        throw new Error('The given entry is not in the queue array');
                     }
-                    position++;
+                    if (!includeFrom) position++;
                 }
 
                 // filters out skipped entries so that we don't retry them
