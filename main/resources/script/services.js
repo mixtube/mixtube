@@ -5,7 +5,7 @@
         var logger = mtLoggerFactory.logger('mtVideoPlayerManager');
 
         /**
-         * @type {{handle: mt.player.VideoHandle, entry: mt.model.QueueEntry, playDeferred: Deferred, init: Function}}
+         * @typedef {{handle: mt.player.VideoHandle, entry: mt.model.QueueEntry, playDeferred: Deferred, init: Function}}
          */
         var PlaybackSlot = {
             handle: null,
@@ -70,9 +70,10 @@
 
                 // when the video starts playing, position the playback head and start loading the next one
                 mtQueueManager.positionPlaybackEntry(currentSlot.entry);
-                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
-                    loadQueueEntry(queueEntry, false);
-                });
+                var nextQueueEntry = mtQueueManager.nextEntry();
+                if (nextQueueEntry) {
+                    loadQueueEntry(nextQueueEntry, false);
+                }
             } else {
                 // end of the road
                 playing = false;
@@ -120,10 +121,11 @@
                     currentSlot.handle.unpause();
                 }
             } else {
-                // if play action is requested on an non playing queue, the first item and force play
-                mtQueueManager.nextValidQueueEntry().then(function (queueEntry) {
+                // if play action is requested on a non playing queue, grab the first item and force play
+                var queueEntry = mtQueueManager.nextEntry();
+                if (queueEntry) {
                     loadQueueEntry(queueEntry, true);
-                });
+                }
             }
         }
 
@@ -195,13 +197,14 @@
                     nextSlot.entry.skippedAtRuntime = true;
                     nextSlot.playDeferred.reject();
 
-                    // now try to find the nex valid entry and load it if found
-                    mtQueueManager.closestValidQueueEntry(nextSlot.entry).then(function (queueEntry) {
-                        // keep the force play value of the original call
-                        loadQueueEntry(queueEntry, forcePlay);
-                    });
+                    // now get the entry after the failed one and load it
+                    var nextEntry = mtQueueManager.nextEntry(nextSlot.entry);
 
                     ensureNextSlotCleared();
+
+                    if (nextEntry) {
+                        loadQueueEntry(nextEntry, forcePlay);
+                    }
                 });
             });
 
@@ -218,9 +221,8 @@
             }
         }
 
-        // watch on object full equality
-        // todo use watchCollection instead ?
-        $rootScope.$watch(function () {
+        // watch on collection change only (we don't want this watcher to be called when an entry property is updated)
+        $rootScope.$watchCollection(function () {
             return mtQueueManager.queue.entries;
         }, function () {
             if (mtQueueManager.queue.entries.length === 0) {
@@ -228,7 +230,9 @@
                 clear();
             } else if (currentSlot) {
                 // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
-                mtQueueManager.nextValidQueueEntry().then(function (nextQueueEntry) {
+                var nextQueueEntry = mtQueueManager.nextEntry();
+
+                if (nextQueueEntry) {
                     var needReplacingNextHandle;
 
                     if (!nextSlot) {
@@ -248,12 +252,11 @@
                         ensureNextSlotCleared();
                         loadQueueEntry(nextQueueEntry, false);
                     }
-                }, function () {
-                    // no next video available, clear the next handle
+                } else {
                     ensureNextSlotCleared();
-                });
+                }
             }
-        }, true);
+        });
 
         return {
             get playing() {
@@ -338,39 +341,6 @@
             });
         }
 
-        /**
-         * Gets the first valid entry by pinging the entry video itself and going forward through the queue.
-         *
-         * @param {number} startPosition the position from where to start to look for the a valid video
-         * @return {promise} resolved with the closest valid queue entry, rejected if none found
-         */
-        function closestValidQueueEntry(startPosition) {
-            var tryPosition = startPosition;
-            var queueEntry;
-
-            if (tryPosition >= queue.entries.length) {
-                return $q.reject();
-            }
-
-            // filters out skipped entries so that we don't retry them
-            while ((queueEntry = queue.entries[tryPosition]).skippedAtRuntime) {
-                tryPosition++;
-            }
-
-            if (tryPosition < queue.entries.length) {
-                return mtYoutubeClient.pingVideoById(queueEntry.video.id).then(function (videoExists) {
-                    if (videoExists) {
-                        return queueEntry;
-                    } else {
-                        queueEntry.skippedAtRuntime = true;
-                        return closestValidQueueEntry(tryPosition + 1);
-                    }
-                });
-            } else {
-                return $q.reject();
-            }
-        }
-
         // initialize queue
         var queue = new mt.model.Queue();
         /** @type {mt.model.QueueEntry=} */
@@ -440,45 +410,36 @@
             },
 
             /**
-             * Finds the next video in the queue that exists starting from current playback entry. If there is no
-             * current playback entry starts from position 0.
+             * Returns the next video in the queue from the given entry or the current playback entry if none given. If
+             * there is no current entry it returns the first one.
              *
-             * Video can be removed from the remote provider so we have to check that before loading a video to prevent
-             * playback interruption.
-             *
-             * @return {promise} resolved with a queue entry when an existing video is found, rejected else
+             * @param {mt.model.QueueEntry=} from an optional entry to start the search from
+             * @return {mt.model.QueueEntry} the next entry or null if none
              */
-            nextValidQueueEntry: function () {
-                var startPosition = 0;
+            nextEntry: function (from) {
+                var position = 0;
 
-                if (playbackEntry) {
-                    var position = queue.entries.indexOf(playbackEntry);
+                from = from || playbackEntry;
+                if (from) {
+                    position = queue.entries.indexOf(from);
                     if (position === -1) {
                         // something is seriously broken here
                         throw new Error('The active entry from the queue manager is not in the queue array');
                     }
-                    startPosition = position + 1;
+                    position++;
                 }
 
-                return closestValidQueueEntry(startPosition);
-            },
-
-            /**
-             * Finds the closest video in the queue that exists starting from the given queue index.
-             *
-             * @param {number} startEntry the position where to start looking for
-             * @return {promise} resolved with a queue entry when an existing video is found, rejected else
-             */
-            closestValidQueueEntry: function (startEntry) {
-
-                var startPosition = queue.entries.indexOf(startEntry);
-
-                if (startPosition === -1) {
-                    // something is seriously broken here
-                    throw new Error('The active entry from the queue manager is not in the queue array');
+                // filters out skipped entries so that we don't retry them
+                var queueEntry;
+                while ((queueEntry = queue.entries[position]).skippedAtRuntime) {
+                    position++;
                 }
 
-                return closestValidQueueEntry(startPosition);
+                if (position < queue.entries.length) {
+                    return queueEntry;
+                }
+
+                return null;
             },
 
             /**
@@ -671,25 +632,6 @@
 
                         dataCallback(videos);
                         extendVideosWithDetails(videos);
-                    });
-            },
-
-            /**
-             * Checks if the supplied video id matches a existing video in Youtube system.
-             *
-             * @param {string} id the video id
-             * @return {promise} a promise that is resolved with true if the video exist, false else
-             */
-            pingVideoById: function (id) {
-                return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
-                    params: {
-                        id: id,
-                        part: 'id',
-                        callback: 'JSON_CALLBACK',
-                        key: mtConfiguration.youtubeAPIKey
-                    }
-                }).then(function (response) {
-                        return response.data.items.length > 0;
                     });
             }
         };
