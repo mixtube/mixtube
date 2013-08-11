@@ -1,8 +1,8 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtVideoPlayerManager', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory, mtAlert) {
-        var logger = mtLoggerFactory.logger('mtVideoPlayerManager');
+    mt.MixTubeApp.factory('mtConductor', function ($rootScope, $q, mtPlayerPoolProvider, mtQueueManager, mtYoutubeClient, mtConfiguration, mtLoggerFactory, mtAlert) {
+        var logger = mtLoggerFactory.logger('mtConductor');
 
         /**
          * @typedef {{handle: mt.player.VideoHandle, entry: mt.model.QueueEntry, playDeferred: Deferred, init: Function}}
@@ -68,9 +68,8 @@
                 // notify that we started to play the new entry
                 currentSlot.playDeferred.resolve();
 
-                // when the video starts playing, position the playback head and start loading the next one
-                mtQueueManager.positionPlaybackEntry(currentSlot.entry);
-                var nextQueueEntry = mtQueueManager.nextEntry();
+                // when the video starts playing, start loading the next one
+                var nextQueueEntry = mtQueueManager.nextEntry(currentSlot.entry);
                 if (nextQueueEntry) {
                     loadQueueEntry(nextQueueEntry, false);
                 }
@@ -122,9 +121,9 @@
                 }
             } else {
                 // if play action is requested on a non playing queue, grab the first item and force play
-                var queueEntry = mtQueueManager.nextEntry();
-                if (queueEntry) {
-                    loadQueueEntry(queueEntry, true);
+                var firstEntry = mtQueueManager.nextEntry();
+                if (firstEntry) {
+                    loadQueueEntry(firstEntry, true);
                 }
             }
         }
@@ -230,7 +229,7 @@
                 clear();
             } else if (currentSlot) {
                 // we want to know if the next queue entry changed so that we can tell the video player manager to prepare it
-                var nextQueueEntry = mtQueueManager.nextEntry();
+                var nextQueueEntry = mtQueueManager.nextEntry(currentSlot.entry);
 
                 if (nextQueueEntry) {
                     var needReplacingNextHandle;
@@ -261,6 +260,15 @@
         return {
             get playing() {
                 return  playing;
+            },
+
+            /**
+             * The current entry.
+             *
+             * @returns {mt.model.QueueEntry}
+             */
+            get playbackEntry() {
+                return currentSlot ? currentSlot.entry : null;
             },
 
             /**

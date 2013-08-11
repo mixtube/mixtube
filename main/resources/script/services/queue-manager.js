@@ -58,8 +58,6 @@
 
         // initialize queue
         var queue = new mt.model.Queue();
-        /** @type {mt.model.QueueEntry=} */
-        var playbackEntry;
 
         return {
             /**
@@ -67,15 +65,6 @@
              */
             get queue() {
                 return queue;
-            },
-
-            /**
-             * The current entry.
-             *
-             * @returns {mt.model.QueueEntry}
-             */
-            get playbackEntry() {
-                return playbackEntry;
             },
 
             /**
@@ -107,26 +96,10 @@
              */
             clear: function () {
                 queue.entries = [];
-                playbackEntry = null;
             },
 
             /**
-             * Notify the queue manager of the entry playing henceforth.
-             *
-             * @param {mt.model.QueueEntry} entry
-             */
-            positionPlaybackEntry: function (entry) {
-                var entryPosition = queue.entries.indexOf(entry);
-                if (entryPosition === -1) {
-                    throw new Error('The given entry is not in the queue array');
-                }
-
-                playbackEntry = entry;
-            },
-
-            /**
-             * Returns the next video in the queue from the given entry or the current playback entry if none given. If
-             * there is no current entry it returns the first one.
+             * Returns the next video in the queue from the given entry or the first entry if none is given.
              *
              * @param {mt.model.QueueEntry=} from an optional entry to start the search from
              * @return {mt.model.QueueEntry} the next entry or null if none
@@ -134,7 +107,6 @@
             nextEntry: function (from) {
                 var position = 0;
 
-                from = from || playbackEntry;
                 if (from) {
                     position = queue.entries.indexOf(from);
                     if (position === -1) {

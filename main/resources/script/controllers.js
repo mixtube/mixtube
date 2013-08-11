@@ -51,7 +51,7 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtVideoPlayerManager, mtYoutubeClient, mtUserInteractionManager, mtModal) {
+    mt.MixTubeApp.controller('mtQueueFrameCtrl', function ($scope, $rootScope, $q, mtQueueManager, mtConductor, mtYoutubeClient, mtUserInteractionManager, mtModal) {
 
         $scope.removeQueueEntryClicked = function (queueEntry) {
             mtQueueManager.removeEntry(queueEntry);
@@ -80,25 +80,25 @@
         };
 
         $scope.getPlaybackQueueEntry = function () {
-            return mtQueueManager.playbackEntry;
+            return mtConductor.playbackEntry;
         }
     });
 
-    mt.MixTubeApp.controller('mtQueueItemCtrl', function ($scope, $q, mtVideoPlayerManager) {
+    mt.MixTubeApp.controller('mtQueueItemCtrl', function ($scope, $q, mtConductor) {
 
         /**  @type {boolean} */
         $scope.playPending = false;
 
         $scope.queueEntryClicked = function (queueEntry) {
             $scope.playPending = true;
-            var playPromise = mtVideoPlayerManager.loadQueueEntry(queueEntry, true);
+            var playPromise = mtConductor.loadQueueEntry(queueEntry, true);
             playPromise.always(function () {
                 $scope.playPending = false;
             });
         };
     });
 
-    mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager, mtVideoPlayerManager) {
+    mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager, mtConductor) {
 
         mtKeyboardShortcutManager.register('global', /\w/, function (evt) {
             $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: String.fromCharCode(evt.which)});
@@ -107,21 +107,21 @@
         // register the global space shortcut and directly enter the shortcuts context
         mtKeyboardShortcutManager.register('global', 'space', function (evt) {
             evt.preventDefault();
-            mtVideoPlayerManager.playbackToggle();
+            mtConductor.playbackToggle();
         });
 
         mtKeyboardShortcutManager.enterContext('global');
 
         $scope.pauseButtonClicked = function () {
-            mtVideoPlayerManager.playbackToggle();
+            mtConductor.playbackToggle();
         };
 
         $scope.isPlaying = function () {
-            return mtVideoPlayerManager.playing;
+            return mtConductor.playing;
         };
     });
 
-    mt.MixTubeApp.controller('mtComingNextCtrl', function ($scope, $timeout, mtVideoPlayerManager, mtConfiguration) {
+    mt.MixTubeApp.controller('mtComingNextCtrl', function ($scope, $timeout, mtConductor, mtConfiguration) {
 
         /** @type {boolean} */
         $scope.comingNextVisible = false;
