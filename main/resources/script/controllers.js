@@ -156,7 +156,7 @@
         /** @type {string} */
         $scope.searchTerm = null;
         /** @type {Array.<mt.model.Video>} */
-        $scope.youtubeSearchResults = mtConfiguration.initialSearchResults;
+        $scope.youtubeSearchResults = null;
         /** @type {boolean} */
         $scope.searchVisible = mtConfiguration.initialSearchOpen;
         /** @type {promise} */
