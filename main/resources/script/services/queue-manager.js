@@ -122,16 +122,17 @@
                 }
 
                 // filters out skipped entries so that we don't retry them
-                var queueEntry;
-                while ((queueEntry = queue.entries[position]).skippedAtRuntime) {
-                    position++;
+                var validEntry;
+                while (!validEntry && position < queue.entries.length) {
+                    var entry = queue.entries[position];
+                    if (entry.skippedAtRuntime) {
+                        position++;
+                    } else {
+                        validEntry = entry;
+                    }
                 }
 
-                if (position < queue.entries.length) {
-                    return queueEntry;
-                }
-
-                return null;
+                return validEntry;
             },
 
             /**

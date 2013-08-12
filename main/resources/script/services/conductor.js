@@ -82,7 +82,7 @@
         function executeComingNext() {
             $rootScope.$broadcast(mt.events.UpdateComingNextRequest, {
                 currentVideo: currentSlot.entry.video,
-                nextVideo: nextSlot.entry.video
+                nextVideo: nextSlot ? nextSlot.entry.video : null
             });
         }
 
