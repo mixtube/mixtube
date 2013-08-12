@@ -22,7 +22,8 @@
                 var newSerializedQueue = mtQueueManager.serialize();
                 if (!angular.equals(serializedQueue, newSerializedQueue)) {
                     serializedQueue = newSerializedQueue;
-                    $location.search({queue: serializedQueue});
+                    // replace queue parameter but keep the rest
+                    $location.search(angular.extend({}, $location.search(), {queue: serializedQueue}));
                 }
             }
         }, true);
