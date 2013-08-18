@@ -48,7 +48,7 @@
                     // the only way from now is to protectively defer the affectation thanks to timeout
                     // for details see https://github.com/angular/angular.js/issues/1250#issuecomment-8604033
                     $timeout(function () {
-                        element.focus();
+                        element[0].focus();
                         saved$render();
                         if (attr.hasOwnProperty('autoSelect')) {
                             element[0].select();
