@@ -42,6 +42,24 @@
     };
 
     /**
+     * A query selector all that works with JQLite objects and DOM elements. It delegates to the native querySelectorAll method.
+     *
+     * This is required because the AngularJS version of "find" deals only with tag names and not with CSS selectors.
+     *
+     * @param {JQLite} context
+     * @param {string} selector the CSS selector
+     * @returns {JQLite} the collection of matching elements
+     */
+    mt.tools.querySelector = function (context, selector) {
+        if (context.bind && context.find) {
+            // jQuery like context
+            context = context[0];
+        }
+
+        return angular.element(context.querySelectorAll(selector));
+    };
+
+    /**
      * A basic inbetweening tool.
      *
      * Interpolates properties of the "from / to" objects in a linear fashion and call a function with the intermediates

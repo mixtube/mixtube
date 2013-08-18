@@ -7,7 +7,7 @@
         // executed when the Youtube player API is ready, it actually instantiate the players pool and notify the application that it is ready
         var playersPool = new mt.player.PlayersPool(function () {
             var playerDiv = angular.element('<div class="mt-video-player-instance"></div>');
-            $document.find('.mt-video-player-window').append(playerDiv);
+            mt.tools.querySelector($document, '.mt-video-player-window').append(playerDiv);
             return playerDiv[0];
         }, mtLoggerFactory.logger('PlayersPool'));
 

@@ -222,7 +222,7 @@
         }
 
         /**
-         * @param {jQuery} target
+         * @param {JQLite} target
          * @param {function()} callback
          * @returns {{disconnect: function()}}
          */
@@ -272,7 +272,7 @@
 
                 var self = this;
                 var carousel = $element;
-                var slider = carousel.find('.mt-carousel-slider');
+                var slider = mt.tools.querySelector(carousel, '.mt-carousel-slider');
                 var savedList = [];
 
                 // allows to animate the slider
@@ -290,7 +290,7 @@
                  * @returns {HTMLElement} the item at the position or undefined if none found
                  */
                 function rawBucketFromPosition(x) {
-                    return _.findWhere(carousel.find('.mt-carousel-bucket'), function (bucket) {
+                    return _.findWhere(mt.tools.querySelector(carousel, '.mt-carousel-bucket'), function (bucket) {
                         var bucketRect = bucket.getBoundingClientRect();
                         if (x > 0) {
                             // in forward we want the half visible bucket at the very right
@@ -344,7 +344,7 @@
                             }
 
                             // the bucket has been just added bring it up
-                            self.bringUp(carousel.find('.mt-carousel-bucket').eq(addedBucketIndex));
+                            self.bringUp(mt.tools.querySelector(carousel, '.mt-carousel-bucket').eq(addedBucketIndex));
                         }
 
                         // shallow copy the list for next change detection
@@ -392,8 +392,8 @@
                 var tRemainder = tOriginal.find('remainder');
 
                 tElement.append(tHandles.contents());
-                tElement.find('.js-mt-carousel-item-bucket').append(tRenderer.contents());
-                tElement.find('.js-mt-carousel-remainder-bucket').append(tRemainder.contents());
+                mt.tools.querySelector(tElement, '.js-mt-carousel-item-bucket').append(tRenderer.contents());
+                mt.tools.querySelector(tElement, '.js-mt-carousel-remainder-bucket').append(tRemainder.contents());
 
                 return function link(scope, element, attr, carouselCtrl) {
                     // react to items list changes
@@ -413,7 +413,7 @@
                     }, 100));
 
                     // react to bucket insertion/removal
-                    var bucketListObserver = observeChildList(element.find('.mt-carousel-list'), function () {
+                    var bucketListObserver = observeChildList(mt.tools.querySelector(element, '.mt-carousel-list'), function () {
                         carouselCtrl.computeSizeRelated();
                     });
 
