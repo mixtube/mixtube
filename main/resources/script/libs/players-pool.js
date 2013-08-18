@@ -46,11 +46,6 @@
 
         self.lastSampledTime = 0;
 
-        // clear previous state
-        if (self.canPlayThroughDeferred) {
-            self.canPlayThroughDeferred.reject();
-        }
-
         if (self.endOfFadeDeferred) {
             self.endOfFadeDeferred.resolve();
         }
@@ -202,19 +197,33 @@
      * @param {mt.player.PlayersPool} playersPool
      * @param {string} uid a generated id that is unique to this handle
      * @param {{id: string, provider: string, coarseDuration: number}} video
-     * @param {Array.<{time: number, callback: function}>} cues the cue points
      * @param logger
      * @constructor
      */
-    mt.player.VideoHandle = function (playersPool, uid, video, cues, logger) {
+    mt.player.VideoHandle = function (playersPool, uid, video, logger) {
         this.playersPool = playersPool;
         this.uid = uid;
         this.video = video;
-        this.cues = cues;
+        this.cueByName = {};
         this.logger = logger;
         this.player = null;
         this.canPlayThroughDeferred = jQuery.Deferred();
         this.disposed = false;
+    };
+
+    /**
+     * @param {string} name
+     * @param {{time: number, callback: function}} cues
+     */
+    mt.player.VideoHandle.prototype.defineCue = function (name, cue) {
+        this.cueByName[name] = cue;
+    };
+
+    /**
+     * @param {string} name
+     */
+    mt.player.VideoHandle.prototype.removeCue = function (name) {
+        delete this.cueByName[name];
     };
 
     /**
@@ -230,16 +239,19 @@
             // register the listener for cues
             self.player.addTimeUpdateListener(self.uid + '_cue', function (evt) {
                 // go through each cue and execute it if it is the goode time slot
-                self.cues.forEach(function (cue) {
+                for (var cueName in self.cueByName) {
+                    var cue = self.cueByName[cueName];
                     // execute the cue if last time is before the cue time and current time is after
                     if (lastCurrentTime <= cue.time && cue.time <= evt.currentTime) {
-                        self.logger.debug('Cue point for %s executed', self.uid);
+                        self.logger.debug('Cue point ' + cueName + ' for %s executed', self.uid);
                         cue.callback();
                     }
-                });
+                }
                 lastCurrentTime = evt.currentTime;
             });
-            self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve).fail(self.canPlayThroughDeferred.reject);
+            if (self.canPlayThroughDeferred) {
+                self.player.loadVideo(self.video.id).done(self.canPlayThroughDeferred.resolve).fail(self.canPlayThroughDeferred.reject);
+            }
         });
         return self.canPlayThroughDeferred.promise();
     };
@@ -262,7 +274,7 @@
     mt.player.VideoHandle.prototype.dispose = function () {
         this.disposed = true;
         this.player.removeTimeUpdateListener(this.uid + '_cue');
-        this.canPlayThroughDeferred.reject();
+        this.canPlayThroughDeferred = null;
         this.player.stopVideo();
     };
 
@@ -326,11 +338,10 @@
      * Prepares a video and gives back a handle to interact with it.
      *
      * @param {{id: string, provider: string, coarseDuration: number}} video the video the load
-     * @param {Array.<{time: number, callback: function}>} cues the cues points
      * @return {mt.player.VideoHandle}
      */
-    mt.player.PlayersPool.prototype.prepareVideo = function (video, cues) {
-        return new mt.player.VideoHandle(this, mt.tools.uniqueId(), video, cues, this.logger);
+    mt.player.PlayersPool.prototype.prepareVideo = function (video) {
+        return new mt.player.VideoHandle(this, mt.tools.uniqueId(), video, this.logger);
     };
 
     /**

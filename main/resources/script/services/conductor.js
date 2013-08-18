@@ -51,7 +51,7 @@
 
             if (previousSlot) {
                 previousSlot.handle.out(mtConfiguration.transitionDuration).done(function (handle) {
-                    if (previousSlot.handle === handle) {
+                    if (previousSlot && previousSlot.handle === handle) {
                         $rootScope.$apply(function () {
                             // prevents race condition: handle that just finished the out is still the current slot one
                             previousSlot = null;
@@ -141,53 +141,59 @@
         }
 
         /**
-         * @param {mt.model.QueueEntry} queueEntry
+         * @param {mt.model.QueueEntry} nextQueueEntry
          * @param {boolean} forcePlay
          * @returns {promise} resolved when the loaded video starts playing
          */
-        function prepareNextSlot(queueEntry, forcePlay) {
+        function prepareNextSlot(nextQueueEntry, forcePlay) {
 
             var nextPlayDeferred = $q.defer();
 
-            logger.debug('Start request for video %s received with forcePlay flag %s', queueEntry.video.id, forcePlay);
-
-            var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, queueEntry.video.duration);
-            var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, queueEntry.video.duration);
-            logger.debug('Preparing a video %s, the coming next cue will start at %d, the transition cue will start at %d', queueEntry.video.id, comingNextStartTime, transitionStartTime);
+            logger.debug('Start request for video %s received with forcePlay flag %s', nextQueueEntry.video.id, forcePlay);
 
             nextSlot = Object.create(PlaybackSlot);
             nextSlot.init(
                 playersPool.prepareVideo({
-                    id: queueEntry.video.id,
-                    provider: queueEntry.video.provider,
-                    coarseDuration: queueEntry.video.duration
-                }, [
-                    {time: comingNextStartTime, callback: function () {
-                        $rootScope.$apply(function () {
-                            executeComingNext();
-                        });
-                    }},
-                    {time: transitionStartTime, callback: function () {
-                        // starts the next prepared video and cross fade
-                        $rootScope.$apply(function () {
-                            executeTransition();
-                        });
-                    }}
-                ]),
-                queueEntry,
+                    id: nextQueueEntry.video.id,
+                    provider: nextQueueEntry.video.provider,
+                    coarseDuration: nextQueueEntry.video.duration
+                }),
+                nextQueueEntry,
                 nextPlayDeferred
             );
 
-            var nextLoadJQDeferred = nextSlot.handle.load();
+            if (currentSlot) {
+                // there is a current slot we need to treat its cues
 
-            if (forcePlay) {
-                nextLoadJQDeferred.done(function () {
-                    $rootScope.$apply(function () {
-                        executeTransition();
-                    });
-                });
+                if (!forcePlay) {
+                    var transitionStartTime = relativeTimeToAbsolute(mtConfiguration.transitionStartTime, currentSlot.entry.video.duration);
+                    var comingNextStartTime = relativeTimeToAbsolute(mtConfiguration.comingNextStartTime, currentSlot.entry.video.duration);
+                    logger.debug('Preparing a video %s, the coming next cue will start at %d, the transition cue will start at %d of the previous video',
+                        nextQueueEntry.video.id, comingNextStartTime, transitionStartTime);
+
+                    //  regular prepare next slot so we define the cues for transitions on the current slot
+                    currentSlot.handle.defineCue('commingNext', {
+                        time: comingNextStartTime,
+                        callback: function () {
+                            $rootScope.$apply(function () {
+                                executeComingNext();
+                            });
+                        }});
+                    currentSlot.handle.defineCue('transition', {
+                        time: transitionStartTime, callback: function () {
+                            // starts the next prepared video and cross fade
+                            $rootScope.$apply(function () {
+                                executeTransition();
+                            });
+                        }});
+                } else {
+                    // programmed cues (transitions here) are obsolete
+                    currentSlot.handle.removeCue('commingNext');
+                    currentSlot.handle.removeCue('transition');
+                }
             }
 
+            var nextLoadJQDeferred = nextSlot.handle.load();
             nextLoadJQDeferred.fail(function () {
                 $rootScope.$apply(function () {
                     mtAlert.warning('Unable to preload "' + _.escape(nextSlot.entry.video.title) + '". Will be skipped.', 5000);
@@ -206,6 +212,14 @@
                     }
                 });
             });
+
+            if (forcePlay) {
+                nextLoadJQDeferred.done(function () {
+                    $rootScope.$apply(function () {
+                        executeTransition();
+                    });
+                });
+            }
 
             return nextPlayDeferred.promise;
         }
