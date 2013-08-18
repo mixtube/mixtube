@@ -98,7 +98,12 @@
                 }
 
                 nextFrameId = enqueueFrame(function frame(timestamp) {
-                    var progress = (timestamp - startedTimestamp - pausedDuration) / options.duration;
+                    var progress;
+                    if (options.duration <= 0) {
+                        progress = 1;
+                    } else {
+                        progress = (timestamp - startedTimestamp - pausedDuration) / options.duration;
+                    }
 
                     var reachedEnd = progress >= 1;
                     if (!reachedEnd) {
