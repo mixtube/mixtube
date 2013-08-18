@@ -57,7 +57,7 @@
         });
 
         // make the player silent and invisible
-        self.fade('out', 0);
+        self.cloak();
     };
 
     /**
@@ -141,6 +141,14 @@
     };
 
     /**
+     * Immediately hides and mutes the player.
+     */
+    mt.player.YoutubePlayer.prototype.cloak = function () {
+        this.delegate.getIframe().style.opacity = 0;
+        this.delegate.setVolume(0);
+    };
+
+    /**
      * Fades the player without modifying the playback status (no play or stop call).
      *
      * If there was a pending fade operation, it is terminated so that it jumps to the end values. If duration is equal
@@ -152,7 +160,6 @@
      */
     mt.player.YoutubePlayer.prototype.fade = function (direction, duration) {
         var self = this;
-        var immediate = duration === 0;
 
         if (self.endOfFadeDeferred) {
             // there is a pending fade operation, ensure it is resolved
@@ -161,31 +168,26 @@
 
         self.endOfFadeDeferred = jQuery.Deferred();
 
-        if (immediate) {
-            // no animation, resolve straight
-            self.endOfFadeDeferred.resolve();
-        } else {
-            var playerIFrameStyle = self.delegate.getIframe().style;
-            self.activeFadeTween = mt.tools.tween({
-                target: function (values) {
-                    playerIFrameStyle.opacity = values.opacity;
-                    self.delegate.setVolume(values.volume);
-                },
-                from: {
-                    opacity: direction === 'in' ? 0 : 1,
-                    volume: direction === 'in' ? 0 : 100
-                },
-                to: {
-                    opacity: direction === 'in' ? 1 : 0,
-                    volume: direction === 'in' ? 100 : 0
-                },
-                duration: duration,
-                complete: function () {
-                    self.endOfFadeDeferred.resolve();
-                    self.activeFadeTween = null;
-                }
-            }).play();
-        }
+        var playerIFrameStyle = self.delegate.getIframe().style;
+        self.activeFadeTween = mt.tools.tween({
+            target: function (values) {
+                playerIFrameStyle.opacity = values.opacity;
+                self.delegate.setVolume(values.volume);
+            },
+            from: {
+                opacity: direction === 'in' ? 0 : 1,
+                volume: direction === 'in' ? 0 : 100
+            },
+            to: {
+                opacity: direction === 'in' ? 1 : 0,
+                volume: direction === 'in' ? 100 : 0
+            },
+            duration: duration,
+            complete: function () {
+                self.endOfFadeDeferred.resolve();
+                self.activeFadeTween = null;
+            }
+        }).play();
 
         return self.endOfFadeDeferred.promise();
     };
