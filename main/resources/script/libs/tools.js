@@ -46,7 +46,7 @@
      *
      * This is required because the AngularJS version of "find" deals only with tag names and not with CSS selectors.
      *
-     * @param {JQLite} context
+     * @param {JQLite|Element} context
      * @param {string} selector the CSS selector
      * @returns {JQLite} the collection of matching elements
      */

@@ -8,7 +8,7 @@
             restrict: 'A',
             priority: 10, // priority at 10 to be executed before the original angular click directive
             link: function (scope, element) {
-                element.bind('click.mtLastClick', function (evt) {
+                element.bind('click', function (evt) {
                     var now = Date.now();
                     var lastClickTs = element.data('mtLastClickTS');
                     if (lastClickTs && now - lastClickTs < 500) {
@@ -236,16 +236,18 @@
             } else {
                 // only IE10 in the range of supported browsers
                 // todo remove once IE11 has been released
-                target.bind('DOMNodeInserted.mtCarousel DOMNodeRemoved.mtCarousel', function () {
+                var subtreeModifiedHandler = function () {
                     // we need to let time for the node to be rendered before calling the callback
                     $timeout(function () {
                         callback();
                     }, 0);
-                });
+                };
+                target.bind('DOMNodeInserted DOMNodeRemoved', subtreeModifiedHandler);
 
                 return {
                     disconnect: function () {
-                        target.unbind('DOMNodeInserted.mtCarousel DOMNodeRemoved.mtCarousel');
+                        target.unbind('DOMNodeInserted', subtreeModifiedHandler);
+                        target.unbind('DOMNodeRemoved', subtreeModifiedHandler);
                     }
                 };
             }
@@ -406,11 +408,13 @@
 
                     // react to window resizing
                     var window = angular.element($window);
-                    window.bind('resize.mtCarousel', _.debounce(function () {
+                    var resizeCarouselHandler = _.debounce(function () {
                         scope.$apply(function () {
                             carouselCtrl.computeSizeRelated();
                         });
-                    }, 100));
+                    }, 100);
+
+                    window.bind('resize', resizeCarouselHandler);
 
                     // react to bucket insertion/removal
                     var bucketListObserver = observeChildList(mt.tools.querySelector(element, '.mt-carousel-list'), function () {
@@ -418,7 +422,7 @@
                     });
 
                     scope.$on('$destroy', function () {
-                        window.unbind('resize.mtCarousel');
+                        window.unbind('resize', resizeCarouselHandler);
                         bucketListObserver.disconnect();
                     });
 
