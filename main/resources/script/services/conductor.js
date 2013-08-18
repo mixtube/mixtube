@@ -44,13 +44,13 @@
          * - references the prepared video as the new current one
          * - cross fades the videos (out the current one / in the prepared one)
          */
-        function executeTransition() {
+        function executeTransition(transitionDuration) {
             previousSlot = currentSlot;
             currentSlot = nextSlot;
             nextSlot = null;
 
             if (previousSlot) {
-                previousSlot.handle.out(mtConfiguration.transitionDuration).done(function (handle) {
+                previousSlot.handle.out(transitionDuration).done(function (handle) {
                     if (previousSlot && previousSlot.handle === handle) {
                         $rootScope.$apply(function () {
                             // prevents race condition: handle that just finished the out is still the current slot one
@@ -63,7 +63,7 @@
             // if there is a a current video start it, else it's the end of the sequence
             if (currentSlot) {
                 playing = true;
-                currentSlot.handle.in(mtConfiguration.transitionDuration);
+                currentSlot.handle.in(transitionDuration);
 
                 // notify that we started to play the new entry
                 currentSlot.playDeferred.resolve();
@@ -183,7 +183,7 @@
                         time: transitionStartTime, callback: function () {
                             // starts the next prepared video and cross fade
                             $rootScope.$apply(function () {
-                                executeTransition();
+                                executeTransition(mtConfiguration.transitionDuration);
                             });
                         }});
                 } else {
@@ -216,7 +216,7 @@
             if (forcePlay) {
                 nextLoadJQDeferred.done(function () {
                     $rootScope.$apply(function () {
-                        executeTransition();
+                        executeTransition(mtConfiguration.transitionDuration);
                     });
                 });
             }
@@ -228,9 +228,7 @@
             ensureNextSlotCleared();
 
             if (currentSlot) {
-                playing = false;
-                currentSlot.handle.dispose();
-                currentSlot = null;
+                executeTransition(0);
             }
         }
 
