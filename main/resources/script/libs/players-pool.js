@@ -1,6 +1,8 @@
 (function (mt, undefined) {
     'use strict';
 
+    Q.longStackSupport = true;
+
     mt.player = {};
 
     /**
