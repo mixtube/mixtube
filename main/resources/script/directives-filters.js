@@ -369,12 +369,12 @@
                         });
 
                         // listen for end of transition to compute handles availability
-                        slider.one('transitionend.mtCarousel', function () {
+                        slider.bind('transitionend', function transitionEndHandler() {
+                            slider.unbind('transitionend', transitionEndHandler);
                             $scope.$apply(function () {
                                 computeHandlesAvailability();
                             });
                         });
-
                     }
                 };
 
