@@ -101,10 +101,6 @@
 
     mt.MixTubeApp.controller('mtVideoPlayerControlsCtrl', function ($scope, $rootScope, mtKeyboardShortcutManager, mtConductor) {
 
-        mtKeyboardShortcutManager.register('global', /\w/, function (evt) {
-            $rootScope.$broadcast(mt.events.OpenSearchFrameRequest, {typedChar: String.fromCharCode(evt.which)});
-        });
-
         // register the global space shortcut and directly enter the shortcuts context
         mtKeyboardShortcutManager.register('global', 'space', function (evt) {
             evt.preventDefault();
@@ -159,7 +155,7 @@
         /** @type {Array.<mt.model.Video>} */
         $scope.youtubeSearchResults = null;
         /** @type {boolean} */
-        $scope.searchVisible = mtConfiguration.initialSearchOpen;
+        $scope.searchOpen = mtConfiguration.initialSearchOpen;
         /** @type {promise} */
         $scope.instantSearchPromise = null;
         /** @type {number} */
@@ -169,21 +165,8 @@
         /** @type {Object.<string, boolean>} */
         $scope.searchResultsDelivered = {youtube: false};
 
-        /**
-         * Opens the search frame and optionally input the first char.
-         *
-         * @param {string=} firstChar the first char to fill the input with
-         */
-        var open = function (firstChar) {
-            mtKeyboardShortcutManager.enterContext('search');
-            $scope.searchVisible = true;
-            $scope.searchTerm = firstChar;
-        };
-
-        $scope.$on(mt.events.OpenSearchFrameRequest, function (evt, data) {
-            if (!$scope.searchVisible) {
-                open(data ? data.typedChar : '');
-            }
+        $scope.$on(mt.events.OpenSearchFrameRequest, function () {
+            $scope.searchOpen = true;
         });
 
         // when the user types we automatically execute the search
@@ -208,11 +191,10 @@
             }
         });
 
-        $scope.$watch('searchVisible', function (newSearchVisible) {
-            if (newSearchVisible) {
+        $scope.$watch('searchOpen', function (newSearchOpen) {
+            if (newSearchOpen) {
                 mtUserInteractionManager.searchActiveKeepAlive();
             } else {
-                $scope.searchTerm = null;
                 mtUserInteractionManager.searchClosed();
             }
         });
@@ -221,8 +203,8 @@
         $scope.$watch(function () {
             return mtUserInteractionManager.userInteracting
         }, function (newUserInteracting) {
-            if (!newUserInteracting && $scope.searchVisible) {
-                $scope.close();
+            if (!newUserInteracting && $scope.searchOpen) {
+                $scope.searchOpen = false;
             }
         });
 
@@ -249,13 +231,7 @@
         };
 
         $scope.close = function () {
-            mtKeyboardShortcutManager.leaveContext('search');
-            $scope.searchVisible = false;
+            $scope.searchOpen = false;
         };
-
-        mtKeyboardShortcutManager.register('search', 'esc', function (evt) {
-            evt.preventDefault();
-            $scope.close();
-        });
     });
 })(mt);

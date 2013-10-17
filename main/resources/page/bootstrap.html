@@ -39,14 +39,14 @@
     <div class="mt-video-player-window"></div>
 </section>
 
-<section class="mt-search-frame-container" ng-controller="mtSearchCtrl" ng-show="searchVisible">
+<!-- mt-search is a Angular directive that does the plumbing for the search frame -->
+<mt-search mt-search-open="searchOpen" class="mt-search-frame-container" ng-controller="mtSearchCtrl">
     <div class="mt-search-frame-wrapper">
         <div class="mt-search-frame">
             <form class="mt-search-form" name="searchForm" novalidate>
-                <!-- mousetrap class required to make the esc shortcut work when the filed is focused -->
-                <input class="mt-search-term-input mousetrap" ng-model="searchTerm" placeholder="Start typing"
-                       ng-show="searchVisible" mt-focus-on-render spellcheck="false" autocomplete="false"
-                       required>
+                <!-- mousetrap class required to make the esc shortcut work when the field is focused -->
+                <input mt-search-field ng-model="searchTerm" class="mt-search-term-input mousetrap"
+                       placeholder="Start typing" spellcheck="false" autocomplete="false">
             </form>
             <a class="mt-search-close-button" title="Close [Esc]" ng-click="close()"></a>
 
@@ -118,7 +118,7 @@
             </div>
         </div>
     </div>
-</section>
+</mt-search>
 
 <section class="mt-queue-frame-container" ng-controller="mtQueueFrameCtrl">
     <div class="mt-queue-frame" ng-class="{'mt-appear': isUserInteracting()}" ng-mouseenter="mouseEntered()"
@@ -259,6 +259,7 @@
 <script src="../script/services/youtube-client.js"></script>
 <script src="../script/controllers.js"></script>
 <script src="../script/directives-filters.js"></script>
+<script src="../script/search-directive.js"></script>
 <script src="//www.youtube.com/iframe_api"></script>
 
 </body>
