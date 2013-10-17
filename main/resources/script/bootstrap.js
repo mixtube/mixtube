@@ -6,7 +6,9 @@
             $locationProvider.html5Mode(true);
         }).factory('$exceptionHandler', function ($log) {
             return function (exception, cause) {
-                qbaka.report(exception);
+                if ('qbaka' in window) {
+                    qbaka.report(exception);
+                }
                 $log.error.apply($log, arguments);
             };
         });
