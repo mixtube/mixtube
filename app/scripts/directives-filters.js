@@ -158,11 +158,11 @@
                     inputScope.$watch('edition', function (newEdition, oldEdition) {
                         if (newEdition !== oldEdition) {
                             if (newEdition) {
-                                element.hide();
+                                element.css('display', 'none');
                                 mtKeyboardShortcutManager.enterContext(keyboardShortcutContext);
                             } else {
                                 mtKeyboardShortcutManager.leaveContext(keyboardShortcutContext);
-                                element.show();
+                                element.css('display', '');
                             }
                         }
                     });
