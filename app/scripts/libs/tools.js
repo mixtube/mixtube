@@ -65,32 +65,37 @@
      * Interpolates properties of the "from / to" objects in a linear fashion and call a function with the intermediates
      * value.
      *
-     * @param {{target: function(Object), from: Object, to: Object, duration: number, complete: function}} options
+     * @param {{target: function(Object), from: Object, to: Object, duration: number, complete: function=, useRAF: boolean=}} options
      * @returns {{play: function, pause: function}} the tween with play and pause methods
      */
     mt.tools.tween = function (options) {
 
-        // a robust animation timing function copied from https://gist.github.com/paulirish/1579671
-        // can't use requestAnimationFrame because we want the animation to continue even when the tab or window is focused out
-        var lastTime = 0;
+        var useRAF = options.useRAF && 'requestAnimationFrame' in window;
 
-        function enqueueFrame(callback) {
-            var currTime = Date.now();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function () {
-                    callback(currTime + timeToCall);
-                },
-                timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        }
+        var nextFrame = (function () {
+            if (useRAF) {
+                return window.requestAnimationFrame;
+            } else {
+                // a robust animation timing function copied from https://gist.github.com/paulirish/1579671
+                // can't use requestAnimationFrame because we want the animation to continue even when the tab or window is focused out
+                var lastTime = 0;
+                return function (callback) {
+                    var currTime = Date.now();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function () {
+                            callback(currTime + timeToCall);
+                        },
+                        timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                }
+            }
+        })();
 
-        function cancelFrame(id) {
-            window.clearTimeout(id);
-        }
+        var cancelNextFrame = useRAF ? window.cancelRequestAnimationFrame : window.clearTimeout;
 
-        var startedTimestamp;
-        var lastPauseTimestamp;
+        var firstExecutedFrameTs = null;
+        var lastExecutedFrameTs = null;
         var pausedDuration = 0;
         var values = Object.create(options.from);
 
@@ -100,27 +105,28 @@
             deltas[propertyName] = options.to[propertyName] - options.from[propertyName];
         }
 
-        var nextFrameId;
+        var nextFrameId = null;
 
         return {
             play: function () {
-                if (!startedTimestamp) {
-                    // first start call
-                    startedTimestamp = Date.now();
-                    // init values
-                    options.target(values);
-                } else {
-                    // resume after a pause
-                    pausedDuration += Date.now() - lastPauseTimestamp;
 
-                }
+                // if we are here with a set firstExecutedFrameTs it means it's a resume after a pause
+                var resume = firstExecutedFrameTs != null;
 
-                nextFrameId = enqueueFrame(function frame(timestamp) {
+                nextFrameId = nextFrame(function frame(frameTs) {
+                    if (!firstExecutedFrameTs) {
+                        // first start call
+                        firstExecutedFrameTs = frameTs;
+                    } else if (resume) {
+                        // resume after a pause
+                        pausedDuration += frameTs - lastExecutedFrameTs;
+                    }
+
                     var progress;
                     if (options.duration <= 0) {
                         progress = 1;
                     } else {
-                        progress = (timestamp - startedTimestamp - pausedDuration) / options.duration;
+                        progress = (frameTs - firstExecutedFrameTs - pausedDuration) / options.duration;
                     }
 
                     var reachedEnd = progress >= 1;
@@ -128,7 +134,7 @@
                         for (var propertyName in  options.from) {
                             values[propertyName] = options.from[propertyName] + progress * deltas[propertyName];
                         }
-                        nextFrameId = enqueueFrame(frame);
+                        nextFrameId = nextFrame(frame);
                     } else {
                         // finish with final values
                         values = Object.create(options.to);
@@ -136,17 +142,18 @@
 
                     options.target(values);
 
-                    if (reachedEnd) {
+                    if (reachedEnd && options.hasOwnProperty('complete')) {
                         options.complete();
                     }
+
+                    lastExecutedFrameTs = frameTs;
                 });
 
                 return this;
             },
 
             pause: function () {
-                lastPauseTimestamp = Date.now();
-                cancelFrame(nextFrameId);
+                cancelNextFrame(nextFrameId);
                 return this;
             }
         };

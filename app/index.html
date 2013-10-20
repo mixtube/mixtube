@@ -59,8 +59,8 @@
                     </header>
 
                     <!--mouse enter/leave stuff emulates hover pseudo class for scrollbar styling since it doesn't work for webkit-->
-                    <mt-scrollview class="mt-results-scrollview" ng-mouseenter="hover = true"
-                                   ng-mouseleave="hover = false" ng-class="{'hover': hover}">
+                    <div mt-scroll-top-on-change="youtubeSearchResults" class="mt-results-scrollview" ng-mouseenter="hover = true" ng-mouseleave="hover = false"
+                         ng-class="{'hover': hover}">
 
                         <p ng-show="searchResultsDelivered.youtube && youtubeSearchResults.length === 0 && searchTerm"
                            class="mt-results-no-result-message">
@@ -68,8 +68,7 @@
                         </p>
 
                         <ul class="mt-results-list">
-                            <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults"
-                                mt-scroll-into-view-if="$first">
+                            <li class="mt-results-item" ng-repeat="searchResult in youtubeSearchResults">
                                 <div class="mt-thumbnail-frame">
                                     <div ng-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}"
                                          class="mt-results-thumbnail"></div>
@@ -95,7 +94,7 @@
                                 </ul>
                             </li>
                         </ul>
-                    </mt-scrollview>
+                    </div>
                 </section>
                 <section class="mt-search-results-frame">
                     <h4 class="mt-results-provider">Vimeo</h4>

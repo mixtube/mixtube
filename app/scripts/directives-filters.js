@@ -84,53 +84,31 @@
             });
         });
 
-    mt.MixTubeApp.directive('mtScrollview', function () {
+    mt.MixTubeApp.directive('mtScrollTopOnChange', function () {
+        return function (scope, element, attr) {
 
-        /**
-         * Return the given element ClientRect including the margins.
-         *
-         * @param {jQuery} $elem
-         * @returns {ClientRect}
-         */
-        function getWholeClientRect($elem) {
-            var rect = angular.copy($elem[0].getBoundingClientRect());
-            rect.top -= parseFloat($elem.css('margin-top'));
-            rect.bottom += parseFloat($elem.css('margin-bottom'));
-            rect.left -= parseFloat($elem.css('margin-left'));
-            rect.rigth += parseFloat($elem.css('margin-right'));
-            return rect;
-        }
+            var currentTween = null;
 
-        return {
-            restrict: 'E',
-            replace: true,
-            transclude: true,
-            template: '<div ng-transclude></div>',
-            controller: function ($element) {
-                var scrollViewRect = $element[0].getBoundingClientRect();
-
-                this.scrollIntoView = function ($targetElement) {
-                    var targetRect = getWholeClientRect($targetElement);
-                    $element.animate({scrollTop: targetRect.top - scrollViewRect.top}, 'fast');
-                };
-            }
-        };
-    });
-
-    var scrollIntoViewIfName = 'mtScrollIntoViewIf';
-    mt.MixTubeApp.directive(scrollIntoViewIfName, function ($timeout) {
-        return {
-            restrict: 'A',
-            require: '^mtScrollview',
-            link: function (scope, element, attrs, mtScrollviewCtrl) {
-                scope.$watch(attrs[scrollIntoViewIfName], function (value) {
-                    if (value) {
-                        $timeout(function () {
-                            mtScrollviewCtrl.scrollIntoView(element);
-                        }, 0);
-                    }
-                });
-            }
+            scope.$watch(attr.mtScrollTopOnChange, function mtScrollTopOnChangeAction() {
+                if (!currentTween) {
+                    currentTween = mt.tools.tween({
+                        useRAF: true,
+                        target: function (values) {
+                            element[0].scrollTop = values.scrollTop;
+                        },
+                        from: {
+                            scrollTop: element[0].scrollTop
+                        },
+                        to: {
+                            scrollTop: 0
+                        },
+                        duration: 300,
+                        complete: function () {
+                            currentTween = null;
+                        }
+                    }).play();
+                }
+            });
         };
     });
 
