@@ -1,14 +1,21 @@
 {
-    "name": "mixtube",
-    "version": "0.0.0-snapshot",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/jraoult/mixtube.git"
-    },
-    "licenses": [
-        {
-            "type": "MIT",
-            "url": "https://github.com/jraoult/mixtube/blob/master/LICENSE"
-        }
-    ]
+  "name": "mixtube",
+  "version": "0.0.0-snapshot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jraoult/mixtube.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jraoult/mixtube/blob/master/LICENSE"
+    }
+  ],
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-contrib-clean": "latest",
+    "grunt-contrib-sass": "latest",
+    "grunt-contrib-connect": "latest",
+    "grunt-contrib-watch": "latest"
+  }
 }
