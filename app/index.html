@@ -5,9 +5,13 @@
 
     <title ng-bind="'MixTube ' + (queue.name ? '- ' + queue.name : '')">MixTube (Loading)</title>
 
+    <!-- usemin must look for files in app and .tmp directory for compiled css -->
+    <!-- build:css({app,.tmp}) styles/app.css -->
     <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
+    <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
     <link rel="stylesheet" href="styles/css/main.css" type="text/css">
-    <link rel="stylesheet" href="styles/vendor/fontello/css/fontello.css" type="text/css">
+    <!-- endbuild -->
+
     <!-- Don't include Qbaka reporting while in dev to stop error reporting -->
     <!--<script src="scripts/vendor/qbaka.js"></script>-->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
@@ -59,7 +63,8 @@
                     </header>
 
                     <!--mouse enter/leave stuff emulates hover pseudo class for scrollbar styling since it doesn't work for webkit-->
-                    <div mt-scroll-top-on-change="youtubeSearchResults" class="mt-results-scrollview" ng-mouseenter="hover = true" ng-mouseleave="hover = false"
+                    <div mt-scroll-top-on-change="youtubeSearchResults" class="mt-results-scrollview"
+                         ng-mouseenter="hover = true" ng-mouseleave="hover = false"
                          ng-class="{'hover': hover}">
 
                         <p ng-show="searchResultsDelivered.youtube && youtubeSearchResults.length === 0 && searchTerm"
@@ -238,9 +243,13 @@
            auto-select>
 </script>
 
+<!-- build:js scripts/ext-dependencies.js -->
 <script src="bower_components/lodash/lodash.js"></script>
 <script src="bower_components/q/q.js"></script>
 <script src="bower_components/mousetrap/mousetrap.js"></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/app.js -->
 <script src="scripts/bootstrap.js"></script>
 <script src="scripts/libs/mousetrap.regexpbinding.js"></script>
 <script src="scripts/libs/players-pool.js"></script>
@@ -259,6 +268,8 @@
 <script src="scripts/controllers.js"></script>
 <script src="scripts/directives-filters.js"></script>
 <script src="scripts/search-directive.js"></script>
+<!-- endbuild -->
+
 <script src="//www.youtube.com/iframe_api"></script>
 
 </body>

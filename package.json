@@ -16,6 +16,8 @@
     "grunt-contrib-clean": "latest",
     "grunt-contrib-sass": "latest",
     "grunt-contrib-connect": "latest",
-    "grunt-contrib-watch": "latest"
+    "grunt-contrib-watch": "latest",
+    "grunt-usemin": "latest",
+    "grunt-rev": "latest"
   }
 }
