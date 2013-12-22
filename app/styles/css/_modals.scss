@@ -1,0 +1,106 @@
+@import '../vendor/bourbon/bourbon';
+@import 'variables';
+@import 'utils';
+
+@mixin modals {
+
+  $transitionDuration: $baseTransitionDuration;
+
+  .mt-app-overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 500;
+
+    opacity: 1;
+    background-color: $overlayBackgroundColor;
+
+    // propagate the "flexibility" in column direction so that we can do clever things with modals sizing
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    transition: opacity $transitionDuration $ease-in-quart;
+
+    // shows the overlay
+    &.ng-hide {
+      opacity: .5;
+    }
+
+    &.ng-hide-add, &.ng-hide-remove {
+      display: flex !important;
+    }
+  }
+
+  .mt-modal {
+    padding: $unitVerticalPadding / 2 .5rem;
+
+    // propagate the "flexibility"
+    display: flex;
+    flex-direction: column;
+
+    transition: transform $transitionDuration $ease-in-quart;
+
+    .mt-app-overlay.ng-hide & {
+      transform: translateY(-200%);
+    }
+  }
+
+  .mt-modal__container {
+    background-color: $lightTextColor;
+    border-radius: 2px;
+    color: $secondaryBgColor;
+
+    // propagate the "flexibility"
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mt-modal__title {
+    padding: $unitVerticalPadding / 2 1rem;
+
+    color: $baseBgColor;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .mt-modal__content {
+    flex: 1; // wil shrink or expand to match the available height
+    padding: 0 1rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    text-align: justify;
+  }
+
+  .mt-modal__commands {
+    padding: 1rem;
+
+    display: flex;
+  }
+
+  .mt-modal__button {
+    @extend %mt-chromeless-button;
+    flex: 1;
+    padding: $unitVerticalPadding/4 0;
+    margin: 0 .5rem;
+
+    background-color: $contrastedColor;
+    font-weight: 700;
+
+    &.secondary {
+      border: 1px solid $contrastedColor;
+      background-color: transparent;
+    }
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

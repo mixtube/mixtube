@@ -1,0 +1,98 @@
+@import '../vendor/bourbon/bourbon';
+@import 'utils';
+
+@mixin notifications {
+
+  $notificationsNominalWidth: 30rem;
+
+  .mt-notifications-center {
+    position: absolute;
+    right: 0;
+    z-index: 500;
+    width: 100%;
+    overflow: hidden;
+    pointer-events: none;
+
+    // if the available size is larger than the minimum notification size stop expansion
+    // could have been done with width + min-width but FF doesn't behave like the others
+    @media screen and (min-width: $notificationsNominalWidth) {
+      width: $notificationsNominalWidth;
+    }
+  }
+
+  .mt-notifications-center__container {
+    padding: 0 .5rem $unitVerticalPadding / 2 .5rem;
+    &:first-child {
+      padding-top: $unitVerticalPadding / 2;
+    }
+
+    transition-property: transform, opacity;
+    transition-duration: $baseTransitionDuration;
+    transition-timing-function: $ease-in-quart;
+
+    // shows the overlay
+    &.ng-hide {
+      transform: translateX(100%);
+      opacity: .5;
+    }
+
+    &.ng-hide-add, &.ng-hide-remove {
+      display: block !important;
+    }
+  }
+
+  .mt-notification {
+    position: relative;
+
+    background-color: $lightTextColor;
+    color: $secondaryBgColor;
+    border-radius: 2px;
+
+    &.info {
+      background-color: $infoBgColor;
+      color: $lightTextColor;
+    }
+
+    &.error {
+      background-color: $errorBgColor;
+      color: $lightTextColor;
+    }
+  }
+
+  .mt-notification__dismiss-button {
+    @extend %mt-chromeless-button;
+
+    position: absolute;
+    right: .5rem;
+    top: .5rem;
+
+    line-height: .5;
+
+    opacity: .8;
+    font-weight: bold;
+    font-size: 1.25rem;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .mt-notification__content {
+    display: flex;
+
+    > .text {
+      flex: 2;
+      padding: $unitVerticalPadding / 2 1rem;
+    }
+
+    > .thumbnail {
+      flex: 1;
+    }
+  }
+
+  .mt-notification__image {
+    width: 100%;
+
+    @include mt-fluid-image(1);
+  }
+}

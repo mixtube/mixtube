@@ -1,0 +1,376 @@
+@import 'variables';
+@import 'utils';
+@import 'modals';
+@import 'notifications';
+@import 'header';
+
+// includes imported modules styles
+@include utils;
+@include modals;
+@include notifications;
+@include header;
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  line-height: $lineHeight;
+  color: $lightTextColor;
+}
+
+.video-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  overflow: hidden;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+
+  background-image: url(../../mock-video.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #000000;
+}
+
+.mt-coming-next__group {
+  padding-bottom: $unitVerticalPadding / 2;
+
+  &.next {
+    font-weight: bold;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.mt-coming-next__header {
+  font-size: 0.875rem;
+}
+
+.mt-coming-next__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mt-app {
+  position: relative;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-body {
+  position: relative;
+  flex: 1;
+
+  display: flex;
+}
+
+.mt-queue {
+  flex: 1;
+  align-self: stretch;
+  transform: translateX(-50%);
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  opacity: 0;
+
+  transition-property: transform, opacity;
+  transition-duration: .2s;
+  transition-timing-function: $ease-in-quart;
+  transition-delay: $baseTransitionDuration;
+
+  .activity-state & {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@mixin queue-item-color($bgColor) {
+  background-color: $bgColor;
+
+  .mt-queue__item__data:before {
+    @include triangle(1.25rem, $bgColor, up);
+  }
+}
+
+.mt-queue__item {
+  @include queue-item-color($baseBgColor);
+
+  &.active {
+    @include queue-item-color($contrastedColor);
+  }
+
+  &.broken {
+    @include queue-item-color($errorBgColor);
+  }
+}
+
+.mt-queue__item__thumbnail {
+  position: relative;
+
+  > .image {
+    @include mt-fluid-image(.4);
+    filter: saturate(5%);
+  }
+
+  .active & {
+    > .image {
+      filter: none;
+    }
+  }
+}
+
+.mt-queue__item__broken-message {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  background-color: rgba($errorBgColor, $overlayOpacity);
+}
+
+.mt-queue__item__progress {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  progress {
+    @extend %mt-chromeless-progress;
+    @include mt-spinner(3rem, $contrastedColor);
+  }
+}
+
+.mt-queue__item__data {
+  position: relative;
+
+  display: flex;
+
+  // decorative up arrow
+  &:before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 2rem;
+
+    @include triangle(1.25rem, $baseBgColor, up);
+  }
+}
+
+.mt-queue__item__title {
+  flex: 1;
+  align-self: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: $unitVerticalPadding/2 .5rem;
+
+  font-family: 'Open Sans Condensed', sans-serif;
+}
+
+.mt-queue__item__commands {
+  align-self: stretch;
+
+  display: flex;
+  align-items: stretch;
+}
+
+.mt-queue__item__remove-button {
+  @extend %mt-chromeless-button;
+  padding: 0 .5rem;
+
+  opacity: .1;
+  font-size: 2.5rem;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.mt-search {
+  @include position(absolute, 0px 0px 0px 0px);
+  transform: translateY(-50%);
+
+  background-color: rgba($secondaryBgColor, .8);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+
+  transition-property: transform, opacity;
+  transition-duration: .2s;
+  transition-timing-function: $ease-in-quart;
+
+  .result-state & {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @include mt-media-large-screen {
+    position: static;
+    flex: 5;
+  }
+}
+
+.mt-search__provider {
+  margin: 1rem 1rem 0 1rem;
+}
+
+.mt-search__provider__header {
+  margin-bottom: $unitVerticalPadding / 2;
+  padding-left: .5rem;
+
+  > .title {
+    font-size: 1.25rem;
+  }
+}
+
+.mt-results {
+  @include clearfix;
+
+  .mt-result {
+    width: 100%;
+
+    // more than 1 item per line when more space is available
+    @include mt-media-large-screen {
+      $resultsColumnsCount: 5;
+      width: 100% / $resultsColumnsCount;
+    }
+  }
+}
+
+.mt-result {
+  float: left;
+  padding: 0 .5rem $unitVerticalPadding .5rem;
+  vertical-align: top;
+}
+
+.mt-result__container {
+  @extend %mt-chromeless-button;
+  position: relative;
+  display: block;
+  width: 100%;
+
+  text-align: inherit;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mt-result__add-affordance {
+  position: absolute;
+  top: 0;
+  right: 0;
+  overflow: visible;
+  @include triangle(3rem, $baseBgColor, up-right);
+  z-index: 1;
+
+  &:before {
+    position: absolute;
+    content: '\e803';
+    bottom: .80rem;
+    right: .5rem;
+
+    color: $lightTextColor;
+    opacity: .8;
+    font-size: 1.5rem;
+    font-family: fontello;
+  }
+
+  .mt-result__container:hover & {
+    &:before {
+      color: $contrastedColor;
+      opacity: 1;
+    }
+  }
+}
+
+.mt-result__thumbnail {
+  position: relative;
+  @include mt-fluid-image(.4);
+}
+
+.mt-result__added-confirmation {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 2;
+  transform: translate3d(-100%, 0, 0); // use 3D here to avoid animation flickering in webkit
+
+  opacity: .5;
+  background-color: $baseBgColor;
+  border-radius: 2px 2px 0 0; // nee
+
+  // vertically center the text
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition-property: transform, opacity;
+  transition-duration: $baseTransitionDuration;
+  transition-timing-function: $ease-in-quart;
+
+  > .text {
+    text-align: center;
+  }
+
+  .confirmed & {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.mt-result__data {
+  color: $baseBgColor;
+  background-color: $lightTextColor;
+
+  > .title {
+    padding: $unitVerticalPadding/2 .5rem;
+
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-size: .875rem;
+  }
+}
+
+.mt-debug-bar {
+  position: absolute;
+  z-index: 1000;
+}
+
+.mt-debug-bar__button {
+  font-size: 1rem;
+  line-height: 3;
+  width: 3rem;
+  @extend %mt-chromeless-button;
+
+  &.modal {
+    background-color: #8EC447;
+  }
+
+  &.notifications {
+    background-color: #B94A48;
+  }
+}

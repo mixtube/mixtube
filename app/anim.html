@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--preventing the user to zoom is not really nice but this is to prevent the browser from zooming when an input is focused-->
+    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
+    <title></title>
+    <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
+    <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
+    <link rel="stylesheet" href="styles/css/anim.css" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400'
+          rel='stylesheet'
+          type='text/css'>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <script src="bower_components/zepto/zepto.min.js"></script>
+</head>
+<body ng-app="app" ng-controller="mtBodyCtrl">
+<div class="mt-debug-bar" ng-show="props.showDebugBar">
+    <button class="mt-debug-bar__button modal" ng-click="toggleModal()">
+        M
+    </button>
+    <button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">
+        N
+    </button>
+</div>
+
+<div class="mt-app-overlay" ng-show="props.showModal">
+    <div class="mt-modal">
+        <div class="mt-modal__container">
+            <h2 class="mt-modal__title">The title of the modal</h2>
+
+            <div class="mt-modal__content">
+                <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
+                <!-- where the hidden part of the overflowing zone is never rendered -->
+                <div>
+                    <span ng-repeat="i in [0,1,2,3,4,5,6,7]">Some random content probably very important!
+                    <br>Please be careful with that, if you miss it you miss it</span>
+                </div>
+            </div>
+
+            <div class="mt-modal__commands">
+                <button class="mt-modal__button">Confirm</button>
+                <button class="mt-modal__button secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="video-container" ng-hide="true">
+    <div class="video"></div>
+</div>
+
+<div class="mt-app">
+    <div class="mt-header" mt-search-input>
+        <div class="mt-header__bg"></div>
+        <div class="mt-header__container">
+            <div class="start">
+                <h1 class="mt-header__app-title">
+                    <span class="logo">M</span><span class="remaining">ixtube</span>
+                </h1>
+            </div>
+            <div class="center">
+                <button class="mt-header__play-button" data-mt-icon="&#xe80a">
+                    <span class="mt-replaced-text">Play</span>
+                </button>
+            </div>
+            <div class="end">
+                <!--just padding container to ensure proper centering of header-center -->
+            </div>
+        </div>
+
+        <button class="mt-search-input__button" data-mt-icon="&#xe800">
+            <span class="mt-replaced-text">Search</span>
+        </button>
+
+        <div class="mt-search-input mt-search-input__animation-toggle">
+            <input class="mt-search-input__field" placeholder="Search video" size="30"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+            <div class="mt-search-input__fake-field" data-mt-placeholder="Search video"></div>
+        </div>
+    </div>
+
+    <div class="mt-body">
+
+        <div class="mt-notifications-center">
+
+            <div class="mt-notifications-center__container" ng-show="props.showNotification">
+                <div class="mt-notification error">
+                    <button class="mt-notification__dismiss-button">&times;</button>
+                    <div class="mt-notification__content">
+                        <div class="text">
+                            Some random content probably very important! Please be careful with that, if you miss it you
+                            miss it
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-notifications-center__container" ng-show="showComingNext">
+                <div class="mt-notification">
+                    <button class="mt-notification__dismiss-button">&times;</button>
+                    <div class="mt-notification__content">
+                        <div class="thumbnail">
+                            <div class="mt-notification__image"
+                                 ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg)'}"></div>
+                        </div>
+                        <div class="text">
+                            <div class="mt-coming-next__group">
+                                <div class="mt-coming-next__header">It was:</div>
+                                <div class="mt-coming-next__title">
+                                    Kaaris : "J'ai mis 13ans pour faire un Planète Rap, y'a rien
+                                    d'exceptionnel !"
+                                </div>
+                            </div>
+                            <div class="mt-coming-next__group next">
+                                <div class="mt-coming-next__header">Comming next:</div>
+                                <div class="mt-coming-next__title">Ace Hood - Hustle (with lot of details here)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-queue">
+            <ul>
+                <li class="mt-queue__item" ng-class="{'active': $index === 2, 'broken':  $index === 4}"
+                    ng-repeat="i in ['D874kQpNEpc', 'eU4ZvfkmOck', 'djE-BLrdDDc', 'jb6HZa151s8', 'a35rNEBNiO4', 'URpIzQedQio', '_sV0QuxOHoY']">
+                    <div class="mt-queue__item__thumbnail">
+                        <div ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}"
+                             class="image"></div>
+                        <p ng-show="$index === 4" class="mt-queue__item__broken-message">Couldn't load this video</p>
+
+                        <div class="mt-queue__item__progress" ng-show="$index === 1">
+                            <progress></progress>
+                        </div>
+                    </div>
+                    <div class="mt-queue__item__data">
+                        <p class="mt-queue__item__title">
+                            Rick Ros - I like the strawberry Jam a lot
+                        </p>
+
+                        <div class="mt-queue__item__commands">
+                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801">
+                                <span class="mt-replaced-text">Remove</span>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="mt-search" ng-hide="false">
+            <div class="mt-search__provider" ng-repeat="pname in ['YouTube', 'Vimeo']">
+                <div class="mt-search__provider__header">
+                    <h3 class="title">{{pname}}</h3>
+                </div>
+                <ul class="mt-results">
+                    <li class="mt-result"
+                        ng-repeat="i in ['D874kQpNEpc', 'eU4ZvfkmOck', 'djE-BLrdDDc', 'jb6HZa151s8', 'a35rNEBNiO4', 'URpIzQedQio', '_sV0QuxOHoY']">
+                        <button class="mt-result__container">
+                            <div class="mt-result__add-affordance"></div>
+
+                            <div class="mt-result__thumbnail"
+                                 ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}">
+                                <div class="mt-result__added-confirmation">
+                                    <span class="text">Added to the queue</span>
+                                </div>
+                            </div>
+                            <div class="mt-result__data">
+                                <p class="title">Benard Menez - Ooh ooh ooh Jolie poupee</p>
+                            </div>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    angular.module('app', ['ngAnimate', 'ngTouch']);
+
+    angular.module('app').config(function ($locationProvider) {
+        $locationProvider.html5Mode(true);
+    });
+
+    angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
+
+        $scope.props = {
+            showDebugBar: false,
+            showModal: false,
+            showNotification: false
+        };
+
+        $scope.toggleModal = function () {
+            $scope.props.showModal = !$scope.props.showModal;
+        };
+
+        $scope.toggleNotification = function () {
+            $scope.props.showNotification = !$scope.props.showNotification;
+        };
+
+        $scope.$watch(function () {
+            return $location.search();
+        }, function (newSearch) {
+            $scope.props.showDebugBar = 'debug' in newSearch;
+        });
+    });
+
+    /**
+     * @ngdoc directive
+     * @name mt.directive:mtSearchInput
+     * @restrict A
+     *
+     * @description
+     * A single usage directive that controls the sequencing of search input animation.
+     *
+     * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
+     * can't be guaranteed by AngularJS (because of the digestion loop).
+     * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
+     * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
+     */
+    angular.module('app').directive('mtSearchInput', function ($animate) {
+        return {
+            restrict: 'A',
+            link: function (iScope, iElement) {
+                var searchInput = angular.element(iElement[0].querySelector('.mt-search-input'));
+                var trigger = angular.element(iElement[0].querySelector('.mt-search-input__button'));
+                var inputElmt = searchInput[0].querySelector('input');
+
+                var hide = true;
+
+                function sync() {
+                    $animate[hide ? 'addClass' : 'removeClass'](searchInput, 'ng-hide');
+                    inputElmt[hide ? 'blur' : 'focus']();
+                }
+
+                trigger.on('click', function () {
+                    hide = !hide;
+                    sync();
+                });
+
+                // sync at first rendering
+                sync();
+            }
+        }
+    });
+
+    var $searchInput = $('.mt-search-input__field');
+    var $body = $('body');
+
+    //    document.querySelector('.mt-search-input__button').addEventListener('click', function () {
+    //        $searchInput.focus();
+    //        $body.addClass('search-state');
+    //    });
+
+    //    $searchInput.on('blur', function () {
+    //        $body.removeClass('search-state end');
+    //    });
+
+    //    $searchInput.on('input', function () {
+    //        if ($searchInput.val()) {
+    //            $body.addClass('result-state');
+    //        } else {
+    //            $body.removeClass('result-state');
+    //        }
+    //    });
+
+    //    $body.on('keypress', function (evt) {
+    //        var char = String.fromCharCode(evt.which);
+    //        if (char === 'm') {
+    //            $body.toggleClass('modal-state');
+    //        } else if (char === 'a') {
+    //            $body.toggleClass('alert-state');
+    //        } else if (char === 'p') {
+    //            $body.toggleClass('activity-state');
+    //        }
+    //    });
+
+    $body.toggleClass('activity-state');
+
+    //    $body.on('touchstart', function() {
+    //        $body.toggleClass('modal-state');
+    //    });
+    //    bodyElmt.addEventListener('touchstart', function () {
+    //        bodyElmt.classList.toggle('alert-state');
+    //    bodyElmt.classList.toggle('modal-state');
+    //    });
+
+    var searchElmt = document.querySelector('.mt-search');
+    searchElmt.addEventListener('click', function (evt) {
+        evt.preventDefault();
+        var current = evt.target;
+        while (current && current != searchElmt) {
+            if (current.classList.contains('mt-result')) {
+                var resultCardElmt = current;
+                resultCardElmt.classList.add('confirmed');
+                setTimeout(function () {
+                    resultCardElmt.classList.remove('confirmed');
+                }, 1500);
+                break;
+            }
+            current = current.parentNode;
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -3,6 +3,8 @@
   "css_prefix_text": "mt-icon-",
   "css_use_suffix": false,
   "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
   "glyphs": [
     {
       "uid": "7222571caa5c15f83dcfd447c58d68d9",
@@ -13,7 +15,7 @@
     {
       "uid": "c759418c008e9562944080fee617fc76",
       "css": "cancel-circled",
-      "code": 59394,
+      "code": 59393,
       "src": "entypo"
     },
     {
@@ -23,39 +25,9 @@
       "src": "entypo"
     },
     {
-      "uid": "1256e3054823e304d7e452a589cf8bb8",
-      "css": "minus",
-      "code": 59403,
-      "src": "entypo"
-    },
-    {
-      "uid": "005a38f6af74b31aeb817fedb09d2175",
-      "css": "keyboard",
-      "code": 59396,
-      "src": "entypo"
-    },
-    {
-      "uid": "2626e3a1bbcd90e45849af3b58a1d594",
-      "css": "trash",
-      "code": 59397,
-      "src": "entypo"
-    },
-    {
-      "uid": "29e7f6072d5935d7818204d9b088508b",
-      "css": "block",
-      "code": 59400,
-      "src": "entypo"
-    },
-    {
-      "uid": "884cfc3e6e2d456dd2a2ca0dbb9e6337",
-      "css": "left-open-big",
-      "code": 59398,
-      "src": "entypo"
-    },
-    {
-      "uid": "004882ab2d5c418c5b2060e80596279b",
-      "css": "right-open-big",
-      "code": 59393,
+      "uid": "39a5a0d7ce8342d149373b2ce219503a",
+      "css": "alert",
+      "code": 59394,
       "src": "entypo"
     },
     {
