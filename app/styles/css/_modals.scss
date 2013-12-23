@@ -12,7 +12,6 @@
     width: 100%;
     z-index: 500;
 
-    opacity: 1;
     background-color: $overlayBackgroundColor;
 
     // propagate the "flexibility" in column direction so that we can do clever things with modals sizing
@@ -21,11 +20,11 @@
     align-items: center;
     justify-content: center;
 
-    transition: opacity $transitionDuration $ease-in-quart;
+    transition: opacity $transitionDuration linear;
 
     // shows the overlay
     &.ng-hide {
-      opacity: .5;
+      opacity: 0;
     }
 
     &.ng-hide-add, &.ng-hide-remove {
@@ -40,10 +39,13 @@
     display: flex;
     flex-direction: column;
 
-    transition: transform $transitionDuration $ease-in-quart;
+    transition-property: transform, opacity;
+    transition-duration: $transitionDuration;
+    transition-timing-function: $ease-in-quart, linear;
 
     .mt-app-overlay.ng-hide & {
-      transform: translateY(-200%);
+      transform: translateY(-100%);
+      opacity: 0;
     }
   }
 

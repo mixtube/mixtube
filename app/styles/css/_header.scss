@@ -6,7 +6,7 @@
 
   $headerHeight: 4rem;
   $searchInputPadding: 0 3rem 0 .5rem;
-  $searchFieldAnimationDuration: $baseTransitionDuration * 2;
+  $searchFieldAnimationDuration: $baseTransitionDuration;
 
   .mt-header {
     position: relative;
@@ -120,6 +120,10 @@
 
     color: $lightTextColor;
     font-size: 2.5rem;
+
+    &.ng-click-active {
+      transform: scale(.9);
+    }
   }
 
   // the container, will be translated but not animated

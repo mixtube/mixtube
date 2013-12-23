@@ -31,13 +31,14 @@
     transition-timing-function: $ease-in-quart;
 
     // shows the overlay
-    &.ng-hide {
+    &.ng-enter, &.ng-leave-active {
       transform: translateX(100%);
       opacity: .5;
     }
 
-    &.ng-hide-add, &.ng-hide-remove {
-      display: block !important;
+    &.ng-enter.ng-enter-active {
+      transform: translateX(0);
+      opacity: 1;
     }
   }
 

@@ -21,6 +21,6 @@
     "grunt-rev": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-concat": "latest",
-    "grunt-autoprefixer": "~0.4.1"
+    "grunt-autoprefixer": "latest"
   }
 }

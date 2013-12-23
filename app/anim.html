@@ -13,16 +13,23 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
-    <script src="bower_components/zepto/zepto.min.js"></script>
 </head>
-<body ng-app="app" ng-controller="mtBodyCtrl">
+<body ng-app="app" ng-controller="mtBodyCtrl" class="activity-state">
 <div class="mt-debug-bar" ng-show="props.showDebugBar">
-    <button class="mt-debug-bar__button modal" ng-click="toggleModal()">
-        M
-    </button>
-    <button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">
-        N
-    </button>
+    <div class="mt-debug-bar__container">
+        <button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">
+            Ms
+        </button>
+        <button class="mt-debug-bar__button modal" ng-click="toggleModal(7)">
+            Ml
+        </button>
+        <button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">
+            Ne
+        </button>
+        <button class="mt-debug-bar__button notifications" ng-click="toggleComingNext()">
+            Ncn
+        </button>
+    </div>
 </div>
 
 <div class="mt-app-overlay" ng-show="props.showModal">
@@ -34,7 +41,7 @@
                 <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
                 <!-- where the hidden part of the overflowing zone is never rendered -->
                 <div>
-                    <span ng-repeat="i in [0,1,2,3,4,5,6,7]">Some random content probably very important!
+                    <span ng-repeat="i in props.modalLines">Some random content probably very important!
                     <br>Please be careful with that, if you miss it you miss it</span>
                 </div>
             </div>
@@ -47,7 +54,7 @@
     </div>
 </div>
 
-<div class="video-container" ng-hide="true">
+<div class="video-container" ng-hide="false">
     <div class="video"></div>
 </div>
 
@@ -86,7 +93,7 @@
 
         <div class="mt-notifications-center">
 
-            <div class="mt-notifications-center__container" ng-show="props.showNotification">
+            <div class="mt-notifications-center__container" ng-if="props.showNotification">
                 <div class="mt-notification error">
                     <button class="mt-notification__dismiss-button">&times;</button>
                     <div class="mt-notification__content">
@@ -98,7 +105,7 @@
                 </div>
             </div>
 
-            <div class="mt-notifications-center__container" ng-show="showComingNext">
+            <div class="mt-notifications-center__container" ng-if="props.showComingNext">
                 <div class="mt-notification">
                     <button class="mt-notification__dismiss-button">&times;</button>
                     <div class="mt-notification__content">
@@ -194,12 +201,18 @@
             showNotification: false
         };
 
-        $scope.toggleModal = function () {
+        $scope.toggleModal = function (lineCount) {
+            var lines = [0, 1, 2, 3, 4, 5, 6, 7];
+            $scope.props.modalLines = lines.slice(0, lineCount);
             $scope.props.showModal = !$scope.props.showModal;
         };
 
         $scope.toggleNotification = function () {
             $scope.props.showNotification = !$scope.props.showNotification;
+        };
+
+        $scope.toggleComingNext = function () {
+            $scope.props.showComingNext = !$scope.props.showComingNext;
         };
 
         $scope.$watch(function () {
@@ -226,6 +239,7 @@
         return {
             restrict: 'A',
             link: function (iScope, iElement) {
+                var ACTIVE_CLASS_NAME = 'ng-click-active';
                 var searchInput = angular.element(iElement[0].querySelector('.mt-search-input'));
                 var trigger = angular.element(iElement[0].querySelector('.mt-search-input__button'));
                 var inputElmt = searchInput[0].querySelector('input');
@@ -237,72 +251,23 @@
                     inputElmt[hide ? 'blur' : 'focus']();
                 }
 
-                trigger.on('click', function () {
-                    hide = !hide;
-                    sync();
-                });
+                // on mobile, focusing a field programatically only works from a click event handler dispatched directly by the browser
+                trigger
+                        .on('click', function () {
+                            hide = !hide;
+                            sync();
+                        })
+                        // simulates ngTouch behavior for active class
+                        .on('touchstart', function () {
+                            trigger.addClass(ACTIVE_CLASS_NAME);
+                        })
+                        .on('touchend touchmove touchcancel', function () {
+                            trigger.removeClass(ACTIVE_CLASS_NAME);
+                        });
 
                 // sync at first rendering
                 sync();
             }
-        }
-    });
-
-    var $searchInput = $('.mt-search-input__field');
-    var $body = $('body');
-
-    //    document.querySelector('.mt-search-input__button').addEventListener('click', function () {
-    //        $searchInput.focus();
-    //        $body.addClass('search-state');
-    //    });
-
-    //    $searchInput.on('blur', function () {
-    //        $body.removeClass('search-state end');
-    //    });
-
-    //    $searchInput.on('input', function () {
-    //        if ($searchInput.val()) {
-    //            $body.addClass('result-state');
-    //        } else {
-    //            $body.removeClass('result-state');
-    //        }
-    //    });
-
-    //    $body.on('keypress', function (evt) {
-    //        var char = String.fromCharCode(evt.which);
-    //        if (char === 'm') {
-    //            $body.toggleClass('modal-state');
-    //        } else if (char === 'a') {
-    //            $body.toggleClass('alert-state');
-    //        } else if (char === 'p') {
-    //            $body.toggleClass('activity-state');
-    //        }
-    //    });
-
-    $body.toggleClass('activity-state');
-
-    //    $body.on('touchstart', function() {
-    //        $body.toggleClass('modal-state');
-    //    });
-    //    bodyElmt.addEventListener('touchstart', function () {
-    //        bodyElmt.classList.toggle('alert-state');
-    //    bodyElmt.classList.toggle('modal-state');
-    //    });
-
-    var searchElmt = document.querySelector('.mt-search');
-    searchElmt.addEventListener('click', function (evt) {
-        evt.preventDefault();
-        var current = evt.target;
-        while (current && current != searchElmt) {
-            if (current.classList.contains('mt-result')) {
-                var resultCardElmt = current;
-                resultCardElmt.classList.add('confirmed');
-                setTimeout(function () {
-                    resultCardElmt.classList.remove('confirmed');
-                }, 1500);
-                break;
-            }
-            current = current.parentNode;
         }
     });
 </script>
