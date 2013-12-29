@@ -25,7 +25,7 @@
     background-color: $baseBgColor;
     opacity: 0; // animated
 
-    transition: opacity $baseTransitionDuration $ease-in-quart;
+    transition: opacity $baseTransitionDuration $easeInOut;
 
     .activity-state & {
       opacity: 1; // animated
@@ -208,7 +208,7 @@
       @include mt-placeholder;
     }
 
-    transition: transform $searchFieldAnimationDuration $ease-in-quart;
+    transition: transform $searchFieldAnimationDuration $easeInOut;
 
     .mt-search-input__animation-toggle.ng-hide & {
       transform: translateX(100%);

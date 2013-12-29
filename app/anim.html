@@ -77,16 +77,19 @@
             </div>
         </div>
 
-        <button class="mt-search-input__button" data-mt-icon="&#xe800">
+        <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800">
             <span class="mt-replaced-text">Search</span>
         </button>
 
-        <div class="mt-search-input mt-search-input__animation-toggle">
-            <input class="mt-search-input__field" placeholder="Search video" size="30"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <!-- use form element so that we can intercept submit event triggered by virtual keyboard in mobile browsers -->
+        <form class="mt-search-input mt-search-input__animation-toggle mt-js-search-input__form">
+            <!-- we could use search input type but we actually don't want the "services" brought by it (cancel button...) -->
+            <input ng-model="props.searchTerm" class="mt-search-input__field mt-js-search-input__field"
+                   placeholder="Search video" size="30" autocomplete="off" autocorrect="off" autocapitalize="off"
+                   spellcheck="false">
 
             <div class="mt-search-input__fake-field" data-mt-placeholder="Search video"></div>
-        </div>
+        </form>
     </div>
 
     <div class="mt-body">
@@ -159,7 +162,7 @@
                 </li>
             </ul>
         </div>
-        <div class="mt-search" ng-hide="false">
+        <div class="mt-search" ng-show="props.searchTerm">
             <div class="mt-search__provider" ng-repeat="pname in ['YouTube', 'Vimeo']">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pname}}</h3>
@@ -236,20 +239,32 @@
      * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
      */
     angular.module('app').directive('mtSearchInput', function ($animate) {
+
+        /**
+         * @const
+         * @type {string}
+         */
+        var NG_ACTIVE_CLASS_NAME = 'ng-click-active';
+
         return {
             restrict: 'A',
             link: function (iScope, iElement) {
-                var ACTIVE_CLASS_NAME = 'ng-click-active';
-                var searchInput = angular.element(iElement[0].querySelector('.mt-search-input'));
-                var trigger = angular.element(iElement[0].querySelector('.mt-search-input__button'));
-                var inputElmt = searchInput[0].querySelector('input');
+
+                var searchInputForm = angular.element(iElement[0].querySelector('.mt-js-search-input__form'));
+                var trigger = angular.element(iElement[0].querySelector('.mt-js-search-input__button'));
+                var inputElmt = searchInputForm[0].querySelector('.mt-js-search-input__field');
 
                 var hide = true;
 
                 function sync() {
-                    $animate[hide ? 'addClass' : 'removeClass'](searchInput, 'ng-hide');
+                    $animate[hide ? 'addClass' : 'removeClass'](searchInputForm, 'ng-hide');
                     inputElmt[hide ? 'blur' : 'focus']();
                 }
+
+                // we need to blur the field on form submit to hide the virtual keyboard on mobile
+                searchInputForm.on('submit', function () {
+                    inputElmt.blur();
+                });
 
                 // on mobile, focusing a field programatically only works from a click event handler dispatched directly by the browser
                 trigger
@@ -257,12 +272,12 @@
                             hide = !hide;
                             sync();
                         })
-                        // simulates ngTouch behavior for active class
+                    // simulates ngTouch behavior for active class
                         .on('touchstart', function () {
-                            trigger.addClass(ACTIVE_CLASS_NAME);
+                            trigger.addClass(NG_ACTIVE_CLASS_NAME);
                         })
                         .on('touchend touchmove touchcancel', function () {
-                            trigger.removeClass(ACTIVE_CLASS_NAME);
+                            trigger.removeClass(NG_ACTIVE_CLASS_NAME);
                         });
 
                 // sync at first rendering

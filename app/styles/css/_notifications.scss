@@ -28,7 +28,7 @@
 
     transition-property: transform, opacity;
     transition-duration: $baseTransitionDuration;
-    transition-timing-function: $ease-in-quart;
+    transition-timing-function: $easeInOut;
 
     // shows the overlay
     &.ng-enter, &.ng-leave-active {

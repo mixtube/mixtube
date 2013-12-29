@@ -4,6 +4,7 @@ $unitVerticalPadding: $lineHeight * 1em;
 $baseTransitionDuration: .2s;
 $overlayOpacity: .85;
 
+$darkestBgColor: #262626;
 $baseBgColor: #2D2D2E;
 $secondaryBgColor: #636466;
 $contrastedColor: #8EC447;
@@ -12,3 +13,5 @@ $darkTextColor: #96D3D4;
 $infoBgColor: #5F7BCE;
 $errorBgColor: #BA3B26;
 $overlayBackgroundColor: rgba(0, 0, 0, $overlayOpacity);
+
+$easeInOut: cubic-bezier(.8, 0, .2, 1);

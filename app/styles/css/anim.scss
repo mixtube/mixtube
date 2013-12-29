@@ -76,27 +76,32 @@ body {
   position: relative;
   flex: 1;
 
+  // use flex here only to leverage the align items stretch behavior for children so that they fill the height
   display: flex;
 }
 
 .mt-queue {
-  flex: 1;
-  align-self: stretch;
+  width: 100%;
   transform: translateX(-50%);
 
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
   opacity: 0;
+  background-color: $darkestBgColor;
 
   transition-property: transform, opacity;
   transition-duration: .2s;
-  transition-timing-function: $ease-in-quart;
+  transition-timing-function: $easeInOut;
   transition-delay: $baseTransitionDuration;
 
   .activity-state & {
     transform: translateX(0);
     opacity: 1;
+  }
+
+  @include mt-media-large-screen {
+    width: (100%/6);
   }
 }
 
@@ -213,25 +218,28 @@ body {
 
 .mt-search {
   @include position(absolute, 0px 0px 0px 0px);
-  transform: translateY(-50%);
 
   background-color: rgba($secondaryBgColor, .8);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  opacity: 0;
 
   transition-property: transform, opacity;
   transition-duration: .2s;
-  transition-timing-function: $ease-in-quart;
-
-  .result-state & {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  transition-timing-function: $easeInOut, linear;
 
   @include mt-media-large-screen {
-    position: static;
-    flex: 5;
+    position: static; // when there is available size put the element back in the flow to create a columns layout
+    width: (5 * 100%/6);
+  }
+
+  &.ng-hide {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  // don't hide it straight: wait for the end of the animation
+  &.ng-hide-add, &.ng-hide-remove {
+    display: block !important;
   }
 }
 
@@ -331,7 +339,7 @@ body {
 
   transition-property: transform, opacity;
   transition-duration: $baseTransitionDuration;
-  transition-timing-function: $ease-in-quart;
+  transition-timing-function: $easeInOut, linear;
 
   > .text {
     text-align: center;
@@ -363,6 +371,10 @@ body {
   display: flex;
   align-items: center;
   pointer-events: none;
+}
+
+.mt-debug-bar__container {
+  pointer-events: auto;
 }
 
 .mt-debug-bar__button {

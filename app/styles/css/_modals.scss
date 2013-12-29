@@ -41,7 +41,7 @@
 
     transition-property: transform, opacity;
     transition-duration: $transitionDuration;
-    transition-timing-function: $ease-in-quart, linear;
+    transition-timing-function: $easeInOut, linear;
 
     .mt-app-overlay.ng-hide & {
       transform: translateY(-100%);
