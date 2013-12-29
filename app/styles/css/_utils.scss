@@ -96,7 +96,7 @@
   width: $size;
   height: $size;
   border-radius: 50%;
-  border: (4rem/16) solid transparent;
+  border: (4rem/$baseFontSizeUnitless) solid transparent;
   border-top-color: $color;
 
   // this animation key frames are defined in the module main mixin (see above)

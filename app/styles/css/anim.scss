@@ -12,15 +12,16 @@
 
 html {
   height: 100%;
+
+  font-size: $baseFontSizeUnitless * 1px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  color: $lightTextColor;
 }
 
 body {
   height: 100%;
-
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 300;
   line-height: $lineHeight;
-  color: $lightTextColor;
 }
 
 .video-container {
@@ -211,7 +212,11 @@ body {
   opacity: .1;
   font-size: 2.5rem;
 
-  &:hover {
+  &.ng-click-active {
+    transform: scale(.9);
+  }
+
+  .mt-mouse-based-interaction &:hover {
     opacity: 1;
   }
 }
@@ -307,11 +312,11 @@ body {
     font-family: fontello;
   }
 
-  .mt-result__container:hover & {
-    &:before {
-      color: $contrastedColor;
-      opacity: 1;
-    }
+  // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
+  // state remains after a tap until the next tap)
+  .mt-mouse-based-interaction .mt-result__container:hover &:before {
+    color: $contrastedColor;
+    opacity: 1;
   }
 }
 
@@ -326,15 +331,14 @@ body {
   bottom: 0;
   width: 100%;
   z-index: 2;
-  transform: translate3d(-100%, 0, 0); // use 3D here to avoid animation flickering in webkit
+  transform: translate3d(0, 0, 0); // use 3D here to avoid animation flickering in webkit
 
-  opacity: .5;
   background-color: $baseBgColor;
-  border-radius: 2px 2px 0 0; // nee
+  border-radius: 2px 2px 0 0;
 
   // vertically center the text
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
 
   transition-property: transform, opacity;
@@ -342,12 +346,36 @@ body {
   transition-timing-function: $easeInOut, linear;
 
   > .text {
+    padding: .25rem;
     text-align: center;
+    overflow: hidden;
+
+    // a very cheap element query to display a shorter confirmation message on larger screen when the search result screen
+    // is made of 5 columns which doesn't give much place to the message
+    @include mt-media-large-screen {
+
+      font-size: (14rem/$baseFontSizeUnitless);
+
+      &:before {
+        content: attr(mt-short-text);
+      }
+
+      > .mt-replaced-text {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+    }
   }
 
-  .confirmed & {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
+  // don't hide it straight: wait for the end of the animation
+  &.ng-hide-add, &.ng-hide-remove {
+    display: flex !important;
+  }
+
+  &.ng-hide {
+    transform: translate3d(-100%, 0, 0);
+    opacity: .5;
   }
 }
 
@@ -389,5 +417,9 @@ body {
 
   &.notifications {
     background-color: #B94A48;
+  }
+
+  &.search {
+    background-color: #5d61b9;
   }
 }

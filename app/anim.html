@@ -7,14 +7,15 @@
     <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
     <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
     <link rel="stylesheet" href="styles/css/anim.css" type="text/css">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400'
-          rel='stylesheet'
-          type='text/css'>
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400"
+          rel="stylesheet"
+          type="text/css">
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
 </head>
-<body ng-app="app" ng-controller="mtBodyCtrl" class="activity-state">
+<body ng-app="app" ng-controller="mtBodyCtrl" class="activity-state"
+      mt-mouse-interaction-detection="mt-mouse-based-interaction">
 <div class="mt-debug-bar" ng-show="props.showDebugBar">
     <div class="mt-debug-bar__container">
         <button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">
@@ -28,6 +29,9 @@
         </button>
         <button class="mt-debug-bar__button notifications" ng-click="toggleComingNext()">
             Ncn
+        </button>
+        <button class="mt-debug-bar__button search" ng-click="toggleSearch()">
+            S
         </button>
     </div>
 </div>
@@ -154,7 +158,7 @@
                         </p>
 
                         <div class="mt-queue__item__commands">
-                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801">
+                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801" ng-click="dummy()">
                                 <span class="mt-replaced-text">Remove</span>
                             </button>
                         </div>
@@ -162,21 +166,24 @@
                 </li>
             </ul>
         </div>
-        <div class="mt-search" ng-show="props.searchTerm">
+        <div class="mt-search" ng-show="props.showSearch">
             <div class="mt-search__provider" ng-repeat="pname in ['YouTube', 'Vimeo']">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pname}}</h3>
                 </div>
                 <ul class="mt-results">
-                    <li class="mt-result"
+                    <li class="mt-result" ng-controller="mtSearchResultCtrl"
                         ng-repeat="i in ['D874kQpNEpc', 'eU4ZvfkmOck', 'djE-BLrdDDc', 'jb6HZa151s8', 'a35rNEBNiO4', 'URpIzQedQio', '_sV0QuxOHoY']">
-                        <button class="mt-result__container">
+                        <button class="mt-result__container" ng-click="addItemToQueue()">
                             <div class="mt-result__add-affordance"></div>
 
                             <div class="mt-result__thumbnail"
                                  ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}">
-                                <div class="mt-result__added-confirmation">
-                                    <span class="text">Added to the queue</span>
+                                <div class="mt-result__added-confirmation"
+                                     ng-show="searchResultProps.showAddedConfirmation">
+                                    <div class="text" mt-short-text="Video added to the queue">
+                                        <span class="mt-replaced-text">Video added to the queue. 5 remaining tunes before yours to be played. Enjoy!</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mt-result__data">
@@ -196,12 +203,26 @@
         $locationProvider.html5Mode(true);
     });
 
+    angular.module('app').controller('mtSearchResultCtrl', function ($scope, $timeout) {
+
+        $scope.searchResultProps = {showAddedConfirmation: false, tmoPromise: null};
+
+        $scope.addItemToQueue = function () {
+            $scope.searchResultProps.showAddedConfirmation = true;
+            $timeout.cancel($scope.searchResultProps.tmoPromise);
+            $scope.searchResultProps.tmoPromise = $timeout(function () {
+                $scope.searchResultProps.showAddedConfirmation = false;
+            }, 4000);
+        }
+    });
+
     angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
 
         $scope.props = {
             showDebugBar: false,
             showModal: false,
-            showNotification: false
+            showNotification: false,
+            showSearch: false
         };
 
         $scope.toggleModal = function (lineCount) {
@@ -218,11 +239,58 @@
             $scope.props.showComingNext = !$scope.props.showComingNext;
         };
 
+        $scope.toggleSearch = function () {
+            $scope.props.showSearch = !$scope.props.showSearch;
+        };
+
         $scope.$watch(function () {
             return $location.search();
         }, function (newSearch) {
             $scope.props.showDebugBar = 'debug' in newSearch;
         });
+
+        $scope.$watch('props.searchTerm', function (newVal) {
+            $scope.props.showSearch = !!newVal;
+        });
+    });
+
+    /**
+     * @ngdoc directive
+     * @name mt.directive:mtMouseInteractionDetection
+     * @restrict A
+     *
+     * Adds the specified class to the element when a mouse based interaction is detected.
+     *
+     * The detection mechanism is inspired by https://github.com/stucox/Modernizr/blob/hover/feature-detects/device/hover.js
+     * where we try to detect two consecutive "mousemove" events without an intervening "mousedown" event. This sequence
+     * is not possible with a touch (only) interaction based device.
+     */
+    angular.module('app').directive('mtMouseInteractionDetection', function () {
+        return {
+            restrict: 'A',
+            link: function (iScope, iElement, iAttrs) {
+
+                var className = iAttrs.mtMouseInteractionDetection;
+                if (!className) throw new Error('mtMouseInteractionDetection require an attribute value');
+
+                var mouseMoveCount = 0;
+
+                function mouseDownHandler() {
+                    mouseMoveCount = 0;
+                }
+
+                iElement
+                        .on('mousedown', mouseDownHandler)
+                        .on('mousemove', function mouseMoveHandler() {
+                            if (++mouseMoveCount > 1) {
+                                iElement
+                                        .off('mousedown', mouseDownHandler)
+                                        .off('mousemove', mouseMoveHandler);
+                                iElement.addClass(className);
+                            }
+                        });
+            }
+        };
     });
 
     /**
