@@ -466,8 +466,8 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
             element = element.eq(0);
 
             var heightFrom = 0;
-            // we get the height at after insertion
-            var heightTo = element[0].clientHeight;
+            // we get the height at after insertion with floating point precision
+            var heightTo = element[0].getBoundingClientRect().height;
 
             var transformFrom = 'translateX(-100%)';
             var transformTo = '';
