@@ -164,7 +164,8 @@
                         </p>
 
                         <div class="mt-queue__item__commands">
-                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801" ng-click="dummy()">
+                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801"
+                                    ng-click="removeQueueItem(i)">
                                 <span class="mt-replaced-text">Remove</span>
                             </button>
                         </div>
@@ -264,6 +265,10 @@ angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
 
     $scope.insertQueueItem = function () {
         _props.queueItems.splice(1, 0, _props.queueItemsSrc[_props.queueSize++]);
+    };
+
+    $scope.removeQueueItem = function (queueItem) {
+        _props.queueItems.splice(_props.queueItems.indexOf(queueItem), 1);
     };
 
     $scope.$watch(function () {
@@ -414,48 +419,55 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
      */
     var TRANSFORM_PROP_NAME = typeof document.createElement('div').style['-webkit-transform'] !== 'undefined' ? '-webkit-transform' : 'transform';
 
-    // reset css properties to default values
-    var FINAL = {};
-    FINAL['transition'] = '';
-    FINAL['height'] = '';
-    FINAL[TRANSFORM_PROP_NAME] = '';
+    function escapePropName(propName) {
+        if (propName === 'transform') {
+            return TRANSFORM_PROP_NAME;
+        }
+        return propName;
+    }
 
-    function transition(element, entering, heightFrom, heightTo, transformFrom, transformTo, done) {
+    function extendWithEscapedCss(escaped, raw) {
+        for (var propName in raw) {
+            escaped[escapePropName(propName)] = raw[propName];
+        }
 
-        var transitionHeight = {};
-        transitionHeight['transition-duration'] = '.175s';
-        transitionHeight['transition-property'] = 'height';
-        transitionHeight['height'] = heightTo + 'px';
+        return escaped;
+    }
 
-        // then translate to put the item inside the view port
-        var transitionTransform = {};
-        transitionTransform['transition-duration'] = '.175s';
-        transitionTransform['transition-property'] = TRANSFORM_PROP_NAME;
-        transitionTransform[TRANSFORM_PROP_NAME] = transformTo;
+    function transition(element, initial, stages, final, done) {
 
-        var initial = {};
-        initial[TRANSFORM_PROP_NAME] = transformFrom;
+        if (angular.isFunction(final)) {
+            done = final;
+            final = undefined;
+        }
 
         var sequence = Object.create(Sequence);
-
-        var stages = [];
-        // if the element is not at the end we need to animate the height
-        if (element.next().length) {
-            initial['height'] = heightFrom + 'px';
-            stages.push(transitionHeight);
-        }
-        stages.push(transitionTransform);
-
-        if (!entering) {
-            stages.reverse();
-        }
-
         stages.forEach(function (stage) {
-            sequence.then(stage);
+
+            var propsNames = Object.keys(stage);
+
+            // transition "settings"
+            var css = {
+                'transition-property': propsNames.map(escapePropName).join(','),
+                'transition-duration': '.175s'
+            };
+            // add escaped css properties
+            extendWithEscapedCss(css, stage);
+
+            // add it to the sequence
+            sequence.then(css);
         });
 
-        element.css(initial);
-        sequence.run(element, done);
+        element.css(extendWithEscapedCss({}, initial));
+        sequence.run(element, function () {
+            // remove animation settings
+            var css = {'transition-property': '', 'transition-duration': ''};
+            if (final) {
+                extendWithEscapedCss(css, final)
+            }
+            element.css(css);
+            done();
+        });
     }
 
     return {
@@ -465,26 +477,34 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
             // we might get a comment node as well here so we need to filter only the element
             element = element.eq(0);
 
-            var heightFrom = 0;
-            // we get the height at after insertion with floating point precision
-            var heightTo = element[0].getBoundingClientRect().height;
+            var initial = {transform: 'translateX(-100%)'};
+            var stages = [
+                {transform: ''}
+            ];
 
-            var transformFrom = 'translateX(-100%)';
-            var transformTo = '';
-
-            transition(element, true, heightFrom, heightTo, transformFrom, transformTo, done);
-
-            return function () {
-                element.css(FINAL);
+            // if the element is not at the end we need to animate the height
+            if (element.next().length) {
+                initial.height = 0;
+                // we get the height after insertion with floating point precision
+                stages.unshift({height: element[0].getBoundingClientRect().height + 'px'})
             }
+
+            transition(element, initial, stages, {height: '', transform: ''}, done);
         },
 
         leave: function (element, done) {
+            element = element.eq(0);
 
-        },
+            var initial = {transform: ''};
+            var stages = [
+                {transform: 'translateX(-100%)'}
+            ];
 
-        move: function (element, done) {
-
+            if (element.next().length) {
+                initial.height = element[0].getBoundingClientRect().height + 'px';
+                stages.push({height: 0});
+            }
+            transition(element, initial, stages, done);
         }
     };
 });

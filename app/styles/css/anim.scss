@@ -116,6 +116,7 @@ body {
 
 .mt-queue__item {
   @include queue-item-color($baseBgColor);
+  overflow: hidden;
 
   &.active {
     @include queue-item-color($contrastedColor);
