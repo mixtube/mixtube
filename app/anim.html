@@ -388,8 +388,8 @@ angular.module('app').directive('mtSearchInput', function ($animate) {
  * @description
  * A animation tailored for queue's items (enter and leave events).
  *
- * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CS based transition and JS sequencing.
- * The animation framework here is just used as an "event" system to be notified of new element insertion / removal.
+ * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CSS transitions and JS sequencing.
+ * The animation framework here is just used as an "event" system for us to be notified of new element insertion / removal.
  */
 angular.module('app').animation('.mt-js-queue__item__animation-repeat', function ($window) {
 
@@ -417,7 +417,7 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
         end: function (element, doneCallback) {
             var sequence = this;
 
-            // defined and execute the animation loop
+            // defined and execute the sequencing loop
             (function runNextStage() {
                 var stage = sequence._stages.shift();
 
@@ -467,17 +467,17 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
         element = element.eq(0);
 
         // if the element is not at the end we need to animate the height too
-        var requiresHeightAnimation = element.next().length;
+        var requiresHeightTransition = element.next().length;
 
         var nominalHeight = null;
-        if (requiresHeightAnimation) {
+        if (requiresHeightTransition) {
             // we get the (floating point precision) height value just after insertion
             nominalHeight = element[0].getBoundingClientRect().height;
         }
 
         return {
             element: element,
-            requiresHeightAnimation: requiresHeightAnimation,
+            requiresHeightTransition: requiresHeightTransition,
             nominalHeight: nominalHeight
         };
     }
@@ -491,7 +491,7 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
             var ts = Object.create(TransitionsSequence);
 
             ts.begin().addClass('slidein-start');
-            if (params.requiresHeightAnimation) {
+            if (params.requiresHeightTransition) {
                 ts.addClass('grow-start'); // part of the begin stage
 
                 // next stage
@@ -512,14 +512,14 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
             var ts = Object.create(TransitionsSequence);
 
             ts.begin().addClass('slideout-start');
-            if (params.requiresHeightAnimation) {
+            if (params.requiresHeightTransition) {
                 ts.addClass('shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
             }
 
             ts.then().addClass('slideout slideout-end');
 
             ts.then().removeClass('slideout slideout-start');
-            if (params.requiresHeightAnimation) {
+            if (params.requiresHeightTransition) {
                 // reset the height and let the CSS magic happen
                 ts.css('height', '').addClass('shrink shrink-end'); // part of the previous stage
             }
@@ -529,7 +529,7 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
         },
 
         move: function (element, done) {
-            // move doesn't really make sense for the queue animation
+            // move doesn't really make sense for the queue's animation
             done();
         }
     };

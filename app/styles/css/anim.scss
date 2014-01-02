@@ -127,7 +127,7 @@ body {
     @include queue-item-color($errorBgColor);
   }
 
-  // js based animation but relies on the CSS classes bellow
+  // js based animation but relies on transitions triggered by the CSS classes bellow
   &.mt-js-queue__item__animation-repeat {
 
     &.grow, &.shrink {
@@ -143,7 +143,7 @@ body {
     }
 
     &.grow-end {
-      // helped by JS during the animation
+      // helped by JS during the transition
       height: auto;
     }
 
@@ -156,7 +156,7 @@ body {
     }
 
     &.shrink-start {
-      // helped by JS during the animation
+      // helped by JS during the transition
       height: auto;
     }
 
