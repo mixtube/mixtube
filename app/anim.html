@@ -146,9 +146,8 @@
 
         <div class="mt-queue">
             <ul>
-                <li class="mt-queue__item mt-js-queue__item__animation-repeat"
-                    ng-class="{'active': $index === 2, 'broken':  $index === 4}"
-                    ng-repeat="i in props.queueItems">
+                <li class="mt-queue__item mt-js-queue__item__animation-repeat" ng-repeat="i in props.queueItems"
+                    ng-class="{'active': $index === 2, 'broken':  $index === 4}">
                     <div class="mt-queue__item__thumbnail">
                         <div ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}"
                              class="image"></div>
@@ -382,129 +381,156 @@ angular.module('app').directive('mtSearchInput', function ($animate) {
     }
 });
 
-angular.module('app').animation('.mt-js-queue__item__animation-repeat', function () {
+/**
+ * @ngdoc animation
+ * @name mt.animation:.mt-js-queue__item__animation-repeat
+ *
+ * @description
+ * A animation tailored for queue's items (enter and leave events).
+ *
+ * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CS based transition and JS sequencing.
+ * The animation framework here is just used as an "event" system to be notified of new element insertion / removal.
+ */
+angular.module('app').animation('.mt-js-queue__item__animation-repeat', function ($window) {
 
-    // basic animation tool
-    var Sequence = {
-        __stages: null,
-        get _stages() {
-            return this.__stages || (this.__stages = []);
+    var SLICE_METHOD = [].slice;
+
+    // a transition sequencing tool
+    var TransitionsSequence = {
+
+        _stages: null,
+
+        get _currentStage() {
+            return this._stages[this._stages.length - 1];
         },
 
-        then: function (css) {
-            this._stages.push(css);
+        begin: function () {
+            this._stages = [];
+            return this.then();
+        },
+
+        then: function () {
+            this._stages.push([]);
             return this;
         },
 
-        run: function (element, done) {
+        end: function (element, doneCallback) {
             var sequence = this;
-            window.requestAnimationFrame(function exec() {
-                if (sequence._stages.length) {
-                    element.css(sequence._stages.shift()).one('transitionend', function () {
-                        exec();
-                    });
+
+            // defined and execute the animation loop
+            (function runNextStage() {
+                var stage = sequence._stages.shift();
+
+                // apply all defined stage's commands
+                stage.forEach(function (command) {
+                    element[command.method].apply(element, command.args);
+                });
+
+                var nextCallback = sequence._stages.length ? runNextStage : doneCallback;
+
+                // we try to get a transition duration since it is the only required property for valid transitions
+                // if there isn't computed duration it means this stage doesn't trigger any transition and that we have to use a "manual" progress
+                var transitionDefined = !!parseFloat($window.getComputedStyle(element[0]).getPropertyValue('transition-duration'));
+
+                if (transitionDefined) {
+                    element.one('transitionend', nextCallback);
                 } else {
-                    done();
+                    // "manual" stage progress
+                    $window.requestAnimationFrame(nextCallback);
                 }
-            });
+            })();
+        },
+
+        pushMethodCommand: function (name, args) {
+            // make a defensive shallow copy of the given arguments object
+            var argsCopy = SLICE_METHOD.call(args, 0);
+            this._currentStage.push({method: name, args: argsCopy});
+            return this;
+        },
+
+        addClass: function (classes) {
+            return this.pushMethodCommand('addClass', arguments);
+        },
+
+        removeClass: function (classes) {
+            return this.pushMethodCommand('removeClass', arguments);
+        },
+
+        css: function (name, value) {
+            return this.pushMethodCommand('css', arguments);
         }
     };
 
-    /**
-     * The css "transform" property name for the current environment. Chrome (as of 31) is the only supported browser
-     * that still needs prefixed transform property (webkit prefixed).
-     *
-     * @const
-     * @type {string}
-     */
-    var TRANSFORM_PROP_NAME = typeof document.createElement('div').style['-webkit-transform'] !== 'undefined' ? '-webkit-transform' : 'transform';
+    // creates the params used by enter and leave method
+    function buildParams(element) {
+        // we might get a comment node as well here so we need to filter only the element
+        element = element.eq(0);
 
-    function escapePropName(propName) {
-        if (propName === 'transform') {
-            return TRANSFORM_PROP_NAME;
-        }
-        return propName;
-    }
+        // if the element is not at the end we need to animate the height too
+        var requiresHeightAnimation = element.next().length;
 
-    function extendWithEscapedCss(escaped, raw) {
-        for (var propName in raw) {
-            escaped[escapePropName(propName)] = raw[propName];
+        var nominalHeight = null;
+        if (requiresHeightAnimation) {
+            // we get the (floating point precision) height value just after insertion
+            nominalHeight = element[0].getBoundingClientRect().height;
         }
 
-        return escaped;
+        return {
+            element: element,
+            requiresHeightAnimation: requiresHeightAnimation,
+            nominalHeight: nominalHeight
+        };
     }
 
-    function transition(element, initial, stages, final, done) {
-
-        if (angular.isFunction(final)) {
-            done = final;
-            final = undefined;
-        }
-
-        var sequence = Object.create(Sequence);
-        stages.forEach(function (stage) {
-
-            var propsNames = Object.keys(stage);
-
-            // transition "settings"
-            var css = {
-                'transition-property': propsNames.map(escapePropName).join(','),
-                'transition-duration': '.175s'
-            };
-            // add escaped css properties
-            extendWithEscapedCss(css, stage);
-
-            // add it to the sequence
-            sequence.then(css);
-        });
-
-        element.css(extendWithEscapedCss({}, initial));
-        sequence.run(element, function () {
-            // remove animation settings
-            var css = {'transition-property': '', 'transition-duration': ''};
-            if (final) {
-                extendWithEscapedCss(css, final)
-            }
-            element.css(css);
-            done();
-        });
-    }
-
+    // we use the animation just as a hook to be notified of the list (managed by "ng-repeat") modifications
     return {
 
         enter: function (element, done) {
+            var params = buildParams(element);
 
-            // we might get a comment node as well here so we need to filter only the element
-            element = element.eq(0);
+            var ts = Object.create(TransitionsSequence);
 
-            var initial = {transform: 'translateX(-100%)'};
-            var stages = [
-                {transform: ''}
-            ];
+            ts.begin().addClass('slidein-start');
+            if (params.requiresHeightAnimation) {
+                ts.addClass('grow-start'); // part of the begin stage
 
-            // if the element is not at the end we need to animate the height
-            if (element.next().length) {
-                initial.height = 0;
-                // we get the height after insertion with floating point precision
-                stages.unshift({height: element[0].getBoundingClientRect().height + 'px'})
+                // next stage
+                ts.then().removeClass('grow-start').addClass('grow grow-end').css('height', params.nominalHeight + 'px');
             }
 
-            transition(element, initial, stages, {height: '', transform: ''}, done);
+            ts.then().removeClass('grow grow-init').css('height', '').removeClass('slidein-start').addClass('slidein slidein-end');
+
+            ts.then().removeClass('grow-end slidein slidein-end');
+
+            // run the sequence
+            ts.end(params.element, done);
         },
 
         leave: function (element, done) {
-            element = element.eq(0);
+            var params = buildParams(element);
 
-            var initial = {transform: ''};
-            var stages = [
-                {transform: 'translateX(-100%)'}
-            ];
+            var ts = Object.create(TransitionsSequence);
 
-            if (element.next().length) {
-                initial.height = element[0].getBoundingClientRect().height + 'px';
-                stages.push({height: 0});
+            ts.begin().addClass('slideout-start');
+            if (params.requiresHeightAnimation) {
+                ts.addClass('shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
             }
-            transition(element, initial, stages, done);
+
+            ts.then().addClass('slideout slideout-end');
+
+            ts.then().removeClass('slideout slideout-start');
+            if (params.requiresHeightAnimation) {
+                // reset the height and let the CSS magic happen
+                ts.css('height', '').addClass('shrink shrink-end'); // part of the previous stage
+            }
+
+            // run the sequence
+            ts.end(params.element, done);
+        },
+
+        move: function (element, done) {
+            // move doesn't really make sense for the queue animation
+            done();
         }
     };
 });

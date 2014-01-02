@@ -85,6 +85,7 @@ body {
   width: 100%;
   transform: translateX(-50%);
 
+  overflow-x: hidden; // needed by FF sometimes
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
@@ -124,6 +125,52 @@ body {
 
   &.broken {
     @include queue-item-color($errorBgColor);
+  }
+
+  // js based animation but relies on the CSS classes bellow
+  &.mt-js-queue__item__animation-repeat {
+
+    &.grow, &.shrink {
+      transition: height .175s;
+    }
+
+    &.slidein, &.slideout {
+      transition: transform .175s;
+    }
+
+    &.grow-start {
+      height: 0;
+    }
+
+    &.grow-end {
+      // helped by JS during the animation
+      height: auto;
+    }
+
+    &.slidein-start {
+      transform: translateX(-100%);
+    }
+
+    &.slidein-end {
+      transform: translateX(0);
+    }
+
+    &.shrink-start {
+      // helped by JS during the animation
+      height: auto;
+    }
+
+    &.shrink-end {
+      height: 0;
+    }
+
+    &.slideout-start {
+      transform: translateX(0);
+    }
+
+    &.slideout-end {
+      transform: translateX(-100%);
+    }
   }
 }
 
