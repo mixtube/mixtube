@@ -370,6 +370,7 @@ body {
 
 .mt-result__thumbnail {
   position: relative;
+  overflow: hidden;
   @include mt-fluid-image(.4);
 }
 
@@ -389,16 +390,12 @@ body {
   flex-direction: column;
   justify-content: center;
 
-  transition-property: transform, opacity;
-  transition-duration: $baseTransitionDuration;
-  transition-timing-function: $easeInOut, linear;
-
   > .text {
     padding: .25rem;
     text-align: center;
     overflow: hidden;
 
-    // a very cheap element query to display a shorter confirmation message on larger screen when the search result screen
+    // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
     // is made of 5 columns which doesn't give much place to the message
     @include mt-media-large-screen {
 
@@ -409,21 +406,28 @@ body {
       }
 
       > .mt-replaced-text {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
+        display: none;
       }
     }
   }
 
-  // don't hide it straight: wait for the end of the animation
-  &.ng-hide-add, &.ng-hide-remove {
-    display: flex !important;
-  }
+  &.mt-result__added-confirmation__animation-if {
 
-  &.ng-hide {
-    transform: translate3d(-100%, 0, 0);
-    opacity: .5;
+    &.ng-enter, &.ng-leave {
+      transition-property: transform, opacity;
+      transition-duration: $baseTransitionDuration;
+      transition-timing-function: $easeInOut, linear;
+    }
+
+    &.ng-enter, &.ng-leave.ng-leave-active {
+      transform: translate3d(-100%, 0, 0);
+      opacity: .5;
+    }
+
+    &.ng-leave, &.ng-enter.ng-enter-active {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
   }
 }
 
