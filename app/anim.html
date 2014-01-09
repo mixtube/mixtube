@@ -50,8 +50,10 @@
                 <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
                 <!-- where the hidden part of the overflowing zone is never rendered -->
                 <div>
-                    <span ng-repeat="i in props.modalLines">Some random content probably very important!
-                    <br>Please be careful with that, if you miss it you miss it</span>
+                    <p ng-repeat="i in props.modalLines">
+                        Some random content probably very important!
+                        <br>Please be careful with that, if you miss it you miss it
+                    </p>
                 </div>
             </div>
 
