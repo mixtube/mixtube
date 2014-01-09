@@ -94,6 +94,7 @@
 
   .mt-modal__button {
     @extend %mt-chromeless-button;
+    @include mt-click-reaction;
     flex: 1;
     padding: $unitVerticalPadding/4 0;
     margin: 0 .5rem;

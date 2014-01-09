@@ -78,6 +78,12 @@
   }
 }
 
+@mixin mt-click-reaction {
+  &.ng-click-active {
+    transform: scale(.9);
+  }
+}
+
 // extracted settings for placeholder so that we can simulate placeholders with regular element
 @mixin mt-placeholder($color: #A9A9A9) {
   color: $color;

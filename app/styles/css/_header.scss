@@ -111,6 +111,7 @@
 
   .mt-search-input__button {
     @extend %mt-chromeless-button;
+    @include mt-click-reaction;
     position: absolute;
     right: 0;
     top: 0;
@@ -120,10 +121,6 @@
 
     color: $lightTextColor;
     font-size: 2.5rem;
-
-    &.ng-click-active {
-      transform: scale(.9);
-    }
   }
 
   // the container, will be translated but not animated

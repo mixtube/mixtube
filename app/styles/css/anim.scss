@@ -255,14 +255,11 @@ body {
 
 .mt-queue__item__remove-button {
   @extend %mt-chromeless-button;
+  @include mt-click-reaction;
   padding: 0 .5rem;
 
   opacity: .1;
   font-size: 2.5rem;
-
-  &.ng-click-active {
-    transform: scale(.9);
-  }
 
   .mt-mouse-based-interaction &:hover {
     opacity: 1;
