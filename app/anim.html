@@ -13,8 +13,7 @@
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
 </head>
-<body ng-app="app" ng-controller="mtBodyCtrl" class="activity-state"
-      mt-mouse-interaction-detection="mt-mouse-based-interaction">
+<body ng-app="app" ng-controller="mtBodyCtrl" mt-mouse-interaction-detection="mt-mouse-based-interaction">
 <div class="mt-debug-bar" ng-show="props.showDebugBar">
     <div class="mt-debug-bar__container">
         <button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">
@@ -37,6 +36,9 @@
         </button>
         <button class="mt-debug-bar__button queue-items" ng-click="insertQueueItem()">
             Ii
+        </button>
+        <button class="mt-debug-bar__button activity" ng-click="toggleActivity()">
+            A
         </button>
     </div>
 </div>
@@ -71,7 +73,7 @@
 
 <div class="mt-app">
     <div class="mt-header" mt-search-input>
-        <div class="mt-header__bg"></div>
+        <div class="mt-header__bg mt-header__bg__animation-show" ng-show="props.showChrome"></div>
         <div class="mt-header__container">
             <div class="start">
                 <h1 class="mt-header__app-title">
@@ -79,9 +81,17 @@
                 </h1>
             </div>
             <div class="center">
-                <button class="mt-header__play-button" data-mt-icon="&#xe80a">
-                    <span class="mt-replaced-text">Play</span>
-                </button>
+                <div class="mt-header__playback-buttons mt-header__playback-buttons__animation-class"
+                     ng-class="{'pause': !props.showPlayButton}">
+                    <button class="mt-header__playback-button play" data-mt-icon="&#xe805"
+                            ng-click="togglePlayButton()">
+                        <span class="mt-replaced-text">Play</span>
+                    </button>
+                    <button class="mt-header__playback-button pause" data-mt-icon="&#xe804"
+                            ng-click="togglePlayButton()">
+                        <span class="mt-replaced-text">Pause</span>
+                    </button>
+                </div>
             </div>
             <div class="end">
                 <!--just padding container to ensure proper centering of header-center -->
@@ -146,7 +156,7 @@
 
         </div>
 
-        <div class="mt-queue">
+        <div class="mt-queue mt-queue__animation-show" ng-show="props.showChrome">
             <ul>
                 <li class="mt-queue__item mt-js-queue__item__animation-repeat" ng-repeat="i in props.queueItems"
                     ng-class="{'active': $index === 2, 'broken':  $index === 4}">
@@ -174,7 +184,7 @@
                 </li>
             </ul>
         </div>
-        <div class="mt-search" ng-show="props.showSearch">
+        <div class="mt-search mt-search__animation-show" ng-show="props.showSearch">
             <div class="mt-search__provider" ng-repeat="pname in ['YouTube', 'Vimeo']">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pname}}</h3>
@@ -237,6 +247,8 @@ angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
         showModal: false,
         showNotification: false,
         showSearch: false,
+        showChrome: false,
+        showPlayButton: true,
         get queueItems() {
             return _props.queueItems;
         }
@@ -258,6 +270,9 @@ angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
 
     $scope.toggleSearch = function () {
         $scope.props.showSearch = !$scope.props.showSearch;
+        if ($scope.props.showSearch) {
+            $scope.props.showChrome = true;
+        }
     };
 
     $scope.appendQueueItem = function () {
@@ -270,6 +285,14 @@ angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
 
     $scope.removeQueueItem = function (queueItem) {
         _props.queueItems.splice(_props.queueItems.indexOf(queueItem), 1);
+    };
+
+    $scope.toggleActivity = function () {
+        $scope.props.showChrome = !$scope.props.showChrome;
+    };
+
+    $scope.togglePlayButton = function () {
+        $scope.props.showPlayButton = !$scope.props.showPlayButton;
     };
 
     $scope.$watch(function () {

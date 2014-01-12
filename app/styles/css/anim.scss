@@ -83,27 +83,32 @@ body {
 
 .mt-queue {
   width: 100%;
-  transform: translateX(-50%);
 
   overflow-x: hidden; // needed by FF sometimes
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
-  opacity: 0;
   background-color: $darkestBgColor;
-
-  transition-property: transform, opacity;
-  transition-duration: .2s;
-  transition-timing-function: $easeInOut;
-  transition-delay: $baseTransitionDuration;
-
-  .activity-state & {
-    transform: translateX(0);
-    opacity: 1;
-  }
 
   @include mt-media-large-screen {
     width: (100%/6);
+  }
+
+  &.mt-queue__animation-show {
+
+    &.ng-hide-add, &.ng-hide-remove {
+      transition-property: transform, opacity;
+      transition-duration: $baseTransitionDuration;
+      transition-timing-function: $easeInOut, linear;
+
+      // needed by the transition
+      display: block !important;
+    }
+
+    &.ng-hide {
+      opacity: 0;
+      transform: translateX(-50%);
+    }
   }
 }
 
@@ -267,29 +272,32 @@ body {
 }
 
 .mt-search {
-  @include position(absolute, 0px 0px 0px 0px);
+  // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
+  @include position(absolute, 0px 0px 0px 0);
 
   background-color: rgba($secondaryBgColor, .8);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
-  transition-property: transform, opacity;
-  transition-duration: .2s;
-  transition-timing-function: $easeInOut, linear;
-
   @include mt-media-large-screen {
-    position: static; // when there is available size put the element back in the flow to create a columns layout
-    width: (5 * 100%/6);
+    width: (5 * 100%/6); // width is 5 "columns" out of 6
   }
 
-  &.ng-hide {
-    transform: translateY(-50%);
-    opacity: 0;
-  }
+  &.mt-search__animation-show {
 
-  // don't hide it straight: wait for the end of the animation
-  &.ng-hide-add, &.ng-hide-remove {
-    display: block !important;
+    &.ng-hide-add, &.ng-hide-remove {
+      transition-property: transform, opacity;
+      transition-duration: $baseTransitionDuration;
+      transition-timing-function: $easeInOut, linear;
+
+      // don't hide it straight: wait for the end of the animation
+      display: block !important;
+    }
+
+    &.ng-hide {
+      transform: translateY(-50%);
+      opacity: 0;
+    }
   }
 }
 
@@ -446,19 +454,22 @@ body {
   opacity: .6;
   height: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   pointer-events: none;
 }
 
 .mt-debug-bar__container {
   pointer-events: auto;
+  overflow-y: auto;
+  width: 3rem;
 }
 
 .mt-debug-bar__button {
+  @extend %mt-chromeless-button;
   font-size: 1rem;
   line-height: 3;
-  width: 3rem;
-  @extend %mt-chromeless-button;
+  width: 100%;
 
   &.modal {
     background-color: #8EC447;
@@ -474,5 +485,9 @@ body {
 
   &.queue-items {
     background-color: #b96eb5;
+  }
+
+  &.activity {
+    background-color: #e1cb50;
   }
 }

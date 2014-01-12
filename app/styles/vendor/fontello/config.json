@@ -25,28 +25,16 @@
       "src": "entypo"
     },
     {
-      "uid": "39a5a0d7ce8342d149373b2ce219503a",
-      "css": "alert",
-      "code": 59394,
-      "src": "entypo"
+      "uid": "fc006ff27e50163bdec3a7588226171b",
+      "css": "play-circled",
+      "code": 59397,
+      "src": "elusive"
     },
     {
-      "uid": "cb13afd4722a849d48056540bb74c47e",
-      "css": "play",
-      "code": 59402,
-      "src": "entypo"
-    },
-    {
-      "uid": "d8d378d0ce413f231dfa37592e39c227",
-      "css": "pause",
-      "code": 59401,
-      "src": "entypo"
-    },
-    {
-      "uid": "fccd3ea0efb711b849045bee686b1ceb",
-      "css": "spinner1",
-      "code": 59399,
-      "src": "mfglabs"
+      "uid": "8710d1e404dcb3a55b3ab97f797355b5",
+      "css": "pause-circled",
+      "code": 59396,
+      "src": "elusive"
     }
   ]
 }
