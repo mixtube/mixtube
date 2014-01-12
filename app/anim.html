@@ -163,7 +163,7 @@
                     <div class="mt-queue__item__thumbnail">
                         <div ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}"
                              class="image"></div>
-                        <p ng-show="$index === 4" class="mt-queue__item__broken-message">Couldn't load this video</p>
+                        <p class="mt-queue__item__broken-message">Couldn't load this video</p>
 
                         <div class="mt-queue__item__progress" ng-show="$index === 1">
                             <progress></progress>
@@ -491,18 +491,14 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
         // we might get a comment node as well here so we need to filter only the element
         element = element.eq(0);
 
-        // if the element is not at the end we need to animate the height too
-        var requiresHeightTransition = element.next().length;
+        var isLastChild = element.next().length;
 
-        var nominalHeight = null;
-        if (requiresHeightTransition) {
-            // we get the (floating point precision) height value just after insertion
-            nominalHeight = element[0].getBoundingClientRect().height;
-        }
+        // we get the (floating point precision) height value just before the animation
+        var nominalHeight = element[0].getBoundingClientRect().height;
 
         return {
             element: element,
-            requiresHeightTransition: requiresHeightTransition,
+            isLastChild: isLastChild,
             nominalHeight: nominalHeight
         };
     }
@@ -516,7 +512,9 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
             var ts = Object.create(TransitionsSequence);
 
             ts.begin().addClass('slidein-start');
-            if (params.requiresHeightTransition) {
+
+            // if the element is not at the end we need to animate the height too
+            if (params.isLastChild) {
                 ts.addClass('grow-start'); // part of the begin stage
 
                 // next stage
@@ -536,18 +534,12 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
 
             var ts = Object.create(TransitionsSequence);
 
-            ts.begin().addClass('slideout-start');
-            if (params.requiresHeightTransition) {
-                ts.addClass('shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
-            }
+            ts.begin().addClass('slideout-start').addClass('shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
 
             ts.then().addClass('slideout slideout-end');
 
-            ts.then().removeClass('slideout slideout-start');
-            if (params.requiresHeightTransition) {
-                // reset the height and let the CSS magic happen
-                ts.css('height', '').addClass('shrink shrink-end'); // part of the previous stage
-            }
+            // reset the height and let the CSS magic happen
+            ts.then().removeClass('slideout slideout-start').css('height', '').addClass('shrink shrink-end');
 
             // run the sequence
             ts.end(params.element, done);

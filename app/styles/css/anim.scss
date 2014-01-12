@@ -187,7 +187,7 @@ body {
     filter: saturate(5%);
   }
 
-  .active & {
+  .mt-queue__item.active & {
     > .image {
       filter: none;
     }
@@ -200,12 +200,16 @@ body {
   width: 100%;
   height: 100%;
 
-  display: flex;
+  display: none; // hidden by default
   align-items: center;
   justify-content: center;
   text-align: center;
 
   background-color: rgba($errorBgColor, $overlayOpacity);
+
+  .mt-queue__item.broken & {
+    display: flex;
+  }
 }
 
 .mt-queue__item__progress {
