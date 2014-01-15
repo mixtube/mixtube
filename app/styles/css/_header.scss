@@ -7,8 +7,8 @@
   $headerHeight: 4rem;
   $searchInputPadding: 0 3rem 0 .5rem;
   $searchFieldAnimationDuration: $baseTransitionDuration;
-  $textShadowSize: 1px;
-  $textShadow: 0px $textShadowSize 0px $baseBgColor;
+  $textShadowSize: 8px;
+  $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .5);
 
   .mt-header {
     position: relative;
