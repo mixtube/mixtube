@@ -160,7 +160,7 @@
 
         </div>
 
-        <div class="mt-queue mt-queue__animation-show" ng-show="props.showChrome" mt-scroll-view>
+        <div class="mt-queue mt-queue__animation-show" ng-show="props.showChrome" mt-scrollable>
             <ul>
                 <li class="mt-queue__item mt-js-queue__item__animation-repeat"
                     ng-repeat="i in props.queueItems"
@@ -366,7 +366,16 @@ angular.module('app').directive('mtMouseInteractionDetection', function () {
     };
 });
 
-angular.module('app').directive('mtScrollView', function ($window) {
+/**
+ * @ngdoc directive
+ * @name mt.directive:mtScrollable
+ * @restrict A
+ *
+ * Allows children directives to manipulate the scroll position of the element.
+ *
+ * It exposes a controller that can be injected to the sub directives like "mtEnsureVisibleIf"
+ */
+angular.module('app').directive('mtScrollable', function ($window) {
 
     /**
      * A JS function equivalent of "cubic-bezier(.8, 0, .2, 1)"
@@ -433,10 +442,19 @@ angular.module('app').directive('mtScrollView', function ($window) {
     };
 });
 
+/**
+ * @ngdoc directive
+ * @name mt.directive:mtEnsureVisibleIf
+ * @restrict A
+ *
+ * Makes sure that the element is visible when the value of the given expression changes and is "truthy".
+ *
+ * It requires a parent with the "mtScrollable" directive.
+ */
 angular.module('app').directive('mtEnsureVisibleIf', function () {
     return {
         restrict: 'A',
-        require: '^mtScrollView',
+        require: '^mtScrollable',
         link: function (iScope, iElement, iAttrs, mtScrollViewCtrl) {
             iScope.$watch(iAttrs.mtEnsureVisibleIf, function (ensureVisible) {
                 if (ensureVisible) {
