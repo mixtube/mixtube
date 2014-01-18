@@ -575,6 +575,10 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
 
                 // we try to get a transition duration since it is the only required property for valid transitions
                 // if there isn't computed duration it means this stage doesn't trigger any transition and that we have to use a "manual" progress
+                //
+                // WARNING: this detection is not perfect though because if the properties declared in the transition are not modified
+                // the transition won't be triggered then the "transitionend" event won't be triggered and we will get a never ending sequence.
+                // A better impl would make a diff between css property values before and after applying commands to check if it triggers the transiton
                 var transitionDefined = !!parseFloat($window.getComputedStyle(element[0]).getPropertyValue('transition-duration'));
 
                 if (transitionDefined) {
@@ -611,14 +615,11 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
         // we might get a comment node as well here so we need to filter only the element
         element = element.eq(0);
 
-        var isLastChild = element.next().length;
-
         // we get the (floating point precision) height value just before the animation
         var nominalHeight = element[0].getBoundingClientRect().height;
 
         return {
             element: element,
-            isLastChild: isLastChild,
             nominalHeight: nominalHeight
         };
     }
@@ -631,17 +632,13 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
 
             var ts = Object.create(TransitionsSequence);
 
-            ts.begin().addClass('slidein-start');
+            ts.begin().addClass('slidein-start grow-start'); // part of the begin stage
 
-            // if the element is not at the end we need to animate the height too
-            if (params.isLastChild) {
-                ts.addClass('grow-start'); // part of the begin stage
+            ts.then().removeClass('grow-start')
+                    .addClass('grow grow-end').css('height', params.nominalHeight + 'px');
 
-                // next stage
-                ts.then().removeClass('grow-start').addClass('grow grow-end').css('height', params.nominalHeight + 'px');
-            }
-
-            ts.then().removeClass('grow grow-init').css('height', '').removeClass('slidein-start').addClass('slidein slidein-end');
+            ts.then().removeClass('grow grow-init').css('height', '').removeClass('slidein-start')
+                    .addClass('slidein slidein-end');
 
             ts.then().removeClass('grow-end slidein slidein-end');
 
@@ -654,12 +651,13 @@ angular.module('app').animation('.mt-js-queue__item__animation-repeat', function
 
             var ts = Object.create(TransitionsSequence);
 
-            ts.begin().addClass('slideout-start').addClass('shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
+            ts.begin().addClass('slideout-start shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
 
             ts.then().addClass('slideout slideout-end');
 
-            // reset the height and let the CSS magic happen
-            ts.then().removeClass('slideout slideout-start').css('height', '').addClass('shrink shrink-end');
+            // reset the inline defined height so that the value declared in the stylesheet takes over and let the CSS magic happen
+            ts.then().removeClass('slideout slideout-start').css('height', '')
+                    .addClass('shrink shrink-end');
 
             // run the sequence
             ts.end(params.element, done);
