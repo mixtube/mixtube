@@ -4,12 +4,6 @@
 @import 'notifications';
 @import 'header';
 
-// includes imported modules styles
-@include utils;
-@include modals;
-@include notifications;
-@include header;
-
 html {
   height: 100%;
 
@@ -43,26 +37,16 @@ body {
   background-color: #000000;
 }
 
-.mt-coming-next__group {
-  padding-bottom: $unitVerticalPadding / 2;
-
-  &.next {
-    font-weight: bold;
-  }
-
-  &:last-child {
-    padding-bottom: 0;
-  }
+.mt-queue-loading__message {
+  margin-bottom: $unitVerticalPadding;
 }
 
-.mt-coming-next__header {
-  font-size: 0.875rem;
-}
+.mt-queue-loading__progress {
+  progress {
+    @extend %mt-chromeless-progress;
+    @include mt-spinner(4rem, $contrastedColor);
+  }
 
-.mt-coming-next__title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .mt-app {
@@ -81,33 +65,224 @@ body {
   display: flex;
 }
 
-.mt-queue {
-  width: 100%;
+@mixin coming-next {
 
-  overflow-x: hidden; // needed by FF sometimes
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  .mt-coming-next__group {
+    padding-bottom: $unitVerticalPadding / 2;
 
-  background-color: $darkestBgColor;
-
-  @include mt-media-large-screen {
-    width: (100%/6);
-  }
-
-  &.mt-queue__animation-show {
-
-    &.ng-hide-add, &.ng-hide-remove {
-      transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
-
-      // needed by the transition
-      display: block !important;
+    &.next {
+      font-weight: bold;
     }
 
-    &.ng-hide {
-      opacity: 0;
-      transform: translateX(-50%);
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  .mt-coming-next__header {
+    font-size: 0.875rem;
+  }
+
+  .mt-coming-next__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@mixin queue {
+
+  .mt-queue {
+    width: 100%;
+
+    overflow-x: hidden; // needed by FF sometimes
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    background-color: $darkestBgColor;
+
+    @include mt-media-large-screen {
+      width: (100%/6);
+    }
+
+    &.mt-queue__animation-show {
+
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+
+        // needed by the transition
+        display: block !important;
+      }
+
+      &.ng-hide {
+        opacity: 0;
+        transform: translateX(-50%);
+      }
+    }
+  }
+
+  .mt-queue__entry {
+    @include queue-item-color($baseBgColor);
+    overflow: hidden;
+
+    &.active {
+      @include queue-item-color($contrastedColor);
+    }
+
+    &.broken {
+      @include queue-item-color($errorBgColor);
+    }
+
+    // js based animation but relies on transitions triggered by the CSS classes bellow
+    &.mt-js-queue__entry__animation-repeat {
+
+      // we dont want Angular to detect the animation so we set the delay by adding those classes after
+      &.grow, &.shrink, &.slidein, &.slideout {
+        transition-duration: .175s;
+      }
+
+      &.grow, &.shrink {
+        transition-property: height;
+      }
+
+      &.slidein, &.slideout {
+        transition-property: transform;
+      }
+
+      &.grow-start {
+        height: 0;
+      }
+
+      &.grow-end {
+        // helped by JS during the transition
+        height: auto;
+      }
+
+      &.slidein-start {
+        transform: translateX(-100%);
+      }
+
+      &.slidein-end {
+        transform: translateX(0);
+      }
+
+      &.shrink-start {
+        // helped by JS during the transition
+        height: auto;
+      }
+
+      &.shrink-end {
+        height: 0;
+      }
+
+      &.slideout-start {
+        transform: translateX(0);
+      }
+
+      &.slideout-end {
+        transform: translateX(-100%);
+      }
+    }
+  }
+
+  .mt-queue__entry__thumbnail {
+    @extend %mt-chromeless-button;
+    display: block;
+    position: relative;
+    width: 100%;
+
+    > .image {
+      @include mt-fluid-image(.4);
+      filter: saturate(5%);
+    }
+
+    .mt-queue__entry.active & {
+      > .image {
+        filter: none;
+      }
+    }
+  }
+
+  .mt-queue__entry__broken-message {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    display: none; // hidden by default
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    background-color: rgba($errorBgColor, $overlayOpacity);
+
+    .mt-queue__entry.broken & {
+      display: flex;
+    }
+  }
+
+  .mt-queue__entry__progress {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    progress {
+      @extend %mt-chromeless-progress;
+      @include mt-spinner(3rem, $contrastedColor);
+    }
+  }
+
+  .mt-queue__entry__data {
+    position: relative;
+
+    display: flex;
+
+    // decorative up arrow
+    &:before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 2rem;
+
+      @include triangle(1.25rem, $baseBgColor, up);
+    }
+  }
+
+  .mt-queue__entry__title {
+    flex: 1;
+    align-self: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: $unitVerticalPadding/2 .5rem;
+
+    font-family: 'Open Sans Condensed', sans-serif;
+  }
+
+  .mt-queue__entry__commands {
+    align-self: stretch;
+
+    display: flex;
+    align-items: stretch;
+  }
+
+  .mt-queue__entry__remove-button {
+    @extend %mt-chromeless-button;
+    @include mt-click-reaction;
+    padding: 0 .5rem;
+
+    opacity: .1;
+    font-size: 2.5rem;
+
+    .mt-mouse-based-interaction &:hover {
+      opacity: 1;
     }
   }
 }
@@ -115,345 +290,210 @@ body {
 @mixin queue-item-color($bgColor) {
   background-color: $bgColor;
 
-  .mt-queue__item__data:before {
+  .mt-queue__entry__data:before {
     @include triangle(1.25rem, $bgColor, up);
   }
 }
 
-.mt-queue__item {
-  @include queue-item-color($baseBgColor);
-  overflow: hidden;
+@mixin search {
 
-  &.active {
-    @include queue-item-color($contrastedColor);
-  }
+  $headerFontSize: 1.25rem;
+  $resultsHorizontalPadding: .5rem;
 
-  &.broken {
-    @include queue-item-color($errorBgColor);
-  }
+  .mt-search {
+    // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
+    @include position(absolute, 0px 0px 0px 0);
 
-  // js based animation but relies on transitions triggered by the CSS classes bellow
-  &.mt-js-queue__item__animation-repeat {
+    background-color: rgba($secondaryBgColor, .8);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 
-    // we dont want Angular to detect the animation so we set the delay by adding those classes after
-    &.grow, &.shrink, &.slidein, &.slideout {
-      transition-duration: .175s;
+    @include mt-media-large-screen {
+      width: (5 * 100%/6); // width is 5 "columns" out of 6
     }
 
-    &.grow, &.shrink {
-      transition-property: height;
-    }
+    &.mt-search__animation-show {
 
-    &.slidein, &.slideout {
-      transition-property: transform;
-    }
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
 
-    &.grow-start {
-      height: 0;
-    }
+        // don't hide it straight: wait for the end of the animation
+        display: block !important;
+      }
 
-    &.grow-end {
-      // helped by JS during the transition
-      height: auto;
-    }
-
-    &.slidein-start {
-      transform: translateX(-100%);
-    }
-
-    &.slidein-end {
-      transform: translateX(0);
-    }
-
-    &.shrink-start {
-      // helped by JS during the transition
-      height: auto;
-    }
-
-    &.shrink-end {
-      height: 0;
-    }
-
-    &.slideout-start {
-      transform: translateX(0);
-    }
-
-    &.slideout-end {
-      transform: translateX(-100%);
+      &.ng-hide {
+        transform: translateY(-50%);
+        opacity: 0;
+      }
     }
   }
-}
 
-.mt-queue__item__thumbnail {
-  position: relative;
-
-  > .image {
-    @include mt-fluid-image(.4);
-    filter: saturate(5%);
+  .mt-search__provider {
+    margin: 1rem 1rem 0 1rem;
   }
 
-  .mt-queue__item.active & {
-    > .image {
-      filter: none;
-    }
-  }
-}
+  .mt-search__provider__header {
 
-.mt-queue__item__broken-message {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
+    margin-bottom: $unitVerticalPadding / 2;
+    padding: 0 $resultsHorizontalPadding;
 
-  display: none; // hidden by default
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+    > .title {
+      display: inline-block;
 
-  background-color: rgba($errorBgColor, $overlayOpacity);
-
-  .mt-queue__item.broken & {
-    display: flex;
-  }
-}
-
-.mt-queue__item__progress {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  progress {
-    @extend %mt-chromeless-progress;
-    @include mt-spinner(3rem, $contrastedColor);
-  }
-}
-
-.mt-queue__item__data {
-  position: relative;
-
-  display: flex;
-
-  // decorative up arrow
-  &:before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 2rem;
-
-    @include triangle(1.25rem, $baseBgColor, up);
-  }
-}
-
-.mt-queue__item__title {
-  flex: 1;
-  align-self: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  padding: $unitVerticalPadding/2 .5rem;
-
-  font-family: 'Open Sans Condensed', sans-serif;
-}
-
-.mt-queue__item__commands {
-  align-self: stretch;
-
-  display: flex;
-  align-items: stretch;
-}
-
-.mt-queue__item__remove-button {
-  @extend %mt-chromeless-button;
-  @include mt-click-reaction;
-  padding: 0 .5rem;
-
-  opacity: .1;
-  font-size: 2.5rem;
-
-  .mt-mouse-based-interaction &:hover {
-    opacity: 1;
-  }
-}
-
-.mt-search {
-  // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
-  @include position(absolute, 0px 0px 0px 0);
-
-  background-color: rgba($secondaryBgColor, .8);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @include mt-media-large-screen {
-    width: (5 * 100%/6); // width is 5 "columns" out of 6
-  }
-
-  &.mt-search__animation-show {
-
-    &.ng-hide-add, &.ng-hide-remove {
-      transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
-
-      // don't hide it straight: wait for the end of the animation
-      display: block !important;
+      font-size: $headerFontSize;
     }
 
-    &.ng-hide {
-      transform: translateY(-50%);
-      opacity: 0;
+    .progress {
+      display: inline-block;
+
+      progress {
+        @extend %mt-chromeless-progress;
+        @include mt-spinner($headerFontSize, $lightTextColor);
+      }
     }
   }
-}
 
-.mt-search__provider {
-  margin: 1rem 1rem 0 1rem;
-}
-
-.mt-search__provider__header {
-  margin-bottom: $unitVerticalPadding / 2;
-  padding-left: .5rem;
-
-  > .title {
-    font-size: 1.25rem;
+  .mt-search__no-results-message {
+    padding: 0 $resultsHorizontalPadding;
   }
-}
 
-.mt-results {
-  @include clearfix;
+  .mt-results {
+    @include clearfix;
+
+    .mt-result {
+      width: 100%;
+
+      // more than 1 item per line when more space is available
+      @include mt-media-large-screen {
+        $resultsColumnsCount: 5;
+        width: 100% / $resultsColumnsCount;
+      }
+    }
+  }
 
   .mt-result {
+    float: left;
+    padding: 0 $resultsHorizontalPadding $unitVerticalPadding $resultsHorizontalPadding;
+    vertical-align: top;
+  }
+
+  .mt-result__container {
+    @extend %mt-chromeless-button;
+    position: relative;
+    display: block;
     width: 100%;
 
-    // more than 1 item per line when more space is available
-    @include mt-media-large-screen {
-      $resultsColumnsCount: 5;
-      width: 100% / $resultsColumnsCount;
-    }
-  }
-}
-
-.mt-result {
-  float: left;
-  padding: 0 .5rem $unitVerticalPadding .5rem;
-  vertical-align: top;
-}
-
-.mt-result__container {
-  @extend %mt-chromeless-button;
-  position: relative;
-  display: block;
-  width: 100%;
-
-  text-align: inherit;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.mt-result__add-affordance {
-  position: absolute;
-  top: 0;
-  right: 0;
-  overflow: visible;
-  @include triangle(3rem, $baseBgColor, up-right);
-  z-index: 1;
-
-  &:before {
-    position: absolute;
-    content: '\e803';
-    bottom: .80rem;
-    right: .5rem;
-
-    color: $lightTextColor;
-    opacity: .8;
-    font-size: 1.5rem;
-    font-family: fontello;
-  }
-
-  // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
-  // state remains after a tap until the next tap)
-  .mt-mouse-based-interaction .mt-result__container:hover &:before {
-    color: $contrastedColor;
-    opacity: 1;
-  }
-}
-
-.mt-result__thumbnail {
-  position: relative;
-  overflow: hidden;
-  @include mt-fluid-image(.4);
-}
-
-.mt-result__added-confirmation {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  z-index: 2;
-  transform: translate3d(0, 0, 0); // use 3D here to avoid animation flickering in webkit
-
-  background-color: $baseBgColor;
-  border-radius: 2px 2px 0 0;
-
-  // vertically center the text
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  > .text {
-    padding: .25rem;
-    text-align: center;
+    text-align: inherit;
+    border-radius: 2px;
     overflow: hidden;
-
-    // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
-    // is made of 5 columns which doesn't give much place to the message
-    @include mt-media-large-screen {
-
-      font-size: (14rem/$baseFontSizeUnitless);
-
-      &:before {
-        content: attr(mt-short-text);
-      }
-
-      > .mt-replaced-text {
-        display: none;
-      }
-    }
   }
 
-  &.mt-result__added-confirmation__animation-if {
+  .mt-result__add-affordance {
+    position: absolute;
+    top: 0;
+    right: 0;
+    overflow: visible;
+    @include triangle(3rem, $baseBgColor, up-right);
+    z-index: 1;
 
-    &.ng-enter, &.ng-leave {
-      transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+    &:before {
+      position: absolute;
+      content: '\e803';
+      bottom: .80rem;
+      right: .5rem;
+
+      color: $lightTextColor;
+      opacity: .8;
+      font-size: 1.5rem;
+      font-family: fontello;
     }
 
-    &.ng-enter, &.ng-leave.ng-leave-active {
-      transform: translate3d(-100%, 0, 0);
-      opacity: .5;
-    }
-
-    &.ng-leave, &.ng-enter.ng-enter-active {
-      transform: translate3d(0, 0, 0);
+    // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
+    // state remains after a tap until the next tap)
+    .mt-mouse-based-interaction .mt-result__container:hover &:before {
+      color: $contrastedColor;
       opacity: 1;
     }
   }
-}
 
-.mt-result__data {
-  color: $baseBgColor;
-  background-color: $lightTextColor;
+  .mt-result__thumbnail {
+    position: relative;
+    overflow: hidden;
+    @include mt-fluid-image(.4);
+  }
 
-  > .title {
-    padding: $unitVerticalPadding/2 .5rem;
+  .mt-result__added-confirmation {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+    transform: translate3d(0, 0, 0); // use 3D here to avoid animation flickering in webkit
 
-    font-family: 'Open Sans Condensed', sans-serif;
-    font-size: .875rem;
+    background-color: $baseBgColor;
+    border-radius: 2px 2px 0 0;
+
+    // vertically center the text
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    > .text {
+      padding: .25rem;
+      text-align: center;
+      overflow: hidden;
+
+      // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
+      // is made of 5 columns which doesn't give much place to the message
+      @include mt-media-large-screen {
+
+        font-size: (14rem/$baseFontSizeUnitless);
+
+        &:before {
+          content: attr(mt-short-text);
+        }
+
+        > .mt-replaced-text {
+          display: none;
+        }
+      }
+    }
+
+    &.mt-result__added-confirmation__animation-if {
+
+      &.ng-enter, &.ng-leave {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+      }
+
+      &.ng-enter, &.ng-leave.ng-leave-active {
+        transform: translate3d(-100%, 0, 0);
+        opacity: .5;
+      }
+
+      &.ng-leave, &.ng-enter.ng-enter-active {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+    }
+  }
+
+  .mt-result__data {
+    color: $baseBgColor;
+    background-color: $lightTextColor;
+
+    > .title {
+      padding: $unitVerticalPadding/2 .5rem;
+      overflow: hidden;
+
+      font-family: 'Open Sans Condensed', sans-serif;
+      font-size: .875rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
 }
 
@@ -500,3 +540,12 @@ body {
     background-color: #e1cb50;
   }
 }
+
+// includes imported modules styles
+@include utils;
+@include modals;
+@include notifications;
+@include header;
+@include coming-next;
+@include queue;
+@include search;

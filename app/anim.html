@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="mtMixTubeApp" ng-controller="mtRootCtrl as rootCtrl">
 <head>
     <!--preventing the user to zoom is not really nice but this is to prevent the browser from zooming when an input is focused-->
     <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
@@ -9,12 +9,8 @@
     <link rel="stylesheet" href="styles/css/anim.css" type="text/css">
     <link href="//fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400"
           rel="stylesheet" type="text/css">
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/angular-animate/angular-animate.js"></script>
-    <script src="bower_components/angular-touch/angular-touch.js"></script>
-    <script src="bower_components/bezier-easing/index.js"></script>
 </head>
-<body ng-app="app" ng-controller="mtBodyCtrl" mt-mouse-interaction-detection="mt-mouse-based-interaction">
+<body ng-app="app" mt-mouse-interaction-detection="mt-mouse-based-interaction">
 <div class="mt-debug-bar" ng-show="props.showDebugBar">
     <div class="mt-debug-bar__container">
         <button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">
@@ -71,13 +67,21 @@
     </div>
 </div>
 
+<div class="mt-app-overlay" ng-show="rootCtrl.queueLoading">
+    <p class="mt-queue-loading__message">Loading queue, please wait...</p>
+
+    <div class="mt-queue-loading__progress">
+        <progress></progress>
+    </div>
+</div>
+
 <div class="video-container" ng-hide="false">
     <div class="video"></div>
 </div>
 
 <div class="mt-app">
     <div class="mt-header" mt-search-input>
-        <div class="mt-header__bg mt-header__bg__animation-show" ng-show="props.showChrome"></div>
+        <div class="mt-header__bg mt-header__bg__animation-show"></div>
         <div class="mt-header__container">
             <div class="start">
                 <h1 class="mt-header__app-title">
@@ -160,29 +164,30 @@
 
         </div>
 
-        <div class="mt-queue mt-queue__animation-show" ng-show="props.showChrome" mt-scrollable>
+        <div class="mt-queue mt-queue__animation-show" mt-scrollable>
             <ul>
-                <li class="mt-queue__item mt-js-queue__item__animation-repeat"
-                    ng-repeat="i in props.queueItems"
-                    ng-class="{'active': i === props.activeQueueItem}"
-                    mt-ensure-visible-if="shouldEnsureVisible(i, $last)">
-                    <div class="mt-queue__item__thumbnail">
-                        <div ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}"
+                <li class="mt-queue__entry mt-js-queue__entry__animation-repeat"
+                    ng-repeat="entry in props.queue.entries"
+                    ng-class="{'active': entry === props.activeQueueEntry, 'broken': entry.skippedAtRuntime}"
+                    mt-ensure-visible-if="entry === props.focusedQueueEntry"
+                    ng-controller="mtQueueEntryCtrl as queueEntryCtrl">
+                    <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
+                        <div ng-style="{'background-image': 'url(' + entry.video.thumbnailUrl + ')'}"
                              class="image"></div>
-                        <p class="mt-queue__item__broken-message">Couldn't load this video</p>
+                        <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
 
-                        <div class="mt-queue__item__progress" ng-show="$index === 1">
+                        <div class="mt-queue__entry__progress" ng-show="queueEntryCtrl.pending">
                             <progress></progress>
                         </div>
-                    </div>
-                    <div class="mt-queue__item__data">
-                        <p class="mt-queue__item__title">
-                            Rick Ros - I like the strawberry Jam a lot
+                    </button>
+                    <div class="mt-queue__entry__data">
+                        <p class="mt-queue__entry__title">
+                            {{entry.video.title}}
                         </p>
 
-                        <div class="mt-queue__item__commands">
-                            <button class="mt-queue__item__remove-button" data-mt-icon="&#xe801"
-                                    ng-click="removeQueueItem(i)">
+                        <div class="mt-queue__entry__commands">
+                            <button class="mt-queue__entry__remove-button" data-mt-icon="&#xe801"
+                                    ng-click="queueEntryCtrl.removeQueueEntry(entry)">
                                 <span class="mt-replaced-text">Remove</span>
                             </button>
                         </div>
@@ -190,28 +195,40 @@
                 </li>
             </ul>
         </div>
-        <div class="mt-search mt-search__animation-show" ng-show="props.showSearch">
-            <div class="mt-search__provider" ng-repeat="pname in ['YouTube', 'Vimeo']">
+        <div class="mt-search mt-search__animation-show" ng-controller="mtSearchCtrl as searchCtrl"
+             ng-show="searchCtrl.searchShown">
+            <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
                 <div class="mt-search__provider__header">
-                    <h3 class="title">{{pname}}</h3>
+                    <h3 class="title">{{pLabel}}</h3>
+
+                    <div class="progress" ng-show="searchCtrl.pending[pId]">
+                        <progress></progress>
+                    </div>
                 </div>
+
+                <p class="mt-search__no-results-message"
+                   ng-show="searchCtrl.delivered[pId] && searchCtrl.results[pId].length === 0 && props.searchTerm">
+                    Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another title.
+                </p>
+
                 <ul class="mt-results">
-                    <li class="mt-result" ng-controller="mtSearchResultCtrl"
-                        ng-repeat="i in ['D874kQpNEpc', 'eU4ZvfkmOck', 'djE-BLrdDDc', 'jb6HZa151s8', 'a35rNEBNiO4', 'URpIzQedQio', '_sV0QuxOHoY']">
-                        <button class="mt-result__container" ng-click="addItemToQueue()">
+                    <li class="mt-result" ng-repeat="searchResult in searchCtrl.results[pId]"
+                        ng-controller="mtSearchResultCtrl as searchResultCtrl">
+                        <button class="mt-result__container"
+                                ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
                             <div class="mt-result__add-affordance"></div>
 
                             <div class="mt-result__thumbnail"
-                                 ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/{{i}}/mqdefault.jpg)'}">
+                                 ng-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}">
                                 <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
-                                     ng-if="searchResultProps.showAddedConfirmation">
+                                     ng-if="searchResultCtrl.confirmationShown">
                                     <div class="text" mt-short-text="Video added to the queue">
                                         <span class="mt-replaced-text">Video added to the queue. 5 remaining tunes before yours to be played. Enjoy!</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-result__data">
-                                <p class="title">Benard Menez - Ooh ooh ooh Jolie poupee</p>
+                                <p class="title">{{searchResult.title}}</p>
                             </div>
                         </button>
                     </li>
@@ -220,456 +237,25 @@
         </div>
     </div>
 </div>
-<script>
-angular.module('app', ['ngAnimate', 'ngTouch']);
 
-angular.module('app').config(function ($locationProvider) {
-    $locationProvider.html5Mode(true);
-});
-
-angular.module('app').controller('mtSearchResultCtrl', function ($scope, $timeout) {
-
-    $scope.searchResultProps = {showAddedConfirmation: false, tmoPromise: null};
-
-    $scope.addItemToQueue = function () {
-        $scope.searchResultProps.showAddedConfirmation = true;
-        $timeout.cancel($scope.searchResultProps.tmoPromise);
-        $scope.searchResultProps.tmoPromise = $timeout(function () {
-            $scope.searchResultProps.showAddedConfirmation = false;
-        }, 4000);
-    }
-});
-
-angular.module('app').controller('mtBodyCtrl', function ($scope, $location) {
-
-    var _props = {
-        queueSize: 1,
-        queueItemsSrc: ['D874kQpNEpc', 'eU4ZvfkmOck', 'djE-BLrdDDc', 'jb6HZa151s8', 'a35rNEBNiO4', 'URpIzQedQio', '_sV0QuxOHoY'],
-        queueItems: []
-    };
-
-    $scope.props = {
-        showDebugBar: false,
-        showModal: false,
-        showNotification: false,
-        showSearch: false,
-        showChrome: false,
-        showPlayButton: true,
-        activeQueueItem: _props.queueItemsSrc[2],
-        get queueItems() {
-            return _props.queueItems;
-        }
-    };
-
-    $scope.toggleModal = function (lineCount) {
-        var lines = [0, 1, 2, 3, 4, 5, 6, 7];
-        $scope.props.modalLines = lines.slice(0, lineCount);
-        $scope.props.showModal = !$scope.props.showModal;
-    };
-
-    $scope.toggleNotification = function () {
-        $scope.props.showNotification = !$scope.props.showNotification;
-    };
-
-    $scope.toggleComingNext = function () {
-        $scope.props.showComingNext = !$scope.props.showComingNext;
-    };
-
-    $scope.toggleSearch = function () {
-        $scope.props.showSearch = !$scope.props.showSearch;
-        if ($scope.props.showSearch) {
-            $scope.props.showChrome = true;
-        }
-    };
-
-    $scope.appendQueueItem = function () {
-        _props.queueItems = _props.queueItemsSrc.slice(0, _props.queueSize++);
-    };
-
-    $scope.insertQueueItem = function () {
-        _props.queueItems.splice(1, 0, _props.queueItemsSrc[_props.queueSize++]);
-    };
-
-    $scope.removeQueueItem = function (queueItem) {
-        _props.queueItems.splice(_props.queueItems.indexOf(queueItem), 1);
-    };
-
-    $scope.switchActiveQueueItem = function () {
-        $scope.props.activeQueueItem
-                = $scope.props.activeQueueItem === _props.queueItemsSrc[2] ? _props.queueItemsSrc[4] : _props.queueItemsSrc[2];
-    };
-
-    $scope.toggleActivity = function () {
-        $scope.props.showChrome = !$scope.props.showChrome;
-    };
-
-    $scope.togglePlayButton = function () {
-        $scope.props.showPlayButton = !$scope.props.showPlayButton;
-    };
-
-    /**
-     * @returns {number} a "truthy" value means that we have to make sure given queue item is visible
-     */
-    $scope.shouldEnsureVisible = function (queueItem, isLast) {
-        // we return a number here to make sure the value change when the reason for making the element visible changes
-        // avoid the case where it was true before for another reason and say true but for the other reason
-        return isLast << 1 | queueItem === $scope.props.activeQueueItem;
-    };
-
-    $scope.$watch(function () {
-        return $location.search();
-    }, function (newSearch) {
-        $scope.props.showDebugBar = 'debug' in newSearch;
-    });
-
-    $scope.$watch('props.searchTerm', function (newVal) {
-        $scope.props.showSearch = !!newVal;
-    });
-});
-
-/**
- * @ngdoc directive
- * @name mt.directive:mtMouseInteractionDetection
- * @restrict A
- *
- * Adds the specified class to the element when a mouse based interaction is detected.
- *
- * The detection mechanism is inspired by https://github.com/stucox/Modernizr/blob/hover/feature-detects/device/hover.js
- * where we try to detect two consecutive "mousemove" events without an intervening "mousedown" event. This sequence
- * is not possible with a touch (only) interaction based device.
- */
-angular.module('app').directive('mtMouseInteractionDetection', function () {
-    return {
-        restrict: 'A',
-        link: function (iScope, iElement, iAttrs) {
-
-            var className = iAttrs.mtMouseInteractionDetection;
-            if (!className) throw new Error('mtMouseInteractionDetection require an attribute value');
-
-            var mouseMoveCount = 0;
-
-            function mouseDownHandler() {
-                mouseMoveCount = 0;
-            }
-
-            iElement
-                    .on('mousedown', mouseDownHandler)
-                    .on('mousemove', function mouseMoveHandler() {
-                        if (++mouseMoveCount > 1) {
-                            iElement
-                                    .off('mousedown', mouseDownHandler)
-                                    .off('mousemove', mouseMoveHandler);
-                            iElement.addClass(className);
-                        }
-                    });
-        }
-    };
-});
-
-/**
- * @ngdoc directive
- * @name mt.directive:mtScrollable
- * @restrict A
- *
- * Allows children directives to manipulate the scroll position of the element.
- *
- * It exposes a controller that can be injected to the sub directives like "mtEnsureVisibleIf"
- */
-angular.module('app').directive('mtScrollable', function ($window) {
-
-    /**
-     * A JS function equivalent of "cubic-bezier(.8, 0, .2, 1)"
-     *
-     * @constant
-     */
-    var EASE_IN_OUT = $window.BezierEasing(.8, 0, .2, 1);
-
-    /**
-     * @constant
-     */
-    var BASE_TRANSITION_DURATION = 200;
-
-    return {
-        restrict: 'A',
-        controller: function ($scope, $element) {
-            var scrollView = $element;
-
-            function transitionTiming(progress) {
-                return EASE_IN_OUT(progress);
-            }
-
-            function transitionScrollTop(scrollView, duration, scrollOffset) {
-                // store the scroll position at the beginning of the transition
-                var scrollStart = scrollView[0].scrollTop;
-
-                var startTs = null;
-                (function requestNextFrame() {
-                    $window.requestAnimationFrame(function (frameTs) {
-                        if (startTs === null) {
-                            startTs = frameTs;
-                        }
-
-                        var progress = (frameTs - startTs) / duration;
-
-                        if (progress > 0) {
-                            var frameScrollOffset = scrollOffset * transitionTiming(progress);
-                            scrollView[0].scrollTop = scrollStart + frameScrollOffset;
-                        }
-
-                        if (progress < 1) {
-                            requestNextFrame();
-                        }
-                    });
-                })();
-            }
-
-            this.ensureVisible = function (target) {
-                var scrollViewRect = scrollView[0].getBoundingClientRect();
-                var targetRect = target[0].getBoundingClientRect();
-
-                var offset = 0;
-                if (targetRect.top < scrollViewRect.top) {
-                    offset = targetRect.top - scrollViewRect.top;
-                } else if (scrollViewRect.bottom < targetRect.bottom) {
-                    offset = targetRect.bottom - scrollViewRect.bottom;
-                }
-
-                if (offset !== 0) {
-                    transitionScrollTop(scrollView, BASE_TRANSITION_DURATION, offset);
-                }
-            }
-        }
-    };
-});
-
-/**
- * @ngdoc directive
- * @name mt.directive:mtEnsureVisibleIf
- * @restrict A
- *
- * Makes sure that the element is visible when the value of the given expression changes and is "truthy".
- *
- * It requires a parent with the "mtScrollable" directive.
- */
-angular.module('app').directive('mtEnsureVisibleIf', function () {
-    return {
-        restrict: 'A',
-        require: '^mtScrollable',
-        link: function (iScope, iElement, iAttrs, mtScrollViewCtrl) {
-            iScope.$watch(iAttrs.mtEnsureVisibleIf, function (ensureVisible) {
-                if (ensureVisible) {
-                    mtScrollViewCtrl.ensureVisible(iElement);
-                }
-            });
-        }
-    };
-});
-
-/**
- * @ngdoc directive
- * @name mt.directive:mtSearchInput
- * @restrict A
- *
- * @description
- * A single usage directive that controls the sequencing of search input animation.
- *
- * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
- * can't be guaranteed by AngularJS (because of the digestion loop).
- * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
- * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
- */
-angular.module('app').directive('mtSearchInput', function ($animate) {
-
-    /**
-     * @const
-     * @type {string}
-     */
-    var NG_ACTIVE_CLASS_NAME = 'ng-click-active';
-
-    return {
-        restrict: 'A',
-        link: function (iScope, iElement) {
-
-            var searchInputForm = angular.element(iElement[0].querySelector('.mt-js-search-input__form'));
-            var trigger = angular.element(iElement[0].querySelector('.mt-js-search-input__button'));
-            var inputElmt = searchInputForm[0].querySelector('.mt-js-search-input__field');
-
-            var hide = true;
-
-            function sync() {
-                $animate[hide ? 'addClass' : 'removeClass'](searchInputForm, 'ng-hide');
-                inputElmt[hide ? 'blur' : 'focus']();
-            }
-
-            // we need to blur the field on form submit to hide the virtual keyboard on mobile
-            searchInputForm.on('submit', function () {
-                inputElmt.blur();
-            });
-
-            // on mobile, focusing a field programatically only works from a click event handler dispatched directly by the browser
-            trigger
-                    .on('click', function () {
-                        hide = !hide;
-                        sync();
-                    })
-                // simulates ngTouch behavior for active class
-                    .on('touchstart', function () {
-                        trigger.addClass(NG_ACTIVE_CLASS_NAME);
-                    })
-                    .on('touchend touchmove touchcancel', function () {
-                        trigger.removeClass(NG_ACTIVE_CLASS_NAME);
-                    });
-
-            // sync at first rendering
-            sync();
-        }
-    }
-});
-
-/**
- * @ngdoc animation
- * @name mt.animation:.mt-js-queue__item__animation-repeat
- *
- * @description
- * A animation tailored for queue's items (enter and leave events).
- *
- * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CSS transitions and JS sequencing.
- * The animation framework here is just used as an "event" system for us to be notified of new element insertion / removal.
- */
-angular.module('app').animation('.mt-js-queue__item__animation-repeat', function ($window) {
-
-    var SLICE_METHOD = [].slice;
-
-    // a transition sequencing tool
-    var TransitionsSequence = {
-
-        _stages: null,
-
-        get _currentStage() {
-            return this._stages[this._stages.length - 1];
-        },
-
-        begin: function () {
-            this._stages = [];
-            return this.then();
-        },
-
-        then: function () {
-            this._stages.push([]);
-            return this;
-        },
-
-        end: function (element, doneCallback) {
-            var sequence = this;
-
-            // defined and execute the sequencing loop
-            (function runNextStage() {
-                var stage = sequence._stages.shift();
-
-                // apply all defined stage's commands
-                stage.forEach(function (command) {
-                    element[command.method].apply(element, command.args);
-                });
-
-                var nextCallback = sequence._stages.length ? runNextStage : doneCallback;
-
-                // we try to get a transition duration since it is the only required property for valid transitions
-                // if there isn't computed duration it means this stage doesn't trigger any transition and that we have to use a "manual" progress
-                //
-                // WARNING: this detection is not perfect though because if the properties declared in the transition are not modified
-                // the transition won't be triggered then the "transitionend" event won't be triggered and we will get a never ending sequence.
-                // A better impl would make a diff between css property values before and after applying commands to check if it triggers the transiton
-                var transitionDefined = !!parseFloat($window.getComputedStyle(element[0]).getPropertyValue('transition-duration'));
-
-                if (transitionDefined) {
-                    element.one('transitionend', nextCallback);
-                } else {
-                    // "manual" stage progress
-                    $window.requestAnimationFrame(nextCallback);
-                }
-            })();
-        },
-
-        pushMethodCommand: function (name, args) {
-            // make a defensive shallow copy of the given arguments object
-            var argsCopy = SLICE_METHOD.call(args, 0);
-            this._currentStage.push({method: name, args: argsCopy});
-            return this;
-        },
-
-        addClass: function (classes) {
-            return this.pushMethodCommand('addClass', arguments);
-        },
-
-        removeClass: function (classes) {
-            return this.pushMethodCommand('removeClass', arguments);
-        },
-
-        css: function (name, value) {
-            return this.pushMethodCommand('css', arguments);
-        }
-    };
-
-    // creates the params used by enter and leave method
-    function buildParams(element) {
-        // we might get a comment node as well here so we need to filter only the element
-        element = element.eq(0);
-
-        // we get the (floating point precision) height value just before the animation
-        var nominalHeight = element[0].getBoundingClientRect().height;
-
-        return {
-            element: element,
-            nominalHeight: nominalHeight
-        };
-    }
-
-    // we use the animation just as a hook to be notified of the list (managed by "ng-repeat") modifications
-    return {
-
-        enter: function (element, done) {
-            var params = buildParams(element);
-
-            var ts = Object.create(TransitionsSequence);
-
-            ts.begin().addClass('slidein-start grow-start'); // part of the begin stage
-
-            ts.then().removeClass('grow-start')
-                    .addClass('grow grow-end').css('height', params.nominalHeight + 'px');
-
-            ts.then().removeClass('grow grow-init').css('height', '').removeClass('slidein-start')
-                    .addClass('slidein slidein-end');
-
-            ts.then().removeClass('grow-end slidein slidein-end');
-
-            // run the sequence
-            ts.end(params.element, done);
-        },
-
-        leave: function (element, done) {
-            var params = buildParams(element);
-
-            var ts = Object.create(TransitionsSequence);
-
-            ts.begin().addClass('slideout-start shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
-
-            ts.then().addClass('slideout slideout-end');
-
-            // reset the inline defined height so that the value declared in the stylesheet takes over and let the CSS magic happen
-            ts.then().removeClass('slideout slideout-start').css('height', '')
-                    .addClass('shrink shrink-end');
-
-            // run the sequence
-            ts.end(params.element, done);
-        },
-
-        move: function (element, done) {
-            // move doesn't really make sense for the queue's animation
-            done();
-        }
-    };
-});
-</script>
+<!-- build:js scripts/ext-dependencies.js -->
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-animate/angular-animate.js"></script>
+<script src="bower_components/angular-touch/angular-touch.js"></script>
+<script src="bower_components/bezier-easing/index.js"></script>
+<script src="bower_components/lodash/dist/lodash.js"></script>
+<!-- endbuild -->
+
+<!-- build:js scripts/app.js -->
+<script src="scripts/v2/bootstrap.js"></script>
+<script src="scripts/libs/tools.js"></script>
+<script src="scripts/v2/controllers.js"></script>
+<script src="scripts/v2/misc.js"></script>
+<script src="scripts/services/configuration.js"></script>
+<script src="scripts/services/logger-factory.js"></script>
+<script src="scripts/services/queue-manager.js"></script>
+<script src="scripts/services/youtube-client.js"></script>
+<!-- endbuild -->
 
 </body>
 </html>
