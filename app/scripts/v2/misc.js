@@ -145,11 +145,14 @@
      * @name mt.directive:mtScrollable
      * @restrict A
      *
-     * Allows children directives to manipulate the scroll position of the element.
+     * Declares a scrollable container that can be manipulated pragmatically thanks to {@link mtScrollablesManager}. The
+     * attribute value is an unique name that is used to get the scrollable from {@link mtScrollablesManager}.
      *
-     * It exposes a controller that can be injected to the sub directives like "mtEnsureVisibleIf"
+     * An anchor string declared on children elements thanks to the "mt-scrollable-anchor" attribute can be then used
+     * when calling {@link mtScrollablesManager.scrollable#ensureInViewPort(string)} to scroll until the child element
+     * is visible.
      */
-    mt.MixTubeApp.directive('mtScrollable', function ($window) {
+    mt.MixTubeApp.directive('mtScrollable', function ($window, $rootScope, mtScrollablesManager) {
 
         /**
          * A JS function equivalent of "cubic-bezier(.8, 0, .2, 1)"
@@ -165,8 +168,43 @@
 
         return {
             restrict: 'A',
-            controller: function ($scope, $element) {
+            controller: function ($scope, $element, $attrs) {
+
+                var ctrl = this;
                 var scrollView = $element;
+
+//                mtScrollablesManager.register($attrs.mtScrollable, {
+//                    ensureInViewPort: function (anchor) {
+//                        // wait for the end of the next digest loop to make sure the insertion / removal of content is done
+//                        $rootScope.$$postDigest(function () {
+//                            var anchorElement = mt.tools.querySelector(scrollView, '[mt-scrollable-anchor=' + anchor + ']');
+//                            var animationSemaphore = 0;
+//
+//                            function animateBefore() {
+//                                animationSemaphore++;
+//                            }
+//
+//                            function animateClose() {
+//                                if (--animationSemaphore === 0) {
+//                                    ctrl.ensureVisible(anchorElement);
+//                                }
+//                            }
+//
+//                            anchorElement
+//                                .on('$animate:mtSized', function () {
+//                                    ctrl.ensureVisible(anchorElement);
+//                                });
+////                                .on('$animate:close', animateClose);
+//
+//                            // $rootScope.$$postDigest(function () {
+////                            setTimeout(function() {
+////
+////                                ctrl.ensureVisible(anchorElement);
+////                            }, 1000);
+//                            //});
+//                        });
+//                    }
+//                });
 
                 function transitionTiming(progress) {
                     return EASE_IN_OUT(progress);
@@ -212,29 +250,6 @@
                         transitionScrollTop(scrollView, BASE_TRANSITION_DURATION, offset);
                     }
                 }
-            }
-        };
-    });
-
-    /**
-     * @ngdoc directive
-     * @name mt.directive:mtEnsureVisibleIf
-     * @restrict A
-     *
-     * Makes sure that the element is visible when the value of the given expression changes and is "truthy".
-     *
-     * It requires a parent with the "mtScrollable" directive.
-     */
-    mt.MixTubeApp.directive('mtEnsureVisibleIf', function () {
-        return {
-            restrict: 'A',
-            require: '^mtScrollable',
-            link: function (iScope, iElement, iAttrs, mtScrollViewCtrl) {
-                iScope.$watch(iAttrs.mtEnsureVisibleIf, function (ensureVisible) {
-                    if (ensureVisible) {
-                        mtScrollViewCtrl.ensureVisible(iElement);
-                    }
-                });
             }
         };
     });
@@ -342,7 +357,11 @@
 
                     // apply all defined stage's commands
                     stage.forEach(function (command) {
-                        element[command.method].apply(element, command.args);
+                        if ('method' in command && 'args' in command) {
+                            element[command.method].apply(element, command.args);
+                        } else if (angular.isFunction(command)) {
+                            command();
+                        }
                     });
 
                     var nextCallback = sequence._stages.length ? runNextStage : doneCallback;
@@ -381,6 +400,11 @@
 
             css: function (name, value) {
                 return this.pushMethodCommand('css', arguments);
+            },
+
+            exec: function (cb) {
+                this._currentStage.push(cb);
+                return this;
             }
         };
 
@@ -411,7 +435,9 @@
                 ts.then().removeClass('grow-start')
                     .addClass('grow grow-end').css('height', params.nominalHeight + 'px');
 
-                ts.then().removeClass('grow grow-init').css('height', '').removeClass('slidein-start')
+                ts.then().exec(function () {
+                    element.triggerHandler('$animate:mtSized');
+                }).removeClass('grow grow-init').css('height', '').removeClass('slidein-start')
                     .addClass('slidein slidein-end');
 
                 ts.then().removeClass('grow-end slidein slidein-end');

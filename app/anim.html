@@ -164,12 +164,12 @@
 
         </div>
 
-        <div class="mt-queue mt-queue__animation-show" mt-scrollable>
+        <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue">
             <ul>
                 <li class="mt-queue__entry mt-js-queue__entry__animation-repeat"
                     ng-repeat="entry in props.queue.entries"
                     ng-class="{'active': entry === props.activeQueueEntry, 'broken': entry.skippedAtRuntime}"
-                    mt-ensure-visible-if="entry === props.focusedQueueEntry"
+                    mt-scrollable-anchor="{{entry.id}}"
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
                         <div ng-style="{'background-image': 'url(' + entry.video.thumbnailUrl + ')'}"
@@ -255,6 +255,7 @@
 <script src="scripts/services/logger-factory.js"></script>
 <script src="scripts/services/queue-manager.js"></script>
 <script src="scripts/services/youtube-client.js"></script>
+<script src="scripts/v2/services/scrollables-manager.js"></script>
 <!-- endbuild -->
 
 </body>

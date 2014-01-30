@@ -15,10 +15,12 @@
 
         ctrl.queueLoading = false;
 
-        // the queue and the search term are declared in the scope (instead of the root controller) so that they can be
-        // watched from any controller
+        // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
+        // so that they can be read, written and watched from any controller
         /** @type {mt.model.Queue} */
         $scope.props.queue = mtQueueManager.queue;
+        /** @type {mt.model.QueueEntry} */
+        $scope.props.focusedEntry = null;
         /** @type {string}*/
         $scope.props.searchTerm = null;
 
@@ -116,7 +118,7 @@
         });
     });
 
-    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($timeout, mtQueueManager) {
+    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtScrollablesManager) {
 
         var ctrl = this;
         var tmoPromise = null;
@@ -127,7 +129,8 @@
          * @param {mt.model.Video} video
          */
         ctrl.appendResultToQueue = function (video) {
-            mtQueueManager.appendVideo(video);
+
+            mtScrollablesManager('queue').ensureInViewPort(mtQueueManager.appendVideo(video).id);
 
             ctrl.confirmationShown = true;
             $timeout.cancel(tmoPromise);
