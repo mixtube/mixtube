@@ -92,6 +92,8 @@ body {
 
 @mixin queue {
 
+  $entryTransitionPhaseDuration: 175ms;
+
   .mt-queue {
     width: 100%;
 
@@ -140,7 +142,7 @@ body {
 
       // we dont want Angular to detect the animation so we set the delay by adding those classes after
       &.grow, &.shrink, &.slidein, &.slideout {
-        transition-duration: .175s;
+        transition-duration: $entryTransitionPhaseDuration;
       }
 
       &.grow, &.shrink {

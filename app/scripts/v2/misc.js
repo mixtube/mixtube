@@ -170,49 +170,21 @@
             restrict: 'A',
             controller: function ($scope, $element, $attrs) {
 
-                var ctrl = this;
-                var scrollView = $element;
+                var scrollableElement = $element;
+                var scrollableName = $attrs.mtScrollable;
 
-//                mtScrollablesManager.register($attrs.mtScrollable, {
-//                    ensureInViewPort: function (anchor) {
-//                        // wait for the end of the next digest loop to make sure the insertion / removal of content is done
-//                        $rootScope.$$postDigest(function () {
-//                            var anchorElement = mt.tools.querySelector(scrollView, '[mt-scrollable-anchor=' + anchor + ']');
-//                            var animationSemaphore = 0;
-//
-//                            function animateBefore() {
-//                                animationSemaphore++;
-//                            }
-//
-//                            function animateClose() {
-//                                if (--animationSemaphore === 0) {
-//                                    ctrl.ensureVisible(anchorElement);
-//                                }
-//                            }
-//
-//                            anchorElement
-//                                .on('$animate:mtSized', function () {
-//                                    ctrl.ensureVisible(anchorElement);
-//                                });
-////                                .on('$animate:close', animateClose);
-//
-//                            // $rootScope.$$postDigest(function () {
-////                            setTimeout(function() {
-////
-////                                ctrl.ensureVisible(anchorElement);
-////                            }, 1000);
-//                            //});
-//                        });
-//                    }
-//                });
-
-                function transitionTiming(progress) {
-                    return EASE_IN_OUT(progress);
+                if (!scrollableName || scrollableName.trim().length === 0) {
+                    throw new Error('mtScrollable expected a non empty string as attribute value');
                 }
 
-                function transitionScrollTop(scrollView, duration, scrollOffset) {
+                mtScrollablesManager.register(scrollableName, this);
+                $scope.$on('$destroy', function () {
+                    mtScrollablesManager.unregister(scrollableName);
+                });
+
+                function transitionScrollTop(scrollableElement, duration, scrollOffset) {
                     // store the scroll position at the beginning of the transition
-                    var scrollStart = scrollView[0].scrollTop;
+                    var scrollStart = scrollableElement[0].scrollTop;
 
                     var startTs = null;
                     (function requestNextFrame() {
@@ -224,8 +196,8 @@
                             var progress = (frameTs - startTs) / duration;
 
                             if (progress > 0) {
-                                var frameScrollOffset = scrollOffset * transitionTiming(progress);
-                                scrollView[0].scrollTop = scrollStart + frameScrollOffset;
+                                var frameScrollOffset = scrollOffset * EASE_IN_OUT(progress);
+                                scrollableElement[0].scrollTop = scrollStart + frameScrollOffset;
                             }
 
                             if (progress < 1) {
@@ -235,8 +207,8 @@
                     })();
                 }
 
-                this.ensureVisible = function (target) {
-                    var scrollViewRect = scrollView[0].getBoundingClientRect();
+                function putElementInViewPort(target) {
+                    var scrollViewRect = scrollableElement[0].getBoundingClientRect();
                     var targetRect = target[0].getBoundingClientRect();
 
                     var offset = 0;
@@ -247,9 +219,31 @@
                     }
 
                     if (offset !== 0) {
-                        transitionScrollTop(scrollView, BASE_TRANSITION_DURATION, offset);
+                        transitionScrollTop(scrollableElement, BASE_TRANSITION_DURATION, offset);
                     }
                 }
+
+                function putAnchorInViewPort(anchor) {
+                    var target = mt.tools.querySelector(scrollableElement, '[mt-anchor=' + anchor + ']');
+                    if (target.length > 0) {
+                        putElementInViewPort(target);
+                    }
+                }
+
+                /**
+                 * Ensures the given target is visible in the view port by scrolling the scrollable.
+                 *
+                 * @param {(string|jqLite)} target could be an anchor define by "mt-anchor" attribute or a jqLite element
+                 */
+                this.putInViewPort = function (target) {
+                    if (angular.isElement(target)) {
+                        putElementInViewPort(target);
+                    } else if (angular.isString(target)) {
+                        putAnchorInViewPort(target);
+                    } else {
+                        throw new Error('The "putInViewPort" method from mtScrollable only accepts strings or jQLite elements');
+                    }
+                };
             }
         };
     });

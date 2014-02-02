@@ -120,6 +120,12 @@
 
     mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtScrollablesManager) {
 
+        /**
+         * @const
+         * @type {number}
+         */
+        var CONFIRMATION_DURATION = 4000;
+
         var ctrl = this;
         var tmoPromise = null;
 
@@ -130,13 +136,19 @@
          */
         ctrl.appendResultToQueue = function (video) {
 
-            mtScrollablesManager('queue').ensureInViewPort(mtQueueManager.appendVideo(video).id);
+            var queueEntry = mtQueueManager.appendVideo(video);
+
+            // execute at the end of the current digest loop so that the entry is really inserted in the queue
+            // by the ngRepeat directive reacting to the queue change
+            $scope.$$postDigest(function () {
+                mtScrollablesManager('queue').putInViewPort(queueEntry.id);
+            });
 
             ctrl.confirmationShown = true;
             $timeout.cancel(tmoPromise);
             tmoPromise = $timeout(function () {
                 ctrl.confirmationShown = false;
-            }, 4000);
+            }, CONFIRMATION_DURATION);
         };
     });
 

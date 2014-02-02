@@ -169,8 +169,8 @@
                 <li class="mt-queue__entry mt-js-queue__entry__animation-repeat"
                     ng-repeat="entry in props.queue.entries"
                     ng-class="{'active': entry === props.activeQueueEntry, 'broken': entry.skippedAtRuntime}"
-                    mt-scrollable-anchor="{{entry.id}}"
-                    ng-controller="mtQueueEntryCtrl as queueEntryCtrl">
+                    ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
+                    mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
                         <div ng-style="{'background-image': 'url(' + entry.video.thumbnailUrl + ')'}"
                              class="image"></div>
