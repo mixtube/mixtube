@@ -6,29 +6,28 @@
      * @name mt.directive:mtScrollable
      * @restrict A
      *
-     * Declares a scrollable container that can be manipulated pragmatically thanks to {@link mtScrollablesManager}. The
-     * attribute value is an unique name that is used to get the scrollable from {@link mtScrollablesManager}.
+     * Declares a scrollable container that can be manipulated thanks to its controller. The attribute value is an unique
+     * name that can be used to get the directive controller from the {@link mtScrollablesRegistry}.
      *
      * An anchor string declared on children elements thanks to the "mt-scrollable-anchor" attribute can be then used
-     * when calling {@link mtScrollablesManager.scrollable#putInViewPort(string)} to scroll until the child element
+     * when calling {@link mtScrollable.mtScrollableController#putInViewPort(string)} to scroll until the child element
      * is visible.
      */
-    mt.MixTubeApp.directive('mtScrollable', function ($window, $rootScope, mtScrollablesManager, BASE_TRANSITION_DURATION, EASE_IN_OUT_FN) {
+    mt.MixTubeApp.directive('mtScrollable', function ($window, $rootScope, mtScrollablesRegistry, BASE_TRANSITION_DURATION, EASE_IN_OUT_FN) {
 
         return {
             restrict: 'A',
             controller: function ($scope, $element, $attrs) {
 
-                var scrollableElement = $element;
                 var scrollableName = $attrs.mtScrollable;
 
                 if (!scrollableName || scrollableName.trim().length === 0) {
                     throw new Error('mtScrollable expected a non empty string as attribute value');
                 }
 
-                mtScrollablesManager.register(scrollableName, this);
+                mtScrollablesRegistry.set(scrollableName, this);
                 $scope.$on('$destroy', function () {
-                    mtScrollablesManager.unregister(scrollableName);
+                    mtScrollablesRegistry.delete(scrollableName);
                 });
 
                 function transitionScrollTop(scrollableElement, duration, scrollOffset) {

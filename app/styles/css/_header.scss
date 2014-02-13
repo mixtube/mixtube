@@ -127,7 +127,7 @@
   //  - we can't animate and focus an input because it creates glitches (at least in Chrome): the browser will move the
   //    focused input inside the viewport to make it visible
   //  - we want an cross browser way to fix that
-  // So:
+  // So thanks to the following styles and the mtSearchInput directive:
   //  - we append a transparent (opacity: 0) "real" input next to a "fake" one (basically a div) to a translated container
   //    so that it is outside of the viewport
   //  - on user action we translate the container inside the view, we focus the real input and animate the fake one
@@ -163,16 +163,6 @@
 
     display: flex;
     align-items: center;
-
-    &.mt-search-input__animation-toggle {
-      // this element is not animated but AngularJS animations need this duration info
-      animation-duration: $searchFieldAnimationDuration;
-    }
-
-    // don't hide it straight: wait for the end of the animation
-    &.mt-search-input__animation-toggle.ng-hide-add, &.mt-search-input__animation-toggle.ng-hide-remove {
-      display: block !important;
-    }
   }
 
   // the real input, is made transparent and becomes opaque at the end
@@ -191,28 +181,12 @@
     &::placeholder {
       @include mt-placeholder;
     }
-
-    // use fake 0s duration transition to actually leverage the delay for opacity change
-    // doing that we don't rely on JS animation event handling to show the input at the end of the fake input animation
-    transition: opacity 0s;
-
-    .mt-search-input__animation-toggle.ng-hide & {
-      opacity: 0; // IE11 won't respect that once the field focused and that will create a flash, not much we can do
-    }
-
-    .mt-search-input__animation-toggle.ng-hide-remove & {
-      transition-delay: $searchFieldAnimationDuration;
-    }
-
-    // remove delay when hiding
-    .mt-search-input__animation-toggle.ng-hide-add & {
-      transition-delay: 0;
-    }
   }
 
   // the animated fake field gives the illusion that the real input is moving
   .mt-search-input__fake-field {
     @include position(absolute, 0px 0px 0px 0px);
+    padding: $searchInputPadding;
 
     background-color: $secondaryBgColor;
     transform: translateX(0);
@@ -222,17 +196,23 @@
     align-items: center; // align-self seems to not work for :before pseudo element in IE11
 
     // simulates the real input placeholder until the real input is made visible
-    &:before {
+    &.empty:before {
       content: attr(data-mt-placeholder);
-      padding: $searchInputPadding;
 
       @include mt-placeholder;
     }
 
-    transition: transform $searchFieldAnimationDuration $easeInOut;
+    &.mt-search-input__fake-field__animation-toggle {
 
-    .mt-search-input__animation-toggle.ng-hide & {
-      transform: translateX(100%);
+      transition: transform $searchFieldAnimationDuration $easeInOut;
+
+      &.ng-hide-add, &.ng-hide-remove {
+        display: flex !important;
+      }
+
+      &.ng-hide {
+        transform: translateX(100%);
+      }
     }
   }
 }

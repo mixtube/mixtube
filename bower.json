@@ -4,13 +4,13 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "angular": "1.2.10",
+    "angular": "1.2.12",
     "reset-css": "2.0.20110126",
     "lodash": "2.4.1",
     "q": "0.9.6",
     "mousetrap": "1.4.4",
-    "angular-animate": "1.2.10",
-    "angular-touch": "1.2.10",
+    "angular-animate": "1.2.12",
+    "angular-touch": "1.2.12",
     "bezier-easing": "gre/bezier-easing"
   }
 }

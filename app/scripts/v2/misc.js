@@ -141,66 +141,6 @@
     });
 
 
-    /**
-     * @ngdoc directive
-     * @name mt.directive:mtSearchInput
-     * @restrict A
-     *
-     * @description
-     * A single usage directive that controls the sequencing of search input animation.
-     *
-     * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
-     * can't be guaranteed by AngularJS (because of the digestion loop).
-     * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
-     * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
-     */
-    mt.MixTubeApp.directive('mtSearchInput', function ($animate) {
-
-        /**
-         * @const
-         * @type {string}
-         */
-        var NG_ACTIVE_CLASS_NAME = 'ng-click-active';
-
-        return {
-            restrict: 'A',
-            link: function (iScope, iElement) {
-
-                var searchInputForm = angular.element(iElement[0].querySelector('.mt-js-search-input__form'));
-                var trigger = angular.element(iElement[0].querySelector('.mt-js-search-input__button'));
-                var inputElmt = searchInputForm[0].querySelector('.mt-js-search-input__field');
-
-                var hide = true;
-
-                function sync() {
-                    $animate[hide ? 'addClass' : 'removeClass'](searchInputForm, 'ng-hide');
-                    inputElmt[hide ? 'blur' : 'focus']();
-                }
-
-                // we need to blur the field on form submit to hide the virtual keyboard on mobile
-                searchInputForm.on('submit', function () {
-                    inputElmt.blur();
-                });
-
-                // on mobile, focusing a field programatically only works from a click event handler dispatched directly by the browser
-                trigger
-                    .on('click', function () {
-                        hide = !hide;
-                        sync();
-                    })
-                    // simulates ngTouch behavior for active class
-                    .on('touchstart', function () {
-                        trigger.addClass(NG_ACTIVE_CLASS_NAME);
-                    })
-                    .on('touchend touchmove touchcancel', function () {
-                        trigger.removeClass(NG_ACTIVE_CLASS_NAME);
-                    });
-
-                // sync at first rendering
-                sync();
-            }
-        }
-    });
 
     /**
      * @ngdoc animation

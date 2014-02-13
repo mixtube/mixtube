@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager) {
+    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry) {
 
         var ctrl = this;
 
@@ -23,6 +23,8 @@
         $scope.props.focusedEntry = null;
         /** @type {string}*/
         $scope.props.searchTerm = null;
+        /** @type {boolean}*/
+        $scope.props.searchShown = false;
 
         $scope.$watch('props.queue', function (newVal, oldVal) {
             // this test is here to prevent to serialize during the init phase
@@ -52,9 +54,20 @@
                     });
             }
         }, true);
+
+        $scope.searchButtonClicked_sync = function () {
+            $scope.props.searchShown = !$scope.props.searchShown;
+
+            if ($scope.props.searchShown) {
+                // reset search term before showing the search input
+                $scope.props.searchTerm = null;
+            }
+
+            mtSearchInputsRegistry('search').toggle($scope.props.searchShown);
+        };
     });
 
-    mt.MixTubeApp.controller('mtSearchCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient, mtConfiguration) {
+    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
 
         var ctrl = this;
 
@@ -69,15 +82,18 @@
         /** @type {promise} */
         var instantSearchPromise = null;
 
-        /** @type {boolean} */
-        ctrl.searchShown = mtConfiguration.initialSearchOpen;
-
         /** @type {Object.<string, Array.<mt.model.Video>>} */
-        ctrl.results = {youtube: []};
+        ctrl.results = null;
         /** @type {Object.<string, boolean>} */
-        ctrl.pending = {youtube: false};
+        ctrl.pending = null;
         /** @type {Object.<string, boolean>} */
-        ctrl.delivered = {youtube: false};
+        ctrl.delivered = null;
+
+        function reset() {
+            ctrl.results = {youtube: []};
+            ctrl.pending = {youtube: false};
+            ctrl.delivered = {youtube: false};
+        }
 
         function search(term) {
             // store the current request count
@@ -97,8 +113,6 @@
         // when the user types we automatically execute the search
         $scope.$watch('props.searchTerm', function (newSearchTerm) {
             if (newSearchTerm !== null) {
-                // ensure search panel is open when triggering a search
-                ctrl.searchShown = true;
 
                 // new inputs so we stop the previous request
                 $timeout.cancel(instantSearchPromise);
@@ -116,9 +130,20 @@
                 }
             }
         });
+
+        // ensures everything is cleared when the search is hidden
+        $scope.$watch('props.searchShown', function (searchShown) {
+            if (!searchShown) {
+                // new inputs so we stop the previous request
+                $timeout.cancel(instantSearchPromise);
+                reset();
+            }
+        });
+
+        reset();
     });
 
-    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtScrollablesManager) {
+    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtScrollablesRegistry) {
 
         /**
          * @const
@@ -141,7 +166,7 @@
             // execute at the end of the current digest loop so that the entry is really inserted in the queue
             // by the ngRepeat directive reacting to the queue change
             $scope.$$postDigest(function () {
-                mtScrollablesManager('queue').putInViewPort(queueEntry.id);
+                mtScrollablesRegistry('queue').putInViewPort(queueEntry.id);
             });
 
             ctrl.confirmationShown = true;

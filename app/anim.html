@@ -11,37 +11,54 @@
           rel="stylesheet" type="text/css">
 </head>
 <body ng-app="app" mt-mouse-interaction-detection="mt-mouse-based-interaction">
-<div class="mt-debug-bar" ng-show="props.showDebugBar">
-    <div class="mt-debug-bar__container">
-        <button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">
-            Ms
-        </button>
-        <button class="mt-debug-bar__button modal" ng-click="toggleModal(7)">
-            Ml
-        </button>
-        <button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">
-            Ne
-        </button>
-        <button class="mt-debug-bar__button notifications" ng-click="toggleComingNext()">
-            Ncn
-        </button>
-        <button class="mt-debug-bar__button search" ng-click="toggleSearch()">
-            S
-        </button>
-        <button class="mt-debug-bar__button queue-items" ng-click="appendQueueItem()">
-            Ia
-        </button>
-        <button class="mt-debug-bar__button queue-items" ng-click="insertQueueItem()">
-            Ii
-        </button>
-        <button class="mt-debug-bar__button queue-items" ng-click="switchActiveQueueItem()" title="Switch active item">
-            Is
-        </button>
-        <button class="mt-debug-bar__button activity" ng-click="toggleActivity()">
-            A
-        </button>
-    </div>
-</div>
+<!--<div class="mt-debug-bar" ng-show="props.showDebugBar">-->
+<!--<div class="mt-debug-bar__container">-->
+<!--<button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">-->
+<!--Ms-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button modal" ng-click="toggleModal(7)">-->
+<!--Ml-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">-->
+<!--Ne-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button notifications" ng-click="toggleComingNext()">-->
+<!--Ncn-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button search" ng-click="toggleSearch()">-->
+<!--S-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button queue-items" ng-click="appendQueueItem()">-->
+<!--Ia-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button queue-items" ng-click="insertQueueItem()">-->
+<!--Ii-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button queue-items" ng-click="switchActiveQueueItem()" title="Switch active item">-->
+<!--Is-->
+<!--</button>-->
+<!--<button class="mt-debug-bar__button activity" ng-click="toggleActivity()">-->
+<!--A-->
+<!--</button>-->
+<!--</div>-->
+<!--</div>-->
+
+<script type="text/ng-template" id="search-input-tmpl.html">
+    <form class="mt-search-input">
+        <!-- use form element so that we can intercept submit event triggered by virtual keyboard in mobile browsers -->
+        <!-- we could use search input type but we actually don't want the "services" brought by it (cancel button...) -->
+        <input ng-model="inputModel"
+               class="mt-search-input__field mt-js-search-input__field"
+               placeholder="Search video" size="30" autocomplete="off" autocorrect="off" autocapitalize="off"
+               spellcheck="false">
+
+        <div class="mt-search-input__fake-field mt-js-search-input__fake-field mt-search-input__fake-field__animation-toggle"
+             data-mt-placeholder="Search video"
+             ng-class="{empty: !inputModel}">
+            {{inputModel}}
+        </div>
+    </form>
+</script>
 
 <div class="mt-app-overlay" ng-show="props.showModal">
     <div class="mt-modal">
@@ -80,7 +97,7 @@
 </div>
 
 <div class="mt-app">
-    <div class="mt-header" mt-search-input>
+    <div class="mt-header">
         <div class="mt-header__bg mt-header__bg__animation-show"></div>
         <div class="mt-header__container">
             <div class="start">
@@ -106,19 +123,12 @@
             </div>
         </div>
 
-        <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800">
+        <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800"
+                mt-click-sync="searchButtonClicked_sync()" mt-click-active-class="ng-click-active">
             <span class="mt-replaced-text">Search</span>
         </button>
 
-        <!-- use form element so that we can intercept submit event triggered by virtual keyboard in mobile browsers -->
-        <form class="mt-search-input mt-search-input__animation-toggle mt-js-search-input__form">
-            <!-- we could use search input type but we actually don't want the "services" brought by it (cancel button...) -->
-            <input ng-model="props.searchTerm" class="mt-search-input__field mt-js-search-input__field"
-                   placeholder="Search video" size="30" autocomplete="off" autocorrect="off" autocapitalize="off"
-                   spellcheck="false">
-
-            <div class="mt-search-input__fake-field" data-mt-placeholder="Search video"></div>
-        </form>
+        <mt-search-input name="search" ng-model="props.searchTerm"></mt-search-input>
     </div>
 
     <div class="mt-body">
@@ -195,24 +205,24 @@
                 </li>
             </ul>
         </div>
-        <div class="mt-search mt-search__animation-show" ng-controller="mtSearchCtrl as searchCtrl"
-             ng-show="searchCtrl.searchShown">
+        <div class="mt-search mt-search__animation-show" ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
+             ng-show="props.searchShown && props.searchTerm">
             <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pLabel}}</h3>
 
-                    <div class="progress" ng-show="searchCtrl.pending[pId]">
+                    <div class="progress" ng-show="searchResultsCtrl.pending[pId]">
                         <progress></progress>
                     </div>
                 </div>
 
                 <p class="mt-search__no-results-message"
-                   ng-show="searchCtrl.delivered[pId] && searchCtrl.results[pId].length === 0 && props.searchTerm">
+                   ng-show="searchResultsCtrl.delivered[pId] && searchResultsCtrl.results[pId].length === 0 && props.searchTerm">
                     Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another title.
                 </p>
 
                 <ul class="mt-results">
-                    <li class="mt-result" ng-repeat="searchResult in searchCtrl.results[pId]"
+                    <li class="mt-result" ng-repeat="searchResult in searchResultsCtrl.results[pId]"
                         ng-controller="mtSearchResultCtrl as searchResultCtrl">
                         <button class="mt-result__container"
                                 ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
@@ -255,8 +265,11 @@
 <script src="scripts/services/logger-factory.js"></script>
 <script src="scripts/services/queue-manager.js"></script>
 <script src="scripts/services/youtube-client.js"></script>
-<script src="scripts/v2/services/scrollables-manager.js"></script>
+<script src="scripts/v2/services/scrollables-registry.js"></script>
 <script src="scripts/v2/directives/scrollable.js"></script>
+<script src="scripts/v2/services/search-inputs-registry.js"></script>
+<script src="scripts/v2/directives/search-input.js"></script>
+<script src="scripts/v2/directives/sync-events.js"></script>
 <!-- endbuild -->
 
 </body>
