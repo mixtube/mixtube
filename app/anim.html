@@ -174,7 +174,7 @@
                         </div>
                     </button>
                     <div class="mt-queue__entry__data">
-                        <p class="mt-queue__entry__title">
+                        <p class="mt-queue__entry__title" title="{{entry.video.title}}">
                             {{entry.video.title}}
                         </p>
 
@@ -220,9 +220,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-result__data">
-                                <p class="title">{{searchResult.title}}</p>
-                            </div>
+                            <ul class="mt-result__data">
+                                <li class="mt-result__data__item title" title="{{searchResult.title}}">
+                                    {{searchResult.title}}
+                                </li>
+                                <li class="mt-result__data__item publisher">by {{searchResult.publisherName}}</li>
+                                <li class="mt-result__data__item duration">
+                                    {{searchResult.duration | mtDuration:'shortTime'}}
+                                </li>
+                            </ul>
                         </button>
                     </li>
                 </ul>
@@ -244,6 +250,7 @@
 <script src="scripts/libs/tools.js"></script>
 <script src="scripts/v2/app-controllers.js"></script>
 <script src="scripts/v2/components/pointing-directives.js"></script>
+<script src="scripts/v2/components/duration-filter.js"></script>
 <script src="scripts/v2/components/transitions-sequence-factory.js"></script>
 <script src="scripts/v2/components/queue/queue-entry-animation.js"></script>
 <script src="scripts/v2/components/scrollable/scrollables-registry.js"></script>

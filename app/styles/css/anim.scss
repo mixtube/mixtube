@@ -398,7 +398,7 @@ body {
     top: 0;
     right: 0;
     overflow: visible;
-    @include triangle(3rem, $baseBgColor, up-right);
+    @include triangle(3rem, rgba($baseBgColor, $overlayOpacity), up-right);
     z-index: 1;
 
     &:before {
@@ -485,17 +485,45 @@ body {
   }
 
   .mt-result__data {
+    position: relative;
+    padding: $unitVerticalPadding/4 .5rem;
+
     color: $baseBgColor;
     background-color: $lightTextColor;
 
-    > .title {
-      padding: $unitVerticalPadding/2 .5rem;
+    .mt-result__data__item {
       overflow: hidden;
 
       font-family: 'Open Sans Condensed', sans-serif;
-      font-size: .875rem;
       white-space: nowrap;
       text-overflow: ellipsis;
+
+      &.title, {
+        font-size: (14rem/16);
+        font-weight: bold;
+      }
+
+      &.publisher {
+        font-size: (13rem/16);
+      }
+
+      &.duration {
+        $durationFontSize: 12rem/16;
+        $durationMargin: .25rem;
+
+        position: absolute;
+        padding: $durationMargin;
+        right: 0;
+        top: -$durationFontSize - 2 * $durationMargin; // that works because line height is 1
+        line-height: 1;
+
+        background-color: rgba($baseBgColor, $overlayOpacity);
+        border-top-left-radius: 2px;
+
+        color: $lightTextColor;
+        font-family: 'Open Sans', sans-serif;
+        font-size: $durationFontSize;
+      }
     }
   }
 }
