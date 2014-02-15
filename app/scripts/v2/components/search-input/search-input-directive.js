@@ -70,11 +70,10 @@
                     field[0][_show ? 'focus' : 'blur']();
                 }
 
-                // we need to hide and blur the field on form submit to hide the virtual keyboard on mobile
+                // we need to blur the field on form submit to hide the virtual keyboard on mobile
                 form.on('submit', function () {
                     if (!animationRunning) {
-                        _show = false;
-                        sync();
+                        field[0].blur();
                     }
                 });
 
