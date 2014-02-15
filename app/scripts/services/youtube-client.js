@@ -51,11 +51,10 @@
 
             var videosIds = _.pluck(videos, 'id');
 
-            return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
+            return $http.get('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
                     id: videosIds.join(','),
                     part: 'snippet,statistics,contentDetails',
-                    callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
             }).then(function (response) {
@@ -137,14 +136,13 @@
              * @param {function(Array.<(mt.model.Video)>)} dataCallback executed the first time we receive data
              */
             searchVideosByQuery: function (queryString, dataCallback) {
-                $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
+                $http.get('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         q: queryString,
                         type: 'video',
                         part: 'snippet',
                         order: 'relevance',
                         maxResults: mtConfiguration.maxSearchResults,
-                        callback: 'JSON_CALLBACK',
                         key: mtConfiguration.youtubeAPIKey
                     }
                 }).success(function (response) {
