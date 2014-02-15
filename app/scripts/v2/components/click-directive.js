@@ -1,22 +1,22 @@
 (function (mt) {
     'use strict';
 
-    'click'.split(' ').forEach(function (name) {
-        var directiveName = 'mt' + mt.tools.capitalize(name) + 'Sync';
-
-        mt.MixTubeApp.directive(directiveName, function ($parse) {
-            return {
-                compile: function ($element, attr) {
-                    var fn = $parse(attr[directiveName]);
-                    return function (scope, element) {
-                        element.on(name, function (event) {
+    // we using the ngTouch module the original ngClick directive is dropped in favor of an the touch one. This touch
+    // ngClick calls the callback in an asynchronous what can be undesired sometimes. This directive is here to offer the
+    // ''default ngClick behavior
+    mt.MixTubeApp.directive('mtClickSync', function ($parse) {
+        return {
+            compile: function ($element, attr) {
+                var fn = $parse(attr.mtClickSync);
+                return function (scope, element) {
+                    element.on('click', function (event) {
+                        scope.$apply(function () {
                             fn(scope, {$event: event});
-                            scope.$digest();
                         });
-                    };
-                }
-            };
-        });
+                    });
+                };
+            }
+        };
     });
 
     mt.MixTubeApp.directive('mtClickActiveClass', function () {

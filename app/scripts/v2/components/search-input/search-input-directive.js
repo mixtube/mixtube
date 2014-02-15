@@ -17,7 +17,7 @@
     mt.MixTubeApp.directive('mtSearchInput', function ($animate, $$animateReflow, mtSearchInputsRegistry) {
         return {
             restrict: 'E',
-            templateUrl: 'search-input-tmpl.html',
+            templateUrl: '/scripts/v2/components/search-input/search-input.html',
             replace: true,
             scope: {
                 inputModel: '=ngModel'

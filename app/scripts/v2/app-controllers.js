@@ -55,7 +55,7 @@
             }
         }, true);
 
-        $scope.searchButtonClicked_sync = function () {
+        $scope.searchButtonClicked = function () {
             $scope.props.searchShown = !$scope.props.searchShown;
 
             if ($scope.props.searchShown) {

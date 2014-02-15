@@ -43,23 +43,6 @@
 <!--</div>-->
 <!--</div>-->
 
-<script type="text/ng-template" id="search-input-tmpl.html">
-    <form class="mt-search-input">
-        <!-- use form element so that we can intercept submit event triggered by virtual keyboard in mobile browsers -->
-        <!-- we could use search input type but we actually don't want the "services" brought by it (cancel button...) -->
-        <input ng-model="inputModel"
-               class="mt-search-input__field mt-js-search-input__field"
-               placeholder="Search video" size="30" autocomplete="off" autocorrect="off" autocapitalize="off"
-               spellcheck="false">
-
-        <div class="mt-search-input__fake-field mt-js-search-input__fake-field mt-search-input__fake-field__animation-toggle"
-             data-mt-placeholder="Search video"
-             ng-class="{empty: !inputModel}">
-            {{inputModel}}
-        </div>
-    </form>
-</script>
-
 <div class="mt-app-overlay" ng-show="props.showModal">
     <div class="mt-modal">
         <div class="mt-modal__container">
@@ -124,7 +107,7 @@
         </div>
 
         <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800"
-                mt-click-sync="searchButtonClicked_sync()" mt-click-active-class="ng-click-active">
+                mt-click-sync="searchButtonClicked()" mt-click-active-class="ng-click-active">
             <span class="mt-replaced-text">Search</span>
         </button>
 
@@ -257,19 +240,20 @@
 <!-- endbuild -->
 
 <!-- build:js scripts/app.js -->
-<script src="scripts/v2/bootstrap.js"></script>
+<script src="scripts/v2/app.js"></script>
 <script src="scripts/libs/tools.js"></script>
-<script src="scripts/v2/controllers.js"></script>
+<script src="scripts/v2/app-controllers.js"></script>
 <script src="scripts/v2/misc.js"></script>
+<script src="scripts/v2/components/scrollable/scrollables-registry.js"></script>
+<script src="scripts/v2/components/scrollable/scrollable-directive.js"></script>
+<script src="scripts/v2/components/search-input/search-inputs-registry.js"></script>
+<script src="scripts/v2/components/search-input/search-input-directive.js"></script>
+<script src="scripts/v2/components/click-directive.js"></script>
+
 <script src="scripts/services/configuration.js"></script>
 <script src="scripts/services/logger-factory.js"></script>
 <script src="scripts/services/queue-manager.js"></script>
 <script src="scripts/services/youtube-client.js"></script>
-<script src="scripts/v2/services/scrollables-registry.js"></script>
-<script src="scripts/v2/directives/scrollable.js"></script>
-<script src="scripts/v2/services/search-inputs-registry.js"></script>
-<script src="scripts/v2/directives/search-input.js"></script>
-<script src="scripts/v2/directives/sync-events.js"></script>
 <!-- endbuild -->
 
 </body>
