@@ -14,6 +14,7 @@
         var serializedQueue;
 
         ctrl.queueLoading = false;
+        ctrl.playing = false;
 
         // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
         // so that they can be read, written and watched from any controller
@@ -55,7 +56,7 @@
             }
         }, true);
 
-        $scope.searchButtonClicked = function () {
+        ctrl.searchButtonClicked = function () {
             $scope.props.searchShown = !$scope.props.searchShown;
 
             if ($scope.props.searchShown) {
@@ -65,6 +66,10 @@
 
             mtSearchInputsRegistry('search').toggle($scope.props.searchShown);
         };
+
+        ctrl.togglePlayback = function () {
+            ctrl.playing = !ctrl.playing;
+        }
     });
 
     mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {

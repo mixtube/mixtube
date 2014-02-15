@@ -1,0 +1,23 @@
+<div class="mt-app-overlay">
+    <div class="mt-modal">
+        <div class="mt-modal__container">
+            <h2 class="mt-modal__title">The title of the modal</h2>
+
+            <div class="mt-modal__content">
+                <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
+                <!-- where the hidden part of the overflowing zone is never rendered -->
+                <div>
+                    <p ng-repeat="i in props.modalLines">
+                        Some random content probably very important!
+                        <br>Please be careful with that, if you miss it you miss it
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-modal__commands">
+                <button class="mt-modal__button" ng-click="void()">Confirm</button>
+                <button class="mt-modal__button secondary" ng-click="void()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

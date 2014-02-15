@@ -43,30 +43,6 @@
 <!--</div>-->
 <!--</div>-->
 
-<div class="mt-app-overlay" ng-show="props.showModal">
-    <div class="mt-modal">
-        <div class="mt-modal__container">
-            <h2 class="mt-modal__title">The title of the modal</h2>
-
-            <div class="mt-modal__content">
-                <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
-                <!-- where the hidden part of the overflowing zone is never rendered -->
-                <div>
-                    <p ng-repeat="i in props.modalLines">
-                        Some random content probably very important!
-                        <br>Please be careful with that, if you miss it you miss it
-                    </p>
-                </div>
-            </div>
-
-            <div class="mt-modal__commands">
-                <button class="mt-modal__button" ng-click="void()">Confirm</button>
-                <button class="mt-modal__button secondary" ng-click="void()">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="mt-app-overlay" ng-show="rootCtrl.queueLoading">
     <p class="mt-queue-loading__message">Loading queue, please wait...</p>
 
@@ -90,13 +66,13 @@
             </div>
             <div class="center">
                 <div class="mt-header__playback-buttons mt-header__playback-buttons__animation-class"
-                     ng-class="{'pause': !props.showPlayButton}">
+                     ng-class="{'pause': rootCtrl.playing}">
                     <button class="mt-header__playback-button play" data-mt-icon="&#xe805"
-                            ng-click="togglePlayButton()">
+                            ng-click="rootCtrl.togglePlayback()">
                         <span class="mt-replaced-text">Play</span>
                     </button>
                     <button class="mt-header__playback-button pause" data-mt-icon="&#xe804"
-                            ng-click="togglePlayButton()">
+                            ng-click="rootCtrl.togglePlayback()">
                         <span class="mt-replaced-text">Pause</span>
                     </button>
                 </div>
@@ -107,7 +83,7 @@
         </div>
 
         <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800"
-                mt-click-sync="searchButtonClicked()" mt-click-active-class="ng-click-active">
+                mt-click-sync="rootCtrl.searchButtonClicked()" mt-click-active-class="ng-click-active">
             <span class="mt-replaced-text">Search</span>
         </button>
 
