@@ -92,46 +92,7 @@
 
     <div class="mt-body">
 
-        <div class="mt-notifications-center">
-
-            <div class="mt-notifications-center__container" ng-if="props.showNotification">
-                <div class="mt-notification error">
-                    <button class="mt-notification__dismiss-button">&times;</button>
-                    <div class="mt-notification__content">
-                        <div class="text">
-                            Some random content probably very important! Please be careful with that, if you miss it you
-                            miss it
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-notifications-center__container" ng-if="props.showComingNext">
-                <div class="mt-notification">
-                    <button class="mt-notification__dismiss-button">&times;</button>
-                    <div class="mt-notification__content">
-                        <div class="thumbnail">
-                            <div class="mt-notification__image"
-                                 ng-style="{'background-image': 'url(http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg)'}"></div>
-                        </div>
-                        <div class="text">
-                            <div class="mt-coming-next__group">
-                                <div class="mt-coming-next__header">It was:</div>
-                                <div class="mt-coming-next__title">
-                                    Kaaris : "J'ai mis 13ans pour faire un Planète Rap, y'a rien
-                                    d'exceptionnel !"
-                                </div>
-                            </div>
-                            <div class="mt-coming-next__group next">
-                                <div class="mt-coming-next__header">Comming next:</div>
-                                <div class="mt-coming-next__title">Ace Hood - Hustle (with lot of details here)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        <mt-notification-center name="notificationCenter"></mt-notification-center>
 
         <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue">
             <ul>
@@ -141,7 +102,7 @@
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
                     mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
-                        <div ng-style="{'background-image': 'url(' + entry.video.thumbnailUrl + ')'}"
+                        <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                              class="image"></div>
                         <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
 
@@ -188,7 +149,7 @@
                             <div class="mt-result__add-affordance"></div>
 
                             <div class="mt-result__thumbnail"
-                                 ng-style="{'background-image': 'url(' + searchResult.thumbnailUrl + ')'}">
+                                 ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}">
                                 <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
                                      ng-if="searchResultCtrl.confirmationShown">
                                     <div class="text" mt-short-text="Video added to the queue">
@@ -235,6 +196,8 @@
 <script src="scripts/v2/components/scrollable/scrollable-directive.js"></script>
 <script src="scripts/v2/components/search-input/search-inputs-registry.js"></script>
 <script src="scripts/v2/components/search-input/search-input-directive.js"></script>
+<script src="scripts/v2/components/notification/notification-centers-registry.js"></script>
+<script src="scripts/v2/components/notification/notification-center-directive.js"></script>
 
 <script src="scripts/services/configuration.js"></script>
 <script src="scripts/services/queue-manager.js"></script>
