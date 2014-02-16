@@ -4,8 +4,6 @@
     mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry) {
 
         var ctrl = this;
-        var notificationCenter = mtNotificationCentersRegistry('notificationCenter');
-
 //        notificationCenter.comingNext({
 //            current: 'Kaaris : "J\'ai mis 13ans pour faire un Planète Rap, y\'a rien d\'exceptionnel !"',
 //            next: 'Ace Hood - Hustle (with lot of details here)',
@@ -55,7 +53,9 @@
                 ctrl.queueLoading = true;
                 mtQueueManager.deserialize(serializedQueue)
                     .catch(function (message) {
-                        notificationCenter.error(message);
+                        mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
+                            notificationCenter.error(message);
+                        });
                     }).finally(function () {
                         ctrl.queueLoading = false;
                     });
@@ -70,12 +70,14 @@
                 $scope.props.searchTerm = null;
             }
 
-            mtSearchInputsRegistry('search').toggle($scope.props.searchShown);
+            mtSearchInputsRegistry('search').ready(function (searchInput) {
+                searchInput.toggle($scope.props.searchShown);
+            });
         };
 
         ctrl.togglePlayback = function () {
             ctrl.playing = !ctrl.playing;
-        }
+        };
     });
 
     mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
@@ -177,7 +179,9 @@
             // execute at the end of the current digest loop so that the entry is really inserted in the queue
             // by the ngRepeat directive reacting to the queue change
             $scope.$$postDigest(function () {
-                mtScrollablesRegistry('queue').putInViewPort(queueEntry.id);
+                mtScrollablesRegistry('queue').ready(function (scrollable) {
+                    scrollable.putInViewPort(queueEntry.id);
+                });
             });
 
             ctrl.confirmationShown = true;
