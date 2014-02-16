@@ -159,23 +159,4 @@
         };
     };
 
-    mt.tools.buildGettingDictionary = function () {
-        getter._store = {};
-        getter.set = function (key, value) {
-            getter._store[key] = value;
-        };
-        getter.delete = function (key) {
-            delete getter._store[key];
-        };
-
-        function getter(key) {
-            if (!(key in getter._store)) {
-                return null;
-            }
-            return getter._store[key];
-        }
-
-        return getter;
-    };
-
 })(mt);
