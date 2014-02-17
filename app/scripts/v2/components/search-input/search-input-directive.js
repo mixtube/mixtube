@@ -30,9 +30,9 @@
                     throw new Error('mtSearchInput expected a non empty string as name value');
                 }
 
-                mtSearchInputsRegistry.set(name, this);
+                mtSearchInputsRegistry.register(name, this);
                 $scope.$on('$destroy', function () {
-                    mtSearchInputsRegistry.delete(name);
+                    mtSearchInputsRegistry.unregister(name);
                 });
 
                 var form = $element;

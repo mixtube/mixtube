@@ -23,9 +23,9 @@
                     throw new Error('mtNotificationCenter expected a non empty string as name value');
                 }
 
-                mtNotificationCentersRegistry.set(name, this);
+                mtNotificationCentersRegistry.register(name, this);
                 $scope.$on('$destroy', function () {
-                    mtNotificationCentersRegistry.delete(name);
+                    mtNotificationCentersRegistry.unregister(name);
                 });
 
                 function close(notification) {

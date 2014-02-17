@@ -1,6 +1,8 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.constant('mtNotificationCentersRegistry', mt.commons.buildAsyncDictionary());
+    mt.MixTubeApp.factory('mtNotificationCentersRegistry', function (mtAsyncRegistryFactory) {
+        return mtAsyncRegistryFactory('mtNotificationCenters');
+    });
 
 })(mt);

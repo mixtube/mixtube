@@ -25,9 +25,9 @@
                     throw new Error('mtScrollable expected a non empty string as attribute value');
                 }
 
-                mtScrollablesRegistry.set(scrollableName, this);
+                mtScrollablesRegistry.register(scrollableName, this);
                 $scope.$on('$destroy', function () {
-                    mtScrollablesRegistry.delete(scrollableName);
+                    mtScrollablesRegistry.unregister(scrollableName);
                 });
 
                 function transitionScrollTop(scrollableElement, duration, scrollOffset) {

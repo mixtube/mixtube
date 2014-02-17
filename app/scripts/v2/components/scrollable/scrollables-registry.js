@@ -1,6 +1,8 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.constant('mtScrollablesRegistry', mt.commons.buildAsyncDictionary());
+    mt.MixTubeApp.factory('mtScrollablesRegistry', function (mtAsyncRegistryFactory) {
+        return mtAsyncRegistryFactory('mtScrollables');
+    });
 
 })(mt);
