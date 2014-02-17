@@ -32,6 +32,11 @@
         /** @type {boolean}*/
         $scope.props.searchShown = false;
 
+        // hide the input search at startup
+        mtSearchInputsRegistry('search').ready(function (searchInput) {
+            searchInput.toggle(false);
+        });
+
         $scope.$watch('props.queue', function (newVal, oldVal) {
             // this test is here to prevent to serialize during the init phase
             if (!angular.equals(newVal, oldVal)) {

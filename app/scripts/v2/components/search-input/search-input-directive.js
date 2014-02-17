@@ -39,7 +39,7 @@
                 var field = mt.tools.querySelector($element, '.mt-js-search-input__field');
                 var fakeField = mt.tools.querySelector($element, '.mt-js-search-input__fake-field');
 
-                var _show = false;
+                var _show = null;
                 var animationRunning = false;
 
                 function sync() {
@@ -78,14 +78,11 @@
                 });
 
                 this.toggle = function (show) {
-                    if (show != _show && !animationRunning) {
+                    if (show !== _show && !animationRunning) {
                         _show = show;
                         sync();
                     }
                 };
-
-                // sync at first rendering
-                sync();
             }
         }
     });
