@@ -92,8 +92,6 @@ body {
 
 @mixin queue {
 
-  $entryTransitionPhaseDuration: 175ms;
-
   .mt-queue {
     width: 100%;
 
@@ -135,57 +133,6 @@ body {
 
     &.broken {
       @include queue-item-color($errorBgColor);
-    }
-
-    // js based animation but relies on transitions triggered by the CSS classes bellow
-    &.mt-js-queue__entry__animation-repeat {
-
-      // we dont want Angular to detect the animation so we set the delay by adding those classes after
-      &.grow, &.shrink, &.slidein, &.slideout {
-        transition-duration: $entryTransitionPhaseDuration;
-      }
-
-      &.grow, &.shrink {
-        transition-property: height;
-      }
-
-      &.slidein, &.slideout {
-        transition-property: transform;
-      }
-
-      &.grow-start {
-        height: 0;
-      }
-
-      &.grow-end {
-        // helped by JS during the transition
-        height: auto;
-      }
-
-      &.slidein-start {
-        transform: translateX(-100%);
-      }
-
-      &.slidein-end {
-        transform: translateX(0);
-      }
-
-      &.shrink-start {
-        // helped by JS during the transition
-        height: auto;
-      }
-
-      &.shrink-end {
-        height: 0;
-      }
-
-      &.slideout-start {
-        transform: translateX(0);
-      }
-
-      &.slideout-end {
-        transform: translateX(-100%);
-      }
     }
   }
 

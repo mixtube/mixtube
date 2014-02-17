@@ -3,7 +3,7 @@
 
     /**
      * @ngdoc animation
-     * @name mt.animation:.mt-js-queue__entry__animation-repeat
+     * @name mt.animation:.mt-js-animation-enter-leave__slide-and-size
      *
      * @description
      * A animation tailored for queue's items (enter and leave events).
@@ -11,7 +11,7 @@
      * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CSS transitions and JS sequencing.
      * The animation framework here is just used as an "event" system for us to be notified of new element insertion / removal.
      */
-    mt.MixTubeApp.animation('.mt-js-queue__entry__animation-repeat', function (mTransitionsSequenceFactory) {
+    mt.MixTubeApp.animation('.mt-js-animation-enter-leave__slide-and-size', function (mTransitionsSequenceFactory) {
 
         // creates the params used by enter and leave method
         function buildParams(element) {

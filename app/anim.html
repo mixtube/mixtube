@@ -96,7 +96,7 @@
 
         <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue">
             <ul>
-                <li class="mt-queue__entry mt-js-queue__entry__animation-repeat"
+                <li class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
                     ng-repeat="entry in props.queue.entries"
                     ng-class="{'active': entry === props.activeQueueEntry, 'broken': entry.skippedAtRuntime}"
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
@@ -192,7 +192,7 @@
 <script src="scripts/v2/components/async-registry-factory.js"></script>
 <script src="scripts/v2/components/pointing-directives.js"></script>
 <script src="scripts/v2/components/duration-filter.js"></script>
-<script src="scripts/v2/components/queue/queue-entry-animation.js"></script>
+<script src="scripts/v2/components/slide-size-animation.js"></script>
 <script src="scripts/v2/components/scrollable/scrollables-registry.js"></script>
 <script src="scripts/v2/components/scrollable/scrollable-directive.js"></script>
 <script src="scripts/v2/components/search-input/search-inputs-registry.js"></script>

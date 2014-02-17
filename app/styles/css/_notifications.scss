@@ -26,21 +26,6 @@
     &:first-child {
       padding-top: $unitVerticalPadding / 2;
     }
-
-    transition-property: transform, opacity;
-    transition-duration: $baseTransitionDuration;
-    transition-timing-function: $easeInOut;
-
-    // shows the overlay
-    &.ng-enter, &.ng-leave-active {
-      transform: translateX(100%);
-      opacity: .5;
-    }
-
-    &.ng-enter.ng-enter-active {
-      transform: translateX(0);
-      opacity: 1;
-    }
   }
 
   .mt-notification {

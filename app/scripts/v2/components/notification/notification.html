@@ -1,5 +1,6 @@
 <div class="mt-notifications-center">
-    <div class="mt-notifications-center__container" ng-repeat="notification in notifications">
+    <div class="mt-notifications-center__container mt-js-animation-enter-leave__slide-and-size from-right"
+         ng-repeat="notification in notifications">
         <button class="mt-notification" ng-switch on="notification.type"
                 ng-class="{error: notification.type === 'error'}" ng-click="close(notification)">
             <div class="mt-notification__content" ng-switch-when="error">

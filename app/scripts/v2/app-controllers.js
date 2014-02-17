@@ -4,11 +4,6 @@
     mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry) {
 
         var ctrl = this;
-//        notificationCenter.comingNext({
-//            current: 'Kaaris : "J\'ai mis 13ans pour faire un Planète Rap, y\'a rien d\'exceptionnel !"',
-//            next: 'Ace Hood - Hustle (with lot of details here)',
-//            imageUrl: 'http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg'
-//        });
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -197,7 +192,7 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager) {
+    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager, mtNotificationCentersRegistry) {
 
         var ctrl = this;
 
@@ -212,6 +207,14 @@
             $timeout(function () {
                 ctrl.pending = false;
             }, 2000);
+
+            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
+                notificationCenter.comingNext({
+                    current: 'Kaaris : "J\'ai mis 13ans pour faire un Planète Rap, y\'a rien d\'exceptionnel !"',
+                    next: 'Ace Hood - Hustle (with lot of details here)',
+                    imageUrl: 'http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg'
+                });
+            });
         };
 
         /**
