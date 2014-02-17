@@ -20,6 +20,7 @@
             controller: function ($scope, $element, $attrs) {
 
                 var scrollableName = $attrs.mtScrollable;
+                var scrollableElement = $element;
 
                 if (!scrollableName || scrollableName.trim().length === 0) {
                     throw new Error('mtScrollable expected a non empty string as attribute value');
@@ -30,7 +31,7 @@
                     mtScrollablesRegistry.unregister(scrollableName);
                 });
 
-                function transitionScrollTop(scrollableElement, duration, scrollOffset) {
+                function transitionScrollTop(duration, scrollOffset) {
                     // store the scroll position at the beginning of the transition
                     var scrollStart = scrollableElement[0].scrollTop;
 
@@ -67,7 +68,7 @@
                     }
 
                     if (offset !== 0) {
-                        transitionScrollTop(scrollableElement, BASE_TRANSITION_DURATION, offset);
+                        transitionScrollTop(BASE_TRANSITION_DURATION, offset);
                     }
                 }
 
