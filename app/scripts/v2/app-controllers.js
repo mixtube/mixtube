@@ -192,7 +192,7 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager, mtNotificationCentersRegistry) {
+    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager, mtNotificationCentersRegistry, mtModalManager) {
 
         var ctrl = this;
 
@@ -208,13 +208,15 @@
                 ctrl.pending = false;
             }, 2000);
 
-            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
-                notificationCenter.comingNext({
-                    current: 'Kaaris : "J\'ai mis 13ans pour faire un Planète Rap, y\'a rien d\'exceptionnel !"',
-                    next: 'Ace Hood - Hustle (with lot of details here)',
-                    imageUrl: 'http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg'
-                });
-            });
+            mtModalManager.open();
+
+//            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
+//                notificationCenter.comingNext({
+//                    current: 'Kaaris : "J\'ai mis 13ans pour faire un Planète Rap, y\'a rien d\'exceptionnel !"',
+//                    next: 'Ace Hood - Hustle (with lot of details here)',
+//                    imageUrl: 'http://i1.ytimg.com/vi/djE-BLrdDDc/mqdefault.jpg'
+//                });
+//            });
         };
 
         /**
