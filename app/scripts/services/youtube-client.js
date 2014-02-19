@@ -51,10 +51,16 @@
 
             var videosIds = _.pluck(videos, 'id');
 
-            return $http.get('https://www.googleapis.com/youtube/v3/videos', {
+            // We have to use JSONP here
+            //  - IE11 manages CORS request if originating page and requested resource have the same protocol
+            //  - googleapi.com only accept https protocol
+            //  - it is not doable right now to have MixTube served through https
+            //  ==> can't use CORS for MixTube in IE11 ==> can't use CORS in MixTube
+            return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
                     id: videosIds.join(','),
                     part: 'snippet,statistics,contentDetails',
+                    callback: 'JSON_CALLBACK',
                     key: mtConfiguration.youtubeAPIKey
                 }
             }).then(function (response) {
@@ -136,13 +142,14 @@
              * @param {function(Array.<(mt.model.Video)>)} dataCallback executed the first time we receive data
              */
             searchVideosByQuery: function (queryString, dataCallback) {
-                $http.get('https://www.googleapis.com/youtube/v3/search', {
+                $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         q: queryString,
                         type: 'video',
                         part: 'snippet',
                         order: 'relevance',
                         maxResults: mtConfiguration.maxSearchResults,
+                        callback: 'JSON_CALLBACK',
                         key: mtConfiguration.youtubeAPIKey
                     }
                 }).success(function (response) {
