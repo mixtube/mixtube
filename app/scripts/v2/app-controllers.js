@@ -208,7 +208,14 @@
                 ctrl.pending = false;
             }, 2000);
 
-            mtModalManager.open();
+            mtModalManager.open({
+                title: 'toto',
+                contentTemplateUrl: 'scripts/v2/components/modal/dummy-modal-content.html',
+                commands: [
+                    {label: 'Confirm', action: 'close()', primary: true},
+                    {label: 'Cancel', action: 'dismiss()'}
+                ]
+            });
 
 //            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
 //                notificationCenter.comingNext({

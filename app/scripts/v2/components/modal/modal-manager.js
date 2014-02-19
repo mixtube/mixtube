@@ -4,39 +4,44 @@
     mt.MixTubeApp.factory('mtModalManager', function ($document, $http, $templateCache, $compile, $q, $animate, $rootScope) {
 
         var body = $document.find('body').eq(0);
+        var backdropElement = angular.element('<div class="mt-backdrop"></div>');
 
         var linkFnDeferred = $q.defer();
-
         $http.get('scripts/v2/components/modal/modal.html', {cache: $templateCache}).success(function (response) {
             linkFnDeferred.resolve($compile(angular.element(response)));
         });
 
         return {
             open: function (options) {
-                return linkFnDeferred.promise.then(function (linkFn) {
-                    var scope = $rootScope.$new(true);
-                    scope.title = 'toto';
-                    scope.contentTemplateUrl = 'scripts/v2/components/modal/dummy-modal-content.html';
-                    scope.commands = [
-                        {label: 'Confirm', action: 'close()', primary: true},
-                        {label: 'Cancel', action: 'dismiss()'}
-                    ];
+                $animate.enter(backdropElement, body);
+
+                function leave(modalElement, done) {
+                    $animate.leave(backdropElement);
+                    $animate.leave(modalElement, function () {
+                        done();
+                    });
+                }
+
+                return linkFnDeferred.promise.then(function (modalLinkFn) {
+
+                    var scope = angular.extend($rootScope.$new(true), options);
 
                     var modalResult = $q.defer();
 
-                    linkFn(scope, function (clone) {
+                    modalLinkFn(scope, function (modalElement) {
+
                         scope.close = function () {
-                            $animate.leave(clone, function () {
+                            leave(modalElement, function () {
                                 modalResult.resolve();
                             });
                         };
                         scope.dismiss = function () {
-                            $animate.leave(clone, function () {
+                            leave(modalElement, function () {
                                 modalResult.reject();
                             });
                         };
 
-                        $animate.enter(clone, body, null, angular.noop);
+                        $animate.enter(modalElement, body);
                     });
 
                     return modalResult.promise;

@@ -4,26 +4,27 @@
 
 @mixin modals {
 
+  $modalZIndex: 500;
   $transitionDuration: $baseTransitionDuration;
 
-  .mt-app-overlay {
+  .mt-backdrop {
     position: absolute;
     top: 0;
     height: 100%;
     width: 100%;
-    z-index: 500;
+    z-index: $modalZIndex - 1;
 
-    background-color: $overlayBackgroundColor;
+    background-color: $backdropBackgroundColor;
 
-    // propagate the "flexibility" in column direction so that we can do clever things with modals sizing
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    // safety net for IE11 that can't properly manage nested flex containers
-    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
-    overflow: auto;
+    //    // propagate the "flexibility" in column direction so that we can do clever things with modals sizing
+    //    display: flex;
+    //    flex-direction: column;
+    //    align-items: center;
+    //    justify-content: center;
+    //
+    //    // safety net for IE11 that can't properly manage nested flex containers
+    //    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
+    //    overflow: auto;
 
     // shows the overlay
     &.ng-enter, &.ng-leave {
@@ -50,27 +51,50 @@
   }
 
   .mt-modal {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: $modalZIndex;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    // shows the overlay
+    &.ng-enter, &.ng-leave {
+      transition-property: opacity, transform;
+      transition-duration: $transitionDuration;
+      transition-timing-function: linear, $easeInOut;
+    }
+
+    &.ng-enter {
+      opacity: 0;
+      transform: translateY(-25%);
+    }
+
+    &.ng-enter.ng-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    &.ng-leave {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    &.ng-leave.ng-leave-active {
+      opacity: 0;
+      transform: translateY(-25%);
+    }
+  }
+
+  .mt-modal__frame {
     padding: $unitVerticalPadding / 2 .5rem;
 
     // propagate the "flexibility"
     display: flex;
-    flex-direction: column;
-
-    //    .mt-app-overlay.ng-enter & {
-    //      transition-property: transform, opacity;
-    //      transition-duration: 5s;
-    //      transition-timing-function: $easeInOut, linear;
-    //    }
-    //
-    //    .mt-app-overlay.ng-enter & {
-    //      //      transform: translateY(-100%);
-    //      opacity: 0;
-    //    }
-    //
-    //    .mt-app-overlay.ng-enter.ng-enter-active & {
-    //      //      transform: translateY(0);
-    //      opacity: 1;
-    //    }
   }
 
   .mt-modal__container {

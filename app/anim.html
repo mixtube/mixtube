@@ -11,45 +11,18 @@
           rel="stylesheet" type="text/css">
 </head>
 <body mt-mouse-interaction-detection="mt-mouse-based-interaction">
-<!--<div class="mt-debug-bar" ng-show="props.showDebugBar">-->
-<!--<div class="mt-debug-bar__container">-->
-<!--<button class="mt-debug-bar__button modal" ng-click="toggleModal(2)">-->
-<!--Ms-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button modal" ng-click="toggleModal(7)">-->
-<!--Ml-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button notifications" ng-click="toggleNotification()">-->
-<!--Ne-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button notifications" ng-click="toggleComingNext()">-->
-<!--Ncn-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button search" ng-click="toggleSearch()">-->
-<!--S-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button queue-items" ng-click="appendQueueItem()">-->
-<!--Ia-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button queue-items" ng-click="insertQueueItem()">-->
-<!--Ii-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button queue-items" ng-click="switchActiveQueueItem()" title="Switch active item">-->
-<!--Is-->
-<!--</button>-->
-<!--<button class="mt-debug-bar__button activity" ng-click="toggleActivity()">-->
-<!--A-->
-<!--</button>-->
-<!--</div>-->
-<!--</div>-->
 
-<div class="mt-app-overlay" ng-show="rootCtrl.queueLoading">
+<!-- queue loading progress block -->
+<div class="mt-backdrop" ng-show="rootCtrl.queueLoading"></div>
+
+<div class="mt-modal" ng-show="rootCtrl.queueLoading">
     <p class="mt-queue-loading__message">Loading queue, please wait...</p>
 
     <div class="mt-queue-loading__progress">
         <progress></progress>
     </div>
 </div>
+<!-- end of queue loading progress block -->
 
 <div class="video-container" ng-hide="false">
     <div class="video"></div>
