@@ -4,7 +4,7 @@
     mt.MixTubeApp.factory('mtModalManager', function ($document, $http, $templateCache, $compile, $q, $animate, $rootScope) {
 
         var body = $document.find('body').eq(0);
-        var backdropElement = angular.element('<div class="mt-backdrop"></div>');
+        var backdropElement = angular.element('<div class="mt-backdrop mt-animation-enter-leave__fade"></div>');
 
         var linkFnDeferred = $q.defer();
         $http.get('scripts/v2/components/modal/modal.html', {cache: $templateCache}).success(function (response) {

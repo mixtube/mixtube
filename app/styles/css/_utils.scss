@@ -43,6 +43,29 @@
     }
   }
 
+  .mt-animation-enter-leave__fade {
+
+    &.ng-enter, &.ng-leave {
+      transition: opacity $baseTransitionDuration linear;
+    }
+
+    &.ng-enter {
+      opacity: 0;
+    }
+
+    &.ng-enter.ng-enter-active {
+      opacity: 1;
+    }
+
+    &.ng-leave {
+      opacity: 1;
+    }
+
+    &.ng-leave.ng-leave-active {
+      opacity: 0;
+    }
+  }
+
   .mt-js-animation-enter-leave__slide-and-size {
     // js based animation but relies on transitions triggered by the CSS classes bellow
 

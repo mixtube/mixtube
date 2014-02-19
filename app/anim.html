@@ -115,7 +115,8 @@
                 </p>
 
                 <ul class="mt-results">
-                    <li class="mt-result" ng-repeat="searchResult in searchResultsCtrl.results[pId]"
+                    <li class="mt-result mt-animation-enter-leave__fade"
+                        ng-repeat="searchResult in searchResultsCtrl.results[pId]"
                         ng-controller="mtSearchResultCtrl as searchResultCtrl">
                         <button class="mt-result__container"
                                 ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
@@ -135,7 +136,8 @@
                                     {{searchResult.title}}
                                 </li>
                                 <li class="mt-result__data__item publisher">by {{searchResult.publisherName}}</li>
-                                <li class="mt-result__data__item duration">
+                                <li class="mt-result__data__item duration mt-animation-enter-leave__fade"
+                                    ng-if="searchResult.duration">
                                     {{searchResult.duration | mtDuration:'shortTime'}}
                                 </li>
                             </ul>

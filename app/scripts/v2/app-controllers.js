@@ -113,6 +113,9 @@
             var startSearchRequestCount = searchRequestCount;
 
             ctrl.pending.youtube = true;
+            // reset the results to trigger the animation
+            ctrl.results.youtube = [];
+
             mtYoutubeClient.searchVideosByQuery(term, function (videos) {
                 // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests
                 if (searchRequestCount === startSearchRequestCount) {

@@ -5,7 +5,6 @@
 @mixin modals {
 
   $modalZIndex: 500;
-  $transitionDuration: $baseTransitionDuration;
 
   .mt-backdrop {
     position: absolute;
@@ -15,39 +14,6 @@
     z-index: $modalZIndex - 1;
 
     background-color: $backdropBackgroundColor;
-
-    //    // propagate the "flexibility" in column direction so that we can do clever things with modals sizing
-    //    display: flex;
-    //    flex-direction: column;
-    //    align-items: center;
-    //    justify-content: center;
-    //
-    //    // safety net for IE11 that can't properly manage nested flex containers
-    //    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
-    //    overflow: auto;
-
-    // shows the overlay
-    &.ng-enter, &.ng-leave {
-      transition-property: opacity;
-      transition-duration: $transitionDuration;
-      transition-timing-function: linear;
-    }
-
-    &.ng-enter {
-      opacity: 0;
-    }
-
-    &.ng-enter.ng-enter-active {
-      opacity: 1;
-    }
-
-    &.ng-leave {
-      opacity: 1;
-    }
-
-    &.ng-leave.ng-leave-active {
-      opacity: 0;
-    }
   }
 
   .mt-modal {
@@ -57,6 +23,10 @@
     width: 100%;
     z-index: $modalZIndex;
 
+    // safety net for IE11 that can't properly manage nested flex containers
+    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
+    overflow: auto;
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -65,7 +35,7 @@
     // shows the overlay
     &.ng-enter, &.ng-leave {
       transition-property: opacity, transform;
-      transition-duration: $transitionDuration;
+      transition-duration: $baseTransitionDuration;
       transition-timing-function: linear, $easeInOut;
     }
 
@@ -92,9 +62,11 @@
 
   .mt-modal__frame {
     padding: $unitVerticalPadding / 2 .5rem;
+    max-width: 100%;
 
     // propagate the "flexibility"
     display: flex;
+    flex-direction: column;
   }
 
   .mt-modal__container {
