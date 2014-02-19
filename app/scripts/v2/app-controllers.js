@@ -95,6 +95,12 @@
         /** @type {promise} */
         var instantSearchPromise = null;
 
+        /**
+         * The user already executed one search. Used to hide the results pane until there is something to show.
+         *
+         * @type {boolean}
+         */
+        ctrl.inSearch = false;
         /** @type {Object.<string, Array.<mt.model.Video>>} */
         ctrl.results = null;
         /** @type {Object.<string, boolean>} */
@@ -103,6 +109,7 @@
         ctrl.delivered = null;
 
         function reset() {
+            ctrl.inSearch = false;
             ctrl.results = {youtube: []};
             ctrl.pending = {youtube: false};
             ctrl.delivered = {youtube: false};
@@ -112,9 +119,12 @@
             // store the current request count
             var startSearchRequestCount = searchRequestCount;
 
-            ctrl.pending.youtube = true;
+
             // reset the results to trigger the animation
             ctrl.results.youtube = [];
+
+            ctrl.inSearch = true;
+            ctrl.pending.youtube = true;
 
             mtYoutubeClient.searchVideosByQuery(term, function (videos) {
                 // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests

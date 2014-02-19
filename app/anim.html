@@ -98,8 +98,9 @@
                 </li>
             </ul>
         </div>
+
         <div class="mt-search mt-search__animation-show" ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
-             ng-show="props.searchShown && props.searchTerm">
+             ng-show="props.searchShown && searchResultsCtrl.inSearch">
             <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pLabel}}</h3>
