@@ -60,7 +60,7 @@
     }
   }
 
-  .mt-modal__frame {
+  .mt-modal__container {
     padding: $unitVerticalPadding / 2 .5rem;
     max-width: 100%;
 
@@ -69,7 +69,7 @@
     flex-direction: column;
   }
 
-  .mt-modal__container {
+  .mt-modal__frame {
     overflow: hidden;
 
     background-color: $lightTextColor;
