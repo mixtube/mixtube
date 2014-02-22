@@ -39,7 +39,7 @@
             </div>
             <div class="center">
                 <div class="mt-header__playback-buttons mt-header__playback-buttons__animation-class"
-                     ng-class="{'pause': rootCtrl.playing}">
+                     ng-class="{'pause': rootCtrl.playback === PlaybackState.PAUSED}">
                     <button class="mt-header__playback-button play" data-mt-icon="&#xe805"
                             ng-click="rootCtrl.togglePlayback()">
                         <span class="mt-replaced-text">Play</span>

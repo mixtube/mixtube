@@ -1,9 +1,24 @@
 (function (mt) {
     'use strict';
-
     mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry) {
 
         var ctrl = this;
+
+        /**
+         * A enumeration of possible playback state values.
+         *
+         * We use meaningful string values for debugging purpose.
+         *
+         * @enum {string}
+         */
+        var PlaybackState = {
+            PLAYING: 'PLAYING',
+            PAUSED: 'PAUSED',
+            STOPPED: 'STOPPED'
+        };
+
+        // exposes playback state enum so that it can be used everywhere in the UI code
+        $scope.PlaybackState = PlaybackState;
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -14,7 +29,8 @@
         var serializedQueue;
 
         ctrl.queueLoading = false;
-        ctrl.playing = false;
+        /** @type {PlaybackState} */
+        ctrl.playback = $scope.PlaybackState.STOPPED;
 
         // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
         // so that they can be read, written and watched from any controller
@@ -76,7 +92,10 @@
         };
 
         ctrl.togglePlayback = function () {
-            ctrl.playing = !ctrl.playing;
+            ctrl.playback
+                = ctrl.playback === $scope.PlaybackState.PAUSED
+                ? $scope.PlaybackState.PLAYING
+                : $scope.PlaybackState.PAUSED;
         };
     });
 
