@@ -18,25 +18,6 @@ body {
   line-height: $lineHeight;
 }
 
-.video-container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  overflow: hidden;
-}
-
-.video {
-  width: 100%;
-  height: 100%;
-
-  background-image: url(../../mock-video.png);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #000000;
-}
-
 .mt-queue-loading__message {
   margin-bottom: $unitVerticalPadding;
 }
@@ -55,6 +36,26 @@ body {
 
   display: flex;
   flex-direction: column;
+}
+
+.mt-scene {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  overflow: hidden;
+  background-color: red;
+}
+
+.mt-scene__element-host {
+  width: 100%;
+  height: 100%;
+  //
+  //  background-image: url(../../mock-video.png);
+  //  background-size: cover;
+  //  background-repeat: no-repeat;
+  //  background-position: center;
+  //  background-color: #000000;
 }
 
 .mt-body {

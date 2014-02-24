@@ -11,6 +11,7 @@
     "mousetrap": "1.4.4",
     "angular-animate": "1.2.13",
     "angular-touch": "1.2.13",
-    "bezier-easing": "gre/bezier-easing"
+    "bezier-easing": "gre/bezier-easing",
+    "popcorn-js": "~1.5.3"
   }
 }

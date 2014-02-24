@@ -224,7 +224,7 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager, mtNotificationCentersRegistry, mtModalManager) {
+    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtOrchestrator, mtQueueManager, mtNotificationCentersRegistry, mtModalManager) {
 
         var ctrl = this;
 
@@ -234,20 +234,20 @@
          * @param {mt.model.QueueEntry} queueEntry
          */
         ctrl.playQueueEntry = function (queueEntry) {
+
             ctrl.pending = true;
-
-            $timeout(function () {
+            mtOrchestrator.skipTo(queueEntry).finally(function() {
                 ctrl.pending = false;
-            }, 2000);
-
-            mtModalManager.open({
-                title: 'toto',
-                contentTemplateUrl: 'scripts/v2/components/modal/dummy-modal-content.html',
-                commands: [
-                    {label: 'Confirm', action: 'close()', primary: true},
-                    {label: 'Cancel', action: 'dismiss()'}
-                ]
             });
+
+//            mtModalManager.open({
+//                title: 'toto',
+//                contentTemplateUrl: 'scripts/v2/components/modal/dummy-modal-content.html',
+//                commands: [
+//                    {label: 'Confirm', action: 'close()', primary: true},
+//                    {label: 'Cancel', action: 'dismiss()'}
+//                ]
+//            });
 
 //            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
 //                notificationCenter.comingNext({
