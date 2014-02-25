@@ -12,9 +12,7 @@
                 var popcorn = Popcorn(wrapper.get());
 
                 popcorn.on('loadedmetadata', function () {
-                    popcorn.cue(popcorn.duration() - 5, function () {
-
-                    });
+                    popcorn.fade({direction: 'in', start: 0, duration: 5});
                 });
 
                 popcorn.on('canplay', function () {
