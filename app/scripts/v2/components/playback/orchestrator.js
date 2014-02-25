@@ -3,6 +3,8 @@
 
     mt.MixTubeApp.factory('mtOrchestrator', function ($q, mtQueueManager, mtMediaElementsPool) {
 
+        var runningPopcorns = [];
+
         return {
             skipTo: function (queueEntry) {
 
@@ -12,7 +14,13 @@
                 var popcorn = Popcorn(wrapper.get());
 
                 popcorn.on('loadedmetadata', function () {
-                    popcorn.fade({direction: 'in', start: 0, duration: 5});
+                    popcorn.fade({direction: 'in', duration: 5});
+
+                    runningPopcorns.forEach(function (runningPopcorns) {
+                        runningPopcorns.fade({direction: 'out', duration: 5});
+                    });
+
+                    runningPopcorns = [popcorn];
                 });
 
                 popcorn.on('canplay', function () {

@@ -22,7 +22,6 @@
             if (players.length === 0) {
                 // no free player instance, create a new one
                 mediaElement = Popcorn.HTMLYouTubeVideoElement(_scene.newHostElement()[0]);
-                players.push(mediaElement);
             } else {
                 mediaElement = players.pop();
             }

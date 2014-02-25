@@ -31,21 +31,19 @@
             elementTween = invertTween(elementFadeInTween);
         }
 
-        return {
-            start: function (event, options) {
-                var startTs = Date.now();
+        var startTs = Date.now();
 
-                _.defer(function frame() {
-                    var progress = Math.min((Date.now() - startTs) / durationInMillis, 1);
+        _.defer(function frame() {
+            var progress = Math.min((Date.now() - startTs) / durationInMillis, 1);
 
-                    soundTween(instance, progress);
-                    elementTween(instance, progress);
+            soundTween(instance, progress);
+            elementTween(instance, progress);
 
-                    if (progress < 1) {
-                        window.setTimeout(frame, 16);
-                    }
-                });
+            if (progress < 1) {
+                window.setTimeout(frame, 16);
             }
-        };
+        });
+
+        return {};
     });
 })(Popcorn);
