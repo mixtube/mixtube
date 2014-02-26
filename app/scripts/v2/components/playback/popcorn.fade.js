@@ -16,7 +16,7 @@
         };
     }
 
-    Popcorn.plugin('fade', function (options) {
+    Popcorn.prototype.fade = function (options) {
         var instance = this;
 
         var durationInMillis = options.duration * 1000;
@@ -45,5 +45,5 @@
         });
 
         return {};
-    });
+    };
 })(Popcorn);
