@@ -24,9 +24,7 @@
 </div>
 <!-- end of queue loading progress block -->
 
-<div class="video-container" ng-hide="false">
-    <div class="video"></div>
-</div>
+<div class="mt-scene" mt-scene="scene"></div>
 
 <div class="mt-app">
     <div class="mt-header">
@@ -39,7 +37,7 @@
             </div>
             <div class="center">
                 <div class="mt-header__playback-buttons mt-header__playback-buttons__animation-class"
-                     ng-class="{'pause': rootCtrl.playing}">
+                     ng-class="{'pause': rootCtrl.playback === PlaybackState.PAUSED}">
                     <button class="mt-header__playback-button play" data-mt-icon="&#xe805"
                             ng-click="rootCtrl.togglePlayback()">
                         <span class="mt-replaced-text">Play</span>
@@ -156,6 +154,9 @@
 <script src="bower_components/angular-touch/angular-touch.js"></script>
 <script src="bower_components/bezier-easing/index.js"></script>
 <script src="bower_components/lodash/dist/lodash.js"></script>
+<script src="bower_components/popcorn-js/popcorn.js"></script>
+<script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
+<script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
 <!-- endbuild -->
 
 <!-- build:js scripts/app.js -->
@@ -176,6 +177,11 @@
 <script src="scripts/v2/components/notification/notification-centers-registry.js"></script>
 <script src="scripts/v2/components/notification/notification-center-directive.js"></script>
 <script src="scripts/v2/components/modal/modal-manager.js"></script>
+<script src="scripts/v2/components/playback/media-elements-pool.js"></script>
+<script src="scripts/v2/components/playback/orchestrator.js"></script>
+<script src="scripts/v2/components/playback/scene-directive.js"></script>
+<script src="scripts/v2/components/playback/scenes-registry.js"></script>
+<script src="scripts/v2/components/playback/popcorn.fade.js"></script>
 
 <script src="scripts/services/configuration.js"></script>
 <script src="scripts/services/queue-manager.js"></script>

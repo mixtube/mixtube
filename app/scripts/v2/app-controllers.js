@@ -1,9 +1,24 @@
 (function (mt) {
     'use strict';
-
     mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry) {
 
         var ctrl = this;
+
+        /**
+         * A enumeration of possible playback state values.
+         *
+         * We use meaningful string values for debugging purpose.
+         *
+         * @enum {string}
+         */
+        var PlaybackState = {
+            PLAYING: 'PLAYING',
+            PAUSED: 'PAUSED',
+            STOPPED: 'STOPPED'
+        };
+
+        // exposes playback state enum so that it can be used everywhere in the UI code
+        $scope.PlaybackState = PlaybackState;
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -14,7 +29,8 @@
         var serializedQueue;
 
         ctrl.queueLoading = false;
-        ctrl.playing = false;
+        /** @type {PlaybackState} */
+        ctrl.playback = $scope.PlaybackState.STOPPED;
 
         // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
         // so that they can be read, written and watched from any controller
@@ -76,7 +92,10 @@
         };
 
         ctrl.togglePlayback = function () {
-            ctrl.playing = !ctrl.playing;
+            ctrl.playback
+                = ctrl.playback === $scope.PlaybackState.PAUSED
+                ? $scope.PlaybackState.PLAYING
+                : $scope.PlaybackState.PAUSED;
         };
     });
 
@@ -205,7 +224,7 @@
         };
     });
 
-    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtQueueManager, mtNotificationCentersRegistry, mtModalManager) {
+    mt.MixTubeApp.controller('mtQueueEntryCtrl', function ($timeout, mtOrchestrator, mtQueueManager, mtNotificationCentersRegistry, mtModalManager) {
 
         var ctrl = this;
 
@@ -215,20 +234,20 @@
          * @param {mt.model.QueueEntry} queueEntry
          */
         ctrl.playQueueEntry = function (queueEntry) {
+
             ctrl.pending = true;
-
-            $timeout(function () {
+            mtOrchestrator.skipTo(queueEntry).finally(function() {
                 ctrl.pending = false;
-            }, 2000);
-
-            mtModalManager.open({
-                title: 'toto',
-                contentTemplateUrl: 'scripts/v2/components/modal/dummy-modal-content.html',
-                commands: [
-                    {label: 'Confirm', action: 'close()', primary: true},
-                    {label: 'Cancel', action: 'dismiss()'}
-                ]
             });
+
+//            mtModalManager.open({
+//                title: 'toto',
+//                contentTemplateUrl: 'scripts/v2/components/modal/dummy-modal-content.html',
+//                commands: [
+//                    {label: 'Confirm', action: 'close()', primary: true},
+//                    {label: 'Cancel', action: 'dismiss()'}
+//                ]
+//            });
 
 //            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
 //                notificationCenter.comingNext({
