@@ -2,18 +2,16 @@
 
     'use strict';
 
-    function soundFadeInTween(target, progress) {
-        target.volume(progress);
+    var volumeTweenable = new Tweenable();
+    var opacityTweenable = new Tweenable();
+
+    function volumeStep(popcorn, state) {
+        popcorn.volume(state.volume);
+        console.log(popcorn.volume());
     }
 
-    function elementFadeInTween(target, progress) {
-        target.media.style['opacity'] = progress;
-    }
-
-    function invertTween(tween) {
-        return function (target, progress) {
-            tween(target, 1 - progress);
-        };
+    function opacityStep(popcorn, state) {
+        popcorn.media.style.opacity = state.opacity;
     }
 
     Popcorn.prototype.fade = function (options) {
@@ -21,29 +19,27 @@
 
         var durationInMillis = options.duration * 1000;
 
-        var soundTween = null;
-        var elementTween = null;
+        var volumeTweenableConfig = {
+            duration: durationInMillis,
+            step: _.partial(volumeStep, instance),
+            from: { volume: instance.volume() },
+            to: { volume: null }
+        };
+
+        var opacityTweenableConfig = {
+            duration: durationInMillis,
+            step: _.partial(opacityStep, instance),
+            from: { opacity: parseFloat(instance.media.style.opacity) },
+            to: { opacity: null }
+        };
+
         if (options.direction === 'in') {
-            soundTween = soundFadeInTween;
-            elementTween = elementFadeInTween;
+            volumeTweenableConfig.to.volume = opacityTweenableConfig.to.opacity = 1;
         } else if (options.direction === 'out') {
-            soundTween = invertTween(soundFadeInTween);
-            elementTween = invertTween(elementFadeInTween);
+            volumeTweenableConfig.to.volume = opacityTweenableConfig.to.opacity = 0;
         }
 
-        var startTs = Date.now();
-
-        _.defer(function frame() {
-            var progress = Math.min((Date.now() - startTs) / durationInMillis, 1);
-
-            soundTween(instance, progress);
-            elementTween(instance, progress);
-
-            if (progress < 1) {
-                window.setTimeout(frame, 16);
-            }
-        });
-
-        return {};
+        volumeTweenable.tween(volumeTweenableConfig);
+        opacityTweenable.tween(opacityTweenableConfig);
     };
 })(Popcorn);

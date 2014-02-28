@@ -19,7 +19,6 @@
 
                 this.newHostElement = function () {
                     var hostElement = angular.element('<div class="mt-scene__element-host"></div>');
-                    hostElement.css('opacity', 0);
                     sceneElement.append(hostElement);
                     return hostElement;
                 };

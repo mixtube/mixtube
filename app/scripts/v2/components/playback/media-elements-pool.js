@@ -21,7 +21,12 @@
             var mediaElement = null;
             if (players.length === 0) {
                 // no free player instance, create a new one
-                mediaElement = Popcorn.HTMLYouTubeVideoElement(_scene.newHostElement()[0]);
+                var hostElement = _scene.newHostElement();
+                mediaElement = Popcorn.HTMLYouTubeVideoElement(hostElement[0]);
+
+                // hide and make the player silent at the beginning
+                hostElement.css('opacity', 0);
+                mediaElement.volume = 0;
             } else {
                 mediaElement = players.pop();
             }
