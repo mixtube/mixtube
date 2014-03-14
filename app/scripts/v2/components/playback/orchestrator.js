@@ -1,24 +1,33 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, mtQueueManager, mtMediaElementsPool) {
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, mtQueueManager, mtMediaElementsPool) {
+
+        /**
+         * Duration of the whole cross-fade in seconds
+         *
+         * @const
+         * @type {number}
+         */
+        var CROSS_FADE_DURATION = 3;
 
         var _pendingPlayer = null;
         var _runningPlayers = [];
 
         function freePlayer(player) {
             player.popcorn.destroy();
-            player.wrapper.release();
+            player.mediaElementWrapper.release();
         }
 
         /**
          * Fades out, free and remove the currently running players from the list
          */
-        function initiateRunningPlayersTermination() {
+        function stopRunningPlayers() {
             _runningPlayers.forEach(function (runningPlayer) {
-                runningPlayer.popcorn.fade({direction: 'out', duration: 5, done: function () {
+                runningPlayer.popcorn.fade({direction: 'out', duration: CROSS_FADE_DURATION, done: function () {
                     freePlayer(runningPlayer);
                     _.remove(_runningPlayers, runningPlayer);
+                    $rootScope.$digest();
                 }});
             });
         }
@@ -26,29 +35,44 @@
         function preparePending(queueEntry) {
             var deferred = $q.defer();
 
-            var wrapper = mtMediaElementsPool(queueEntry.video.provider);
-            var popcorn = Popcorn(wrapper.get());
+            var mediaElementWrapper = mtMediaElementsPool(queueEntry.video.provider);
+            var popcorn = Popcorn(mediaElementWrapper.get());
 
             // if there is already a pending player we want to cancel: most recent request always wins
             if (_pendingPlayer) {
                 freePlayer(_pendingPlayer);
             }
-            _pendingPlayer = {wrapper: wrapper, popcorn: popcorn};
+            _pendingPlayer = {mediaElementWrapper: mediaElementWrapper, popcorn: popcorn, queueEntry: queueEntry};
 
-            popcorn.on('canplay', function preparePendingCanPlayCb() {
-                popcorn.off('canplay', preparePendingCanPlayCb);
-                deferred.resolve();
+            popcorn.one('canplay', function () {
+                // makes really sure a call to play will start the video instantaneously by forcing the player to buffer
+                popcorn.play();
+                popcorn.one('playing', function () {
+                    popcorn.pause();
+                    deferred.resolve(_pendingPlayer);
+                });
             });
 
-            wrapper.get().src = 'http://www.youtube.com/watch?v=' + queueEntry.video.id;
+            mediaElementWrapper.get().src = 'http://www.youtube.com/watch?v=' + queueEntry.video.id;
 
             return deferred.promise;
+        }
+
+        function preparePendingAuto() {
+            var runningQueueEntry = _.last(_runningPlayers).queueEntry;
+            var nextQueueEntry = mtQueueManager.closestValidEntry(runningQueueEntry, false);
+
+            if (!nextQueueEntry) {
+                return $q.reject(new Error('There is not any next queue entry to prepare'));
+            }
+
+            return preparePending(nextQueueEntry);
         }
 
         /**
          * @returns {promise}
          */
-        function startPending() {
+        function startPendingPlayer() {
             var deferred = $q.defer();
             var popcorn = _pendingPlayer.popcorn;
 
@@ -56,53 +80,53 @@
                 // safety checking: there is a race condition here and it shouldn't happen
                 deferred.reject(new Error('The pending popcorn instance is not ready to be play started'));
             } else {
-                // register the cue to initiate the transition before the end (auto cross-fade)
-                popcorn.cue(popcorn.duration() - 5, function () {
 
+                var duration = popcorn.duration();
+                var crossFadeTime = 15;
+
+                // registers a cue to install auto cross-fade
+                popcorn.cue(crossFadeTime, function () {
+                    stopRunningPlayers();
+                    if (_pendingPlayer) {
+                        startPendingPlayer();
+                    }
+                    $rootScope.$digest();
                 });
                 popcorn.play();
-                popcorn.fade({direction: 'in', duration: 5});
-                initiateRunningPlayersTermination();
+                popcorn.fade({direction: 'in', duration: CROSS_FADE_DURATION});
+
                 // promote the pending player to the running players list
                 _runningPlayers.push(_pendingPlayer);
+
                 _pendingPlayer = null;
+
+                _.defer(function () {
+                    // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
+                    preparePendingAuto();
+                });
+
                 deferred.resolve();
             }
 
             return deferred.promise;
         }
 
+        function skipTo(queueEntry) {
+            return preparePending(queueEntry).then(function () {
+                stopRunningPlayers();
+                return startPendingPlayer();
+            });
+        }
+
         return {
-            skipTo: function (queueEntry) {
+            skipTo: skipTo,
 
-                return preparePending(queueEntry).then(function () {
-                    return startPending();
-                });
+            get runningQueueEntry() {
+                if (!_runningPlayers.length) {
+                    return null;
+                }
 
-//                var playingDeferred = $q.defer();
-//
-//                var wrapper = mtMediaElementsPool(queueEntry.video.provider);
-//                var popcorn = Popcorn(wrapper.get());
-//
-//                if (_pendingPlayer) {
-//                    freePlayer(_pendingPlayer);
-//                }
-//                _pendingPlayer = {wrapper: wrapper, popcorn: popcorn};
-//
-//                popcorn.on('loadedmetadata', function () {
-//                    popcorn.cue(popcorn.duration() - 5, function () {
-//                        play(_pendingPlayer.popcorn);
-//                    });
-//                });
-//
-//                popcorn.on('canplay', function () {
-//                    play(_pendingPlayer.popcorn);
-//                    playingDeferred.resolve();
-//                });
-//
-//                wrapper.get().src = 'http://www.youtube.com/watch?v=' + queueEntry.video.id;
-//
-//                return playingDeferred.promise;
+                return _.last(_runningPlayers).queueEntry;
             }
         };
     });

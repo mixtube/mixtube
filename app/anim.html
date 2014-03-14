@@ -69,7 +69,7 @@
             <ul>
                 <li class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
                     ng-repeat="entry in props.queue.entries"
-                    ng-class="{'active': entry === props.activeQueueEntry, 'broken': entry.skippedAtRuntime}"
+                    ng-class="{'active': entry === props.orchestrator.runningQueueEntry, 'broken': entry.skippedAtRuntime}"
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
                     mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
@@ -182,6 +182,7 @@
 <script src="scripts/v2/components/playback/orchestrator.js"></script>
 <script src="scripts/v2/components/playback/scene-directive.js"></script>
 <script src="scripts/v2/components/playback/scenes-registry.js"></script>
+<script src="scripts/v2/components/playback/popcorn.one.js"></script>
 <script src="scripts/v2/components/playback/popcorn.fade.js"></script>
 
 <script src="scripts/services/configuration.js"></script>

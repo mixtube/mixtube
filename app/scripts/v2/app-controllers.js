@@ -1,6 +1,6 @@
 (function (mt) {
     'use strict';
-    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry) {
+    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator) {
 
         var ctrl = this;
 
@@ -38,6 +38,9 @@
         $scope.props.queue = mtQueueManager.queue;
         /** @type {mt.model.QueueEntry} */
         $scope.props.focusedEntry = null;
+
+        $scope.props.orchestrator = mtOrchestrator;
+
         /** @type {string}*/
         $scope.props.searchTerm = null;
         /** @type {boolean}*/
@@ -236,7 +239,7 @@
         ctrl.playQueueEntry = function (queueEntry) {
 
             ctrl.pending = true;
-            mtOrchestrator.skipTo(queueEntry).finally(function() {
+            mtOrchestrator.skipTo(queueEntry).finally(function () {
                 ctrl.pending = false;
             });
 

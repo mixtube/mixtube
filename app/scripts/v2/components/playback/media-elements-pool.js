@@ -3,8 +3,6 @@
 
     mt.MixTubeApp.factory('mtMediaElementsPool', function (mtScenesRegistry) {
 
-        var availableMediaElementByType = {youtube: []};
-
         var _scene = null;
         mtScenesRegistry('scene').ready(function (scene) {
             _scene = scene;
@@ -12,24 +10,17 @@
 
         return function (type) {
 
-            if (!(type in availableMediaElementByType)) {
+            if (type !== 'youtube') {
                 throw new Error('Unmanaged type of player: ' + type);
             }
 
-            var players = availableMediaElementByType[type];
+            // no free player instance, create a new one
+            var hostElement = _scene.newHostElement();
+            var mediaElement = Popcorn.HTMLYouTubeVideoElement(hostElement[0]);
 
-            var mediaElement = null;
-            if (players.length === 0) {
-                // no free player instance, create a new one
-                var hostElement = _scene.newHostElement();
-                mediaElement = Popcorn.HTMLYouTubeVideoElement(hostElement[0]);
-
-                // hide and make the player silent at the beginning
-                hostElement.css('opacity', 0);
-                mediaElement.volume = 0;
-            } else {
-                mediaElement = players.pop();
-            }
+            // hide and make the player silent at the beginning
+            hostElement.css('opacity', 0);
+            mediaElement.volume = 0;
 
             return {
                 _alive: true,
@@ -49,8 +40,7 @@
                 release: function () {
                     this._checkState();
 
-                    // put the media element back in the pool
-                    players.push(mediaElement);
+                    hostElement.remove();
                     this._alive = false;
                 }
             };

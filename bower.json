@@ -12,7 +12,7 @@
     "angular-animate": "1.2.14",
     "angular-touch": "1.2.14",
     "bezier-easing": "gre/bezier-easing",
-    "popcorn-js": "1.5.4",
-    "shifty": "E:\\development\\idea-projects\\shifty#feature/set-schedule-function"
+    "shifty": "E:\\development\\idea-projects\\shifty#feature/set-schedule-function",
+    "popcorn-js": "1.5.6"
   }
 }
