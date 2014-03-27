@@ -28,6 +28,16 @@
          * @type {PlaybackState}
          */
         var _playback = PlaybackState.STOPPED;
+
+        /**
+         * A deferred that retains a "move to" operation when the "preparation" of the video finished while the
+         * orchestrator was in pause. By resolving this continuation we can proceed to the next step: cross fading the
+         * prepared video.
+         *
+         * @type {Deferred}
+         */
+        var _moveToContinuation = $q.defer();
+
         var _pendingPlayer = null;
         var _runningPlayers = [];
 
@@ -50,15 +60,14 @@
          */
         function stopRunningPlayers() {
             var promises = _runningPlayers.map(function (runningPlayer) {
-
                 var deferred = $q.defer();
 
                 runningPlayer.popcorn.fade({direction: 'out', duration: CROSS_FADE_DURATION, done: function () {
                     $rootScope.$apply(function () {
                         freePlayer(runningPlayer);
                         _.remove(_runningPlayers, runningPlayer);
+                        deferred.resolve();
                     });
-                    deferred.resolve();
                 }});
 
                 return deferred.promise;
@@ -133,40 +142,60 @@
                 var duration = popcorn.duration();
                 var crossFadeTime = 15;
 
+                // promote the pending player to the running players list
+                _runningPlayers.push(_pendingPlayer);
+                _pendingPlayer = null;
+
+                // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
+                $timeout(function () {
+                    preparePendingAuto();
+                });
+
                 // registers a cue to install auto cross-fade
                 popcorn.cue(crossFadeTime, function () {
                     $rootScope.$apply(function () {
-
-                        stopRunningPlayers().then(function () {
-                            if (!_runningPlayers.length) {
-                                // end of the road: nothing has been started while stopping the players
-                                _playback = PlaybackState.STOPPED;
-                            }
-                        });
-
-                        if (_pendingPlayer) { // the pending player at the time (most likely the next one)
-                            startPendingPlayer();
-                        }
-
+                        crossFadeToPendingPlayer();
                     });
                 });
+
+                // actually start the player
                 popcorn.play();
                 popcorn.fade({direction: 'in', duration: CROSS_FADE_DURATION});
-
-                // promote the pending player to the running players list
-                _runningPlayers.push(_pendingPlayer);
-
-                _pendingPlayer = null;
-
-                $timeout(function () {
-                    // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
-                    preparePendingAuto();
-                });
 
                 deferred.resolve();
             }
 
             return deferred.promise;
+        }
+
+        function crossFadeToPendingPlayer() {
+            stopRunningPlayers()
+                .then(function () {
+                    if (!_runningPlayers.length) {
+                        // end of the road: nothing has been started while stopping the players
+                        _playback = PlaybackState.STOPPED;
+                    }
+                });
+
+            if (_pendingPlayer) {
+                startPendingPlayer();
+            }
+        }
+
+        function moveTo(queueEntry) {
+            // when the pending is ready and the playback is resumed when can proceed
+            return preparePending(queueEntry)
+                .then(function () {
+                    if (_playback === PlaybackState.PLAYING) {
+                        crossFadeToPendingPlayer();
+                    } else if (_playback === PlaybackState.PAUSED) {
+                        // the orchestrator is now paused so we retains the next steps
+                        _moveToContinuation = $q.defer();
+                        _moveToContinuation.promise.then(function () {
+                            crossFadeToPendingPlayer();
+                        });
+                    }
+                });
         }
 
         function pause() {
@@ -179,19 +208,11 @@
             _playback = PlaybackState.PLAYING;
         }
 
-        function skipTo(queueEntry) {
+        function play() {
             _playback = PlaybackState.PLAYING;
-            skippedToEntry = queueEntry;
-
-            return preparePending(queueEntry).then(function () {
-                skippedToEntry = null;
-                stopRunningPlayers();
-                return startPendingPlayer();
-            });
         }
 
         return {
-            skipTo: skipTo,
 
             get PlaybackState() {
                 return PlaybackState;
@@ -216,15 +237,37 @@
                 return _playback;
             },
 
+            skipTo: function (queueEntry) {
+                if (_playback === PlaybackState.PLAYING) {
+                } else if (_playback === PlaybackState.PAUSED) {
+                    _moveToContinuation.reject();
+                    resume();
+                } else if (_playback === PlaybackState.STOPPED) {
+                    play();
+                } else {
+                    throw new Error('Unknown PlaybackState: ' + _playback);
+                }
+
+                skippedToEntry = queueEntry;
+                moveTo(queueEntry).then(function () {
+                    skippedToEntry = null;
+                });
+            },
+
             togglePlayback: function () {
                 if (_playback === PlaybackState.PLAYING) {
                     pause();
                 } else if (_playback === PlaybackState.PAUSED) {
+                    _moveToContinuation.resolve();
                     resume();
                 } else if (_playback === PlaybackState.STOPPED) {
                     var queueEntry = mtQueueManager.closestValidEntry();
                     if (queueEntry) {
-                        skipTo(queueEntry);
+                        play();
+                        skippedToEntry = queueEntry;
+                        moveTo(queueEntry).then(function () {
+                            skippedToEntry = null;
+                        });
                     }
                 }
             }
