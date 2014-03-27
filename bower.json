@@ -4,15 +4,15 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "angular": "1.2.14",
+    "angular": "~1.2",
+    "angular-animate": "~1.2",
+    "angular-touch": "~1.2",
     "reset-css": "2.0.20110126",
-    "lodash": "2.4.1",
+    "lodash": "~2.4",
     "q": "1.0.0",
-    "mousetrap": "1.4.6",
-    "angular-animate": "1.2.14",
-    "angular-touch": "1.2.14",
+    "mousetrap": "~1.4",
     "bezier-easing": "gre/bezier-easing",
     "shifty": "E:\\development\\idea-projects\\shifty#feature/set-schedule-function",
-    "popcorn-js": "1.5.6"
+    "popcorn-js": "~1.5"
   }
 }

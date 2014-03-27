@@ -64,13 +64,35 @@
             volumeTweenableConfig.to.volume = opacityTweenableConfig.to.opacity = 0;
         }
 
-        //  we instantiate the latch only if the caller is interested in knowing when the fade is finished
-        if ('done' in options) {
-            var latch = new CountDownLatch(2, options.done);
-            volumeTweenableConfig.finish = opacityTweenableConfig.finish = function () {
-                latch.countDown();
-            };
+        var latch = new CountDownLatch(2, function () {
+            instance.off('play', playHandler);
+            instance.off('pause', pauseHandler);
+
+            if ('done' in options) {
+                options.done();
+            }
+        });
+        volumeTweenableConfig.finish = opacityTweenableConfig.finish = function () {
+            latch.countDown();
+        };
+
+        function playHandler() {
+            // not nice to access a private member of tweenable but there is not public accessor for it
+            if (instance.volumeTweenable._isPaused) {
+                instance.volumeTweenable.resume();
+            }
+            if (instance.opacityTweenable._isPaused) {
+                instance.opacityTweenable.resume();
+            }
         }
+
+        function pauseHandler() {
+            instance.volumeTweenable.pause();
+            instance.opacityTweenable.pause();
+        }
+
+        instance.on('play', playHandler);
+        instance.on('pause', pauseHandler);
 
         instance.volumeTweenable.tween(volumeTweenableConfig);
         instance.opacityTweenable.tween(opacityTweenableConfig);

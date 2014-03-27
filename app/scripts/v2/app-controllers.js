@@ -5,22 +5,6 @@
         var ctrl = this;
 
         /**
-         * A enumeration of possible playback state values.
-         *
-         * We use meaningful string values for debugging purpose.
-         *
-         * @enum {string}
-         */
-        var PlaybackState = {
-            PLAYING: 'PLAYING',
-            PAUSED: 'PAUSED',
-            STOPPED: 'STOPPED'
-        };
-
-        // exposes playback state enum so that it can be used everywhere in the UI code
-        $scope.PlaybackState = PlaybackState;
-
-        /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
          * infinite loops when changing the url internally.
          *
@@ -29,8 +13,6 @@
         var serializedQueue;
 
         ctrl.queueLoading = false;
-        /** @type {PlaybackState} */
-        ctrl.playback = $scope.PlaybackState.STOPPED;
 
         // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
         // so that they can be read, written and watched from any controller
@@ -38,8 +20,6 @@
         $scope.props.queue = mtQueueManager.queue;
         /** @type {mt.model.QueueEntry} */
         $scope.props.focusedEntry = null;
-
-        $scope.props.orchestrator = mtOrchestrator;
 
         /** @type {string}*/
         $scope.props.searchTerm = null;
@@ -81,6 +61,18 @@
             }
         }, true);
 
+        $scope.getRunningQueueEntry = function () {
+            return mtOrchestrator.runningQueueEntry;
+        };
+
+        $scope.getSkippedToQueueEntry = function () {
+            return mtOrchestrator.skippedToQueueEntry;
+        };
+
+        ctrl.isPlaying = function () {
+            return mtOrchestrator.playback === mtOrchestrator.PlaybackState.PLAYING;
+        };
+
         ctrl.searchButtonClicked = function () {
             $scope.props.searchShown = !$scope.props.searchShown;
 
@@ -95,10 +87,7 @@
         };
 
         ctrl.togglePlayback = function () {
-            ctrl.playback
-                = ctrl.playback === $scope.PlaybackState.PAUSED
-                ? $scope.PlaybackState.PLAYING
-                : $scope.PlaybackState.PAUSED;
+            mtOrchestrator.togglePlayback();
         };
     });
 
@@ -231,17 +220,12 @@
 
         var ctrl = this;
 
-        ctrl.showSpinner = false;
-
         /**
          * @param {mt.model.QueueEntry} queueEntry
          */
         ctrl.playQueueEntry = function (queueEntry) {
 
-            ctrl.pending = true;
-            mtOrchestrator.skipTo(queueEntry).finally(function () {
-                ctrl.pending = false;
-            });
+            mtOrchestrator.skipTo(queueEntry);
 
 //            mtModalManager.open({
 //                title: 'toto',
