@@ -1,6 +1,12 @@
 (function (mt) {
     'use strict';
 
+    /**
+     * @typedef {Object} mtMediaElementWrapper
+     * @property {function(): jqLite} get
+     * @property {function} release
+     */
+
     mt.MixTubeApp.factory('mtMediaElementsPool', function (mtScenesRegistry) {
 
         var _scene = null;
