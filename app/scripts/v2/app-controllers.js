@@ -65,12 +65,12 @@
             return mtOrchestrator.runningQueueEntry;
         };
 
-        $scope.getSkippedToQueueEntry = function () {
-            return mtOrchestrator.skippedToQueueEntry;
+        $scope.getLoadingQueueEntry = function () {
+            return mtOrchestrator.loadingQueueEntry;
         };
 
         ctrl.isPlaying = function () {
-            return mtOrchestrator.playback === mtOrchestrator.PlaybackState.PLAYING;
+            return mtOrchestrator.playing;
         };
 
         ctrl.searchButtonClicked = function () {
