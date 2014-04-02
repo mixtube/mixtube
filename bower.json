@@ -12,7 +12,7 @@
     "q": "1.0.0",
     "mousetrap": "~1.4",
     "bezier-easing": "gre/bezier-easing",
-    "shifty": "E:\\development\\idea-projects\\shifty#feature/set-schedule-function",
+    "shifty": "jraoult/shifty#feature/set-schedule-function",
     "popcorn-js": "~1.5"
   }
 }

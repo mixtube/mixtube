@@ -127,7 +127,6 @@
         function PreparePlayerRequest(queueEntry) {
             this.queueEntry = queueEntry;
             this._prepareDeferred = $q.defer();
-            this._forgotten = false;
         }
 
         PreparePlayerRequest.prototype = {
@@ -225,7 +224,7 @@
         function whenPreparePendingRequestReady(preparePlayerRequest, cb) {
             if (preparePlayerRequest) {
                 preparePlayerRequest.whenReady(function (player) {
-                    if (player !== _preparePendingRq) {
+                    if (preparePlayerRequest !== _preparePendingRq) {
                         // todo check if that branch is used at all
                         player.dispose();
                     } else {
@@ -279,7 +278,7 @@
             if (_runningPlayer) {
                 nextQueueEntry = mtQueueManager.closestValidEntry(_runningPlayer.queueEntry, false);
             }
-            if (!nextQueueEntry) {
+            if (nextQueueEntry) {
                 preparePending(nextQueueEntry);
             }
         }
@@ -290,24 +289,32 @@
          * Cross fading will take place once the pending player is prepared and the orchestrator is playing.
          */
         function eventuallyCrossFadeToPending() {
-            whenPreparePendingRequestReady(_preparePendingRq, function (player) {
+            if (!_preparePendingRq) {
                 _playback.whenPlaying(function () {
-
-                    // fade out the currently playing video
                     stopRunning();
+                });
+            } else {
+                whenPreparePendingRequestReady(_preparePendingRq, function (player) {
+                    _preparePendingRq = null;
 
-                    // promote the pending player to the running players list
-                    _runningPlayer = player;
+                    _playback.whenPlaying(function () {
 
-                    // actually start the player
-                    player.play({autoCrossFadeCb: eventuallyCrossFadeToPending});
+                        // fade out the currently playing video
+                        stopRunning();
 
-                    // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
-                    $timeout(function () {
-                        preparePendingAuto();
+                        // promote the pending player to the running players list
+                        _runningPlayer = player;
+
+                        // actually start the player
+                        player.play({autoCrossFadeCb: eventuallyCrossFadeToPending});
+
+                        // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
+                        $timeout(function () {
+                            preparePendingAuto();
+                        });
                     });
                 });
-            });
+            }
         }
 
         function moveTo(queueEntry) {
@@ -422,10 +429,10 @@
             },
 
             /**
-             * @returns {Playback}
+             * @returns {boolean}
              */
-            get playback() {
-                return _playback;
+            get playing() {
+                return _playback.playing;
             },
 
             /**
