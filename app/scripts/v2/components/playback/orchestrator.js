@@ -1,7 +1,9 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtMediaElementsPool) {
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtMediaElementsPool, mtLoggerFactory) {
+
+        var logger = mtLoggerFactory('mtOrchestrator');
 
         function Playback() {
             this._status = Playback.Status.STOPPED;
@@ -89,14 +91,20 @@
                 var crossFadeTime = 15;
 
                 // registers a cue to install auto cross-fade
-                player.popcorn.cue(player.AUTO_CROSS_FADE_CUE_ID, crossFadeTime, function autoCrossFadeCueCb() {
+                player.popcorn.cue(Player.AUTO_CROSS_FADE_CUE_ID, crossFadeTime, function autoCrossFadeCueCb() {
                     $rootScope.$apply(function () {
                         options.autoCrossFadeCb();
+                        logger.debug('autoCrossFadeCb from %o', player.queueEntry.video);
                     });
                 });
 
                 player.popcorn.play();
                 player.popcorn.fade({direction: 'in', duration: Player.CROSS_FADE_DURATION});
+            },
+
+            preventAutoCrossFade: function () {
+                this.popcorn.removeTrackEvent(Player.AUTO_CROSS_FADE_CUE_ID);
+                logger.debug('preventAutoCrossFade for %o', this.queueEntry.video);
             },
 
             stop: function () {
@@ -105,8 +113,8 @@
                 var player = this;
                 var deferred = $q.defer();
 
-                // remove the auto cross fade cue to avoid auto cross fading while stopping a player
-                player.popcorn.removeTrackEvent(Player.AUTO_CROSS_FADE_CUE_ID);
+                // we want to prevent any auto cross fading while stopping the player
+                player.preventAutoCrossFade();
 
                 // fade out and free the player
                 player.popcorn.fade({direction: 'out', duration: Player.CROSS_FADE_DURATION, done: function () {
@@ -195,7 +203,7 @@
          *
          * @type {mt.model.QueueEntry}
          */
-        var _movedToEntry = null;
+        var _movingToEntry = null;
 
 
         /**
@@ -224,12 +232,7 @@
         function whenPreparePendingRequestReady(preparePlayerRequest, cb) {
             if (preparePlayerRequest) {
                 preparePlayerRequest.whenReady(function (player) {
-                    if (preparePlayerRequest !== _preparePendingRq) {
-                        // todo check if that branch is used at all
-                        player.dispose();
-                    } else {
-                        cb(player);
-                    }
+                    cb(player);
                 });
             }
         }
@@ -294,7 +297,7 @@
                     stopRunning();
                 });
             } else {
-                whenPreparePendingRequestReady(_preparePendingRq, function (player) {
+                _preparePendingRq.whenReady(function (player) {
                     _preparePendingRq = null;
 
                     _playback.whenPlaying(function () {
@@ -313,18 +316,24 @@
                             preparePendingAuto();
                         });
                     });
+
                 });
             }
         }
 
         function moveTo(queueEntry) {
+            if (_runningPlayer) {
+                _runningPlayer.preventAutoCrossFade();
+            }
             preparePending(queueEntry);
             eventuallyCrossFadeToPending();
 
-            _movedToEntry = queueEntry;
+            _movingToEntry = queueEntry;
             _preparePendingRq.whenFinished(function () {
-                _movedToEntry = null;
-            })
+                if (_movingToEntry === queueEntry) {
+                    _movingToEntry = null;
+                }
+            });
         }
 
         function pause() {
@@ -376,29 +385,52 @@
                     freePending();
                     stopRunning();
                 } else {
+
                     var removedEntries = _.difference(oldEntries, newEntries);
+                    var removing = removedEntries.length;
 
-                    if (_preparePendingRq && _.contains(removedEntries, _preparePendingRq.queueEntry)) {
-
-                        // keep a ref to the pending queue entry
-                        var pendingQueueEntry = _preparePendingRq.queueEntry;
-
-                        freePending();
-
-                        // prepare the entry that is now at the position of the removed entry
-                        var entryToPrepare = findReplacingEntry(newEntries, oldEntries, pendingQueueEntry);
-                        if (entryToPrepare) {
-                            preparePending(entryToPrepare);
+                    if (!removing) {
+                        if (_runningPlayer) {
+                            // case where a video is added after the one currently playing
+                            var newNextEntry = mtQueueManager.closestValidEntry(_runningPlayer.queueEntry, false);
+                            if (newNextEntry && (!_preparePendingRq || _preparePendingRq.queueEntry !== newNextEntry)) {
+                                preparePending(newNextEntry);
+                            }
                         }
-                    }
+                    } else {
+                        // case where a the currently playing video or the one just moved to is removed
+                        var previousEntry = null;
+                        if (_runningPlayer && _.contains(removedEntries, _runningPlayer.queueEntry)) {
+                            previousEntry = _runningPlayer.queueEntry;
+                        } else if (_movingToEntry && _.contains(removedEntries, _movingToEntry)) {
+                            previousEntry = _movingToEntry;
+                        }
 
-                    if (_runningPlayer && _.contains(removedEntries, _runningPlayer.queueEntry)) {
-                        // prepare the entry that is now at the position of the removed entry
-                        var entryToMoveTo = findReplacingEntry(newEntries, oldEntries, _runningPlayer.queueEntry);
-                        if (entryToMoveTo) {
-                            moveTo(entryToMoveTo);
-                        } else {
-                            stopRunning();
+                        if (previousEntry) {
+                            // prepare the entry that is now at the position of the removed entry
+                            var entryToMoveTo = findReplacingEntry(newEntries, oldEntries, previousEntry);
+                            if (entryToMoveTo) {
+                                moveTo(entryToMoveTo);
+                            } else {
+                                stopRunning();
+                            }
+                        }
+
+                        // case where a video is removed after the one currently playing
+                        if (_preparePendingRq && _.contains(removedEntries, _preparePendingRq.queueEntry)) {
+
+                            // keep a ref to the pending queue entry
+                            var pendingQueueEntry = _preparePendingRq.queueEntry;
+
+                            freePending();
+
+                            // prepare the entry that is now at the position of the removed entry
+                            var entryToPrepare = findReplacingEntry(newEntries, oldEntries, pendingQueueEntry);
+                            if (entryToPrepare) {
+                                preparePending(entryToPrepare);
+                            }
+
+                            logger.debug('entriesWatcherChangeHandler %o removed elected %o as the new pending video', pendingQueueEntry, entryToPrepare);
                         }
                     }
                 }
@@ -425,7 +457,7 @@
              * @returns {?mt.model.QueueEntry}
              */
             get loadingQueueEntry() {
-                return _movedToEntry;
+                return _movingToEntry;
             },
 
             /**
