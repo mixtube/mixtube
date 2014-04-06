@@ -37,9 +37,13 @@
 
         // if there is a running fade action stop it and start the new one
         stopTweenable(instance.volumeTweenable);
-        instance.volumeTweenable = new Tweenable();
-
         stopTweenable(instance.opacityTweenable);
+
+        instance.volumeTweenable = new Tweenable();
+        // browser can throttle requestAnimationFrame execution while the window is not visible
+        // use setTimeout for sound because we don't want this behavior while fading in or out
+        instance.volumeTweenable.setScheduleFunction(window.setTimeout);
+
         instance.opacityTweenable = new Tweenable();
 
         var durationInMillis = options.duration * 1000;
