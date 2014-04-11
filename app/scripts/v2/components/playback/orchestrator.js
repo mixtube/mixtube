@@ -146,6 +146,12 @@
 
                 var player = new Player(mediaElementWrapper, popcorn, request.queueEntry);
 
+                popcorn.on('error', function preparePlayerErrorCb() {
+                    $rootScope.$apply(function () {
+                        request._prepareDeferred.reject(popcorn.media.error);
+                    });
+                });
+
                 popcorn.one('canplay', function preparePlayerCanPlayCb() {
                     $rootScope.$apply(function () {
                         // makes really sure a call to play will start the video instantaneously by forcing the player to buffer
@@ -177,6 +183,10 @@
 
             whenFinished: function (callback) {
                 this._prepareDeferred.promise.finally(callback);
+            },
+
+            whenError: function (callback) {
+                this._prepareDeferred.promise.catch(callback);
             }
         };
 
@@ -221,23 +231,6 @@
         }
 
         /**
-         * Checks if the player delivered by the given request is not stale regarding the orchestrator pending player
-         * preparing request.
-         *
-         * If the player is stale, the callback is not executed and the player is freed.
-         *
-         * @param {?PreparePlayerRequest} preparePlayerRequest
-         * @param {function(Player)} cb
-         */
-        function whenPreparePendingRequestReady(preparePlayerRequest, cb) {
-            if (preparePlayerRequest) {
-                preparePlayerRequest.whenReady(function (player) {
-                    cb(player);
-                });
-            }
-        }
-
-        /**
          * Promotes the given player to the stopping list, fades out and frees it.
          *
          * @param {Player} player
@@ -268,6 +261,9 @@
             }
         }
 
+        /**
+         * @param {mt.model.QueueEntry} queueEntry
+         */
         function preparePending(queueEntry) {
             if (_preparePendingRq) {
                 _preparePendingRq.forget();
@@ -398,7 +394,7 @@
                             }
                         }
                     } else {
-                        // case where a the currently playing video or the one just moved to is removed
+                        // case where the currently playing video or the one just moved to is removed
                         var previousEntry = null;
                         if (_runningPlayer && _.contains(removedEntries, _runningPlayer.queueEntry)) {
                             previousEntry = _runningPlayer.queueEntry;
