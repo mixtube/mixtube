@@ -1,13 +1,21 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtMediaElementsPool, mtLoggerFactory) {
+    /**
+     * @name mtOrchestrator
+     */
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtOrchestrator');
 
+        /**
+         * @name Playback
+         * @constructor
+         */
         function Playback() {
+            this.onPause = new signals.Signal();
+            this.onResume = new signals.Signal();
             this._status = Playback.Status.STOPPED;
-            this._resumeDeferred = $q.defer();
         }
 
         Playback.Status = {
@@ -30,163 +38,31 @@
             },
 
             whenPlaying: function (cb) {
-                this._resumeDeferred.promise.then(cb);
+                if (this._status !== Playback.Status.PLAYING) {
+                    this.onResume.addOnce(cb);
+                } else {
+                    cb();
+                }
             },
 
             pause: function () {
-                this._status = Playback.Status.PAUSED;
-                this._resumeDeferred = $q.defer();
+                if (this._status !== Playback.Status.PAUSED) {
+                    this._status = Playback.Status.PAUSED;
+                    this.onPause.dispatch();
+                }
             },
 
             resume: function () {
-                this._status = Playback.Status.PLAYING;
-                this._resumeDeferred.resolve();
+                if (this._status !== Playback.Status.PLAYING) {
+                    this._status = Playback.Status.PLAYING;
+                    this.onResume.dispatch();
+                }
             },
 
             stop: function () {
                 this._status = Playback.Status.STOPPED;
-                this._resumeDeferred.reject();
-            }
-        };
-
-        /**
-         *
-         * @param {mtMediaElementWrapper} mediaElementWrapper
-         * @param {Popcorn} popcorn
-         * @param {mt.model.QueueEntry} queueEntry
-         * @constructor
-         */
-        function Player(mediaElementWrapper, popcorn, queueEntry) {
-            this.mediaElementWrapper = mediaElementWrapper;
-            this.popcorn = popcorn;
-            this.queueEntry = queueEntry;
-            this._disposed = false;
-        }
-
-        Player.CROSS_FADE_DURATION = 3;
-        Player.AUTO_CROSS_FADE_CUE_ID = 'autoCrossFadeCue';
-        Player.prototype = {
-
-            _checkNotDisposed: function () {
-                if (this._disposed) throw new Error('This player has been disposed and can not be used anymore');
-            },
-
-            dispose: function () {
-                if (!this._disposed) {
-                    this._disposed = true;
-                    this.popcorn.destroy();
-                    this.mediaElementWrapper.release();
-                    this.popcorn = null;
-                    this.mediaElementWrapper = null;
-                }
-            },
-
-            /**
-             * @param {{autoCrossFadeCb: function}} options
-             */
-            play: function (options) {
-                this._checkNotDisposed();
-
-                var player = this;
-                var crossFadeTime = 15;
-
-                // registers a cue to install auto cross-fade
-                player.popcorn.cue(Player.AUTO_CROSS_FADE_CUE_ID, crossFadeTime, function autoCrossFadeCueCb() {
-                    $rootScope.$apply(function () {
-                        options.autoCrossFadeCb();
-                        logger.debug('autoCrossFadeCb from %o', player.queueEntry.video);
-                    });
-                });
-
-                player.popcorn.play();
-                player.popcorn.fade({direction: 'in', duration: Player.CROSS_FADE_DURATION});
-            },
-
-            preventAutoCrossFade: function () {
-                this.popcorn.removeTrackEvent(Player.AUTO_CROSS_FADE_CUE_ID);
-                logger.debug('preventAutoCrossFade for %o', this.queueEntry.video);
-            },
-
-            stop: function () {
-                this._checkNotDisposed();
-
-                var player = this;
-                var deferred = $q.defer();
-
-                // we want to prevent any auto cross fading while stopping the player
-                player.preventAutoCrossFade();
-
-                // fade out and free the player
-                player.popcorn.fade({direction: 'out', duration: Player.CROSS_FADE_DURATION, done: function () {
-                    $rootScope.$apply(function () {
-                        player.dispose();
-                        deferred.resolve();
-                    });
-                }});
-
-                return deferred.promise;
-            }
-        };
-
-        /**
-         * @param {mt.model.QueueEntry} queueEntry
-         * @constructor
-         */
-        function PreparePlayerRequest(queueEntry) {
-            this.queueEntry = queueEntry;
-            this._prepareDeferred = $q.defer();
-        }
-
-        PreparePlayerRequest.prototype = {
-            prepare: function () {
-                var request = this;
-
-                var mediaElementWrapper = mtMediaElementsPool(request.queueEntry.video.provider);
-                var popcorn = Popcorn(mediaElementWrapper.get());
-
-                var player = new Player(mediaElementWrapper, popcorn, request.queueEntry);
-
-                popcorn.on('error', function preparePlayerErrorCb() {
-                    $rootScope.$apply(function () {
-                        request._prepareDeferred.reject(popcorn.media.error);
-                    });
-                });
-
-                popcorn.one('canplay', function preparePlayerCanPlayCb() {
-                    $rootScope.$apply(function () {
-                        // makes really sure a call to play will start the video instantaneously by forcing the player to buffer
-                        popcorn.play();
-                        popcorn.one('playing', function preparePlayerPlayingCb() {
-                            popcorn.pause();
-
-                            // if the request has been aborted we free the player
-                            request._prepareDeferred.promise.catch(function () {
-                                player.dispose();
-                            });
-
-                            // the request is ready (has no effect if the request has been aborted already)
-                            request._prepareDeferred.resolve(player);
-                        });
-                    });
-                });
-
-                mediaElementWrapper.get().src = 'http://www.youtube.com/watch?v=' + request.queueEntry.video.id;
-            },
-
-            forget: function () {
-                this._prepareDeferred.reject();
-            },
-
-            whenReady: function (callback) {
-                this._prepareDeferred.promise.then(callback);
-            },
-
-            whenFinished: function (callback) {
-                this._prepareDeferred.promise.finally(callback);
-            },
-
-            whenError: function (callback) {
-                this._prepareDeferred.promise.catch(callback);
+                this.onPause.removeAll();
+                this.onResume.removeAll();
             }
         };
 
@@ -197,241 +73,72 @@
          */
         var _playback = new Playback();
 
-        /** @type {Player} */
-        var _runningPlayer = null;
-        /** @type {Array.<Player>} */
-        var _stoppingPlayers = [];
+        /** @type {PlaybackSlot} */
+        var _preparedSlot = null;
+        /** @type {PlaybackSlot} */
+        var _engagedSlot = null;
+        /** @type {PlaybackSlot} */
+        var _startedSlot = null;
 
-
-        /** @type {PreparePlayerRequest} */
-        var _preparePendingRq = null;
-
-        /**
-         * The entry currently in preparation for which the loading has been triggered by a manual "move to" call.
-         *
-         * It is only used for the public API, this has not interest internally.
-         *
-         * @type {mt.model.QueueEntry}
-         */
+        /** @type {mt.model.QueueEntry} */
+        var _runningQueueEntry = null;
+        /** @type {mt.model.QueueEntry} */
         var _movingToEntry = null;
 
-
-        /**
-         * Iterates through all the running and stopping player and execute the given callback on each item.
-         *
-         * @param {function(Player)} cb
-         */
-        function forEachActivePlayers(cb) {
-            if (_runningPlayer) {
-                cb(_runningPlayer);
+        function prepareAuto() {
+            if (_preparedSlot) {
+                _preparedSlot.finish();
+                _preparedSlot = null;
             }
-            _stoppingPlayers.forEach(function (player) {
-                cb(player);
-            });
-        }
 
-        /**
-         * Promotes the given player to the stopping list, fades out and frees it.
-         *
-         * @param {Player} player
-         * @return {Promise} resolved when the player stopped (fade out included)
-         */
-        function stopPlayer(player) {
-            _stoppingPlayers.push(player);
-            return player.stop().then(function () {
-                _.remove(_stoppingPlayers, player);
-            });
-        }
+            var followingQueueEntry = mtQueueManager.closestValidEntry(_runningQueueEntry);
 
-        /**
-         * Stops the running player and free it after fading it out.
-         */
-        function stopRunning() {
-            if (_runningPlayer) {
-                var player = _runningPlayer;
-                _runningPlayer = null;
-
-                stopPlayer(player)
-                    .then(function () {
-                        if (!_runningPlayer) {
-                            // end of the road: nothing has been started while stopping the player
-                            _playback.stop();
-                        }
-                    });
+            if (followingQueueEntry) {
+                var slot = mtPlaybackSlotFactory(_playback);
+                slot.prepareSafe(followingQueueEntry);
+                _preparedSlot = slot;
             }
         }
 
-        /**
-         * @param {mt.model.QueueEntry} queueEntry
-         */
-        function preparePending(queueEntry) {
-            if (_preparePendingRq) {
-                _preparePendingRq.forget();
-            }
-            _preparePendingRq = new PreparePlayerRequest(queueEntry);
-            _preparePendingRq.prepare();
-        }
+        function engagePreparedSlot() {
+            if (_preparedSlot) {
+                var slot = _engagedSlot = _preparedSlot;
+                _preparedSlot = null;
 
-        function preparePendingAuto() {
-            var nextQueueEntry = null;
-            if (_runningPlayer) {
-                nextQueueEntry = mtQueueManager.closestValidEntry(_runningPlayer.queueEntry, false);
-            }
-            if (nextQueueEntry) {
-                preparePending(nextQueueEntry);
-            }
-        }
+                slot.engage(function () {
+                    if (_startedSlot) {
+                        // might be unnecessary but finish is robust enough to figure out
+                        _startedSlot.finish();
+                    }
 
-        /**
-         * Cross fades to the new video obtained through the preparing request for the pending player.
-         *
-         * Cross fading will take place once the pending player is prepared and the orchestrator is playing.
-         */
-        function eventuallyCrossFadeToPending() {
-            if (!_preparePendingRq) {
-                _playback.whenPlaying(function () {
-                    stopRunning();
-                });
+                    _startedSlot = _engagedSlot;
+                    _engagedSlot = null;
+
+                    _runningQueueEntry = slot.actualQueueEntry;
+
+                    prepareAuto();
+                }, engagePreparedSlot);
             } else {
-                _preparePendingRq.whenReady(function (player) {
-                    _preparePendingRq = null;
-
-                    _playback.whenPlaying(function () {
-
-                        // fade out the currently playing video
-                        stopRunning();
-
-                        // promote the pending player to the running players list
-                        _runningPlayer = player;
-
-                        // actually start the player
-                        player.play({autoCrossFadeCb: eventuallyCrossFadeToPending});
-
-                        // prepare (preload) the next player so that the upcoming auto cross-fade will run smoothly
-                        $timeout(function () {
-                            preparePendingAuto();
-                        });
-                    });
-
-                });
+                _startedSlot = null;
+                _runningQueueEntry = null;
             }
         }
 
         function moveTo(queueEntry) {
-            if (_runningPlayer) {
-                _runningPlayer.preventAutoCrossFade();
-            }
-            preparePending(queueEntry);
-            eventuallyCrossFadeToPending();
-
-            _movingToEntry = queueEntry;
-            _preparePendingRq.whenFinished(function () {
-                if (_movingToEntry === queueEntry) {
-                    _movingToEntry = null;
-                }
-            });
-        }
-
-        function pause() {
-            forEachActivePlayers(function (player) {
-                player.popcorn.pause();
-            });
-            _playback.pause();
-        }
-
-        function resume() {
-            forEachActivePlayers(function (player) {
-                player.popcorn.play();
-            });
-            _playback.resume();
-        }
-
-        function play() {
-            _playback.resume();
-        }
-
-        function freePending() {
-            _preparePendingRq.forget();
-            _preparePendingRq = null;
-        }
-
-        /**
-         * Returns the closest valid entry replacing the one just removed or null if there is not.
-         *
-         * @param {Array.<mt.model.QueueEntry>} newEntries
-         * @param {Array.<mt.model.QueueEntry>} oldEntries
-         * @param {mt.model.QueueEntry} removedEntry
-         * @returns {?mt.model.QueueEntry}
-         */
-        function findReplacingEntry(newEntries, oldEntries, removedEntry) {
-            var oldIndex = oldEntries.indexOf(removedEntry);
-            if (oldIndex >= newEntries.length) {
-                return null;
+            if (_preparedSlot) {
+                _preparedSlot.finish();
             }
 
-            return mtQueueManager.closestValidEntry(newEntries[oldIndex], true);
+            var slot = mtPlaybackSlotFactory(_playback);
+            slot
+                .prepareSafe(queueEntry, function prepareTryProgress(queueEntry) {
+                    _movingToEntry = queueEntry;
+                });
+
+            _preparedSlot = slot;
+
+            engagePreparedSlot();
         }
-
-        $rootScope.$watchCollection(function () {
-            return mtQueueManager.queue.entries;
-        }, function entriesWatcherChangeHandler(newEntries, oldEntries) {
-            if (newEntries && !angular.equals(newEntries, oldEntries)) {
-                if (newEntries.length === 0) {
-                    // the queue is empty, probably just cleared, do the same for the players abd
-                    freePending();
-                    stopRunning();
-                } else {
-
-                    var removedEntries = _.difference(oldEntries, newEntries);
-                    var removing = removedEntries.length;
-
-                    if (!removing) {
-                        if (_runningPlayer) {
-                            // case where a video is added after the one currently playing
-                            var newNextEntry = mtQueueManager.closestValidEntry(_runningPlayer.queueEntry, false);
-                            if (newNextEntry && (!_preparePendingRq || _preparePendingRq.queueEntry !== newNextEntry)) {
-                                preparePending(newNextEntry);
-                            }
-                        }
-                    } else {
-                        // case where the currently playing video or the one just moved to is removed
-                        var previousEntry = null;
-                        if (_runningPlayer && _.contains(removedEntries, _runningPlayer.queueEntry)) {
-                            previousEntry = _runningPlayer.queueEntry;
-                        } else if (_movingToEntry && _.contains(removedEntries, _movingToEntry)) {
-                            previousEntry = _movingToEntry;
-                        }
-
-                        if (previousEntry) {
-                            // prepare the entry that is now at the position of the removed entry
-                            var entryToMoveTo = findReplacingEntry(newEntries, oldEntries, previousEntry);
-                            if (entryToMoveTo) {
-                                moveTo(entryToMoveTo);
-                            } else {
-                                stopRunning();
-                            }
-                        }
-
-                        // case where a video is removed after the one currently playing
-                        if (_preparePendingRq && _.contains(removedEntries, _preparePendingRq.queueEntry)) {
-
-                            // keep a ref to the pending queue entry
-                            var pendingQueueEntry = _preparePendingRq.queueEntry;
-
-                            freePending();
-
-                            // prepare the entry that is now at the position of the removed entry
-                            var entryToPrepare = findReplacingEntry(newEntries, oldEntries, pendingQueueEntry);
-                            if (entryToPrepare) {
-                                preparePending(entryToPrepare);
-                            }
-
-                            logger.debug('entriesWatcherChangeHandler %o removed elected %o as the new pending video', pendingQueueEntry, entryToPrepare);
-                        }
-                    }
-                }
-            }
-        });
 
         return {
 
@@ -441,7 +148,7 @@
              * @returns {?mt.model.QueueEntry}
              */
             get runningQueueEntry() {
-                return _runningPlayer && _runningPlayer.queueEntry;
+                return _runningQueueEntry;
             },
 
             /**
@@ -468,9 +175,9 @@
              */
             skipTo: function (queueEntry) {
                 if (_playback.paused) {
-                    resume();
+                    _playback.resume();
                 } else if (_playback.stopped) {
-                    play();
+                    _playback.resume();
                 }
 
                 moveTo(queueEntry);
@@ -478,13 +185,13 @@
 
             togglePlayback: function () {
                 if (_playback.playing) {
-                    pause();
+                    _playback.pause();
                 } else if (_playback.paused) {
-                    resume();
+                    _playback.resume();
                 } else if (_playback.stopped) {
                     var queueEntry = mtQueueManager.closestValidEntry();
                     if (queueEntry) {
-                        play();
+                        _playback.resume();
                         moveTo(queueEntry);
                     }
                 }
