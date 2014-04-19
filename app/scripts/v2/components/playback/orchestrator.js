@@ -74,9 +74,9 @@
         var _playback = new Playback();
 
         /** @type {PlaybackSlot} */
-        var _preparedSlot = null;
+        var _autoPreparedSlot = null;
         /** @type {PlaybackSlot} */
-        var _engagedSlot = null;
+        var _movePreparedSlot = null;
         /** @type {PlaybackSlot} */
         var _startedSlot = null;
 
@@ -85,59 +85,73 @@
         /** @type {mt.model.QueueEntry} */
         var _movingToEntry = null;
 
-        function prepareAuto() {
-            if (_preparedSlot) {
-                _preparedSlot.finish();
-                _preparedSlot = null;
-            }
-
-            var followingQueueEntry = mtQueueManager.closestValidEntry(_runningQueueEntry);
-
-            if (followingQueueEntry) {
-                var slot = mtPlaybackSlotFactory(_playback);
-                slot.prepareSafe(followingQueueEntry);
-                _preparedSlot = slot;
+        function movePreparedSlotAccessor(value) {
+            if (angular.isUndefined(value)) {
+                return _movePreparedSlot;
+            } else {
+                _movePreparedSlot = value;
             }
         }
 
-        function engagePreparedSlot() {
-            if (_preparedSlot) {
-                var slot = _engagedSlot = _preparedSlot;
-                _preparedSlot = null;
+        function autoPreparedSlotAccessor(value) {
+            if (angular.isUndefined(value)) {
+                return _autoPreparedSlot;
+            } else {
+                _autoPreparedSlot = value;
+            }
+        }
 
+        function finishSlot(slotAccessor) {
+            var slot = slotAccessor();
+            if (slot) {
+                slot.finish();
+                slotAccessor(null);
+            }
+        }
+
+        function engageSlot(slotAccessor) {
+            var slot = slotAccessor();
+            if (slot) {
                 slot.engage(function () {
                     if (_startedSlot) {
                         // might be unnecessary but finish is robust enough to figure out
                         _startedSlot.finish();
                     }
 
-                    _startedSlot = _engagedSlot;
-                    _engagedSlot = null;
+                    _startedSlot = slot;
+                    slotAccessor(null);
 
                     _runningQueueEntry = slot.actualQueueEntry;
 
                     prepareAuto();
-                }, engagePreparedSlot);
+                }, function () {
+                    engageSlot(autoPreparedSlotAccessor)
+                });
             } else {
                 _startedSlot = null;
                 _runningQueueEntry = null;
             }
         }
 
-        function moveTo(queueEntry) {
-            if (_preparedSlot) {
-                _preparedSlot.finish();
+
+        function prepareAuto() {
+            finishSlot(autoPreparedSlotAccessor);
+
+            var followingQueueEntry = mtQueueManager.closestValidEntry(_runningQueueEntry);
+
+            if (followingQueueEntry) {
+                _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
+                _autoPreparedSlot.prepareSafe(followingQueueEntry);
             }
+        }
 
-            var slot = mtPlaybackSlotFactory(_playback);
-            slot
-                .prepareSafe(queueEntry, function prepareTryProgress(queueEntry) {
-                    _movingToEntry = queueEntry;
-                });
+        function prepareMoveTo(requestedQueueEntry) {
+            finishSlot(movePreparedSlotAccessor);
 
-            _preparedSlot = slot;
-
-            engagePreparedSlot();
+            _movePreparedSlot = mtPlaybackSlotFactory(_playback);
+            _movePreparedSlot.prepareSafe(requestedQueueEntry, function prepareTryProgress(tryingQueueEntry) {
+                _movingToEntry = tryingQueueEntry;
+            });
         }
 
         return {
@@ -180,7 +194,8 @@
                     _playback.resume();
                 }
 
-                moveTo(queueEntry);
+                prepareMoveTo(queueEntry);
+                engageSlot(movePreparedSlotAccessor);
             },
 
             togglePlayback: function () {
@@ -192,7 +207,8 @@
                     var queueEntry = mtQueueManager.closestValidEntry();
                     if (queueEntry) {
                         _playback.resume();
-                        moveTo(queueEntry);
+                        prepareMoveTo(queueEntry);
+                        engageSlot(movePreparedSlotAccessor);
                     }
                 }
             }

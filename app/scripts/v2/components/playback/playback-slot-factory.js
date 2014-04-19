@@ -86,7 +86,7 @@
                     player.popcorn.one('playing', function preparePlayingCb() {
                         player.popcorn.pause();
 
-                        // no last try was successful so send a last progress info to tell that we are not trying anything else
+                        // last try was successful so send a last progress info to tell that we are not trying anything else
                         tryProgressCb(null);
 
                         // make sure the player is disposed if the preparation has been canceled
@@ -161,6 +161,7 @@
                     // this will ensure a player is never returned and properly disposed
                     this._player.dispose();
                 } else if (!this._stopped) {
+                    this._player.popcorn.removeTrackEvent(PlaybackSlot.AUTO_END_CUE_ID);
                     this._stopOut();
                 }
             },
