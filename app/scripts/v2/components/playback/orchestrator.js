@@ -82,8 +82,6 @@
 
         /** @type {mt.model.QueueEntry} */
         var _runningQueueEntry = null;
-        /** @type {mt.model.QueueEntry} */
-        var _movingToEntry = null;
 
         function movePreparedSlotAccessor(value) {
             if (angular.isUndefined(value)) {
@@ -149,9 +147,7 @@
             finishSlot(movePreparedSlotAccessor);
 
             _movePreparedSlot = mtPlaybackSlotFactory(_playback);
-            _movePreparedSlot.prepareSafe(requestedQueueEntry, function prepareTryProgress(tryingQueueEntry) {
-                _movingToEntry = tryingQueueEntry;
-            });
+            _movePreparedSlot.prepareSafe(requestedQueueEntry);
         }
 
         return {
@@ -174,7 +170,7 @@
              * @returns {?mt.model.QueueEntry}
              */
             get loadingQueueEntry() {
-                return _movingToEntry;
+                return _movePreparedSlot && _movePreparedSlot.tryingQueueEntry;
             },
 
             /**

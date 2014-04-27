@@ -51,17 +51,18 @@
             this._finished = false;
             this._prepareDeferred = $q.defer();
 
+            this.tryingQueueEntry = null;
             this.actualQueueEntry = null;
         }
 
         PlaybackSlot.FADE_DURATION = 3;
         PlaybackSlot.AUTO_END_CUE_ID = 'PlaybackSlotAutoEndCue';
-        PlaybackSlot.AUTO_END_CUE_TIME_PRODUCER = function (duration) {
+        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER = function (duration) {
             return 15;
         };
-        PlaybackSlot.PREPARE_RETRY = function (queueEntryToTry, tryProgressCb, prepareDeferred) {
+        PlaybackSlot.PREPARE_RETRY = function (queueEntryToTry, prepareDeferred) {
 
-            tryProgressCb(queueEntryToTry);
+            prepareDeferred.notify(queueEntryToTry);
 
             if (!queueEntryToTry) {
                 prepareDeferred.reject(new Error('Could not find any valid entry to prepare'));
@@ -75,7 +76,7 @@
 
                     player.dispose();
                     queueEntryToTry.skippedAtRuntime = true;
-                    PlaybackSlot.PREPARE_RETRY(mtQueueManager.closestValidEntry(queueEntryToTry), tryProgressCb, prepareDeferred);
+                    PlaybackSlot.PREPARE_RETRY(mtQueueManager.closestValidEntry(queueEntryToTry), prepareDeferred);
                 });
             });
 
@@ -87,7 +88,7 @@
                         player.popcorn.pause();
 
                         // last try was successful so send a last progress info to tell that we are not trying anything else
-                        tryProgressCb(null);
+                        prepareDeferred.notify(null);
 
                         // make sure the player is disposed if the preparation has been canceled
                         prepareDeferred.promise.catch(function () {
@@ -111,16 +112,20 @@
              * This method is responsible for marking queue entry as skipped in case of error while loading.
              *
              * @param {mt.model.QueueEntry} expectedQueueEntry
-             * @param {function(mt.model.QueueEntry)=} tryProgressCb
              */
-            prepareSafe: function (expectedQueueEntry, tryProgressCb) {
+            prepareSafe: function (expectedQueueEntry) {
                 var slot = this;
-                tryProgressCb = tryProgressCb || angular.noop;
 
-                PlaybackSlot.PREPARE_RETRY(mtQueueManager.closestValidEntry(expectedQueueEntry, true), tryProgressCb, slot._prepareDeferred);
-                slot._prepareDeferred.promise.then(function (args) {
+                slot._prepareDeferred.promise.then(function successCb(args) {
                     slot.actualQueueEntry = args.preparedQueueEntry;
+                }, null, function progressCb(tryingQueueEntry) {
+                    slot.tryingQueueEntry = tryingQueueEntry;
                 });
+
+                PlaybackSlot.PREPARE_RETRY(
+                    mtQueueManager.closestValidEntry(expectedQueueEntry, true),
+                    slot._prepareDeferred
+                );
 
                 return this;
             },
@@ -136,7 +141,7 @@
 
                     slot._player.popcorn.cue(
                         PlaybackSlot.AUTO_END_CUE_ID,
-                        PlaybackSlot.AUTO_END_CUE_TIME_PRODUCER(slot._player.popcorn.duration()),
+                        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER(slot._player.popcorn.duration()),
                         function autoEndCueCb() {
                             $rootScope.$apply(function () {
                                 logger.debug('auto ending %O', slot.actualQueueEntry.video);
