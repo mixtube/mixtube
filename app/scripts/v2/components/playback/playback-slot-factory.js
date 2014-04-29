@@ -47,12 +47,12 @@
             this._playback = playback;
             this._player = null;
             this._started = false;
-            this._stopped = false;
-            this._finished = false;
+            this._stopOutCalled = false;
+            this._finishCalled = false;
             this._prepareDeferred = $q.defer();
-
-            this.tryingQueueEntry = null;
-            this.actualQueueEntry = null;
+            this._finishedDeferred = $q.defer();
+            this._tryingQueueEntry = null;
+            this._actualQueueEntry = null;
         }
 
         PlaybackSlot.FADE_DURATION = 3;
@@ -105,6 +105,18 @@
 
         PlaybackSlot.prototype = {
 
+            get tryingQueueEntry() {
+                return this._tryingQueueEntry;
+            },
+
+            get actualQueueEntry() {
+                return this._actualQueueEntry;
+            },
+
+            get finishedPromise() {
+                return this._finishedDeferred.promise;
+            },
+
             /**
              * Tries to load the video of the given entry. If this video is not valid, it browse to cue in incrementally
              * until it finds a valid queue entry.
@@ -117,9 +129,9 @@
                 var slot = this;
 
                 slot._prepareDeferred.promise.then(function successCb(args) {
-                    slot.actualQueueEntry = args.preparedQueueEntry;
+                    slot._actualQueueEntry = args.preparedQueueEntry;
                 }, null, function progressCb(tryingQueueEntry) {
-                    slot.tryingQueueEntry = tryingQueueEntry;
+                    slot._tryingQueueEntry = tryingQueueEntry;
                 });
 
                 PlaybackSlot.PREPARE_RETRY(
@@ -144,7 +156,7 @@
                         PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER(slot._player.popcorn.duration()),
                         function autoEndCueCb() {
                             $rootScope.$apply(function () {
-                                logger.debug('auto ending %O', slot.actualQueueEntry.video);
+                                logger.debug('auto ending %O', slot._actualQueueEntry.video);
                                 aboutToEndCb();
                                 slot.finish();
                             });
@@ -158,14 +170,16 @@
             },
 
             finish: function () {
-                this._finished = true;
+                this._finishCalled = true;
                 if (!this._player) {
                     // player is set when _prepareDeferred is resolved so here we now that we can still reject it
                     this._prepareDeferred.reject(new Error('The PlaybackSlot has been finished before the end of preparation'));
+                    this._finishedDeferred.resolve();
                 } else if (!this._started) {
                     // this will ensure a player is never returned and properly disposed
                     this._player.dispose();
-                } else if (!this._stopped) {
+                    this._finishedDeferred.resolve();
+                } else if (!this._stopOutCalled) {
                     this._player.popcorn.removeTrackEvent(PlaybackSlot.AUTO_END_CUE_ID);
                     this._stopOut();
                 }
@@ -175,7 +189,7 @@
                 var slot = this;
                 slot._playback.whenPlaying(function startInWhenPlaying() {
                     // slot might have been finished while we were waiting for play, better to check first
-                    if (!slot._finished) {
+                    if (!slot._finishCalled) {
                         slot._started = true;
                         var popcorn = slot._player.popcorn;
                         slot._playback.onPause.add(popcorn.pause, popcorn);
@@ -189,9 +203,11 @@
 
             _stopOut: function () {
                 var slot = this;
-                slot._stopped = true;
+                slot._stopOutCalled = true;
                 slot._player.popcorn.fade({direction: 'out', duration: PlaybackSlot.FADE_DURATION, done: function () {
                     $rootScope.$apply(function () {
+                        slot._finishedDeferred.resolve();
+
                         var popcorn = slot._player.popcorn;
                         slot._playback.onPause.remove(popcorn.pause, popcorn);
                         slot._playback.onResume.remove(popcorn.play, popcorn);

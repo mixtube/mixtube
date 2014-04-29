@@ -83,6 +83,14 @@
         /** @type {mt.model.QueueEntry} */
         var _runningQueueEntry = null;
 
+        function startedSlotAccessor(value) {
+            if (angular.isUndefined(value)) {
+                return _startedSlot;
+            } else {
+                _startedSlot = value;
+            }
+        }
+
         function movePreparedSlotAccessor(value) {
             if (angular.isUndefined(value)) {
                 return _movePreparedSlot;
@@ -99,6 +107,14 @@
             }
         }
 
+        function engagedSlotFinishedHandler() {
+            if (!_startedSlot) {
+                // no new started slot when the slot is finished means we reach the end of the queue
+                _playback.stop();
+                _runningQueueEntry = null;
+            }
+        }
+
         function finishSlot(slotAccessor) {
             var slot = slotAccessor();
             if (slot) {
@@ -111,10 +127,10 @@
             var slot = slotAccessor();
             if (slot) {
                 slot.engage(function () {
-                    if (_startedSlot) {
-                        // might be unnecessary but finish is robust enough to figure out
-                        _startedSlot.finish();
-                    }
+                    // might be unnecessary but finish is robust enough to figure out
+                    finishSlot(startedSlotAccessor);
+
+                    slot.finishedPromise.then(engagedSlotFinishedHandler);
 
                     _startedSlot = slot;
                     slotAccessor(null);
@@ -126,8 +142,8 @@
                     engageSlot(autoPreparedSlotAccessor)
                 });
             } else {
+                // todo investigate on what is the purpose of this branch
                 _startedSlot = null;
-                _runningQueueEntry = null;
             }
         }
 
@@ -143,12 +159,54 @@
             }
         }
 
-        function prepareMoveTo(requestedQueueEntry) {
+        /**
+         * @param {mt.model.QueueEntry} requestedQueueEntry
+         */
+        function moveTo(requestedQueueEntry) {
             finishSlot(movePreparedSlotAccessor);
 
             _movePreparedSlot = mtPlaybackSlotFactory(_playback);
             _movePreparedSlot.prepareSafe(requestedQueueEntry);
+
+            engageSlot(movePreparedSlotAccessor);
         }
+
+        /**
+         * @param {Array.<mt.model.QueueEntry>} entries
+         * @param {?PlaybackSlot} slot
+         * @returns {number}
+         */
+        function indexOfActualEntry(slot, entries) {
+            return slot ? entries.indexOf(slot.actualQueueEntry) : -1
+        }
+
+        function findReplacingEntry(slot, oldEntries, newEntries) {
+            var startedEntryIdx = indexOfActualEntry(slot, oldEntries);
+            if (startedEntryIdx !== -1) {
+                var newEntryAtIdx = startedEntryIdx < newEntries.length ? newEntries[startedEntryIdx] : null;
+                if (newEntryAtIdx !== slot.actualQueueEntry) {
+                    return newEntryAtIdx;
+                }
+            }
+            return false;
+        }
+
+        $rootScope.$watchCollection(function () {
+            return mtQueueManager.queue.entries;
+        }, function entriesWatcherChangeHandler(newEntries, oldEntries) {
+            if (!angular.equals(newEntries, oldEntries)) {
+
+                var startedEntryReplacement = findReplacingEntry(_startedSlot, oldEntries, newEntries);
+                if (startedEntryReplacement !== false) {
+                    if (startedEntryReplacement) {
+                        moveTo(startedEntryReplacement);
+                    } else {
+                        // last entry removed nothing more to play w can stop the playback
+                        finishSlot(startedSlotAccessor);
+                    }
+                }
+            }
+        });
 
         return {
 
@@ -184,14 +242,11 @@
              * @param {mt.model.QueueEntry} queueEntry
              */
             skipTo: function (queueEntry) {
-                if (_playback.paused) {
-                    _playback.resume();
-                } else if (_playback.stopped) {
+                if (_playback.paused || _playback.stopped) {
                     _playback.resume();
                 }
 
-                prepareMoveTo(queueEntry);
-                engageSlot(movePreparedSlotAccessor);
+                moveTo(queueEntry);
             },
 
             togglePlayback: function () {
@@ -203,8 +258,7 @@
                     var queueEntry = mtQueueManager.closestValidEntry();
                     if (queueEntry) {
                         _playback.resume();
-                        prepareMoveTo(queueEntry);
-                        engageSlot(movePreparedSlotAccessor);
+                        moveTo(queueEntry);
                     }
                 }
             }
