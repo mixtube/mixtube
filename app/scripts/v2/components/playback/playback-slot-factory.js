@@ -39,7 +39,6 @@
         };
 
         /**
-         * @name PlaybackSlot
          * @param {Playback} playback
          * @constructor
          */
@@ -206,12 +205,12 @@
                 slot._stopOutCalled = true;
                 slot._player.popcorn.fade({direction: 'out', duration: PlaybackSlot.FADE_DURATION, done: function () {
                     $rootScope.$apply(function () {
-                        slot._finishedDeferred.resolve();
-
                         var popcorn = slot._player.popcorn;
                         slot._playback.onPause.remove(popcorn.pause, popcorn);
                         slot._playback.onResume.remove(popcorn.play, popcorn);
                         slot._player.dispose();
+
+                        slot._finishedDeferred.resolve();
                     });
                 }});
             }

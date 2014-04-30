@@ -79,6 +79,8 @@
         var _movePreparedSlot = null;
         /** @type {PlaybackSlot} */
         var _startedSlot = null;
+        /** @type {Array.<PlaybackSlot>} */
+        var _finishingSlots = [];
 
         /** @type {mt.model.QueueEntry} */
         var _runningQueueEntry = null;
@@ -107,30 +109,44 @@
             }
         }
 
-        function engagedSlotFinishedHandler() {
-            if (!_startedSlot) {
-                // no new started slot when the slot is finished means we reach the end of the queue
-                _playback.stop();
-                _runningQueueEntry = null;
-            }
-        }
-
         function finishSlot(slotAccessor) {
             var slot = slotAccessor();
             if (slot) {
+                _finishingSlots.push(slot);
+                slot.finishedPromise.then(function () {
+
+                    _.remove(_finishingSlots, slot);
+
+                    if (!_startedSlot && !_finishingSlots.length) {
+                        _runningQueueEntry = null;
+
+                        if (!_movePreparedSlot && !_autoPreparedSlot) {
+                            // no new started or about to start slot when the slot is finished means we reach the end of the queue
+                            _playback.stop();
+                        }
+                    }
+                });
                 slot.finish();
                 slotAccessor(null);
             }
         }
 
+        /**
+         * Engages the slot returned by the given accessor.
+         *
+         * When engaged, a slot starts playing as soon as the preparation is done. When playing starts it finishes the
+         * started slot and triggers the auto preparation for the next slot.
+         *
+         * If the accessor returns null, it just finishes the started slot.
+         *
+         * @param {function(PlaybackSlot=): PlaybackSlot} slotAccessor
+         */
         function engageSlot(slotAccessor) {
             var slot = slotAccessor();
             if (slot) {
                 slot.engage(function () {
                     // might be unnecessary but finish is robust enough to figure out
                     finishSlot(startedSlotAccessor);
-
-                    slot.finishedPromise.then(engagedSlotFinishedHandler);
 
                     _startedSlot = slot;
                     slotAccessor(null);
@@ -142,8 +158,8 @@
                     engageSlot(autoPreparedSlotAccessor)
                 });
             } else {
-                // todo investigate on what is the purpose of this branch
-                _startedSlot = null;
+                // engaging a null slot just finishes the started one
+                finishSlot(startedSlotAccessor);
             }
         }
 
@@ -151,7 +167,7 @@
         function prepareAuto() {
             finishSlot(autoPreparedSlotAccessor);
 
-            var followingQueueEntry = mtQueueManager.closestValidEntry(_runningQueueEntry);
+            var followingQueueEntry = mtQueueManager.closestValidEntry(_startedSlot.actualQueueEntry);
 
             if (followingQueueEntry) {
                 _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
@@ -160,31 +176,26 @@
         }
 
         /**
-         * @param {mt.model.QueueEntry} requestedQueueEntry
+         * Starts the preparation of a new move slot and engages it.
+         *
+         * @param {?mt.model.QueueEntry} requestedQueueEntry
          */
         function moveTo(requestedQueueEntry) {
             finishSlot(movePreparedSlotAccessor);
 
-            _movePreparedSlot = mtPlaybackSlotFactory(_playback);
-            _movePreparedSlot.prepareSafe(requestedQueueEntry);
+            if (requestedQueueEntry) {
+                _movePreparedSlot = mtPlaybackSlotFactory(_playback);
+                _movePreparedSlot.prepareSafe(requestedQueueEntry);
+            }
 
             engageSlot(movePreparedSlotAccessor);
         }
 
-        /**
-         * @param {Array.<mt.model.QueueEntry>} entries
-         * @param {?PlaybackSlot} slot
-         * @returns {number}
-         */
-        function indexOfActualEntry(slot, entries) {
-            return slot ? entries.indexOf(slot.actualQueueEntry) : -1
-        }
-
-        function findReplacingEntry(slot, oldEntries, newEntries) {
-            var startedEntryIdx = indexOfActualEntry(slot, oldEntries);
-            if (startedEntryIdx !== -1) {
-                var newEntryAtIdx = startedEntryIdx < newEntries.length ? newEntries[startedEntryIdx] : null;
-                if (newEntryAtIdx !== slot.actualQueueEntry) {
+        function findReplacingEntry(entry, oldEntries, newEntries) {
+            var entryIdx = entry ? oldEntries.indexOf(entry) : -1;
+            if (entryIdx !== -1) {
+                var newEntryAtIdx = entryIdx < newEntries.length ? newEntries[entryIdx] : null;
+                if (newEntryAtIdx !== entry) {
                     return newEntryAtIdx;
                 }
             }
@@ -196,13 +207,18 @@
         }, function entriesWatcherChangeHandler(newEntries, oldEntries) {
             if (!angular.equals(newEntries, oldEntries)) {
 
-                var startedEntryReplacement = findReplacingEntry(_startedSlot, oldEntries, newEntries);
+                var startedEntry = _startedSlot && _startedSlot.actualQueueEntry
+                    || _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry);
+                var startedEntryReplacement = findReplacingEntry(startedEntry, oldEntries, newEntries);
+
                 if (startedEntryReplacement !== false) {
-                    if (startedEntryReplacement) {
-                        moveTo(startedEntryReplacement);
-                    } else {
-                        // last entry removed nothing more to play w can stop the playback
-                        finishSlot(startedSlotAccessor);
+                    moveTo(startedEntryReplacement);
+                } else {
+                    var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
+                    var autoPreparedEntryReplacement = findReplacingEntry(autoPreparedEntry, oldEntries, newEntries);
+
+                    if (autoPreparedEntryReplacement !== false) {
+                        prepareAuto();
                     }
                 }
             }
