@@ -221,11 +221,11 @@
         var ctrl = this;
 
         /**
-         * @param {mt.model.QueueEntry} queueEntry
+         * @param {number} queueIndex
          */
-        ctrl.playQueueEntry = function (queueEntry) {
+        ctrl.playQueueEntry = function (queueIndex) {
 
-            mtOrchestrator.skipTo(queueEntry);
+            mtOrchestrator.skipTo(queueIndex);
 
 //            mtModalManager.open({
 //                title: 'toto',

@@ -82,6 +82,8 @@
         /** @type {Array.<PlaybackSlot>} */
         var _finishingSlots = [];
 
+        /** @type {number} */
+        var _runningQueueIndex = -1;
         /** @type {mt.model.QueueEntry} */
         var _runningQueueEntry = null;
 
@@ -119,6 +121,7 @@
 
                     if (!_startedSlot && !_finishingSlots.length) {
                         _runningQueueEntry = null;
+                        _runningQueueIndex = -1;
 
                         if (!_movePreparedSlot && !_autoPreparedSlot) {
                             // no new started or about to start slot when the slot is finished means we reach the end of the queue
@@ -144,19 +147,23 @@
         function engageSlot(slotAccessor) {
             var slot = slotAccessor();
             if (slot) {
-                slot.engage(function () {
-                    // might be unnecessary but finish is robust enough to figure out
-                    finishSlot(startedSlotAccessor);
+                slot.engage(
+                    function prepareFinishedCb() {
+                        // might be unnecessary but finish is robust enough to figure out
+                        finishSlot(startedSlotAccessor);
+                        slotAccessor(null);
+                    },
+                    function aboutToStartCb() {
+                        _startedSlot = slot;
 
-                    _startedSlot = slot;
-                    slotAccessor(null);
+                        _runningQueueEntry = slot.actualQueueEntry;
+                        _runningQueueIndex = mtQueueManager.queue.entries.indexOf(_runningQueueEntry);
 
-                    _runningQueueEntry = slot.actualQueueEntry;
-
-                    prepareAuto();
-                }, function () {
-                    engageSlot(autoPreparedSlotAccessor)
-                });
+                        prepareAuto(_runningQueueIndex + 1);
+                    },
+                    function aboutToEndCb() {
+                        engageSlot(autoPreparedSlotAccessor)
+                    });
             } else {
                 // engaging a null slot just finishes the started one
                 finishSlot(startedSlotAccessor);
@@ -164,34 +171,37 @@
         }
 
 
-        function prepareAuto() {
+        function prepareAuto(queueIndex) {
             finishSlot(autoPreparedSlotAccessor);
 
-            var followingQueueEntry = mtQueueManager.closestValidEntry(_startedSlot.actualQueueEntry);
+//            var followingQueueEntry = mtQueueManager.closestValidEntryByIndex();
+//            var currentIndex = mtQueueManager.queue.entries.indexOf(_startedSlot.actualQueueEntry);
 
-            if (followingQueueEntry) {
-                _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
-                _autoPreparedSlot.prepareSafe(followingQueueEntry);
-            }
+//            if (followingQueueEntry) {
+            _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
+            _autoPreparedSlot.prepareSafe(queueIndex);
+//            }
         }
 
         /**
          * Starts the preparation of a new move slot and engages it.
          *
-         * @param {?mt.model.QueueEntry} requestedQueueEntry
+         * @param {number} queueIndex
          */
-        function moveTo(requestedQueueEntry) {
+        function moveTo(queueIndex) {
+//            var requestedQueueEntry = mtQueueManager.closestValidEntryByIndex(queueIndex);
+
             finishSlot(movePreparedSlotAccessor);
 
-            if (requestedQueueEntry) {
-                _movePreparedSlot = mtPlaybackSlotFactory(_playback);
-                _movePreparedSlot.prepareSafe(requestedQueueEntry);
-            }
+//            if (requestedQueueEntry) {
+            _movePreparedSlot = mtPlaybackSlotFactory(_playback);
+            _movePreparedSlot.prepareSafe(queueIndex);
+//            }
 
             engageSlot(movePreparedSlotAccessor);
         }
 
-        function findReplacingEntry(entry, oldEntries, newEntries) {
+        function findReplacingEntryIndex(entry, oldEntries, newEntries) {
             var entryIdx = entry ? oldEntries.indexOf(entry) : -1;
             if (entryIdx !== -1) {
                 var newEntryAtIdx = entryIdx < newEntries.length ? newEntries[entryIdx] : null;
@@ -207,18 +217,44 @@
         }, function entriesWatcherChangeHandler(newEntries, oldEntries) {
             if (!angular.equals(newEntries, oldEntries)) {
 
-                var startedEntry = _startedSlot && _startedSlot.actualQueueEntry
-                    || _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry);
-                var startedEntryReplacement = findReplacingEntry(startedEntry, oldEntries, newEntries);
+                var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
+                var activeEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
+                    || startedEntry;
 
-                if (startedEntryReplacement !== false) {
-                    moveTo(startedEntryReplacement);
-                } else {
+                var removedEntries = _.difference(oldEntries, newEntries);
+
+                if (_.contains(removedEntries, activeEntry)) {
+                    // the active entry has just been removed
+                    //  move to the entry which is now at the same position in the queue
+                    moveTo(oldEntries.indexOf(activeEntry));
+                } else if (startedEntry) {
+                    // nothing changed for the active entry but we need the check if the change impacted the auto prepared entry
+
+                    var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
+                    var startedEntryNewIndex = newEntries.indexOf(startedEntry);
+
                     var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
-                    var autoPreparedEntryReplacement = findReplacingEntry(autoPreparedEntry, oldEntries, newEntries);
+                    var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
+                    var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
 
-                    if (autoPreparedEntryReplacement !== false) {
-                        prepareAuto();
+                    var needToRePrepare = false;
+                    if (autoPreparedEntryNewIndex === -1) {
+                        // the auto prepared entry has just been removed so we know straight that we have to re-prepare
+                        needToRePrepare = true;
+                    } else {
+                        // we have to compare slices of old and new entries from the entry following the started one
+                        // to the auto prepared one the check if something changes in between
+                        var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
+                        var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
+                        needToRePrepare = !angular.equals(sliceOfOldEntries, sliceOfNewEntries)
+                    }
+
+                    if (needToRePrepare) {
+                        // something changed so just in case we re (auto)prepare the entry
+                        prepareAuto(startedEntryNewIndex + 1);
+
+                        logger.debug('something changed in the queue that required a re-preparation of the previously ' +
+                            'auto prepared entry %O', autoPreparedEntry);
                     }
                 }
             }
@@ -255,14 +291,14 @@
             },
 
             /**
-             * @param {mt.model.QueueEntry} queueEntry
+             * @param {number} queueIndex
              */
-            skipTo: function (queueEntry) {
+            skipTo: function (queueIndex) {
                 if (_playback.paused || _playback.stopped) {
                     _playback.resume();
                 }
 
-                moveTo(queueEntry);
+                moveTo(queueIndex);
             },
 
             togglePlayback: function () {
@@ -271,11 +307,9 @@
                 } else if (_playback.paused) {
                     _playback.resume();
                 } else if (_playback.stopped) {
-                    var queueEntry = mtQueueManager.closestValidEntry();
-                    if (queueEntry) {
-                        _playback.resume();
-                        moveTo(queueEntry);
-                    }
+                    _playback.resume();
+                    // todo test playing an empty queue
+                    moveTo(0);
                 }
             }
         };

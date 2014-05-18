@@ -72,7 +72,7 @@
                     ng-class="{'active': entry === getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
                     mt-anchor="{{entry.id}}">
-                    <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry(entry)">
+                    <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry($index)">
                         <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                              class="image"></div>
                         <p class="mt-queue__entry__broken-message">Couldn't load this video</p>

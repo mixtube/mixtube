@@ -59,47 +59,52 @@
         PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER = function (duration) {
             return 15;
         };
-        PlaybackSlot.PREPARE_RETRY = function (queueEntryToTry, prepareDeferred) {
+        PlaybackSlot.PREPARE_RETRY = function (queueEntryIndexToTry, prepareDeferred) {
 
-            prepareDeferred.notify(queueEntryToTry);
+            var queueEntryTrying = mtQueueManager.closestValidEntryByIndex(queueEntryIndexToTry);
 
-            if (!queueEntryToTry) {
-                prepareDeferred.reject(new Error('Could not find any valid entry to prepare'));
-            }
+            prepareDeferred.notify(queueEntryTrying);
 
-            var player = new Player(queueEntryToTry);
+            if (!queueEntryTrying) {
+                // could not find any valid entry to prepare
+                prepareDeferred.resolve(null);
+            } else {
 
-            player.popcorn.on('error', function prepareErrorCb() {
-                $rootScope.$apply(function () {
-                    logger.warn('Skipped %O because of an error when trying to load it: %O', queueEntryToTry, player.popcorn.media.error);
+                var player = new Player(queueEntryTrying);
 
-                    player.dispose();
-                    queueEntryToTry.skippedAtRuntime = true;
-                    PlaybackSlot.PREPARE_RETRY(mtQueueManager.closestValidEntry(queueEntryToTry), prepareDeferred);
-                });
-            });
+                player.popcorn.on('error', function prepareErrorCb() {
+                    $rootScope.$apply(function () {
+                        logger.warn('Skipped %O (position %s) because of an error when trying to load it: %O', queueEntryTrying, queueEntryIndexToTry, player.popcorn.media.error);
 
-            player.popcorn.one('canplay', function prepareCanPlayCb() {
-                $rootScope.$apply(function () {
-                    // makes really sure a call to play will start the video instantaneously by forcing the player to buffer
-                    player.popcorn.play();
-                    player.popcorn.one('playing', function preparePlayingCb() {
-                        player.popcorn.pause();
-
-                        // last try was successful so send a last progress info to tell that we are not trying anything else
-                        prepareDeferred.notify(null);
-
-                        // make sure the player is disposed if the preparation has been canceled
-                        prepareDeferred.promise.catch(function () {
-                            player.dispose();
-                        });
-                        // depending of the state of the deferred this might have no effect
-                        prepareDeferred.resolve({player: player, preparedQueueEntry: queueEntryToTry});
+                        player.dispose();
+                        queueEntryTrying.skippedAtRuntime = true;
+                        // the entry at the given index failed to load so try the next one
+                        PlaybackSlot.PREPARE_RETRY(queueEntryIndexToTry + 1, prepareDeferred);
                     });
                 });
-            });
 
-            player.load();
+                player.popcorn.one('canplay', function prepareCanPlayCb() {
+                    $rootScope.$apply(function () {
+                        // makes really sure a call to play will start the video instantaneously by forcing the player to buffer
+                        player.popcorn.play();
+                        player.popcorn.one('playing', function preparePlayingCb() {
+                            player.popcorn.pause();
+
+                            // last try was successful so send a last progress info to tell that we are not trying anything else
+                            prepareDeferred.notify(null);
+
+                            // make sure the player is disposed if the preparation has been canceled
+                            prepareDeferred.promise.catch(function () {
+                                player.dispose();
+                            });
+                            // depending of the state of the deferred this might have no effect
+                            prepareDeferred.resolve({player: player, preparedQueueEntry: queueEntryTrying});
+                        });
+                    });
+                });
+
+                player.load();
+            }
         };
 
         PlaybackSlot.prototype = {
@@ -122,19 +127,19 @@
              *
              * This method is responsible for marking queue entry as skipped in case of error while loading.
              *
-             * @param {mt.model.QueueEntry} expectedQueueEntry
+             * @param {number} expectedQueueEntryIndex
              */
-            prepareSafe: function (expectedQueueEntry) {
+            prepareSafe: function (expectedQueueEntryIndex) {
                 var slot = this;
 
-                slot._prepareDeferred.promise.then(function successCb(args) {
-                    slot._actualQueueEntry = args.preparedQueueEntry;
+                slot._prepareDeferred.promise.then(function prepareFinishedCb(args) {
+                    slot._actualQueueEntry = args && args.preparedQueueEntry;
                 }, null, function progressCb(tryingQueueEntry) {
                     slot._tryingQueueEntry = tryingQueueEntry;
                 });
 
                 PlaybackSlot.PREPARE_RETRY(
-                    mtQueueManager.closestValidEntry(expectedQueueEntry, true),
+                    expectedQueueEntryIndex,
                     slot._prepareDeferred
                 );
 
@@ -142,28 +147,36 @@
             },
 
             /**
+             * @param {function} preparedFinishedCb
              * @param {function} aboutToStartCb
              * @param {function} aboutToEndCb
              */
-            engage: function (aboutToStartCb, aboutToEndCb) {
+            engage: function (preparedFinishedCb, aboutToStartCb, aboutToEndCb) {
                 var slot = this;
-                slot._prepareDeferred.promise.then(function setupPlayer(args) {
-                    slot._player = args.player;
+                slot._prepareDeferred.promise.then(
+                    function finished(args) {
 
-                    slot._player.popcorn.cue(
-                        PlaybackSlot.AUTO_END_CUE_ID,
-                        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER(slot._player.popcorn.duration()),
-                        function autoEndCueCb() {
-                            $rootScope.$apply(function () {
-                                logger.debug('auto ending %O', slot._actualQueueEntry.video);
-                                aboutToEndCb();
-                                slot.finish();
-                            });
-                        });
+                        preparedFinishedCb();
 
-                    aboutToStartCb();
-                    slot._startIn();
-                });
+                        // args can be falsy if it wasn't possible to find a valid entry to prepare
+                        if (args) {
+                            slot._player = args.player;
+
+                            slot._player.popcorn.cue(
+                                PlaybackSlot.AUTO_END_CUE_ID,
+                                PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER(slot._player.popcorn.duration()),
+                                function autoEndCueCb() {
+                                    $rootScope.$apply(function () {
+                                        logger.debug('auto ending %O', slot._actualQueueEntry.video);
+                                        aboutToEndCb();
+                                        slot.finish();
+                                    });
+                                });
+
+                            aboutToStartCb();
+                            slot._startIn();
+                        }
+                    });
 
                 return this;
             },

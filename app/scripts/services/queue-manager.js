@@ -136,33 +136,22 @@
             },
 
             /**
-             * Returns the closest valid (not skipped yet) video in the queue from the given entry or the first entry if
-             * none is given.
+             * Returns the closest valid (not skipped yet) entry in the queue from the given entry index included.
              *
-             * @param {mt.model.QueueEntry=} from an optional entry to start the search from
-             * @param {boolean=} includeFrom should the given entry be included in the search
+             * @param {number} fromIndex the index in the queue to start to search from
              * @return {mt.model.QueueEntry} the next entry or null if none
              */
-            closestValidEntry: function (from, includeFrom) {
-                var position = 0;
+            closestValidEntryByIndex: function (fromIndex) {
+                var validEntry = null;
 
-                if (from) {
-                    position = queue.entries.indexOf(from);
-                    if (position === -1) {
-                        // something is seriously broken here
-                        throw new Error('The given entry is not in the queue array');
-                    }
-                    if (!includeFrom) position++;
-                }
-
-                // filters out skipped entries so that we don't retry them
-                var validEntry;
-                while (!validEntry && position < queue.entries.length) {
-                    var entry = queue.entries[position];
-                    if (entry.skippedAtRuntime) {
-                        position++;
-                    } else {
-                        validEntry = entry;
+                if (fromIndex !== -1) {
+                    while (!validEntry && fromIndex < queue.entries.length) {
+                        var entry = queue.entries[fromIndex];
+                        if (entry.skippedAtRuntime) {
+                            fromIndex++;
+                        } else {
+                            validEntry = entry;
+                        }
                     }
                 }
 
