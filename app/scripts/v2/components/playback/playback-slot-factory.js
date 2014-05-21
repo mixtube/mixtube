@@ -74,7 +74,8 @@
 
                 player.popcorn.on('error', function prepareErrorCb() {
                     $rootScope.$apply(function () {
-                        logger.warn('Skipped %O (position %s) because of an error when trying to load it: %O', queueEntryTrying, queueEntryIndexToTry, player.popcorn.media.error);
+                        logger.warn('Skipped %O (position %s) because of an error when trying to load it: %O',
+                            queueEntryTrying, queueEntryIndexToTry, player.popcorn.media.error);
 
                         player.dispose();
                         queueEntryTrying.skippedAtRuntime = true;
@@ -122,24 +123,27 @@
             },
 
             /**
-             * Tries to load the video of the given entry. If this video is not valid, it browse to cue in incrementally
+             * Tries to load the video of the given entry. If this video is not valid, it browses to cue in incrementally
              * until it finds a valid queue entry.
              *
              * This method is responsible for marking queue entry as skipped in case of error while loading.
              *
-             * @param {number} expectedQueueEntryIndex
+             * @param {number} wishedQueueEntryIndex
              */
-            prepareSafe: function (expectedQueueEntryIndex) {
+            prepareSafe: function (wishedQueueEntryIndex) {
                 var slot = this;
 
-                slot._prepareDeferred.promise.then(function prepareFinishedCb(args) {
-                    slot._actualQueueEntry = args && args.preparedQueueEntry;
-                }, null, function progressCb(tryingQueueEntry) {
-                    slot._tryingQueueEntry = tryingQueueEntry;
-                });
+                slot._prepareDeferred.promise.then(
+                    function prepareFinishedCb(/**{player: Player, preparedQueueEntry: mt.model.QueueEntry}*/ playerEntry) {
+                        slot._actualQueueEntry = playerEntry && playerEntry.preparedQueueEntry;
+                    },
+                    null,
+                    function progressCb(tryingQueueEntry) {
+                        slot._tryingQueueEntry = tryingQueueEntry;
+                    });
 
                 PlaybackSlot.PREPARE_RETRY(
-                    expectedQueueEntryIndex,
+                    wishedQueueEntryIndex,
                     slot._prepareDeferred
                 );
 
@@ -154,13 +158,13 @@
             engage: function (preparedFinishedCb, aboutToStartCb, aboutToEndCb) {
                 var slot = this;
                 slot._prepareDeferred.promise.then(
-                    function finished(args) {
+                    function finished(/**{player: Player, preparedQueueEntry: mt.model.QueueEntry}*/ playerEntry) {
 
                         preparedFinishedCb();
 
-                        // args can be falsy if it wasn't possible to find a valid entry to prepare
-                        if (args) {
-                            slot._player = args.player;
+                        // playerEntry can be falsy if it wasn't possible to find a valid entry to prepare
+                        if (playerEntry) {
+                            slot._player = playerEntry.player;
 
                             slot._player.popcorn.cue(
                                 PlaybackSlot.AUTO_END_CUE_ID,
@@ -181,6 +185,11 @@
                 return this;
             },
 
+            /**
+             * Finishes the slot by using the most sensible way to do it according to the slot state.
+             *
+             * This method is re-entrant so it is safe to call it in any circumstances.
+             */
             finish: function () {
                 this._finishCalled = true;
                 if (!this._player) {
@@ -228,7 +237,6 @@
                 }});
             }
         };
-
 
         return function playbackSlot(playback) {
             return new PlaybackSlot(playback);

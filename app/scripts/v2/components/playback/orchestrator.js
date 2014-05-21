@@ -88,7 +88,7 @@
         var _runningQueueEntry = null;
 
         function startedSlotAccessor(value) {
-            if (angular.isUndefined(value)) {
+            if (_.isUndefined(value)) {
                 return _startedSlot;
             } else {
                 _startedSlot = value;
@@ -96,7 +96,7 @@
         }
 
         function movePreparedSlotAccessor(value) {
-            if (angular.isUndefined(value)) {
+            if (_.isUndefined(value)) {
                 return _movePreparedSlot;
             } else {
                 _movePreparedSlot = value;
@@ -104,7 +104,7 @@
         }
 
         function autoPreparedSlotAccessor(value) {
-            if (angular.isUndefined(value)) {
+            if (_.isUndefined(value)) {
                 return _autoPreparedSlot;
             } else {
                 _autoPreparedSlot = value;
@@ -170,86 +170,78 @@
             }
         }
 
-
+        /**
+         * Starts the preparation of a new auto slot.
+         *
+         * @param {number} queueIndex the index of the "wished" queue item to prepare
+         */
         function prepareAuto(queueIndex) {
             finishSlot(autoPreparedSlotAccessor);
-
-//            var followingQueueEntry = mtQueueManager.closestValidEntryByIndex();
-//            var currentIndex = mtQueueManager.queue.entries.indexOf(_startedSlot.actualQueueEntry);
-
-//            if (followingQueueEntry) {
             _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
             _autoPreparedSlot.prepareSafe(queueIndex);
-//            }
         }
 
         /**
          * Starts the preparation of a new move slot and engages it.
          *
-         * @param {number} queueIndex
+         * @param {number} queueIndex the index of the "wished" queue item to prepare
          */
         function moveTo(queueIndex) {
-//            var requestedQueueEntry = mtQueueManager.closestValidEntryByIndex(queueIndex);
-
             finishSlot(movePreparedSlotAccessor);
-
-//            if (requestedQueueEntry) {
             _movePreparedSlot = mtPlaybackSlotFactory(_playback);
             _movePreparedSlot.prepareSafe(queueIndex);
-//            }
-
             engageSlot(movePreparedSlotAccessor);
         }
 
-        function findReplacingEntryIndex(entry, oldEntries, newEntries) {
-            var entryIdx = entry ? oldEntries.indexOf(entry) : -1;
-            if (entryIdx !== -1) {
-                var newEntryAtIdx = entryIdx < newEntries.length ? newEntries[entryIdx] : null;
-                if (newEntryAtIdx !== entry) {
-                    return newEntryAtIdx;
-                }
-            }
-            return false;
-        }
-
+        /**
+         * The watcher bellow observes the queue entries to check if a modification the queue and impacts the playback if required.
+         *
+         * Two main cases:
+         *  - the currently playing entry has been removed -> move to the next valid one
+         *  - something has changed between the currently playing entry and the auto prepared one -> launch a new cycle to pick and prepare
+         */
         $rootScope.$watchCollection(function () {
             return mtQueueManager.queue.entries;
-        }, function entriesWatcherChangeHandler(newEntries, oldEntries) {
+        }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
             if (!angular.equals(newEntries, oldEntries)) {
 
                 var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
-                var activeEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
+
+                // the concept of activated entry is only relevant here
+                // we want to consider the currently started entry or the one about to be the next started entry mainly
+                // to properly manage moved to entry removal while still preparing
+                var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
                     || startedEntry;
 
                 var removedEntries = _.difference(oldEntries, newEntries);
-
-                if (_.contains(removedEntries, activeEntry)) {
+                if (_.contains(removedEntries, activatedEntry)) {
                     // the active entry has just been removed
-                    //  move to the entry which is now at the same position in the queue
-                    moveTo(oldEntries.indexOf(activeEntry));
+                    // move to the entry which is now at the same position in the queue
+                    moveTo(oldEntries.indexOf(activatedEntry));
                 } else if (startedEntry) {
-                    // nothing changed for the active entry but we need the check if the change impacted the auto prepared entry
+                    // nothing changed for the active entry
+
+                    // we need the check if the change impacted the auto prepared entry
+                    var prepareAutoRequired = false;
 
                     var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
                     var startedEntryNewIndex = newEntries.indexOf(startedEntry);
 
                     var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
-                    var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
                     var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
-
-                    var needToRePrepare = false;
                     if (autoPreparedEntryNewIndex === -1) {
                         // the auto prepared entry has just been removed so we know straight that we have to re-prepare
-                        needToRePrepare = true;
+                        prepareAutoRequired = true;
                     } else {
                         // we have to compare slices of old and new entries from the entry following the started one
                         // to the auto prepared one the check if something changes in between
+                        var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
                         var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
                         var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
-                        needToRePrepare = !angular.equals(sliceOfOldEntries, sliceOfNewEntries)
+                        prepareAutoRequired = !angular.equals(sliceOfOldEntries, sliceOfNewEntries);
                     }
 
-                    if (needToRePrepare) {
+                    if (prepareAutoRequired) {
                         // something changed so just in case we re (auto)prepare the entry
                         prepareAuto(startedEntryNewIndex + 1);
 
@@ -306,9 +298,8 @@
                     _playback.pause();
                 } else if (_playback.paused) {
                     _playback.resume();
-                } else if (_playback.stopped) {
+                } else if (_playback.stopped && mtQueueManager.queue.entries.length) {
                     _playback.resume();
-                    // todo test playing an empty queue
                     moveTo(0);
                 }
             }
