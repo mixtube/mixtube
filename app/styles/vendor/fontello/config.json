@@ -638,8 +638,8 @@
     },
     {
       "uid": "10bc96b371dd6dbf38f140ed3b713e71",
-      "css": "glyph",
-      "code": 77,
+      "css": "glyph-2",
+      "code": 59394,
       "src": "custom_icons",
       "selected": false,
       "svg": {
@@ -5077,6 +5077,12 @@
       "css": "plus",
       "code": 59395,
       "src": "entypo"
+    },
+    {
+      "uid": "8da3ac534210aae9c0f0e13804c1df97",
+      "css": "cancel-1",
+      "code": 59394,
+      "src": "websymbols"
     }
   ]
 }

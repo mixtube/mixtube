@@ -36,26 +36,33 @@
                 </h1>
             </div>
             <div class="center">
-                <div class="mt-header__playback-buttons mt-header__playback-buttons__animation-class"
-                     ng-class="{'pause': rootCtrl.isPlaying()}">
-                    <button class="mt-header__playback-button play" data-mt-icon="&#xe805"
-                            ng-click="rootCtrl.togglePlayback()">
+                <button class="mt-header__playback-button"
+                        ng-click="rootCtrl.togglePlayback()">
+                    <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
+                          data-mt-icon="&#xe805">
                         <span class="mt-replaced-text">Play</span>
-                    </button>
-                    <button class="mt-header__playback-button pause" data-mt-icon="&#xe804"
-                            ng-click="rootCtrl.togglePlayback()">
+                    </span>
+                    <span class="facet facet__animation-toggle" ng-show="rootCtrl.isPlaying()"
+                          data-mt-icon="&#xe804">
                         <span class="mt-replaced-text">Pause</span>
-                    </button>
-                </div>
+                    </span>
+                </button>
             </div>
             <div class="end">
                 <!--just padding container to ensure proper centering of header-center -->
             </div>
         </div>
 
-        <button class="mt-search-input__button mt-js-search-input__button" data-mt-icon="&#xe800"
-                mt-click-sync="rootCtrl.searchButtonClicked()" mt-click-active-class="ng-click-active">
-            <span class="mt-replaced-text">Search</span>
+        <button class="mt-search-input__button" mt-click-sync="rootCtrl.searchButtonClicked()"
+                mt-click-active-class="ng-click-active">
+            <span class="facet facet__animation-toggle" ng-hide="props.searchShown"
+                  data-mt-icon="&#xe800">
+                <span class="mt-replaced-text">Open search</span>
+            </span>
+            <span class="facet close facet__animation-toggle" ng-show="props.searchShown"
+                  data-mt-icon="&#xe802">
+                <span class="mt-replaced-text">Close search</span>
+            </span>
         </button>
 
         <mt-search-input name="search" ng-model="props.searchTerm"></mt-search-input>

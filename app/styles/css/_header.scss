@@ -7,7 +7,7 @@
   $headerHeight: 4rem;
   $searchInputPadding: 0 3rem 0 .5rem;
   $searchFieldAnimationDuration: $baseTransitionDuration;
-  $textShadowSize: 8px;
+  $textShadowSize: 8rem / $baseFontSizeUnitless;
   $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
 
   .mt-header {
@@ -97,27 +97,39 @@
     }
   }
 
-  .mt-header__playback-buttons {
+  .mt-header__playback-button {
+    $width: 49rem / $baseFontSizeUnitless;
 
+    @extend %mt-chromeless-button;
+    position: relative;
     height: 100%;
+    width: $width + 2 * $textShadowSize; // leave some space for proper rendering of shadow (IE)
 
-    &.mt-header__playback-buttons__animation-class {
+    font-size: $width;
+    text-shadow: $textShadow;
 
-      transition: transform $baseTransitionDuration $easeInOut;
+    .facet {
+      position: absolute; // facets stacks but only one is visible at the time
+      top: 0;
+      height: 100%;
+      width: 100%;
 
-      &.pause {
+      // center the icon
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .facet__animation-toggle {
+      &.ng-hide-add, &.ng-hide-remove {
+        transition: transform $baseTransitionDuration $easeInOut;
+        display: flex !important;
+      }
+
+      &.ng-hide {
         transform: translateY(-100%);
       }
     }
-  }
-
-  .mt-header__playback-button {
-    @extend %mt-chromeless-button;
-    height: 100%;
-    padding: 0 $textShadowSize; // leave some space for proper rendering of shadow (IE)
-
-    font-size: (49rem/$baseFontSizeUnitless);
-    text-shadow: $textShadow;
   }
 
   // Search input styles
@@ -140,11 +152,38 @@
     right: 0;
     top: 0;
     height: 100%;
-    padding: 0 .5rem;
     z-index: 1;
+    width: 2.5rem + 2 * .5rem; // we need to fix the size here because the content is absolutely positioned
 
     font-size: 2.5rem;
     text-shadow: $textShadow;
+
+    .facet {
+      position: absolute; // facets stacks but only one is visible at the time
+      top: 0;
+      height: 100%;
+      width: 100%;
+
+      // center the icon
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &.close {
+        font-size: 1.7rem; // the close icon is a little bit larger so we need to adjust the size
+      }
+    }
+
+    .facet__animation-toggle {
+      &.ng-hide-add, &.ng-hide-remove {
+        transition: transform $baseTransitionDuration $easeInOut;
+        display: flex !important;
+      }
+
+      &.ng-hide {
+        transform: translateY(-100%);
+      }
+    }
   }
 
   // the container, will be translated but not animated
