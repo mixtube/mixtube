@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <button class="mt-search-input__button" mt-click-sync="rootCtrl.searchButtonClicked()"
+        <button class="mt-search-input__button" mt-click-sync="rootCtrl.toggleSearch()"
                 mt-click-active-class="ng-click-active">
             <span class="facet facet__animation-toggle" ng-hide="props.searchShown"
                   data-mt-icon="&#xe800">
@@ -166,6 +166,7 @@
 <script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
 <script src="bower_components/shifty/dist/shifty.js"></script>
 <script src="bower_components/js-signals/dist/signals.js"></script>
+<script src="bower_components/keymaster/keymaster.js"></script>
 <!-- endbuild -->
 
 <!-- build:js scripts/app.js -->
@@ -193,6 +194,7 @@
 <script src="scripts/v2/components/playback/scenes-registry.js"></script>
 <script src="scripts/v2/components/playback/popcorn.one.js"></script>
 <script src="scripts/v2/components/playback/popcorn.fade.js"></script>
+<script src="scripts/v2/components/keyboard-shortcut-manager.js"></script>
 
 <script src="scripts/services/configuration.js"></script>
 <script src="scripts/services/queue-manager.js"></script>

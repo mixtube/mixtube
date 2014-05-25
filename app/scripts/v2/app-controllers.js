@@ -1,6 +1,6 @@
 (function (mt) {
     'use strict';
-    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator) {
+    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator) {
 
         var ctrl = this;
 
@@ -26,9 +26,53 @@
         /** @type {boolean}*/
         $scope.props.searchShown = false;
 
+        $scope.getRunningQueueEntry = function () {
+            return mtOrchestrator.runningQueueEntry;
+        };
+
+        $scope.getLoadingQueueEntry = function () {
+            return mtOrchestrator.loadingQueueEntry;
+        };
+
+        ctrl.isPlaying = function () {
+            return mtOrchestrator.playing;
+        };
+
+        /**
+         * @param {boolean=} showOrHide if not given it will toggle the visibility
+         */
+        ctrl.toggleSearch = function (showOrHide) {
+            $scope.props.searchShown = _.isUndefined(showOrHide) ? !$scope.props.searchShown : showOrHide;
+
+            if ($scope.props.searchShown) {
+                // reset search term before showing the search input
+                $scope.props.searchTerm = null;
+                mtKeyboardShortcutManager.enterScope('search');
+            } else {
+                mtKeyboardShortcutManager.leaveScope('search');
+            }
+
+            mtSearchInputsRegistry('search').ready(function (searchInput) {
+                searchInput.toggle($scope.props.searchShown);
+            });
+        };
+
+        ctrl.togglePlayback = function () {
+            mtOrchestrator.togglePlayback();
+        };
+
         // hide the input search at startup
-        mtSearchInputsRegistry('search').ready(function (searchInput) {
-            searchInput.toggle(false);
+        ctrl.toggleSearch(false);
+
+        // register the global space shortcut
+        mtKeyboardShortcutManager.register('space', function (evt) {
+            evt.preventDefault();
+            mtOrchestrator.togglePlayback();
+        });
+
+        mtKeyboardShortcutManager.register('search', 'esc', function (evt) {
+            evt.preventDefault();
+            ctrl.toggleSearch(false);
         });
 
         $scope.$watch('props.queue', function (newVal, oldVal) {
@@ -60,35 +104,6 @@
                     });
             }
         }, true);
-
-        $scope.getRunningQueueEntry = function () {
-            return mtOrchestrator.runningQueueEntry;
-        };
-
-        $scope.getLoadingQueueEntry = function () {
-            return mtOrchestrator.loadingQueueEntry;
-        };
-
-        ctrl.isPlaying = function () {
-            return mtOrchestrator.playing;
-        };
-
-        ctrl.searchButtonClicked = function () {
-            $scope.props.searchShown = !$scope.props.searchShown;
-
-            if ($scope.props.searchShown) {
-                // reset search term before showing the search input
-                $scope.props.searchTerm = null;
-            }
-
-            mtSearchInputsRegistry('search').ready(function (searchInput) {
-                searchInput.toggle($scope.props.searchShown);
-            });
-        };
-
-        ctrl.togglePlayback = function () {
-            mtOrchestrator.togglePlayback();
-        };
     });
 
     mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
