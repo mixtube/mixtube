@@ -262,7 +262,7 @@ body {
 
   .mt-search {
     // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
-    @include position(absolute, 0px 0px 0px 0);
+    @include position(absolute, 0px 0px 0px null);
     width: 100%;
 
     background-color: rgba($secondaryBgColor, .8);
