@@ -27,8 +27,8 @@
 <div class="mt-scene" mt-scene="scene"></div>
 
 <div class="mt-app">
-    <div class="mt-header">
-        <div class="mt-header__bg mt-header__bg__animation-show"></div>
+    <div class="mt-header" mt-interactive-chrome>
+        <div class="mt-header__bg mt-header__bg__animation-show" ng-show="rootCtrl.isUserInteracting()"></div>
         <div class="mt-header__container">
             <div class="start">
                 <h1 class="mt-header__app-title">
@@ -72,11 +72,12 @@
 
         <mt-notification-center name="notificationCenter"></mt-notification-center>
 
-        <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue">
+        <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue" mt-interactive-chrome
+             ng-show="rootCtrl.isUserInteracting()">
             <ul>
                 <li class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
                     ng-repeat="entry in props.queue.entries"
-                    ng-class="{'active': entry === getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
+                    ng-class="{'active': entry === rootCtrl.getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
                     mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry($index)">
@@ -84,7 +85,7 @@
                              class="image"></div>
                         <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
 
-                        <div class="mt-queue__entry__progress" ng-show="entry === getLoadingQueueEntry()">
+                        <div class="mt-queue__entry__progress" ng-show="entry === rootCtrl.getLoadingQueueEntry()">
                             <progress></progress>
                         </div>
                     </button>
@@ -104,7 +105,8 @@
             </ul>
         </div>
 
-        <div class="mt-search mt-search__animation-show" ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
+        <div class="mt-search mt-search__animation-show" mt-interactive-chrome
+             ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
              ng-show="props.searchShown && searchResultsCtrl.inSearch">
             <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
                 <div class="mt-search__provider__header">
@@ -195,6 +197,9 @@
 <script src="scripts/v2/components/playback/popcorn.one.js"></script>
 <script src="scripts/v2/components/playback/popcorn.fade.js"></script>
 <script src="scripts/v2/components/keyboard-shortcut-manager.js"></script>
+<script src="scripts/v2/components/user-interaction/interactive-chrome-directive.js"></script>
+<script src="scripts/v2/components/user-interaction/interactive-chromes-manager.js"></script>
+<script src="scripts/v2/components/user-interaction/user-interaction-manager.js"></script>
 
 <script src="scripts/services/configuration.js"></script>
 <script src="scripts/services/queue-manager.js"></script>

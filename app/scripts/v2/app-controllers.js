@@ -1,8 +1,8 @@
 (function (mt) {
     'use strict';
-    mt.MixTubeApp.controller('mtRootCtrl', function ($scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator) {
+    mt.MixTubeApp.controller('mtRootCtrl', function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager) {
 
-        var ctrl = this;
+        var rootCtrl = this;
 
         /**
          * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
@@ -12,7 +12,7 @@
          */
         var serializedQueue;
 
-        ctrl.queueLoading = false;
+        rootCtrl.queueLoading = false;
 
         // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
         // so that they can be read, written and watched from any controller
@@ -26,22 +26,26 @@
         /** @type {boolean}*/
         $scope.props.searchShown = false;
 
-        $scope.getRunningQueueEntry = function () {
+        rootCtrl.getRunningQueueEntry = function () {
             return mtOrchestrator.runningQueueEntry;
         };
 
-        $scope.getLoadingQueueEntry = function () {
+        rootCtrl.getLoadingQueueEntry = function () {
             return mtOrchestrator.loadingQueueEntry;
         };
 
-        ctrl.isPlaying = function () {
+        rootCtrl.isPlaying = function () {
             return mtOrchestrator.playing;
+        };
+
+        rootCtrl.isUserInteracting = function () {
+            return mtUserInteractionManager.userInteracting;
         };
 
         /**
          * @param {boolean=} showOrHide if not given it will toggle the visibility
          */
-        ctrl.toggleSearch = function (showOrHide) {
+        rootCtrl.toggleSearch = function (showOrHide) {
             $scope.props.searchShown = _.isUndefined(showOrHide) ? !$scope.props.searchShown : showOrHide;
 
             if ($scope.props.searchShown) {
@@ -57,12 +61,12 @@
             });
         };
 
-        ctrl.togglePlayback = function () {
+        rootCtrl.togglePlayback = function () {
             mtOrchestrator.togglePlayback();
         };
 
         // hide the input search at startup
-        ctrl.toggleSearch(false);
+        rootCtrl.toggleSearch(false);
 
         // register the global space shortcut
         mtKeyboardShortcutManager.register('space', function (evt) {
@@ -72,7 +76,7 @@
 
         mtKeyboardShortcutManager.register('search', 'esc', function (evt) {
             evt.preventDefault();
-            ctrl.toggleSearch(false);
+            rootCtrl.toggleSearch(false);
         });
 
         $scope.$watch('props.queue', function (newVal, oldVal) {
@@ -93,14 +97,14 @@
             if (serializedQueue !== newSerializedQueue) {
                 serializedQueue = newSerializedQueue;
                 // change initiated by user (back / forward etc.), need to be deserialized
-                ctrl.queueLoading = true;
+                rootCtrl.queueLoading = true;
                 mtQueueManager.deserialize(serializedQueue)
                     .catch(function (message) {
                         mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
                             notificationCenter.error(message);
                         });
                     }).finally(function () {
-                        ctrl.queueLoading = false;
+                        rootCtrl.queueLoading = false;
                     });
             }
         }, true);
