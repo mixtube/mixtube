@@ -36,8 +36,8 @@
                 });
 
                 var form = $element;
-                var field = mt.utils.querySelector($element, '.mt-js-search-input__field');
-                var fakeField = mt.utils.querySelector($element, '.mt-js-search-input__fake-field');
+                var field = mt.commons.querySelector($element, '.mt-js-search-input__field');
+                var fakeField = mt.commons.querySelector($element, '.mt-js-search-input__fake-field');
 
                 var _show = null;
                 var animationRunning = false;

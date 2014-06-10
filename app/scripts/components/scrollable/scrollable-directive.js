@@ -73,7 +73,7 @@
                 }
 
                 function putAnchorInViewPort(anchor) {
-                    var target = mt.utils.querySelector(scrollableElement, '[mt-anchor=' + anchor + ']');
+                    var target = mt.commons.querySelector(scrollableElement, '[mt-anchor=' + anchor + ']');
                     if (target.length > 0) {
                         putElementInViewPort(target);
                     }

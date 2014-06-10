@@ -18,7 +18,7 @@
             singletonDate.setTime(absoluteDateZero);
             singletonDate.setMilliseconds(time);
 
-            return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':' + mt.utils.leftPad(singletonDate.getSeconds().toString(10), 2, '0');
+            return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':' + mt.commons.leftPad(singletonDate.getSeconds().toString(10), 2, '0');
         }
     });
 })(mt);
