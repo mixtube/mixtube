@@ -52,6 +52,7 @@
             this._finishedDeferred = $q.defer();
             this._tryingQueueEntry = null;
             this._actualQueueEntry = null;
+            this._registeredCuesIds = [];
         }
 
         PlaybackSlot.FADE_DURATION = 3;
@@ -110,10 +111,16 @@
 
         PlaybackSlot.prototype = {
 
+            /**
+             * @returns {?mt.model.QueueEntry}
+             */
             get tryingQueueEntry() {
                 return this._tryingQueueEntry;
             },
 
+            /**
+             * @returns {?mt.model.QueueEntry}
+             */
             get actualQueueEntry() {
                 return this._actualQueueEntry;
             },
@@ -151,16 +158,15 @@
             },
 
             /**
-             * @param {function} preparedFinishedCb
-             * @param {function} aboutToStartCb
-             * @param {function} aboutToEndCb
+             * @param {{preparedFinished: function, aboutToStart: function, aboutToEnd: function}} lifecycleCallbacks
+             * @param {Array.<{id: string, timeProvider: function(number): number, fn: function}>} cues
              */
-            engage: function (preparedFinishedCb, aboutToStartCb, aboutToEndCb) {
+            engage: function (lifecycleCallbacks, cues) {
                 var slot = this;
                 slot._prepareDeferred.promise.then(
                     function finished(/**{player: Player, preparedQueueEntry: mt.model.QueueEntry}*/ playerEntry) {
 
-                        preparedFinishedCb();
+                        lifecycleCallbacks.prepareFinished();
 
                         // playerEntry can be falsy if it wasn't possible to find a valid entry to prepare
                         if (playerEntry) {
@@ -172,12 +178,28 @@
                                 function autoEndCueCb() {
                                     $rootScope.$apply(function () {
                                         logger.debug('auto ending %O', slot._actualQueueEntry.video);
-                                        aboutToEndCb();
+                                        lifecycleCallbacks.aboutToEnd();
                                         slot.finish();
                                     });
                                 });
 
-                            aboutToStartCb();
+                            slot._registeredCuesIds.push(PlaybackSlot.AUTO_END_CUE_ID);
+
+
+                            cues.forEach(function (cueDefinition) {
+                                slot._player.popcorn.cue(
+                                    cueDefinition.id,
+                                    cueDefinition.timeProvider(slot._player.popcorn.duration()),
+                                    function () {
+                                        $rootScope.$apply(function () {
+                                            cueDefinition.fn();
+                                        });
+                                    });
+
+                                slot._registeredCuesIds.push(cueDefinition.id);
+                            });
+
+                            lifecycleCallbacks.aboutToStart();
                             slot._startIn();
                         }
                     });
@@ -191,18 +213,22 @@
              * This method is re-entrant so it is safe to call it in any circumstances.
              */
             finish: function () {
-                this._finishCalled = true;
-                if (!this._player) {
+                var slot = this;
+
+                slot._finishCalled = true;
+                if (!slot._player) {
                     // player is set when _prepareDeferred is resolved so here we now that we can still reject it
-                    this._prepareDeferred.reject(new Error('The PlaybackSlot has been finished before the end of preparation'));
-                    this._finishedDeferred.resolve();
-                } else if (!this._started) {
+                    slot._prepareDeferred.reject(new Error('The PlaybackSlot has been finished before the end of preparation'));
+                    slot._finishedDeferred.resolve();
+                } else if (!slot._started) {
                     // this will ensure a player is never returned and properly disposed
-                    this._player.dispose();
-                    this._finishedDeferred.resolve();
-                } else if (!this._stopOutCalled) {
-                    this._player.popcorn.removeTrackEvent(PlaybackSlot.AUTO_END_CUE_ID);
-                    this._stopOut();
+                    slot._player.dispose();
+                    slot._finishedDeferred.resolve();
+                } else if (!slot._stopOutCalled) {
+                    slot._registeredCuesIds.forEach(function (cueId) {
+                        slot._player.popcorn.removeTrackEvent(cueId);
+                    });
+                    slot._stopOut();
                 }
             },
 

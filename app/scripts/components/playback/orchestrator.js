@@ -4,7 +4,7 @@
     /**
      * @name mtOrchestrator
      */
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtOrchestrator');
 
@@ -147,13 +147,13 @@
         function engageSlot(slotAccessor) {
             var slot = slotAccessor();
             if (slot) {
-                slot.engage(
-                    function prepareFinishedCb() {
+                slot.engage({
+                    prepareFinished: function () {
                         // might be unnecessary but finish is robust enough to figure out
                         finishSlot(startedSlotAccessor);
                         slotAccessor(null);
                     },
-                    function aboutToStartCb() {
+                    aboutToStart: function () {
                         _startedSlot = slot;
 
                         _runningQueueEntry = slot.actualQueueEntry;
@@ -161,9 +161,28 @@
 
                         prepareAuto(_runningQueueIndex + 1);
                     },
-                    function aboutToEndCb() {
+                    aboutToEnd: function () {
                         engageSlot(autoPreparedSlotAccessor)
-                    });
+                    }
+                }, [
+                    {
+                        id: 'ComingNextCue',
+                        timeProvider: function (duration) {
+                            return 10;
+                        },
+                        fn: function () {
+                            mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
+                                var autoPreparedSlot = autoPreparedSlotAccessor();
+                                var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
+                                notificationCenter.comingNext({
+                                    current: slot.actualQueueEntry.video.title,
+                                    next: nextVideo ? nextVideo.title : null,
+                                    imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
+                                });
+                            });
+                        }
+                    }
+                ]);
             } else {
                 // engaging a null slot just finishes the started one
                 finishSlot(startedSlotAccessor);

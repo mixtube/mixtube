@@ -7,7 +7,7 @@
          * @const
          * @type {number}
          */
-        var COMING_NEXT_AUTO_CLOSE_DELAY = 5000;
+        var COMING_NEXT_AUTO_CLOSE_DELAY = 8000;
 
         return {
             restrict: 'E',
