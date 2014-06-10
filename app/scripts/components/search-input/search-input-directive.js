@@ -17,7 +17,7 @@
     mt.MixTubeApp.directive('mtSearchInput', function ($animate, $$animateReflow, mtSearchInputsRegistry) {
         return {
             restrict: 'E',
-            templateUrl: '/scripts/v2/components/search-input/search-input.html',
+            templateUrl: '/scripts/components/search-input/search-input.html',
             replace: true,
             scope: {
                 inputModel: '=ngModel'
@@ -36,8 +36,8 @@
                 });
 
                 var form = $element;
-                var field = mt.tools.querySelector($element, '.mt-js-search-input__field');
-                var fakeField = mt.tools.querySelector($element, '.mt-js-search-input__fake-field');
+                var field = mt.utils.querySelector($element, '.mt-js-search-input__field');
+                var fakeField = mt.utils.querySelector($element, '.mt-js-search-input__fake-field');
 
                 var _show = null;
                 var animationRunning = false;

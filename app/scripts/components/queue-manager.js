@@ -79,7 +79,7 @@
             return mtYoutubeClient.listVideosByIds(youtubeVideosIds).then(function (videos) {
                 videos.forEach(function (video) {
                     var queueEntry = new mt.model.QueueEntry();
-                    queueEntry.id = mt.tools.uniqueId();
+                    queueEntry.id = _.uniqueId();
                     queueEntry.video = video;
                     queue.entries.push(queueEntry);
                 });
@@ -109,7 +109,7 @@
              */
             appendVideo: function (video) {
                 var queueEntry = new mt.model.QueueEntry();
-                queueEntry.id = mt.tools.uniqueId();
+                queueEntry.id = _.uniqueId();
                 queueEntry.video = video;
                 queue.entries.push(queueEntry);
                 return queueEntry;

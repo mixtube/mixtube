@@ -7,7 +7,7 @@
         var backdropElement = angular.element('<div class="mt-backdrop mt-animation-enter-leave__fade"></div>');
 
         var linkFnDeferred = $q.defer();
-        $http.get('scripts/v2/components/modal/modal.html', {cache: $templateCache}).success(function (response) {
+        $http.get('scripts/components/modal/modal.html', {cache: $templateCache}).success(function (response) {
             linkFnDeferred.resolve($compile(angular.element(response)));
         });
 

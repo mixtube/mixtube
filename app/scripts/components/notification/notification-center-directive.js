@@ -11,7 +11,7 @@
 
         return {
             restrict: 'E',
-            templateUrl: '/scripts/v2/components/notification/notification.html',
+            templateUrl: '/scripts/components/notification/notification.html',
             replace: true,
             scope: {
             },

@@ -1,909 +1,540 @@
-@import '../vendor/bourbon/_bourbon';
+@import 'variables';
+@import 'utils';
+@import 'modals';
+@import 'notifications';
+@import 'header';
 
-//----------- Commons and resets -----------
-$searchFormHeight: 72px;
-// we want thunmbnails to have a ratio of 320 x 180
-$searchThumbnailRatio: (180 / 320  * 100%);
-$resultsProviderHeight: 20px;
-$darkTextColor: #001413;
-$lightTextColor: #e5fffc;
-$iconFont: 'fontello', sans-serif;
-$regularMargin: 10rem/14;
-$regularPadding: 10rem/14;
-$darkColor: #031112;
-$darkerColor: #020304;
-$queueThumbnailWidth: 140px;
-$queueThumbnailHeight: 79px;
-$queueHeight: $queueThumbnailHeight;
-$queueHeightBarHeight: 40px;
-$queueFrameHeight: $queueHeight + $queueHeightBarHeight;
-// we want to see at least 12 videos in the queue
-$queueVisibleVideoCount: 12;
-$tooltipDefaultColor: rgba(0, 6, 5, .7);
-$tooltipDefaultArrowSize: 20px;
-$zIndexLow: 10;
-$zIndexMedium: 20;
-$zIndexHigh: 30;
-$zIndexAlert: 90;
-$zIndexModal: 100;
-$smallIconFontSize: 17rem/14;
-$bigIconFontSize: 35rem/14;
-$vibratingColor: #f3c621;
-$subtleRadius: 1px;
-$errorForgroundColor: #b94a48;
-
-* {
-  @include box-sizing(border-box);
-}
-
-// force link without href attribute and button to get pointer cursor
-a, button {
-  cursor: pointer;
-}
-
-input, button {
-  font-family: inherit;
-  color: $lightTextColor;
-}
-
-// we use link instead of button as a workaround of IE9 button rendering
-// by using links we avoid text movement on click and allow CSS triangle
-.mt-button-link {
-  display: inline-block;
-
-  color: inherit;
-  text-decoration: none;
-}
-
-.mt-unstyled-input {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  outline: none;
-}
-
-.mt-vertical-centering {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-@mixin mt-corner-button($color, $content) {
-  @include triangle(35px, $color, up-right);
-  @extend .mt-button-link;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  overflow: visible;
-
-  &:before {
-    position: absolute;
-    right: 3px;
-    top: -26px;
-
-    content: $content;
-    color: $darkTextColor;
-    font-size: $smallIconFontSize;
-    font-family: $iconFont;
-    line-height: 0;
-  }
-}
-
-@mixin mt-icon-font-button($fontSize, $content: '') {
-  @extend .mt-button-link;
-
-  font-family: $iconFont;
-
-  &:before {
-    content: $content;
-    font-size: $fontSize;
-    vertical-align: middle;
-  }
-}
-
-@mixin mt-tooltip($arrowOrigin: left, $arrowPosition: 20px, $color: $tooltipDefaultColor, $arrowSize: $tooltipDefaultArrowSize) {
-  position: absolute;
-  padding: $regularPadding;
-  text-align: center;
-  background: $color;
-  border-radius: $subtleRadius;
-
-  &:after {
-    @include triangle($arrowSize, $color, down);
-
-    content: '';
-    position: absolute;
-    bottom: -$arrowSize;
-    #{$arrowOrigin}: $arrowPosition;
-  }
-}
-
-@mixin mt-ribbon($size, $color, $radius: 5px) {
-  border: $size solid $color;
-  border-right-color: transparent;
-  border-left-width: $size;
-  height: 0;
-  border-radius: $radius 0 0 $radius;
-}
-
-@mixin mt-spinner($fontSize, $color) {
-  @include animation(full-rotation 1.0s linear infinite);
-
-  display: inline-block;
-  font-family: $iconFont;
-
-  &:before {
-    content: '\e807';
-    color: $color;
-    font-size: $fontSize;
-  }
-}
-
-.mt-fade-in, .mt-fade-out, {
-  @include transition(opacity 500ms);
-}
-
-.mt-fade-in {
-  opacity: 0;
-
-  &.mt-fade-in-active {
-    opacity: 1;
-  }
-}
-
-.mt-fade-out {
-  opacity: 1;
-
-  &.mt-fade-out-active {
-    opacity: 0;
-  }
-}
-
-@include keyframes(full-rotation) {
-  from {
-    @include transform(rotate(0deg));
-  }
-  to {
-    @include transform(rotate(360deg));
-  }
-}
-
-//----------- Custom styling -----------
-html, body {
+html {
   height: 100%;
+
+  font-size: $baseFontSizeUnitless * 1px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  color: $lightTextColor;
 }
 
 body {
-  font-family: $lucida-grande;
-  font-size: 14px;
-  color: $lightTextColor;
-  background-color: $darkerColor;
-  // needed to allow elememts to overflow out of the window without activating scrollbars
-  // used for the queue bar when hidden for example
-  // used for the queue bar when hidden for example
+  height: 100%;
+
+  background-color: $black;
+
+  line-height: $lineHeight;
+}
+
+.mt-queue-loading__message {
+  margin-bottom: $unitVerticalPadding;
+}
+
+.mt-queue-loading__progress {
+  progress {
+    @extend %mt-chromeless-progress;
+    @include mt-spinner(4rem, $contrastedColor);
+  }
+
+}
+
+.mt-app {
+  position: relative;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-scene {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
-.mt-modal-container {
-  position: absolute;
-  display: table;
-  width: 100%;
-  height: 100%;
-  z-index: $zIndexModal;
-}
-
-.mt-modal-vc {
-  @extend .mt-vertical-centering;
-
-  text-align: center;
-  background-color: $tooltipDefaultColor;
-}
-
-.mt-root-spinner {
-  @include mt-spinner(100px, $lightTextColor);
-}
-
-.mt-root-spinner-message {
-  margin-top: 1rem;
-}
-
-.mt-modal-window {
-  display: inline-block;
-  padding: $regularPadding * 1.5;
-  border-top: 4px solid $vibratingColor;
-  background-color: $darkColor;
-
-  .mt-message {
-    margin-bottom: $regularMargin * 3;
-
-    line-height: normal;
-    text-align: left;
-  }
-
-  .mt-commands-container {
-    text-align: right;
-  }
-
-  .mt-confirm-button {
-    padding: (4rem/14);
-    margin-right: (8rem/14);
-
-    border: none;
-    color: $darkTextColor;
-    background-color: $vibratingColor;
-    font-weight: bold;
-  }
-}
-
-.mt-alert-container {
-  position: absolute;
-  // this padding is actually used as a margin for the child element
-  padding: $regularMargin $regularMargin 0 $regularMargin;
-  top: 0;
-  width: 100%;
-  z-index: $zIndexAlert;
-
-  // hides the container when it is empty. We don't want a empty box floating above everything
-  &:empty {
-    display: none;
-  }
-}
-
-.mt-alert {
-  display: table;
-  width: 100%;
-  margin-bottom: $regularMargin;
-
-  border-radius: $subtleRadius;
-
-  &.mt-level-info {
-    background-color: #d9edf7;
-    color: #3a87ad;
-  }
-
-  &.mt-level-warning {
-    background-color: #fcf8e3;
-    color: #c09853;
-  }
-
-  &.mt-level-error {
-    background-color: #f2dede;
-    color: $errorForgroundColor;
-  }
-
-  > .mt-text-container, > .mt-command-container {
-    display: table-cell;
-    padding: $regularPadding * 2;
-  }
-
-  > .mt-command-container {
-    text-align: right;
-    font-weight: bold;
-  }
-}
-
-.mt-alert-dismiss {
-  color: #000000;
-  opacity: .5;
-  font-weight: bold;
-}
-
-.mt-video-stage-frame {
-  position: relative;
-  height: 100%;
-}
-
-.mt-coming-next {
-  position: absolute;
-  right: $regularMargin;
-  top: $regularMargin;
-  z-index: $zIndexLow;
-  padding: $regularPadding;
-
-  background-color: $tooltipDefaultColor;
-  font-size: (18rem/14);
-  border-radius: $subtleRadius;
-}
-
-.mt-coming-next-item {
-  margin-top: 2 * $regularMargin;
-
-  &:first-child {
-    margin-top: 0;
-  }
-
-  > .mt-header {
-    margin-bottom: $regularMargin / 2;
-
-    font-size: (12rem/14);
-  }
-}
-
-.mt-video-player-window {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-// prevents click on player instances
-.mt-video-player-window:before {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: $zIndexLow;
-  // empty block with no background doesn't intercept clicks on IE9, so set a background color but totaly transparent
-  background-color: rgba(0, 0, 0, 0);
-
-  content: '';
-}
-
-.mt-video-player-instance {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-}
-
-.mt-search-frame-container {
+.mt-scene__element-host {
   position: absolute;
   top: 0;
-  height: 100%;
   width: 100%;
-  padding-bottom: $queueFrameHeight;
+  height: 100%;
+
+  // players and wrappers might do some "weird" stuff by appending iframe
+  // we want to make sure the opacity value is inherited by the whole DOM subtree
+  iframe {
+    opacity: inherit;
+  }
+  //
+  //  background-image: url(../../mock-video.png);
+  //  background-size: cover;
+  //  background-repeat: no-repeat;
+  //  background-position: center;
+  //  background-color: #000000;
 }
 
-.mt-search-frame-wrapper {
-  height: 100%;
-  width: 100%;
-  z-index: $zIndexMedium;
+.mt-body {
   position: relative;
-  padding: {
-    top: $regularMargin;
-    left: $regularMargin;
-    right: $regularMargin;
+  flex: 1;
+
+  // use flex here only to leverage the align items stretch behavior for children so that they fill the height
+  display: flex;
+}
+
+@mixin coming-next {
+
+  .mt-coming-next__group {
+    padding-bottom: $unitVerticalPadding / 2;
+
+    &.next {
+      font-weight: bold;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
   }
 
-  background-color: rgba(26, 37, 38, .8);
-}
-
-.mt-search-frame {
-  position: relative;
-  height: 100%;
-}
-
-.mt-search-form {
-  position: absolute;
-  height: $searchFormHeight;
-  width: 100%;
-  padding-left: $regularMargin;
-  padding-right: 30px;
-}
-
-.mt-search-close-button {
-  @include mt-icon-font-button($smallIconFontSize, '\e802');
-
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
-.mt-search-term-input {
-  @extend .mt-unstyled-input;
-
-  width: 100%;
-
-  font-size: 3.57rem;
-  text-transform: uppercase;
-}
-
-.mt-search-results-frame-wrapper {
-  height: 100%;
-  // 20px more for margin
-  padding-top: $searchFormHeight + 20px;
-}
-
-.mt-search-results-frame {
-  float: left;
-  position: relative;
-  height: 100%;
-  width: 33.33%;
-  padding-top: $resultsProviderHeight;
-}
-
-.mt-results-provider {
-  position: absolute;
-  top: 0;
-  height: $resultsProviderHeight;
-  margin-left: $regularMargin;
-
-  font-size: (16rem/14);
-
-  > .mt-name {
-    display: inline-block;
+  .mt-coming-next__header {
+    font-size: 0.875rem;
   }
 
-  > .mt-spinner {
-    @include mt-spinner($smallIconFontSize, $lightTextColor);
-
-    margin-left: .5em;
-  }
-}
-
-.mt-results-scrollview {
-  height: 100%;
-  overflow: auto;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    // opacitiy used to fix rendering glitches, without the scrollbars are mot correctly repainted sonetimes
-    opacity: 0;
-  }
-
-  &.hover::-webkit-scrollbar {
-    opacity: 1;
-  }
-
-  &.hover::-webkit-scrollbar-thumb {
-    background: $darkColor;
-  }
-}
-
-.mt-results-no-result-message {
-  padding: $regularMargin;
-}
-
-.mt-results-list {
-  @include clearfix;
-}
-
-.mt-results-item {
-  float: left;
-  padding: {
-    left: $regularMargin;
-    right: $regularMargin;
-  }
-  margin: {
-    top: $regularMargin;
-    bottom: $regularMargin;
-  }
-  width: 50%;
-  // prevent ribbon white space to overflow on the siblings items
-  overflow: hidden;
-}
-
-.mt-thumbnail-frame {
-  position: relative;
-}
-
-.mt-results-thumbnail {
-  // a percentage value for padding top is relative to the parent width, makes height of the thumbnail relative to its width
-  padding-top: $searchThumbnailRatio;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.mt-results-item:hover .mt-add-to-queue-button {
-  display: block;
-}
-
-.mt-add-to-queue-button {
-  @include mt-corner-button($vibratingColor, '\e803');
-
-  display: none;
-}
-
-.mt-video-duration {
-  position: absolute;
-  left: -2px;
-  bottom: 7px;
-
-  font-size: 11px;
-  color: $darkTextColor;
-  letter-spacing: -1px;
-
-  &:before {
-    @include mt-ribbon(8px, $lightTextColor, 2px);
-
-    width: 25px;
-
-    content: '';
-    display: block;
-  }
-
-  > .mt-value {
-    position: absolute;
-    top: 2px;
-    left: 4px;
-  }
-}
-
-.mt-video-details-list {
-  margin-top: 5px;
-  line-height: normal;
-}
-
-.mt-video-details-item {
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  &.mt-title {
-    font-weight: bold;
-  }
-}
-
-.mt-queue-frame-container {
-  position: absolute;
-  bottom: 0;
-  height: $queueFrameHeight;
-  width: 100%;
-  z-index: $zIndexMedium;
-}
-
-.mt-queue-frame {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-
-  // I would love to use the AngularJS animation fwk on show but that shows some glitches propably because of the sequence
-  // of animation css and display none
-  @include transition(all 200ms $ease-in-out-quart);
-  @include transform(translateY(100%));
-
-  &.mt-appear {
-    @include transform(translateY(0));
-  }
-}
-
-.mt-queue-bar {
-  height: $queueHeightBarHeight;
-  background-color: $darkColor;
-}
-
-.mt-queue-bar-table {
-  display: table;
-  table-layout: fixed;
-  height: 100%;
-  width: 100%;
-
-  > .mt-column {
-    vertical-align: middle;
-    display: table-cell;
-    width: 33.3333%;
+  .mt-coming-next__title {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 
-    > * {
-      vertical-align: middle;
+@mixin queue {
+
+  .mt-queue {
+    width: 100%;
+
+    overflow-x: hidden; // needed by FF sometimes
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    background-color: $darkestBgColor;
+
+    @include mt-media-large-screen {
+      width: (100%/6);
+    }
+
+    &.mt-queue__animation-show {
+
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+
+        // needed by the transition
+        display: block !important;
+      }
+
+      &.ng-hide {
+        opacity: 0;
+        transform: translateX(-50%);
+      }
     }
   }
 
-  > .mt-left {
-    padding-left: $regularPadding;
+  .mt-queue__entry {
+    @include queue-item-color($baseBgColor);
+    overflow: hidden;
+
+    &.active {
+      @include queue-item-color($contrastedColor);
+    }
+
+    &.broken {
+      @include queue-item-color($errorBgColor);
+    }
   }
 
-  > .mt-middle {
+  .mt-queue__entry__thumbnail {
+    @extend %mt-chromeless-button;
+    display: block;
+    position: relative;
+    width: 100%;
+
+    > .image {
+      @include mt-fluid-image(.4);
+      filter: saturate(5%);
+    }
+
+    .mt-queue__entry.active & {
+      > .image {
+        filter: none;
+      }
+    }
+  }
+
+  .mt-queue__entry__broken-message {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    display: none; // hidden by default
+    align-items: center;
+    justify-content: center;
     text-align: center;
+
+    background-color: rgba($errorBgColor, $overlayOpacity);
+
+    .mt-queue__entry.broken & {
+      display: flex;
+    }
   }
 
-  > .mt-right {
-    text-align: right;
-    padding-right: $regularPadding;
-  }
-}
+  .mt-queue__entry__progress {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
 
-.mt-queue-meta {
-  display: inline-block;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.mt-queue-name {
-  .mt-input, .mt-display {
-    display: inline-block;
-    padding: .2rem;
-    margin: 0;
-    // it is the only height supported by webkit for inputs
-    line-height: normal;
-
-    font-size: (16rem/14);
-    outline: none;
+    progress {
+      @extend %mt-chromeless-progress;
+      @include mt-spinner(3rem, $contrastedColor);
+    }
   }
 
-  .mt-input {
-    border: none;
-    background-color: #e4e4e4;
-    color: $darkTextColor;
-    outline: none;
+  .mt-queue__entry__data {
+    position: relative;
+
+    display: flex;
+
+    // decorative up arrow
+    &:before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 2rem;
+
+      @include triangle(1.25rem, $baseBgColor, up);
+    }
   }
 
-  .mt-display {
-    cursor: pointer;
+  .mt-queue__entry__title {
+    flex: 1;
+    align-self: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: $unitVerticalPadding/2 .5rem;
+
+    font-family: 'Open Sans Condensed', sans-serif;
   }
 
-  .mt-display:hover {
-    background-color: $darkerColor;
+  .mt-queue__entry__commands {
+    align-self: stretch;
+
+    display: flex;
+    align-items: stretch;
   }
-}
 
-.mt-open-search-button {
-  @include mt-icon-font-button($smallIconFontSize, '\e800');
+  .mt-queue__entry__remove-button {
+    @extend %mt-chromeless-button;
+    @include mt-click-reaction;
+    padding: 0 .5rem;
 
-  position: relative;
-  margin-right: (7rem/14);
-  // needed by IE, else the tooltip is hidden
-  overflow: visible;
+    opacity: .1;
+    font-size: 2.5rem;
 
-  &:hover > .mt-open-search-tooltip {
-    visibility: visible;
-  }
-}
-
-.mt-open-search-tooltip {
-  @include mt-tooltip(right, 28px);
-
-  position: absolute;
-  right: -24px;
-  bottom: 43px;
-  z-index: $zIndexHigh;
-
-  font-family: $lucida-grande;
-
-  visibility: hidden;
-
-  .mt-keyboard-icon:before {
-    content: '\e804';
-
-    font-family: $iconFont;
-    font-size: (25rem/14);
-    line-height: 0;
-    vertical-align: middle;
-    margin-right: (7rem/14);
+    .mt-mouse-based-interaction &:hover {
+      opacity: 1;
+    }
   }
 }
 
-.mt-clear-queue-button {
-  @include mt-icon-font-button($smallIconFontSize, '\e805');
+@mixin queue-item-color($bgColor) {
+  background-color: $bgColor;
 
-  position: relative;
-  // needed by IE, else the tooltip is hidden
-  overflow: visible;
-
-  &:hover > .mt-clear-queue-tooltip {
-    visibility: visible;
+  .mt-queue__entry__data:before {
+    @include triangle(1.25rem, $bgColor, up);
   }
 }
 
-.mt-clear-queue-tooltip {
-  @include mt-tooltip(right, 9px);
+@mixin search {
 
-  position: absolute;
-  right: -7px;
-  bottom: 43px;
-  z-index: $zIndexHigh;
+  $headerFontSize: 1.25rem;
+  $resultsHorizontalPadding: .5rem;
 
-  font-family: $lucida-grande;
+  .mt-search {
+    // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
+    @include position(absolute, 0px 0px 0px null);
+    width: 100%;
 
-  visibility: hidden;
-}
+    background-color: rgba($secondaryBgColor, .8);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 
-.mt-playback-button {
-  @include mt-icon-font-button($bigIconFontSize);
+    @include mt-media-large-screen {
+      width: (5 * 100%/6); // width is 5 "columns" out of 6
+    }
 
-  &.mt-pause:before {
-    content: '\e809';
+    &.mt-search__animation-show {
+
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+
+        // don't hide it straight: wait for the end of the animation
+        display: block !important;
+      }
+
+      &.ng-hide {
+        transform: translateY(-50%);
+        opacity: 0;
+      }
+    }
   }
 
-  &.mt-play:before {
-    content: '\e80a';
+  .mt-search__provider {
+    margin: 1rem 1rem 0 1rem;
   }
-}
 
-.mt-queue-list-container {
-  height: $queueHeight;
+  .mt-search__provider__header {
 
-  background-color: $darkerColor;
-}
+    margin-bottom: $unitVerticalPadding / 2;
+    padding: 0 $resultsHorizontalPadding;
 
-.mt-carousel-container {
-  position: relative;
-  width: 100%;
-}
+    > .title {
+      display: inline-block;
 
-.mt-carousel-slider {
-  position: absolute;
-  height: 100%;
-}
+      font-size: $headerFontSize;
+    }
 
-.mt-carousel-list {
-  height: 100%;
-  white-space: nowrap;
-}
+    .progress {
+      display: inline-block;
 
-.mt-carousel-bucket {
-  display: inline-block;
-  height: 100%;
-  //restore white space bahaviour
-  white-space: normal;
-}
+      progress {
+        @extend %mt-chromeless-progress;
+        @include mt-spinner($headerFontSize, $lightTextColor);
+      }
+    }
+  }
 
-.carousel-item {
-  height: 100%;
-  width: $queueThumbnailWidth;
+  .mt-search__no-results-message {
+    padding: 0 $resultsHorizontalPadding;
+  }
 
-  background-size: cover;
-}
+  .mt-results {
+    @include clearfix;
 
-.mt-carousel-handle {
-  position: absolute;
-  top: 0;
-  z-index: $zIndexLow;
-  display: table;
-  height: 100%;
+    .mt-result {
+      width: 100%;
 
-  &.forward {
+      // more than 1 item per line when more space is available
+      @include mt-media-large-screen {
+        $resultsColumnsCount: 5;
+        width: 100% / $resultsColumnsCount;
+      }
+    }
+  }
+
+  .mt-result {
+    float: left;
+    padding: 0 $resultsHorizontalPadding $unitVerticalPadding $resultsHorizontalPadding;
+    vertical-align: top;
+  }
+
+  .mt-result__container {
+    @extend %mt-chromeless-button;
+    position: relative;
+    display: block;
+    width: 100%;
+
+    text-align: inherit;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mt-result__add-affordance {
+    position: absolute;
+    top: 0;
     right: 0;
-  }
+    overflow: visible;
+    @include triangle(3rem, rgba($baseBgColor, $overlayOpacity), up-right);
+    z-index: 1;
 
-  .mt-link {
-    display: inline-block;
-    padding: $regularPadding;
+    &:before {
+      position: absolute;
+      content: '\e803';
+      bottom: .80rem;
+      right: .5rem;
 
-    background-color: $darkColor;
-  }
+      color: $lightTextColor;
+      opacity: .8;
+      font-size: 1.5rem;
+      font-family: fontello;
+    }
 
-  &.backward .mt-link {
-    @include mt-icon-font-button($smallIconFontSize, '\e806');
-
-    border-radius: 0 $subtleRadius $subtleRadius 0;
-  }
-
-  &.forward .mt-link {
-    @include mt-icon-font-button($smallIconFontSize, '\e801');
-
-    border-radius: $subtleRadius 0 0 $subtleRadius;
-  }
-}
-
-.mt-queue-item {
-  position: relative;
-  height: 100%;
-  width: $queueThumbnailWidth;
-
-  // appear / disappear animations
-  &.mt-appear-enter, &.mt-appear-leave {
-    @include transition(all 100ms ease-in-out);
-  }
-
-  &.mt-appear-enter {
-
-    @include transform(scale(0));
-
-    &.mt-appear-enter-active {
-      @include transform(scale(1));
+    // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
+    // state remains after a tap until the next tap)
+    .mt-mouse-based-interaction .mt-result__container:hover &:before {
+      color: $contrastedColor;
+      opacity: 1;
     }
   }
 
-  &.mt-appear-leave {
+  .mt-result__thumbnail {
+    position: relative;
+    overflow: hidden;
+    @include mt-fluid-image(.4);
+  }
 
-    @include transform(scale(1));
+  .mt-result__added-confirmation {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+    transform: translate3d(0, 0, 0); // use 3D here to avoid animation flickering in webkit
 
-    &.mt-appear-leave-active {
-      @include transform(scale(0));
+    background-color: $baseBgColor;
+    border-radius: 2px 2px 0 0;
+
+    // vertically center the text
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    > .text {
+      padding: .25rem;
+      text-align: center;
+      overflow: hidden;
+
+      // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
+      // is made of 5 columns which doesn't give much place to the message
+      @include mt-media-large-screen {
+
+        font-size: (14rem/$baseFontSizeUnitless);
+
+        &:before {
+          content: attr(mt-short-text);
+        }
+
+        > .mt-replaced-text {
+          display: none;
+        }
+      }
+    }
+
+    &.mt-result__added-confirmation__animation-if {
+
+      &.ng-enter, &.ng-leave {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+      }
+
+      &.ng-enter, &.ng-leave.ng-leave-active {
+        transform: translate3d(-100%, 0, 0);
+        opacity: .5;
+      }
+
+      &.ng-leave, &.ng-enter.ng-enter-active {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+    }
+  }
+
+  .mt-result__data {
+    position: relative;
+    padding: $unitVerticalPadding/4 .5rem;
+
+    color: $baseBgColor;
+    background-color: $lightTextColor;
+
+    .mt-result__data__item {
+      overflow: hidden;
+
+      font-family: 'Open Sans Condensed', sans-serif;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+
+      &.title, {
+        font-size: (14rem/16);
+        font-weight: bold;
+      }
+
+      &.publisher {
+        font-size: (13rem/16);
+      }
+
+      &.duration {
+        $durationFontSize: 12rem/16;
+        $durationMargin: .25rem;
+
+        position: absolute;
+        padding: $durationMargin;
+        right: 0;
+        top: -$durationFontSize - 2 * $durationMargin; // that works because line height is 1
+        line-height: 1;
+
+        background-color: rgba($baseBgColor, $overlayOpacity);
+        border-top-left-radius: 2px;
+
+        color: $lightTextColor;
+        font-family: 'Open Sans', sans-serif;
+        font-size: $durationFontSize;
+      }
     }
   }
 }
 
-.mt-queue-item-thumbnail {
-  @include position(absolute, 0px 0px 0px 0px);
-
-  background-size: cover;
-
-  &.mt-skipped {
-    opacity: .2;
-  }
-}
-
-.mt-playing-mark {
+.mt-debug-bar {
   position: absolute;
-  width: 100%;
-  height: 4px;
-  bottom: 0;
-
-  background-color: $vibratingColor;
-}
-
-.mt-queue-item-remove-button {
-  @include mt-corner-button($vibratingColor, '\e80b');
-
-  display: none;
-}
-
-.mt-queue-item:hover > .mt-queue-item-remove-button {
-  display: block;
-}
-
-.mt-queue-item-centering-container {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: $queueThumbnailHeight;
-  display: table;
-
-  // vertical and horizontal centering of content
-  text-align: center;
-}
-
-.mt-play-button {
-  @include mt-icon-font-button($smallIconFontSize, '\e80a');
-
-  // hidden by default
-  display: none;
-  padding: {
-    left: 15px;
-    right: 15px;
-    top: 10px;
-    bottom: 10px;
-  }
-
-  border-radius: $subtleRadius;
-  background-color: $tooltipDefaultColor;
-}
-
-.mt-skipped-icon {
-  @include mt-icon-font-button($bigIconFontSize, ' \e808');
-
-  color: $errorForgroundColor;
-}
-
-.mt-play-button-spinner {
-  @include mt-spinner($bigIconFontSize, $vibratingColor);
-}
-
-.mt-queue-item:hover .mt-play-button {
-  display: inline-block;
-}
-
-.mt-queue-item-tooltip {
-  @include mt-tooltip(left, 9px);
-
-  // hidden by default and shown on queue item over
-  display: none;
-  bottom: $queueHeight + $tooltipDefaultArrowSize;
-  width: $queueThumbnailWidth * 1.5;
-}
-
-.mt-queue-item:hover .mt-queue-item-tooltip {
-  display: block;
-}
-
-.mt-queue-call-to-action {
-  padding: (2rem/14);
-  background-color: $darkerColor;
-}
-
-.mt-queue-call-button {
-  @extend .mt-button-link;
-
-  display: table;
-  table-layout: fixed;
+  z-index: 1000;
+  opacity: .6;
   height: 100%;
-  max-height: $queueThumbnailHeight;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.mt-debug-bar__container {
+  pointer-events: auto;
+  overflow-y: auto;
+  width: 3rem;
+}
+
+.mt-debug-bar__button {
+  @extend %mt-chromeless-button;
+  font-size: 1rem;
+  line-height: 3;
   width: 100%;
 
-  border: (2rem/14) dashed $lightTextColor;
-  border-radius: (10rem/14);
-  opacity: .15;
-
-  &:hover {
-    opacity: 1;
+  &.modal {
+    background-color: #8EC447;
   }
 
-  > .mt-text {
-    display: table-cell;
-    padding: (2rem/14);
-    vertical-align: middle;
-    text-align: center;
+  &.notifications {
+    background-color: #B94A48;
+  }
+
+  &.search {
+    background-color: #5d61b9;
+  }
+
+  &.queue-items {
+    background-color: #b96eb5;
+  }
+
+  &.activity {
+    background-color: #e1cb50;
   }
 }
+
+// includes imported modules styles
+@include utils;
+@include modals;
+@include notifications;
+@include header;
+@include coming-next;
+@include queue;
+@include search;
