@@ -9,7 +9,6 @@
     "angular-touch": "~1.2",
     "reset-css": "2.0.20110126",
     "lodash": "~2.4",
-    "q": "1.0.0",
     "bezier-easing": "gre/bezier-easing",
     "shifty": "~1.2",
     "popcorn-js": "~1.5",
