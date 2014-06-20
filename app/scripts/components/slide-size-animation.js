@@ -7,11 +7,13 @@
      *
      * @description
      * A animation tailored for queue's items (enter and leave events).
-     *
-     * It actually doesn't rely on AngularJS for animation but instead use a custom mix of CSS transitions and JS sequencing.
-     * The animation framework here is just used as an "event" system for us to be notified of new element insertion / removal.
      */
-    mt.MixTubeApp.animation('.mt-js-animation-enter-leave__slide-and-size', function (mTransitionsSequenceFactory) {
+    mt.MixTubeApp.animation('.mt-js-animation-enter-leave__slide-and-size', function () {
+
+        var BASE_VELOCITY_ANIM_CONF = {
+            duration: 175,
+            easing: [ .8, 0, .2, 1 ] // see sass $easeInOut
+        };
 
         // creates the params used by enter and leave method
         function buildParams(element) {
@@ -27,45 +29,73 @@
             };
         }
 
-        // we use the animation just as a hook to be notified of the list (managed by "ng-repeat") modifications
+        /**
+         * Collect the given element and the siblings including comment nodes.
+         *
+         * Required to work with ngRepeat since it manages the collection insertion with the comment between each item.
+         *
+         * @param {JQLite} self the element to start from (including it)
+         * @returns {JQLite} the element itself plus the siblings
+         */
+        function selfAndNextAllIncludingComments(self) {
+            var rMatched = [];
+            var rElem = self[0];
+
+            do {
+                if (rElem.nodeType === Node.ELEMENT_NODE || rElem.nodeType === Node.COMMENT_NODE) {
+                    rMatched.push(rElem);
+                }
+                // get the next sibling and loop
+                rElem = rElem.nextSibling;
+            } while (rElem);
+
+            return angular.element(rMatched);
+        }
+
         return {
 
             enter: function (element, done) {
+
                 var params = buildParams(element);
 
-                var ts = mTransitionsSequenceFactory.getInstance();
-
-                ts.begin().addClass('slidein-start grow-start'); // part of the begin stage
-
-                ts.then().removeClass('grow-start')
-                    .addClass('grow grow-end').css('height', params.nominalHeight + 'px');
-
-                ts.then().exec(function () {
-                    element.triggerHandler('$animate:mtSized');
-                }).removeClass('grow grow-init').css('height', '').removeClass('slidein-start')
-                    .addClass('slidein slidein-end');
-
-                ts.then().removeClass('grow-end slidein slidein-end');
-
-                // run the sequence
-                ts.end(params.element, done);
+                params.element.velocity(
+                    {translateX: [0, '-100%']},
+                    _.defaults({
+                        complete: function () {
+                            params.element.css({transform: ''});
+                            done();
+                        }
+                    }, BASE_VELOCITY_ANIM_CONF));
             },
 
             leave: function (element, done) {
                 var params = buildParams(element);
 
-                var ts = mTransitionsSequenceFactory.getInstance();
+                params.element.velocity(
+                    {translateX: ['-100%', 0]},
+                    _.defaults({
+                        complete: function () {
 
-                ts.begin().addClass('slideout-start shrink-init').css('height', params.nominalHeight + 'px'); // part of the begin stage
+                            var $nextAll = selfAndNextAllIncludingComments(params.element.next());
 
-                ts.then().addClass('slideout slideout-end');
+                            var $wrapper = angular.element('<div>')
+                                .css({transform: 'translateY(' + params.nominalHeight + 'px)'})
+                                .append($nextAll);
 
-                // reset the inline defined height so that the value declared in the stylesheet takes over and let the CSS magic happen
-                ts.then().removeClass('slideout slideout-start').css('height', '')
-                    .addClass('shrink shrink-end');
+                            params.element.after($wrapper);
+                            params.element.css({display: 'none'});
 
-                // run the sequence
-                ts.end(params.element, done);
+                            $wrapper.velocity(
+                                {translateY: [0, params.nominalHeight]},
+                                _.defaults({
+                                    complete: function () {
+                                        params.element.after($nextAll);
+                                        $wrapper.remove();
+                                        done();
+                                    }
+                                }, BASE_VELOCITY_ANIM_CONF));
+                        }
+                    }, BASE_VELOCITY_ANIM_CONF));
             },
 
             move: function (element, done) {

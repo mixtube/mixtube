@@ -72,14 +72,14 @@
 
         <mt-notification-center name="notificationCenter"></mt-notification-center>
 
-        <div class="mt-queue mt-queue__animation-show" mt-scrollable="queue" mt-interactive-chrome
+        <div class="mt-queue mt-queue__animation-show" mt-interactive-chrome
              ng-show="rootCtrl.isUserInteracting()">
-            <ul>
-                <li class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
-                    ng-repeat="entry in props.queue.entries"
-                    ng-class="{'active': entry === rootCtrl.getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
-                    ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
-                    mt-anchor="{{entry.id}}">
+            <div>
+                <div class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
+                     ng-repeat="entry in props.queue.entries"
+                     ng-class="{'active': entry === rootCtrl.getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
+                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
+                     mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry($index)">
                         <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                              class="image"></div>
@@ -101,8 +101,8 @@
                             </button>
                         </div>
                     </div>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
 
         <div class="mt-search mt-search__animation-show" mt-interactive-chrome
@@ -158,6 +158,7 @@
 </div>
 
 <!-- build:js scripts/ext-dependencies.js -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-animate/angular-animate.js"></script>
 <script src="bower_components/angular-touch/angular-touch.js"></script>
@@ -169,6 +170,7 @@
 <script src="bower_components/shifty/dist/shifty.js"></script>
 <script src="bower_components/js-signals/dist/signals.js"></script>
 <script src="bower_components/keymaster/keymaster.js"></script>
+<script src="bower_components/velocity/jquery.velocity.js"></script>
 <!-- endbuild -->
 
 <!-- build:js scripts/app.js -->
@@ -176,7 +178,6 @@
 <script src="scripts/app.js"></script>
 <script src="scripts/app-controllers.js"></script>
 <script src="scripts/components/logger-factory.js"></script>
-<script src="scripts/components/transitions-sequence-factory.js"></script>
 <script src="scripts/components/async-registry-factory.js"></script>
 <script src="scripts/components/pointing-directives.js"></script>
 <script src="scripts/components/duration-filter.js"></script>
