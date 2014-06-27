@@ -89,6 +89,18 @@ module.exports = function (grunt) {
             {expand: true, flatten: true, cwd: '<%= mixtube.app %>', dest: '<%= mixtube.dist %>/styles', src: ['**/*.{eot,svg,ttf,woff}']}
         ],
 
+        inline_angular_templates: {
+            dist: {
+                options: {
+                    base: 'app',
+                    prefix: '/'
+                },
+                files: {
+                    '<%= mixtube.dist %>/index.html': ['<%= mixtube.app %>/scripts/components/**/*.html']
+                }
+            }
+        },
+
         // prepends files name with a hash of the content, we need to process the css dependencies first and then treat
         // the html dependencies
         rev: {
@@ -108,6 +120,13 @@ module.exports = function (grunt) {
         usemin: {
             css: ['<%= mixtube.dist %>/styles/*.css'],
             html: ['<%= mixtube.dist %>/*.html']
+        },
+
+        'gh-pages': {
+            options: {
+                base: 'dist'
+            },
+            src: '**/*'
         }
     });
 
@@ -120,6 +139,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-rev');
+    grunt.loadNpmTasks('grunt-gh-pages');
+    grunt.loadNpmTasks('grunt-inline-angular-templates');
 
     // sass and autoprefix the styles
     grunt.registerTask('style', ['sass', 'autoprefixer']);
@@ -127,5 +148,7 @@ module.exports = function (grunt) {
     // a dev oriented task that watches file that need to be compiled and starts a local server
     grunt.registerTask('server', ['clean:server', 'style', 'connect', 'watch']);
 
-    grunt.registerTask('build', ['clean:dist', 'style', 'useminPrepare', 'concat', 'copy', 'rev:css', 'usemin:css', 'rev:html', 'usemin:html']);
+    grunt.registerTask('build', ['clean:dist', 'style', 'useminPrepare', 'concat', 'copy', 'inline_angular_templates', 'rev:css', 'usemin:css', 'rev:html', 'usemin:html']);
+
+    grunt.registerTask('publish-gh-pages', ['build', 'gh-pages']);
 };

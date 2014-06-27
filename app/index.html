@@ -4,9 +4,12 @@
     <!--preventing the user to zoom is not really nice but this is to prevent the browser from zooming when an input is focused-->
     <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
     <title ng-bind="'MixTube'">MixTube (Loading...)</title>
+    <!-- usemin must look for files in app and .tmp directory for compiled css -->
+    <!-- build:css({app,.tmp}) styles/app.css -->
     <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
     <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
     <link rel="stylesheet" href="styles/css/main.css" type="text/css">
+    <!-- endbuild -->
     <link href="//fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400"
           rel="stylesheet" type="text/css">
 </head>
@@ -72,8 +75,8 @@
 
         <mt-notification-center name="notificationCenter"></mt-notification-center>
 
-        <div class="mt-queue mt-queue__animation-show" mt-interactive-chrome
-             ng-show="rootCtrl.isUserInteracting()">
+        <div class="mt-queue mt-queue__animation-show" mt-srcollable="queue" ng-show="rootCtrl.isUserInteracting()"
+             mt-interactive-chrome>
             <div>
                 <div class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
                      ng-repeat="entry in props.queue.entries"
