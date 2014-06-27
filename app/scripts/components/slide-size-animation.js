@@ -25,7 +25,8 @@
 
             return {
                 element: element,
-                nominalHeight: nominalHeight
+                nominalHeight: nominalHeight,
+                ltr: !element.hasClass('from-right')
             };
         }
 
@@ -39,15 +40,17 @@
          */
         function selfAndNextAllIncludingComments(self) {
             var rMatched = [];
-            var rElem = self[0];
+            if (self.length) {
+                var rElem = self[0];
 
-            do {
-                if (rElem.nodeType === Node.ELEMENT_NODE || rElem.nodeType === Node.COMMENT_NODE) {
-                    rMatched.push(rElem);
-                }
-                // get the next sibling and loop
-                rElem = rElem.nextSibling;
-            } while (rElem);
+                do {
+                    if (rElem.nodeType === Node.ELEMENT_NODE || rElem.nodeType === Node.COMMENT_NODE) {
+                        rMatched.push(rElem);
+                    }
+                    // get the next sibling and loop
+                    rElem = rElem.nextSibling;
+                } while (rElem);
+            }
 
             return angular.element(rMatched);
         }
@@ -59,7 +62,7 @@
                 var params = buildParams(element);
 
                 params.element.velocity(
-                    {translateX: [0, '-100%']},
+                    {translateX: [0, params.ltr ? '-100%' : '100%']},
                     _.defaults({
                         complete: function () {
                             params.element.css({transform: ''});
@@ -72,10 +75,11 @@
                 var params = buildParams(element);
 
                 params.element.velocity(
-                    {translateX: ['-100%', 0]},
+                    {translateX: [params.ltr ? '-100%' : '100%', 0]},
                     _.defaults({
                         complete: function () {
 
+                            // there may be no next element but that's ok, the nextAll collection will just be empty
                             var $nextAll = selfAndNextAllIncludingComments(params.element.next());
 
                             var $wrapper = angular.element('<div>')
