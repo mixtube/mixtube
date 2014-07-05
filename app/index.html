@@ -76,14 +76,13 @@
         <mt-notification-center name="notificationCenter"></mt-notification-center>
 
         <div class="mt-queue mt-queue__animation-show" ng-show="rootCtrl.isUserInteracting()"
-             mt-interactive-chrome>
+             ng-controller="mtQueueCtrl as queueCtrl" mt-interactive-chrome>
             <div>
                 <div class="mt-queue__entry mt-js-animation-enter-leave__slide-and-size"
                      ng-repeat="entry in props.queue.entries"
                      ng-class="{'active': entry === rootCtrl.getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
-                     ng-controller="mtQueueEntryCtrl as queueEntryCtrl"
                      mt-anchor="{{entry.id}}">
-                    <button class="mt-queue__entry__thumbnail" ng-click="queueEntryCtrl.playQueueEntry($index)">
+                    <button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)">
                         <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                              class="image"></div>
                         <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
@@ -99,7 +98,7 @@
 
                         <div class="mt-queue__entry__commands">
                             <button class="mt-queue__entry__remove-button" data-mt-icon="&#xe801"
-                                    ng-click="queueEntryCtrl.removeQueueEntry(entry)">
+                                    ng-click="queueCtrl.removeQueueEntry(entry)">
                                 <span class="mt-replaced-text">Remove</span>
                             </button>
                         </div>
