@@ -1,0 +1,19 @@
+$baseFontSizeUnitless: 16;
+$lineHeight: 1.6;
+$unitVerticalPadding: $lineHeight * 1em;
+
+$baseTransitionDuration: 200ms;
+$overlayOpacity: .85;
+
+$black: #0d0d0d;
+$darkestBgColor: #262626;
+$baseBgColor: #2D2D2E;
+$secondaryBgColor: #636466;
+$contrastedColor: #8EC447;
+$lightTextColor: #ffffff;
+$darkTextColor: #96D3D4;
+$infoBgColor: #5F7BCE;
+$errorBgColor: #BA3B26;
+$backdropBackgroundColor: rgba(0, 0, 0, $overlayOpacity);
+
+$easeInOut: cubic-bezier(.8, 0, .2, 1);

@@ -1,0 +1,257 @@
+@import '../vendor/bourbon/bourbon';
+@import 'variables';
+@import 'utils';
+
+@mixin header {
+
+  $headerHeight: 4rem;
+  $searchInputPadding: 0 3rem 0 .5rem;
+  $searchFieldAnimationDuration: $baseTransitionDuration;
+  $textShadowSize: 8rem / $baseFontSizeUnitless;
+  $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
+
+  .mt-header {
+    position: relative;
+    height: $headerHeight;
+    z-index: 1;
+    overflow: hidden; // hide overflowing search field
+  }
+
+  //fake background so that we can animate the header background color by using opacity
+  .mt-header__bg {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+
+    background-color: $baseBgColor;
+
+    &.mt-header__bg__animation-show {
+
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+
+        // needed by the transition
+        display: block !important;
+      }
+
+      &.ng-hide {
+        opacity: 0;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  .mt-header__container {
+    height: 100%;
+    width: 100%;
+
+    // brings the container forward of the background
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    > .start {
+      flex: 1;
+      overflow: hidden;
+
+      display: flex;
+    }
+
+    > .center {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    > .end {
+      flex: 1;
+    }
+  }
+
+  .mt-header__app-title {
+    position: relative;
+    top: (4rem/$baseFontSizeUnitless);
+    margin-left: .5rem;
+    margin-right: 1rem;
+
+    overflow: hidden;
+
+    text-shadow: $textShadow;
+
+    > .logo {
+      color: $contrastedColor;
+      font-family: 'Oleo Script Swash Caps', cursive;
+      font-size: (40rem/$baseFontSizeUnitless);
+    }
+
+    > .remaining {
+      display: none;
+
+      font-size: (28rem/$baseFontSizeUnitless);
+
+      @include mt-media-large-screen {
+        display: inline;
+      }
+    }
+  }
+
+  .mt-header__playback-button {
+    $width: 49rem / $baseFontSizeUnitless;
+
+    @extend %mt-chromeless-button;
+    position: relative;
+    height: 100%;
+    width: $width + 2 * $textShadowSize; // leave some space for proper rendering of shadow (IE)
+
+    font-size: $width;
+    text-shadow: $textShadow;
+
+    .facet {
+      position: absolute; // facets stacks but only one is visible at the time
+      top: 0;
+      height: 100%;
+      width: 100%;
+
+      // center the icon
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .facet__animation-toggle {
+      &.ng-hide-add, &.ng-hide-remove {
+        transition: transform $baseTransitionDuration $easeInOut;
+        display: flex !important;
+      }
+
+      &.ng-hide {
+        transform: translateY(-100%);
+      }
+    }
+  }
+
+  // Search input styles
+  //
+  // We need a little bit of a hack here because:
+  //  - we need to focus the input field on user action for mobile browsers to accept the focus action and show the virtual keyboard
+  //  - we can't animate and focus an input because it creates glitches (at least in Chrome): the browser will move the
+  //    focused input inside the viewport to make it visible
+  //  - we want an cross browser way to fix that
+  // So thanks to the following styles and the mtSearchInput directive:
+  //  - we append a transparent (opacity: 0) "real" input next to a "fake" one (basically a div) to a translated container
+  //    so that it is outside of the viewport
+  //  - on user action we translate the container inside the view, we focus the real input and animate the fake one
+  //  - at the end of the fake input animation we make the real one visible (opacity: 1)
+
+  .mt-search-input__button {
+    @extend %mt-chromeless-button;
+    @include mt-click-reaction;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    z-index: 1;
+    width: 2.5rem + 2 * .5rem; // we need to fix the size here because the content is absolutely positioned
+
+    font-size: 2.5rem;
+    text-shadow: $textShadow;
+
+    .facet {
+      position: absolute; // facets stacks but only one is visible at the time
+      top: 0;
+      height: 100%;
+      width: 100%;
+
+      // center the icon
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &.close {
+        font-size: 1.7rem; // the close icon is a little bit larger so we need to adjust the size
+      }
+    }
+
+    .facet__animation-toggle {
+      &.ng-hide-add, &.ng-hide-remove {
+        transition: transform $baseTransitionDuration $easeInOut;
+        display: flex !important;
+      }
+
+      &.ng-hide {
+        transform: translateY(-100%);
+      }
+    }
+  }
+
+  // the container, will be translated but not animated
+  .mt-search-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    max-width: 30rem;
+    padding: $searchInputPadding;
+    overflow: hidden;
+
+    font-size: 1.5rem;
+    color: $lightTextColor;
+
+    display: flex;
+    align-items: center;
+  }
+
+  // the real input, is made transparent and becomes opaque at the end
+  .mt-search-input__field {
+    @extend %mt-chromeless-input;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+
+    background-color: $secondaryBgColor;
+    font: inherit;
+    color: inherit;
+
+    // overrides placeholder to be sure that it is coherent with the fake field pseudo placeholder
+    &::placeholder {
+      @include mt-placeholder;
+    }
+  }
+
+  // the animated fake field gives the illusion that the real input is moving
+  .mt-search-input__fake-field {
+    @include position(absolute, 0px 0px 0px 0px);
+    padding: $searchInputPadding;
+
+    background-color: $secondaryBgColor;
+    transform: translateX(0);
+
+    // for fake placeholder alignment
+    display: flex;
+    align-items: center; // align-self seems to not work for :before pseudo element in IE11
+
+    // simulates the real input placeholder until the real input is made visible
+    &.empty:before {
+      content: attr(data-mt-placeholder);
+
+      @include mt-placeholder;
+    }
+
+    &.mt-search-input__fake-field__animation-toggle {
+
+      transition: transform $searchFieldAnimationDuration $easeInOut;
+
+      &.ng-hide-add, &.ng-hide-remove {
+        display: flex !important;
+      }
+
+      &.ng-hide {
+        transform: translateX(100%);
+      }
+    }
+  }
+}

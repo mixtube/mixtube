@@ -1,0 +1,145 @@
+@import 'variables';
+
+@mixin utils {
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  button {
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+
+  @keyframes mt-spinner-rotation {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  [data-mt-icon] {
+    overflow: hidden;
+    line-height: 1;
+
+    &:before {
+      content: attr(data-mt-icon);
+      font-family: fontello;
+    }
+
+    > .mt-replaced-text {
+      // taken from HTML5 Boilerplate's .visuallyhidden
+      border: 0;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+  }
+
+  .mt-animation-enter-leave__fade {
+
+    &.ng-enter, &.ng-leave {
+      transition: opacity $baseTransitionDuration linear;
+    }
+
+    &.ng-enter {
+      opacity: 0;
+    }
+
+    &.ng-enter.ng-enter-active {
+      opacity: 1;
+    }
+
+    &.ng-leave {
+      opacity: 1;
+    }
+
+    &.ng-leave.ng-leave-active {
+      opacity: 0;
+    }
+  }
+}
+
+%mt-chromeless-input {
+  appearance: none;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+%mt-chromeless-progress {
+  appearance: none;
+  background: none;
+  color: transparent; // IE needs that to remove the bar
+
+  // keep those selectors separated otherwise they are not interpreted (weird)
+  &::-webkit-progress-bar {
+    background: none;
+  }
+  &::-moz-progress-bar {
+    background: none;
+  }
+}
+
+%mt-chromeless-button {
+  display: block;
+
+  padding: 0;
+  margin: 0;
+
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+
+  &::-moz-focus-inner {
+    padding: 0;
+    border: 0
+  }
+}
+
+@mixin mt-click-reaction {
+  &.ng-click-active {
+    transform: scale(.9);
+  }
+}
+
+// extracted settings for placeholder so that we can simulate placeholders with regular element
+@mixin mt-placeholder($color: #A9A9A9) {
+  color: $color;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+@mixin mt-fluid-image($heightRatio) {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  padding-top: $heightRatio * 100%;
+}
+
+@mixin mt-spinner($size, $color) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  border: (4rem/$baseFontSizeUnitless) solid transparent;
+  border-top-color: $color;
+
+  // this animation key frames are defined in the module main mixin (see above)
+  animation: mt-spinner-rotation 500ms infinite linear;
+}
+
+@mixin mt-media-large-screen {
+  @media screen and (min-width: 50rem) {
+    @content;
+  }
+}

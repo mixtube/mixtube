@@ -1,0 +1,75 @@
+@import '../vendor/bourbon/bourbon';
+@import 'utils';
+
+@mixin notifications {
+
+  $notificationsNominalWidth: 30rem;
+
+  .mt-notifications-center {
+    position: absolute;
+    right: 0;
+    z-index: 500;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+
+    // if the available size is larger than the minimum notification size stop expansion
+    // could have been done with width + min-width but FF doesn't behave like the others
+    @media screen and (min-width: $notificationsNominalWidth) {
+      width: $notificationsNominalWidth;
+    }
+  }
+
+  .mt-notifications-center__container {
+    padding: 0 .5rem $unitVerticalPadding / 2 .5rem;
+    &:first-child {
+      padding-top: $unitVerticalPadding / 2;
+    }
+  }
+
+  .mt-notification {
+    @extend %mt-chromeless-button;
+
+    // make the notification "interactable" (reverse parent behavior)
+    pointer-events: auto;
+
+    // clear the button properties
+    text-align: left;
+    line-height: $lineHeight;
+    width: 100%;
+
+    background-color: $lightTextColor;
+    color: $secondaryBgColor;
+    border-radius: 2px;
+
+    &.info {
+      background-color: $infoBgColor;
+      color: $lightTextColor;
+    }
+
+    &.error {
+      background-color: $errorBgColor;
+      color: $lightTextColor;
+    }
+  }
+
+  .mt-notification__content {
+    display: flex;
+
+    > .text {
+      flex: 2;
+      padding: $unitVerticalPadding / 2 1rem;
+    }
+
+    > .thumbnail {
+      flex: 1;
+    }
+  }
+
+  .mt-notification__image {
+    width: 100%;
+
+    @include mt-fluid-image(1);
+  }
+}

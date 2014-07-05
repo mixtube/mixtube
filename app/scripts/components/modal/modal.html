@@ -1,0 +1,22 @@
+<div class="mt-modal">
+    <div class="mt-modal__container">
+        <div class="mt-modal__frame">
+            <h2 class="mt-modal__title">{{title}}</h2>
+
+            <div class="mt-modal__content">
+                <!-- the following div is the only way I found to fix a rendering problem in Chrome and Safari mobile -->
+                <!-- where the hidden part of the overflowing zone is never rendered -->
+                <div ng-include="contentTemplateUrl"></div>
+            </div>
+
+            <div class="mt-modal__commands">
+                <button class="mt-modal__button"
+                        ng-repeat="command in commands"
+                        ng-class="{secondary: !command.primary}"
+                        ng-click="{{command.action}}">
+                    {{command.label}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

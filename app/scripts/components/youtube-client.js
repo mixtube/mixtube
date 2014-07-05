@@ -51,6 +51,11 @@
 
             var videosIds = _.pluck(videos, 'id');
 
+            // We have to use JSONP here
+            //  - IE11 manages CORS request if originating page and requested resource have the same protocol
+            //  - googleapi.com only accept https protocol
+            //  - it is not doable right now to have MixTube served through https
+            //  ==> can't use CORS for MixTube in IE11 ==> can't use CORS in MixTube
             return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
                     id: videosIds.join(','),

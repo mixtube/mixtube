@@ -1,0 +1,29 @@
+<div class="mt-notifications-center">
+    <div class="mt-notifications-center__container mt-js-animation-enter-leave__slide-and-size from-right"
+         ng-repeat="notification in notifications">
+        <button class="mt-notification" ng-switch on="notification.type"
+                ng-class="{error: notification.type === 'error'}" ng-click="close(notification)">
+            <div class="mt-notification__content" ng-switch-when="error">
+                <div class="text">
+                    {{notification.data.message}}
+                </div>
+            </div>
+            <div class="mt-notification__content" ng-switch-when="comingNext">
+                <div class="thumbnail" ng-show="notification.data.imageUrl">
+                    <div class="mt-notification__image"
+                         ng-style="{'background-image': 'url({{notification.data.imageUrl}})'}"></div>
+                </div>
+                <div class="text">
+                    <div class="mt-coming-next__group">
+                        <div class="mt-coming-next__header">It was:</div>
+                        <div class="mt-coming-next__title">{{notification.data.current}}</div>
+                    </div>
+                    <div class="mt-coming-next__group next" ng-show="notification.data.next">
+                        <div class="mt-coming-next__header">Coming next:</div>
+                        <div class="mt-coming-next__title">{{notification.data.next}}</div>
+                    </div>
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
