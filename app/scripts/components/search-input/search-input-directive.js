@@ -14,7 +14,7 @@
      * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
      * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
      */
-    mt.MixTubeApp.directive('mtSearchInput', function ($animate, $$animateReflow, mtSearchInputsRegistry) {
+    mt.MixTubeApp.directive('mtSearchInput', function ($animate, $$animateReflow, mtSearchInputsRegistry, mtDirectivesRegistryHelper) {
         return {
             restrict: 'E',
             templateUrl: '/scripts/components/search-input/search-input.html',
@@ -24,16 +24,7 @@
             },
             controller: function ($scope, $element, $attrs) {
 
-                var name = $attrs.name;
-
-                if (!name || name.trim().length === 0) {
-                    throw new Error('mtSearchInput expected a non empty string as name value');
-                }
-
-                mtSearchInputsRegistry.register(name, this);
-                $scope.$on('$destroy', function () {
-                    mtSearchInputsRegistry.unregister(name);
-                });
+                mtDirectivesRegistryHelper.install(this, mtSearchInputsRegistry, 'name', $scope, $attrs);
 
                 var form = $element;
                 var field = mt.commons.querySelector($element, '.mt-js-search-input__field');

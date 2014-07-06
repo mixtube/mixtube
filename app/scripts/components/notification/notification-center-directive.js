@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.directive('mtNotificationCenter', function (mtNotificationCentersRegistry, $timeout) {
+    mt.MixTubeApp.directive('mtNotificationCenter', function ($timeout, mtNotificationCentersRegistry, mtDirectivesRegistryHelper) {
 
         /**
          * @const
@@ -17,16 +17,7 @@
             },
             controller: function ($scope, $element, $attrs) {
 
-                var name = $attrs.name;
-
-                if (!name || name.trim().length === 0) {
-                    throw new Error('mtNotificationCenter expected a non empty string as name value');
-                }
-
-                mtNotificationCentersRegistry.register(name, this);
-                $scope.$on('$destroy', function () {
-                    mtNotificationCentersRegistry.unregister(name);
-                });
+                mtDirectivesRegistryHelper.install(this, mtNotificationCentersRegistry, 'name', $scope, $attrs);
 
                 function close(notification) {
                     _.pull($scope.notifications, notification);
