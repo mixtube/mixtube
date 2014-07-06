@@ -31,6 +31,13 @@
 
                 controller.focusEntry = function (entry) {
                     lastFocusedEntry = entry;
+                    scope.$evalAsync(function () {
+                        // if lastFocusedEntry is not null here it means that the requested focus is for an existing
+                        // entry and that we don't have to do the full "insert / scroll" dance
+                        if (lastFocusedEntry) {
+                            scrollable.putAnchorInViewPort(entry.id);
+                        }
+                    })
                 };
             }
         };

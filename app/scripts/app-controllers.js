@@ -1,6 +1,6 @@
 (function (mt) {
     'use strict';
-    mt.MixTubeApp.controller('mtRootCtrl', function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager) {
+    mt.MixTubeApp.controller('mtRootCtrl', function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry, mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager, mtQueuesRegistry) {
 
         var rootCtrl = this;
 
@@ -79,7 +79,7 @@
 
         $scope.$watch('props.queue', function (newVal, oldVal) {
             // this test is here to prevent to serialize during the init phase
-            if (!angular.equals(newVal, oldVal)) {
+            if (newVal !== oldVal) {
                 var newSerializedQueue = mtQueueManager.serialize();
                 if (serializedQueue !== newSerializedQueue) {
                     serializedQueue = newSerializedQueue;
@@ -105,7 +105,17 @@
                         rootCtrl.queueLoading = false;
                     });
             }
-        }, true);
+        });
+
+        $scope.$watch(function () {
+            return mtOrchestrator.runningQueueEntry;
+        }, function (runningQueueEntry, oldVal) {
+            if (runningQueueEntry !== oldVal) {
+                mtQueuesRegistry('queue').ready(function (queue) {
+                    queue.focusEntry(runningQueueEntry);
+                });
+            }
+        });
     });
 
     mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {

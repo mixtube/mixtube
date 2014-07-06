@@ -14,6 +14,17 @@
      */
     mt.MixTubeApp.directive('mtScrollable', function (BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
 
+        /**
+         * @param {JQLite} container
+         * @param {JQLite} content
+         * @returns {boolean} true if the content is fully contained in the container along the Y axis
+         */
+        function containsY(container, content) {
+            var containerRect = container[0].getBoundingClientRect();
+            var contentRect = content[0].getBoundingClientRect();
+            return containerRect.top < contentRect.top && contentRect.bottom < containerRect.bottom;
+        }
+
         return {
             restrict: 'A',
             controller: function ($scope, $element) {
@@ -22,7 +33,7 @@
 
                 this.putAnchorInViewPort = function (anchor, done) {
                     var target = mt.commons.querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
-                    if (target.length > 0) {
+                    if (target.length > 0 && !containsY(scrollable, target)) {
                         target.velocity(
                             'scroll',
                             {
