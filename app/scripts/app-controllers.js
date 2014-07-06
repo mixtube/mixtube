@@ -18,8 +18,6 @@
         // so that they can be read, written and watched from any controller
         /** @type {mt.model.Queue} */
         $scope.props.queue = mtQueueManager.queue;
-        /** @type {mt.model.QueueEntry} */
-        $scope.props.focusedEntry = null;
 
         /** @type {string}*/
         $scope.props.searchTerm = null;
@@ -199,7 +197,7 @@
         reset();
     });
 
-    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtScrollablesRegistry) {
+    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtQueuesRegistry) {
 
         /**
          * @const
@@ -219,12 +217,8 @@
 
             var queueEntry = mtQueueManager.appendVideo(video);
 
-            // execute at the end of the current digest loop so that the entry is really inserted in the queue
-            // by the ngRepeat directive reacting to the queue change
-            $scope.$$postDigest(function () {
-                mtScrollablesRegistry('queue').ready(function (scrollable) {
-                    scrollable.putInViewPort(queueEntry.id);
-                });
+            mtQueuesRegistry('queue').ready(function (queue) {
+                queue.focusEntry(queueEntry);
             });
 
             ctrl.confirmationShown = true;
