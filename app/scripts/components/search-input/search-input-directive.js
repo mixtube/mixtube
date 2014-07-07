@@ -10,11 +10,12 @@
      * A single usage directive that controls the sequencing of search input animation.
      *
      * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
-     * can't be guaranteed by AngularJS (because of the digestion loop).
+     * can't be guaranteed by AngularJS when using ngTouch module.
      * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
-     * ".mt-search-input". We are leveraging the regular ngHide animation so the required styles are the same.
+     * ".mt-search-input".
      */
-    mt.MixTubeApp.directive('mtSearchInput', function ($animate, $$animateReflow, mtSearchInputsRegistry, mtDirectivesRegistryHelper) {
+    mt.MixTubeApp.directive('mtSearchInput', function (mtSearchInputsRegistry, mtDirectivesRegistryHelper, BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
+
         return {
             restrict: 'E',
             templateUrl: '/scripts/components/search-input/search-input.html',
@@ -30,32 +31,48 @@
                 var field = mt.commons.querySelector($element, '.mt-js-search-input__field');
                 var fakeField = mt.commons.querySelector($element, '.mt-js-search-input__fake-field');
 
+                // helps to differentiate first rendering from next ones
+                var init = true;
+
                 var _show = null;
                 var animationRunning = false;
 
                 function sync() {
                     animationRunning = true;
-                    field.css('opacity', 0);
+                    field.css({opacity: 0});
+
+                    var baseAnimConf = {
+                        // in init phase we don't want to animate
+                        duration: init ? 0 : BASE_TRANSITION_DURATION,
+                        easing: EASE_IN_OUT_BEZIER_POINTS
+                    };
 
                     if (_show) {
-                        $animate.removeClass(form, 'ng-hide', function () {
-                            // needed to avoid animation cancellation due to multiple animation run "in the same time"
-                            $$animateReflow(function () {
-                                $animate.removeClass(fakeField, 'ng-hide', function () {
-                                    field.css('opacity', null);
+                        form.css({display: ''});
+                        fakeField.velocity(
+                            {translateX: ['0', '100%']},
+                            _.extend(baseAnimConf, {
+                                complete: function () {
+                                    field.css({opacity: ''});
                                     animationRunning = false;
-                                });
-                            });
-                        });
+                                }
+                            })
+                        );
                     } else {
-                        $animate.addClass(fakeField, 'ng-hide', function () {
-                            $$animateReflow(function () {
-                                $animate.addClass(form, 'ng-hide', function () {
-                                    field.css('opacity', null);
+                        fakeField.velocity(
+                            {translateX: ['100%', '0']},
+                            _.extend(baseAnimConf, {
+                                complete: function () {
+                                    form.css({display: 'none'});
+                                    field.css({opacity: ''});
                                     animationRunning = false;
-                                });
-                            });
-                        });
+                                }
+                            })
+                        );
+                    }
+
+                    if (init) {
+                        init = false;
                     }
 
                     field[0][_show ? 'focus' : 'blur']();
