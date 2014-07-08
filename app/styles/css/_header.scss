@@ -61,7 +61,6 @@
 
     > .center {
       height: 100%;
-      overflow: hidden;
     }
 
     > .end {
@@ -120,13 +119,17 @@
     }
 
     .facet__animation-toggle {
+
       &.ng-hide-add, &.ng-hide-remove {
-        transition: transform $baseTransitionDuration $easeInOut;
+        transition-duration: $baseTransitionDuration;
+        transition-property: transform, opacity;
+        transition-timing-function: $easeInOut, linear;
         display: flex !important;
       }
 
       &.ng-hide {
-        transform: translateY(-100%);
+        transform: scale(.5);
+        opacity: 0;
       }
     }
   }
@@ -174,13 +177,17 @@
     }
 
     .facet__animation-toggle {
+
       &.ng-hide-add, &.ng-hide-remove {
-        transition: transform $baseTransitionDuration $easeInOut;
+        transition-duration: $baseTransitionDuration;
+        transition-property: transform, opacity;
+        transition-timing-function: $easeInOut, linear;
         display: flex !important;
       }
 
       &.ng-hide {
-        transform: translateY(-100%);
+        transform: scale(.5);
+        opacity: 0;
       }
     }
   }
