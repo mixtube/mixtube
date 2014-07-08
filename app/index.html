@@ -80,7 +80,7 @@
             <div>
                 <div class="mt-queue__entry mt-js-animation__queue-entry"
                      ng-repeat="entry in props.queue.entries"
-                     ng-class="{'active': entry === rootCtrl.getRunningQueueEntry(), 'broken': entry.skippedAtRuntime}"
+                     ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
                      mt-anchor="{{entry.id}}">
                     <button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)">
                         <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
