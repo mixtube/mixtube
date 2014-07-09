@@ -21,7 +21,9 @@
             },
 
             chromeInteractionEnded: function () {
-                chromeInteractionCount--;
+                if (chromeInteractionCount > 0) {
+                    chromeInteractionCount--;
+                }
             }
         };
     });

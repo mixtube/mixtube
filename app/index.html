@@ -109,9 +109,10 @@
             </div>
         </div>
 
-        <div class="mt-search mt-search__animation-show" mt-interactive-chrome
+        <div class="mt-search mt-search__animation-show"
+             mt-interactive-chrome="searchResultsCtrl.shouldShowSearchResultPanel()"
              ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
-             ng-show="props.searchShown && searchResultsCtrl.inSearch">
+             ng-show="searchResultsCtrl.shouldShowSearchResultPanel()">
             <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
                 <div class="mt-search__provider__header">
                     <h3 class="title">{{pLabel}}</h3>

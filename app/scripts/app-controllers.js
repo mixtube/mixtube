@@ -204,6 +204,11 @@
             }
         });
 
+
+        ctrl.shouldShowSearchResultPanel = function() {
+            return $scope.props.searchShown && ctrl.inSearch;
+        };
+
         reset();
     });
 

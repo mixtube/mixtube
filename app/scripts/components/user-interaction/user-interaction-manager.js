@@ -38,7 +38,7 @@
             lastMousePosition = position;
         });
 
-        // add a delay before saying there is not interaction anymore
+        // add a delay before saying there is no interaction anymore
         $rootScope.$watch(function () {
             if (mouseMoving || mtInteractiveChromesManager.chromeInteracted) {
                 $timeout.cancel(userStoppedInteractingTimeout);
