@@ -205,14 +205,14 @@
         });
 
 
-        ctrl.shouldShowSearchResultPanel = function() {
+        ctrl.shouldShowSearchResultPanel = function () {
             return $scope.props.searchShown && ctrl.inSearch;
         };
 
         reset();
     });
 
-    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtQueuesRegistry) {
+    mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtQueuesRegistry, mtOrchestrator) {
 
         /**
          * @const
@@ -223,7 +223,8 @@
         var ctrl = this;
         var tmoPromise = null;
 
-        ctrl.confirmationShown = false;
+        ctrl.shouldShowConfirmation = false;
+        ctrl.countBeforePlayback = null;
 
         /**
          * @param {mt.model.Video} video
@@ -232,14 +233,21 @@
 
             var queueEntry = mtQueueManager.appendVideo(video);
 
+            if (mtOrchestrator.runningQueueEntry) {
+                var entries = mtQueueManager.queue.entries;
+                ctrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(mtOrchestrator.runningQueueEntry);
+            } else {
+                ctrl.countBeforePlayback = null;
+            }
+
             mtQueuesRegistry('queue').ready(function (queue) {
                 queue.focusEntry(queueEntry);
             });
 
-            ctrl.confirmationShown = true;
+            ctrl.shouldShowConfirmation = true;
             $timeout.cancel(tmoPromise);
             tmoPromise = $timeout(function () {
-                ctrl.confirmationShown = false;
+                ctrl.shouldShowConfirmation = false;
             }, CONFIRMATION_DURATION);
         };
     });

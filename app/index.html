@@ -138,9 +138,14 @@
                             <div class="mt-result__thumbnail"
                                  ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}">
                                 <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
-                                     ng-if="searchResultCtrl.confirmationShown">
+                                     ng-if="searchResultCtrl.shouldShowConfirmation">
                                     <div class="text" mt-short-text="Video added to the queue">
-                                        <span class="mt-replaced-text">Video added to the queue. 5 remaining tunes before yours to be played. Enjoy!</span>
+                                        <span class="mt-replaced-text">Video added to the queue.
+                                            <ng-pluralize count="searchResultCtrl.countBeforePlayback"
+                                                          when="{'one': '1 remaining tune before yours to be played.',
+                                                                 'other': '{} remaining tunes before yours to be played.'}">
+                                            </ng-pluralize>
+                                            Enjoy!</span>
                                     </div>
                                 </div>
                             </div>
