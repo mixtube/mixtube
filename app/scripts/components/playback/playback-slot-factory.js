@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtPlaybackSlotFactory', function ($rootScope, $q, mtMediaElementsPool, mtQueueManager, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtPlaybackSlotFactory', function ($rootScope, $q, mtMediaElementsPool, mtQueueManager, mtConfiguration, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtPlaybackSlotFactory');
 
@@ -55,11 +55,10 @@
             this._registeredCuesIds = [];
         }
 
-        PlaybackSlot.FADE_DURATION = 3;
+        PlaybackSlot.FADE_DURATION = mtConfiguration.fadeDuration;
         PlaybackSlot.AUTO_END_CUE_ID = 'PlaybackSlotAutoEndCue';
-        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER = function (duration) {
-            return 15;
-        };
+        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER = mtConfiguration.autoEndCueTimeProvider;
+
         PlaybackSlot.PREPARE_RETRY = function (queueEntryIndexToTry, prepareDeferred) {
 
             var queueEntryTrying = mtQueueManager.closestValidEntryByIndex(queueEntryIndexToTry);
@@ -251,16 +250,18 @@
             _stopOut: function () {
                 var slot = this;
                 slot._stopOutCalled = true;
-                slot._player.popcorn.fade({direction: 'out', duration: PlaybackSlot.FADE_DURATION, done: function () {
-                    $rootScope.$apply(function () {
-                        var popcorn = slot._player.popcorn;
-                        slot._playback.onPause.remove(popcorn.pause, popcorn);
-                        slot._playback.onResume.remove(popcorn.play, popcorn);
-                        slot._player.dispose();
+                slot._player.popcorn.fade({
+                    direction: 'out', duration: PlaybackSlot.FADE_DURATION, done: function () {
+                        $rootScope.$apply(function () {
+                            var popcorn = slot._player.popcorn;
+                            slot._playback.onPause.remove(popcorn.pause, popcorn);
+                            slot._playback.onResume.remove(popcorn.play, popcorn);
+                            slot._player.dispose();
 
-                        slot._finishedDeferred.resolve();
-                    });
-                }});
+                            slot._finishedDeferred.resolve();
+                        });
+                    }
+                });
             }
         };
 

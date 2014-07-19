@@ -3,29 +3,31 @@
 
     mt.MixTubeApp.factory('mtConfiguration', function ($location) {
 
-        var transitionStartTime = 'test.duration' in $location.search() ? parseInt($location.search()['test.duration'], 10) : -5000;
+        var locationSearch = $location.search();
+        var debug = 'debug' in  locationSearch && locationSearch.debug.trim().length > 0 ?
+            JSON.parse(locationSearch.debug) : {};
 
-        return  {
-            get transitionStartTime() {
-                return transitionStartTime;
-            },
-            get transitionDuration() {
-                return 5000;
-            },
-            get initialSearchOpen() {
-                return 'test.searchOpen' in $location.search();
-            },
+        return {
             get youtubeAPIKey() {
                 return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
             },
             get maxSearchResults() {
                 return 20;
             },
-            get comingNextStartTime() {
-                return transitionStartTime - 5000;
+            get fadeDuration() {
+                return 'fade' in debug ? debug.fade : 5;
             },
-            get comingNextDuration() {
-                return 10000;
+            get autoEndCueTimeProvider() {
+                if ('duration' in debug) {
+                    return _.constant(debug.duration);
+                } else {
+                    var config = this;
+                    return function (duration) {
+                        // add a extra second to the fade duration to make sure the video didn't reach the end before
+                        // the end of the transition
+                        return duration - (config.fadeDuration + 1);
+                    };
+                }
             }
         };
     });

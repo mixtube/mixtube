@@ -3,12 +3,6 @@
 
     mt.MixTubeApp.directive('mtNotificationCenter', function ($timeout, mtNotificationCentersRegistry, mtDirectivesRegistryHelper) {
 
-        /**
-         * @const
-         * @type {number}
-         */
-        var COMING_NEXT_AUTO_CLOSE_DELAY = 8000;
-
         return {
             restrict: 'E',
             templateUrl: '/scripts/components/notification/notification.html',
@@ -31,12 +25,16 @@
                     $scope.notifications.unshift({type: 'error', data: {message: message}});
                 };
 
+                /**
+                 * @param {Object} data the data structure passed to the template
+                 * @returns {Function} a callback to close the coming next notification
+                 */
                 this.comingNext = function (data) {
                     var notification = {type: 'comingNext', data: data};
                     $scope.notifications.unshift(notification);
-                    $timeout(function () {
+                    return function () {
                         close(notification);
-                    }, COMING_NEXT_AUTO_CLOSE_DELAY);
+                    };
                 };
             }
         };

@@ -4,7 +4,7 @@
     /**
      * @name mtOrchestrator
      */
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry, mtConfiguration, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtOrchestrator');
 
@@ -82,6 +82,8 @@
         /** @type {Array.<PlaybackSlot>} */
         var _finishingSlots = [];
 
+        var _closeComingNextFn = null;
+
         /** @type {number} */
         var _runningQueueIndex = -1;
         /** @type {mt.model.QueueEntry} */
@@ -158,23 +160,27 @@
 
                         _runningQueueEntry = slot.actualQueueEntry;
                         _runningQueueIndex = mtQueueManager.queue.entries.indexOf(_runningQueueEntry);
-
+                        if (_closeComingNextFn) {
+                            // if there is a coming next notification open
+                            $timeout(_closeComingNextFn, mtConfiguration.fadeDuration * 1000);
+                            _closeComingNextFn = null;
+                        }
                         prepareAuto(_runningQueueIndex + 1);
                     },
                     aboutToEnd: function () {
-                        engageSlot(autoPreparedSlotAccessor)
+                        engageSlot(autoPreparedSlotAccessor);
                     }
                 }, [
                     {
                         id: 'ComingNextCue',
                         timeProvider: function (duration) {
-                            return 10;
+                            return mtConfiguration.autoEndCueTimeProvider(duration) - 10;
                         },
                         fn: function () {
                             mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
                                 var autoPreparedSlot = autoPreparedSlotAccessor();
                                 var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
-                                notificationCenter.comingNext({
+                                _closeComingNextFn = notificationCenter.comingNext({
                                     current: slot.actualQueueEntry.video.title,
                                     next: nextVideo ? nextVideo.title : null,
                                     imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
@@ -265,7 +271,7 @@
                         prepareAuto(startedEntryNewIndex + 1);
 
                         logger.debug('something changed in the queue that required a re-preparation of the previously ' +
-                            'auto prepared entry %O', autoPreparedEntry);
+                        'auto prepared entry %O', autoPreparedEntry);
                     }
                 }
             }
