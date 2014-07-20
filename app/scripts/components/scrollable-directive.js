@@ -12,7 +12,7 @@
      * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
      * is visible.
      */
-    mt.MixTubeApp.directive('mtScrollable', function (BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
+    mt.MixTubeApp.directive('mtScrollable', function ($timeout, BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
 
         /**
          * @param {JQLite} container
@@ -34,6 +34,7 @@
                 this.putAnchorInViewPort = function (anchor, done) {
                     var target = mt.commons.querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
                     if (target.length > 0 && !containsY(scrollable, target)) {
+                        // the target needs to be animated to reveal the item
                         target.velocity(
                             'scroll',
                             {
@@ -43,6 +44,9 @@
                                 complete: done
                             }
                         );
+                    } else {
+                        // no animation required but call the callback asynchronously
+                        $timeout(done, 0, false);
                     }
                 };
             }

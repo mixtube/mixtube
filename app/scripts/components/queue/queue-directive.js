@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.directive('mtQueue', function (mtDirectivesRegistryHelper, mtQueuesRegistry) {
+    mt.MixTubeApp.directive('mtQueue', function ($timeout, mtDirectivesRegistryHelper, mtQueuesRegistry) {
 
         return {
             restrict: 'A',
@@ -14,30 +14,45 @@
                 var scrollable = ctrls[1];
                 var lastFocusedEntry = null;
 
-                scope.$on('mtQueueEntry::sizingDone', function (evt, entry, continuation) {
+                scope.$on('mtQueueEntryAnimation::started', function (evt, entry) {
                     // this event should not bubble further up
                     evt.stopPropagation();
 
                     if (entry === lastFocusedEntry) {
+
+                        // an animation concerning the last focused entry started
+                        //  1. clear the lastFocusedEntry variable to prevent the any other animation of it (see focusEntry method)
+                        //  2. listen to the sizing done event to suspend the entry animation
+                        //  3. scroll to the newly inserted entry
+                        //  4. continue the entry insertion animation
+
                         lastFocusedEntry = null;
 
-                        // suspend the entry animation until the scroll operation is finished then resume it
-                        continuation.suspend();
-                        scrollable.putAnchorInViewPort(entry.id, function () {
-                            continuation.continue();
+                        var deregisterFn = scope.$on('mtQueueEntryAnimation::sizingDone', function (evt, entry, continuation) {
+
+                            evt.stopPropagation();
+                            deregisterFn();
+
+                            // suspend the entry animation until the scroll operation is finished then resume it
+                            continuation.suspend();
+                            scrollable.putAnchorInViewPort(entry.id, function () {
+                                continuation.continue();
+                            });
                         });
                     }
                 });
 
                 controller.focusEntry = function (entry) {
                     lastFocusedEntry = entry;
-                    scope.$evalAsync(function () {
-                        // if lastFocusedEntry is not null here it means that the requested focus is for an existing
-                        // entry and that we don't have to do the full "insert / scroll" dance
+
+                    // timeout leaves enough time for any potential entry animation to start
+                    $timeout(function () {
                         if (lastFocusedEntry) {
+                            // at this stage if lastFocusedEntry is still set it means that no animation occurred
+                            // we can put the entry in the view port without waiting for the completion
                             scrollable.putAnchorInViewPort(entry.id);
                         }
-                    })
+                    }, 0);
                 };
             }
         };

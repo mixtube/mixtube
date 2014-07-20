@@ -13,6 +13,10 @@
                 enter: function (element, done) {
 
                     var config = mtSlideSizeAnimationBuilder.buildConfig(element);
+                    var scope = element.scope();
+
+                    scope.$emit('mtQueueEntryAnimation::started', scope.entry);
+
                     // first step of the animation
                     element.css({transform: 'translateX(-100%)'});
 
@@ -40,8 +44,8 @@
                         }
                     };
 
-                    var scope = element.scope();
-                    scope.$emit('mtQueueEntry::sizingDone', scope.entry, continuation);
+                    // may be overkill but describes better the intent where the sizing could be animated
+                    scope.$emit('mtQueueEntryAnimation::sizingDone', scope.entry, continuation);
 
                     // at this stage the continuation may have been suspended by someone listening to the event
                     if (!suspended) {
