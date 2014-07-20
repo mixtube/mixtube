@@ -31,6 +31,10 @@
 
                 var scrollable = $element;
 
+                /**
+                 * @param {string} anchor
+                 * @param {Function=} done
+                 */
                 this.putAnchorInViewPort = function (anchor, done) {
                     var target = mt.commons.querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
                     if (target.length > 0 && !containsY(scrollable, target)) {
@@ -44,8 +48,8 @@
                                 complete: done
                             }
                         );
-                    } else {
-                        // no animation required but call the callback asynchronously
+                    } else if (done) {
+                        // no animation required but call the callback asynchronously if given
                         $timeout(done, 0, false);
                     }
                 };
