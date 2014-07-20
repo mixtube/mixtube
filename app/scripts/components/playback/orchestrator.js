@@ -82,8 +82,6 @@
         /** @type {Array.<PlaybackSlot>} */
         var _finishingSlots = [];
 
-        var _closeComingNextFn = null;
-
         /** @type {number} */
         var _runningQueueIndex = -1;
         /** @type {mt.model.QueueEntry} */
@@ -160,17 +158,20 @@
 
                         _runningQueueEntry = slot.actualQueueEntry;
                         _runningQueueIndex = mtQueueManager.queue.entries.indexOf(_runningQueueEntry);
-                        if (_closeComingNextFn) {
-                            // if there is a coming next notification open
-                            $timeout(_closeComingNextFn, mtConfiguration.fadeDuration * 1000);
-                            _closeComingNextFn = null;
-                        }
+
                         prepareAuto(_runningQueueIndex + 1);
-                    },
-                    aboutToEnd: function () {
-                        engageSlot(autoPreparedSlotAccessor);
                     }
                 }, [
+                    {
+                        id: 'AutoEndCue',
+                        timeProvider: mtConfiguration.autoEndCueTimeProvider,
+                        fn: function () {
+                            logger.debug('auto ending %O', slot.actualQueueEntry.video);
+
+                            engageSlot(autoPreparedSlotAccessor);
+                            slot.finish();
+                        }
+                    },
                     {
                         id: 'ComingNextCue',
                         timeProvider: function (duration) {
@@ -180,11 +181,13 @@
                             mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
                                 var autoPreparedSlot = autoPreparedSlotAccessor();
                                 var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
-                                _closeComingNextFn = notificationCenter.comingNext({
+                                var closeComingNextFn = notificationCenter.comingNext({
                                     current: slot.actualQueueEntry.video.title,
                                     next: nextVideo ? nextVideo.title : null,
                                     imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
                                 });
+
+                                slot.finishedPromise.finally(closeComingNextFn);
                             });
                         }
                     }

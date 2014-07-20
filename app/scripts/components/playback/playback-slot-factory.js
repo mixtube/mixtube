@@ -55,10 +55,6 @@
             this._registeredCuesIds = [];
         }
 
-        PlaybackSlot.FADE_DURATION = mtConfiguration.fadeDuration;
-        PlaybackSlot.AUTO_END_CUE_ID = 'PlaybackSlotAutoEndCue';
-        PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER = mtConfiguration.autoEndCueTimeProvider;
-
         PlaybackSlot.PREPARE_RETRY = function (queueEntryIndexToTry, prepareDeferred) {
 
             var queueEntryTrying = mtQueueManager.closestValidEntryByIndex(queueEntryIndexToTry);
@@ -157,7 +153,7 @@
             },
 
             /**
-             * @param {{preparedFinished: function, aboutToStart: function, aboutToEnd: function}} lifecycleCallbacks
+             * @param {{preparedFinished: function, aboutToStart: function}} lifecycleCallbacks
              * @param {Array.<{id: string, timeProvider: function(number): number, fn: function}>} cues
              */
             engage: function (lifecycleCallbacks, cues) {
@@ -170,20 +166,6 @@
                         // playerEntry can be falsy if it wasn't possible to find a valid entry to prepare
                         if (playerEntry) {
                             slot._player = playerEntry.player;
-
-                            slot._player.popcorn.cue(
-                                PlaybackSlot.AUTO_END_CUE_ID,
-                                PlaybackSlot.AUTO_END_CUE_TIME_PROVIDER(slot._player.popcorn.duration()),
-                                function autoEndCueCb() {
-                                    $rootScope.$apply(function () {
-                                        logger.debug('auto ending %O', slot._actualQueueEntry.video);
-                                        lifecycleCallbacks.aboutToEnd();
-                                        slot.finish();
-                                    });
-                                });
-
-                            slot._registeredCuesIds.push(PlaybackSlot.AUTO_END_CUE_ID);
-
 
                             cues.forEach(function (cueDefinition) {
                                 slot._player.popcorn.cue(
@@ -242,7 +224,7 @@
                         slot._playback.onResume.add(popcorn.play, popcorn);
 
                         popcorn.play();
-                        popcorn.fade({direction: 'in', duration: PlaybackSlot.FADE_DURATION});
+                        popcorn.fade({direction: 'in', duration: mtConfiguration.fadeDuration});
                     }
                 });
             },
@@ -251,7 +233,7 @@
                 var slot = this;
                 slot._stopOutCalled = true;
                 slot._player.popcorn.fade({
-                    direction: 'out', duration: PlaybackSlot.FADE_DURATION, done: function () {
+                    direction: 'out', duration: mtConfiguration.fadeDuration, done: function () {
                         $rootScope.$apply(function () {
                             var popcorn = slot._player.popcorn;
                             slot._playback.onPause.remove(popcorn.pause, popcorn);
