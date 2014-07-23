@@ -165,7 +165,7 @@
                     {
                         id: 'AutoEndCue',
                         timeProvider: mtConfiguration.autoEndCueTimeProvider,
-                        fn: function () {
+                        fn: function autoEndCueCb() {
                             logger.debug('auto ending %O', slot.actualQueueEntry.video);
 
                             engageSlot(autoPreparedSlotAccessor);
@@ -177,7 +177,7 @@
                         timeProvider: function (duration) {
                             return mtConfiguration.autoEndCueTimeProvider(duration) - 10;
                         },
-                        fn: function () {
+                        fn: function comingNextCueCb() {
                             mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
                                 var autoPreparedSlot = autoPreparedSlotAccessor();
                                 var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
