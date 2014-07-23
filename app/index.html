@@ -3,7 +3,7 @@
 <head>
     <!--preventing the user to zoom is not really nice but this is to prevent the browser from zooming when an input is focused-->
     <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
-    <title ng-bind="'MixTube'">MixTube (Loading...)</title>
+    <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
     <!-- usemin must look for files in app and .tmp directory for compiled css -->
     <!-- build:css({app,.tmp}) styles/app.css -->
     <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
