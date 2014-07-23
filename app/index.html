@@ -14,7 +14,7 @@
           rel="stylesheet" type="text/css">
 </head>
 <body mt-mouse-interaction-detection="mt-mouse-based-interaction"
-      ng-style="{cursor: rootCtrl.isUserInteracting() ? '' : 'none'}">
+      ng-style="{cursor: rootCtrl.isUserInteracting() ? '' : 'none'}" ng-cloak>
 <!--we don't want to use a class for the cursor change to avoid whole page style recalculation-->
 
 <!-- queue loading progress block -->
