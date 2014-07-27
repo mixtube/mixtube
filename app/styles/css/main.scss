@@ -82,7 +82,7 @@ body {
     padding-bottom: $unitVerticalPadding / 2;
 
     &.next {
-      font-weight: bold;
+      font-weight: 600;
     }
 
     &:last-child {
@@ -113,7 +113,7 @@ body {
     background-color: $darkestBgColor;
 
     @include mt-media-large-screen {
-      width: (100%/6);
+      width: (100%/$columnsCount);
     }
 
     &.mt-queue__animation-show {
@@ -222,8 +222,6 @@ body {
     text-overflow: ellipsis;
     overflow: hidden;
     padding: $unitVerticalPadding/2 .5rem;
-
-    font-family: 'Open Sans Condensed', sans-serif;
   }
 
   .mt-queue__entry__commands {
@@ -270,7 +268,7 @@ body {
     -webkit-overflow-scrolling: touch;
 
     @include mt-media-large-screen {
-      width: (5 * 100%/6); // width is 5 "columns" out of 6
+      width: (3 * 100%/$columnsCount); // width is 3 "columns" out of 4
     }
 
     &.mt-search__animation-show {
@@ -328,7 +326,7 @@ body {
 
       // more than 1 item per line when more space is available
       @include mt-media-large-screen {
-        $resultsColumnsCount: 5;
+        $resultsColumnsCount: 3;
         width: 100% / $resultsColumnsCount;
       }
     }
@@ -382,7 +380,7 @@ body {
   .mt-result__thumbnail {
     position: relative;
     overflow: hidden;
-    @include mt-fluid-image(.4);
+    @include mt-fluid-image(.5625);
   }
 
   .mt-result__added-confirmation {
@@ -443,90 +441,43 @@ body {
   }
 
   .mt-result__data {
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     padding: $unitVerticalPadding/4 .5rem;
 
-    color: $baseBgColor;
-    background-color: $lightTextColor;
+    color: $lightTextColor;
+    background: rgba(0, 0, 0, .3);
 
     .mt-result__data__item {
       overflow: hidden;
 
-      font-family: 'Open Sans Condensed', sans-serif;
       white-space: nowrap;
       text-overflow: ellipsis;
 
-      &.title, {
-        font-size: (14rem/16);
-        font-weight: bold;
-      }
-
-      &.publisher {
-        font-size: (13rem/16);
-      }
-
-      &.duration {
-        $durationFontSize: 12rem/16;
-        $durationMargin: .25rem;
-
-        position: absolute;
-        padding: $durationMargin;
-        right: 0;
-        top: -$durationFontSize - 2 * $durationMargin; // that works because line height is 1
-        line-height: 1;
-
-        background-color: rgba($baseBgColor, $overlayOpacity);
-        border-top-left-radius: 2px;
-
-        color: $lightTextColor;
-        font-family: 'Open Sans', sans-serif;
-        font-size: $durationFontSize;
+      &.head {
+        display: flex;
+        align-items: baseline;
       }
     }
-  }
-}
 
-.mt-debug-bar {
-  position: absolute;
-  z-index: 1000;
-  opacity: .6;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  pointer-events: none;
-}
+    .mt-result__data__title {
+      flex: 1;
 
-.mt-debug-bar__container {
-  pointer-events: auto;
-  overflow-y: auto;
-  width: 3rem;
-}
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: (14rem/16);
+      font-weight: 600;
+    }
 
-.mt-debug-bar__button {
-  @extend %mt-chromeless-button;
-  font-size: 1rem;
-  line-height: 3;
-  width: 100%;
+    .mt-result__data__publisher {
+      font-size: (13rem/16);
+    }
 
-  &.modal {
-    background-color: #8EC447;
-  }
-
-  &.notifications {
-    background-color: #B94A48;
-  }
-
-  &.search {
-    background-color: #5d61b9;
-  }
-
-  &.queue-items {
-    background-color: #b96eb5;
-  }
-
-  &.activity {
-    background-color: #e1cb50;
+    .mt-result__data__duration {
+      padding-left: 1em;
+      font-size: (12rem/16);
+    }
   }
 }
 

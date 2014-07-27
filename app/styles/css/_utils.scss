@@ -2,8 +2,12 @@
 
 @mixin utils {
 
-  * {
+  body {
     box-sizing: border-box;
+  }
+
+  * {
+    box-sizing: inherit;
   }
 
   a {

@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
     <link rel="stylesheet" href="styles/css/main.css" type="text/css">
     <!-- endbuild -->
-    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,700|Open+Sans+Condensed:300|Oleo+Script+Swash+Caps:400"
-          rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
 </head>
 <body mt-mouse-interaction-detection="mt-mouse-based-interaction"
       ng-style="{cursor: rootCtrl.isUserInteracting() ? '' : 'none'}" ng-cloak>
@@ -150,13 +150,15 @@
                                 </div>
                             </div>
                             <ul class="mt-result__data">
-                                <li class="mt-result__data__item title" title="{{searchResult.title}}">
-                                    {{searchResult.title}}
+                                <li class="mt-result__data__item head" title="{{searchResult.title}}">
+                                    <span class="mt-result__data__title">{{searchResult.title}}</span>
+                                    <span class="mt-result__data__duration mt-animation-enter-leave__fade"
+                                          ng-if="searchResult.duration">
+                                        {{searchResult.duration | mtDuration:'shortTime'}}
+                                    </span>
                                 </li>
-                                <li class="mt-result__data__item publisher">by {{searchResult.publisherName}}</li>
-                                <li class="mt-result__data__item duration mt-animation-enter-leave__fade"
-                                    ng-if="searchResult.duration">
-                                    {{searchResult.duration | mtDuration:'shortTime'}}
+                                <li class="mt-result__data__item mt-result__data__publisher">by
+                                    {{searchResult.publisherName}}
                                 </li>
                             </ul>
                         </button>
