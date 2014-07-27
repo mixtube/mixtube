@@ -9,31 +9,6 @@
         };
 
         /**
-         * Collect the given element and the siblings including comment nodes.
-         *
-         * Required to work with ngRepeat since it manages the collection insertion with the comment between each item.
-         *
-         * @param {JQLite} self the element to start from (including it)
-         * @returns {JQLite} the element itself plus the siblings
-         */
-        function selfAndNextAllIncludingComments(self) {
-            var rMatched = [];
-            if (self.length) {
-                var rElem = self[0];
-
-                do {
-                    if (rElem.nodeType === Node.ELEMENT_NODE || rElem.nodeType === Node.COMMENT_NODE) {
-                        rMatched.push(rElem);
-                    }
-                    // get the next sibling and loop
-                    rElem = rElem.nextSibling;
-                } while (rElem);
-            }
-
-            return angular.element(rMatched);
-        }
-
-        /**
          * Creates the config used by enter and leave method
          *
          * @param {JQLite} element
@@ -51,15 +26,20 @@
                 enter: function (element, done) {
 
                     var config = buildConfig(element);
+                    var txBeginning = config.ltr ? '-100%' : '100%';
+                    var nominalHeight = element[0].getBoundingClientRect().height;
 
-                    element.velocity(
-                        {translateX: [0, config.ltr ? '-100%' : '100%']},
-                        _.defaults({
-                            complete: function () {
-                                element.css({transform: ''});
-                                done();
-                            }
-                        }, BASE_VELOCITY_ANIM_CONF));
+                    element.css({transform: 'translateX(' + txBeginning + ')'});
+
+                    element
+                        .velocity({height: [nominalHeight, 0]}, BASE_VELOCITY_ANIM_CONF)
+                        .velocity({translateX: [0, txBeginning]}, _.defaults(
+                            {
+                                complete: function () {
+                                    element.css({transform: '', height: ''});
+                                    done();
+                                }
+                            }, BASE_VELOCITY_ANIM_CONF));
                 },
 
                 leave: function (element, done) {
@@ -67,32 +47,9 @@
                     var config = buildConfig(element);
                     var nominalHeight = element[0].getBoundingClientRect().height;
 
-                    element.velocity(
-                        {translateX: [config.ltr ? '-100%' : '100%', 0]},
-                        _.defaults({
-                            complete: function () {
-
-                                // there may be no next element but that's ok, the nextAll collection will just be empty
-                                var $nextAll = selfAndNextAllIncludingComments(element.next());
-
-                                var $wrapper = angular.element('<div>')
-                                    .css({transform: 'translateY(' + nominalHeight + 'px)'})
-                                    .append($nextAll);
-
-                                element.after($wrapper);
-                                element.css({display: 'none'});
-
-                                $wrapper.velocity(
-                                    {translateY: [0, nominalHeight]},
-                                    _.defaults({
-                                        complete: function () {
-                                            element.after($nextAll);
-                                            $wrapper.remove();
-                                            done();
-                                        }
-                                    }, BASE_VELOCITY_ANIM_CONF));
-                            }
-                        }, BASE_VELOCITY_ANIM_CONF));
+                    element
+                        .velocity({translateX: [config.ltr ? '-100%' : '100%', 0]}, BASE_VELOCITY_ANIM_CONF)
+                        .velocity({height: [0, nominalHeight]}, _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
                 },
 
                 move: function (element, done) {

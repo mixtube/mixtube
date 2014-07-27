@@ -14,6 +14,9 @@
             get maxSearchResults() {
                 return 20;
             },
+            get debug() {
+                return 'debug' in  locationSearch;
+            },
             get fadeDuration() {
                 return 'fade' in debug ? debug.fade : 5;
             },
@@ -28,6 +31,9 @@
                         return duration - (config.fadeDuration + 1);
                     };
                 }
+            },
+            get debugNotifications() {
+                return 'notifications' in debug && debug.notifications === true;
             }
         };
     });
