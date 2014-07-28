@@ -380,7 +380,22 @@ body {
   .mt-result__thumbnail {
     position: relative;
     overflow: hidden;
+  }
+
+  .mt-result__thumbnail__img {
     @include mt-fluid-image(.5625);
+
+    filter: saturate(100%);
+
+    &.mt-loading {
+      opacity: 0;
+      filter: saturate(0);
+    }
+
+    &.mt-loading-remove {
+      transition-property: opacity, filter;
+      transition-duration: $baseTransitionDuration * 2.5, $baseTransitionDuration * 5;
+    }
   }
 
   .mt-result__added-confirmation {

@@ -25,6 +25,14 @@
     }
   }
 
+  mt-smart-img {
+    display: block;
+    width: 100%;
+
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
   [data-mt-icon] {
     overflow: hidden;
     line-height: 1;

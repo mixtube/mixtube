@@ -41,8 +41,7 @@
                 </h1>
             </div>
             <div class="center">
-                <button class="mt-header__playback-button"
-                        ng-click="rootCtrl.togglePlayback()">
+                <button class="mt-header__playback-button" ng-click="rootCtrl.togglePlayback()">
                     <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
                           data-mt-icon="&#xe805">
                         <span class="mt-replaced-text">Play</span>
@@ -135,8 +134,10 @@
                                 ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
                             <div class="mt-result__add-affordance"></div>
 
-                            <div class="mt-result__thumbnail"
-                                 ng-style="{'background-image': 'url({{searchResult.thumbnailUrl}})'}">
+                            <div class="mt-result__thumbnail">
+                                <mt-smart-img src="{{searchResultsCtrl.trust(searchResult.thumbnailUrl)}}" crop="fill"
+                                              class="mt-result__thumbnail__img"></mt-smart-img>
+
                                 <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
                                      ng-if="searchResultCtrl.shouldShowConfirmation">
                                     <div class="text" mt-short-text="Video added to the queue">
@@ -192,6 +193,7 @@
 <script src="scripts/components/directives-registry/async-registry-factory.js"></script>
 <script src="scripts/components/directives-registry/directives-registry-helper.js"></script>
 <script src="scripts/components/pointing-directives.js"></script>
+<script src="scripts/components/smart-img-directive.js"></script>
 <script src="scripts/components/duration-filter.js"></script>
 <script src="scripts/components/slide-size-animation/slide-size-animation-builder.js"></script>
 <script src="scripts/components/slide-size-animation/slide-size-animation.js"></script>

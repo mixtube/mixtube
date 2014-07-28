@@ -121,7 +121,7 @@
             });
         });
 
-    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
+    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, $sce, mtYoutubeClient) {
 
         var searchResultsCtrl = this;
 
@@ -210,6 +210,10 @@
 
         searchResultsCtrl.shouldShowSearchResultPanel = function () {
             return $scope.props.searchShown && searchResultsCtrl.inSearch;
+        };
+
+        searchResultsCtrl.trust = function (url) {
+            return $sce.trustAsResourceUrl(url);
         };
 
         reset();
