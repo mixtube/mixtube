@@ -28,9 +28,27 @@
   mt-smart-img {
     display: block;
     width: 100%;
+    position: relative;
 
     background-repeat: no-repeat;
     background-position: center;
+
+    &.fill-crop .mt-smart-img__image {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+
+      background-size: cover;
+    }
+  }
+
+  .mt-smart-img__loading-indicator-container {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    bottom: 0;
   }
 
   [data-mt-icon] {
@@ -61,20 +79,14 @@
       transition: opacity $baseTransitionDuration linear;
     }
 
-    &.ng-enter {
-      opacity: 0;
-    }
-
-    &.ng-enter.ng-enter-active {
-      opacity: 1;
-    }
-
-    &.ng-leave {
-      opacity: 1;
-    }
-
+    &.ng-enter,
     &.ng-leave.ng-leave-active {
       opacity: 0;
+    }
+
+    &.ng-leave,
+    &.ng-enter.ng-enter-active {
+      opacity: 1;
     }
   }
 }

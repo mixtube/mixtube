@@ -1,30 +1,44 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.directive('mtSmartImg', function ($animate) {
+    mt.MixTubeApp.directive('mtSmartImg', function ($document, $animate, $filter) {
+
+        var imgCacheUrlFilter = $filter('mtCacheImgUrl');
 
         return {
             restrict: 'E',
-            link: function (scope, iElement, iAttrs) {
+            template: '<div class="mt-smart-img__image"></div><div class="mt-smart-img__loading-indicator-container"></div>',
+            transclude: true,
+            link: function (scope, iElement, iAttrs, controller, transcludeFn) {
 
-                var bSize = 'contains';
-                if (iAttrs.crop === 'fill') {
-                    bSize = 'cover';
-                }
+                var children = iElement.children();
+                var image = children.eq(0);
+                var indicatorContainer = children.eq(1);
 
-                var image = angular.element('<img>')[0];
-                image.src = iAttrs.src;
-                image.onload = function () {
-                    scope.$apply(function () {
-                        $animate.removeClass(iElement, 'mt-loading');
-                    });
-                };
+                var indicator;
+                transcludeFn(scope, function (indicatorClone) {
+                    indicator = indicatorClone;
+                    indicatorContainer.append(indicatorClone);
+                });
 
-                $animate.addClass(iElement, 'mt-loading');
+                var loader = $document[0].createElement('img');
 
-                iElement.css({
-                    'background-image': 'url(' + iAttrs.src + ')',
-                    'background-size': bSize
+                iAttrs.$observe('source', function (source) {
+                    if (source) {
+                        source = imgCacheUrlFilter(source);
+                        loader.src = source;
+                        loader.onload = function () {
+                            $animate.addClass(indicatorContainer, 'ng-hide');
+                            $animate.removeClass(image, 'mt-loading');
+                        };
+
+                        $animate.removeClass(indicatorContainer, 'ng-hide');
+                        $animate.addClass(image, 'mt-loading');
+
+                        image.css({'background-image': 'url(' + source + ')'});
+                    } else {
+                        image.css({'background-image': 'none'});
+                    }
                 });
             }
         };

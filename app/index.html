@@ -127,7 +127,7 @@
                 </p>
 
                 <ul class="mt-results">
-                    <li class="mt-result mt-animation-enter-leave__fade"
+                    <li class="mt-result mt-animation__fade"
                         ng-repeat="searchResult in searchResultsCtrl.results[pId]"
                         ng-controller="mtSearchResultCtrl as searchResultCtrl">
                         <button class="mt-result__container"
@@ -135,8 +135,15 @@
                             <div class="mt-result__add-affordance"></div>
 
                             <div class="mt-result__thumbnail">
-                                <mt-smart-img src="{{searchResultsCtrl.trust(searchResult.thumbnailUrl)}}" crop="fill"
-                                              class="mt-result__thumbnail__img"></mt-smart-img>
+                                <mt-smart-img source="{{searchResult.thumbnailUrl}}"
+                                              class="mt-result__thumbnail__img fill-crop">
+                                    <div class="loading-indicator">
+                                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
+                                              data-mt-icon="&#xe806">
+                                            <span class="mt-replaced-text">Loading video thumbnail</span>
+                                        </span>
+                                    </div>
+                                </mt-smart-img>
 
                                 <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
                                      ng-if="searchResultCtrl.shouldShowConfirmation">
@@ -153,8 +160,7 @@
                             <ul class="mt-result__data">
                                 <li class="mt-result__data__item head" title="{{searchResult.title}}">
                                     <span class="mt-result__data__title">{{searchResult.title}}</span>
-                                    <span class="mt-result__data__duration mt-animation-enter-leave__fade"
-                                          ng-if="searchResult.duration">
+                                    <span class="mt-result__data__duration">
                                         {{searchResult.duration | mtDuration:'shortTime'}}
                                     </span>
                                 </li>
@@ -195,6 +201,7 @@
 <script src="scripts/components/pointing-directives.js"></script>
 <script src="scripts/components/smart-img-directive.js"></script>
 <script src="scripts/components/duration-filter.js"></script>
+<script src="scripts/components/cache-img-url-filter.js"></script>
 <script src="scripts/components/slide-size-animation/slide-size-animation-builder.js"></script>
 <script src="scripts/components/slide-size-animation/slide-size-animation.js"></script>
 <script src="scripts/components/scrollable-directive.js"></script>

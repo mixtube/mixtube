@@ -3,7 +3,7 @@
 
     mt.MixTubeApp.controller('mtRootCtrl',
         function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-                  mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager, mtQueuesRegistry, mtConfiguration) {
+                  mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager, mtQueuesRegistry) {
 
             var rootCtrl = this;
 
@@ -121,7 +121,7 @@
             });
         });
 
-    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, $sce, mtYoutubeClient) {
+    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
 
         var searchResultsCtrl = this;
 
@@ -207,13 +207,8 @@
             }
         });
 
-
         searchResultsCtrl.shouldShowSearchResultPanel = function () {
             return $scope.props.searchShown && searchResultsCtrl.inSearch;
-        };
-
-        searchResultsCtrl.trust = function (url) {
-            return $sce.trustAsResourceUrl(url);
         };
 
         reset();

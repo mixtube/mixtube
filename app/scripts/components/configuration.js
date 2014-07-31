@@ -34,6 +34,9 @@
             },
             get debugNotifications() {
                 return 'notifications' in debug && debug.notifications === true;
+            },
+            get imgCache() {
+                return !('imgCache' in debug && debug.imgCache === false);
             }
         };
     });
