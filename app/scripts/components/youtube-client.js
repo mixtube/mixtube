@@ -158,6 +158,8 @@
                                 id: item.id.videoId,
                                 title: item.snippet.title,
                                 thumbnailUrl: item.snippet.thumbnails.medium.url,
+                                // a reminder that the channelTitle returned by YT search API is wrong
+                                // publisherName: item.snippet.channelTitle,
                                 provider: 'youtube',
                                 // temporary store the channel, used after to add the video channel name
                                 __youtubeChannelId: item.snippet.channelId

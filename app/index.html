@@ -164,7 +164,8 @@
                                         {{searchResult.duration | mtDuration:'shortTime'}}
                                     </span>
                                 </li>
-                                <li class="mt-result__data__item mt-result__data__publisher">by
+                                <li class="mt-result__data__item mt-result__data__publisher"
+                                    ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">by
                                     {{searchResult.publisherName}}
                                 </li>
                             </ul>
