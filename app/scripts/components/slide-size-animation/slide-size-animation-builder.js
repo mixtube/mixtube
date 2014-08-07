@@ -29,14 +29,13 @@
                     var txBeginning = config.ltr ? '-100%' : '100%';
                     var nominalHeight = element[0].getBoundingClientRect().height;
 
-                    element.css({transform: 'translateX(' + txBeginning + ')'});
-
                     element
+                        .css({height: 0, transform: 'translateX(' + txBeginning + ')'})
                         .velocity({height: [nominalHeight, 0]}, BASE_VELOCITY_ANIM_CONF)
                         .velocity({translateX: [0, txBeginning]}, _.defaults(
                             {
                                 complete: function () {
-                                    element.css({transform: '', height: ''});
+                                    element.css({height: '', transform: ''});
                                     done();
                                 }
                             }, BASE_VELOCITY_ANIM_CONF));

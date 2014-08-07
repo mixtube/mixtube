@@ -13,7 +13,6 @@
             {
                 enter: function (element, done) {
 
-                    var config = mtSlideSizeAnimationBuilder.buildConfig(element);
                     var txBeginning = '-100%';
                     var scope = element.scope();
 

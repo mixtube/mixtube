@@ -14,6 +14,8 @@
     overflow: hidden;
     pointer-events: none;
 
+    padding-top: $unitVerticalPadding / 2;
+
     // if the available size is larger than the minimum notification size stop expansion
     // could have been done with width + min-width but FF doesn't behave like the others
     @media screen and (min-width: $notificationsNominalWidth) {
@@ -21,11 +23,8 @@
     }
   }
 
-  .mt-notifications-center__container {
+  .mt-notifications-center__container__padding {
     padding: 0 .5rem $unitVerticalPadding / 2 .5rem;
-    &:first-child {
-      padding-top: $unitVerticalPadding / 2;
-    }
   }
 
   .mt-notification {

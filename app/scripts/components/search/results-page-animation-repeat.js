@@ -12,17 +12,19 @@
 
                 var nominalHeight = element[0].getBoundingClientRect().height;
 
-                element.velocity({height: [nominalHeight, 0]}, _.defaults(
-                    {
-                        complete: function () {
-                            element.css({height: ''});
-                            done();
-                        }
-                    },
-                    {
-                        duration: animationsConfig.transitionDuration,
-                        easing: animationsConfig.easeInOutBezierPoints
-                    }));
+                element
+                    .css({height: 0})
+                    .velocity({height: [nominalHeight, 0]}, _.defaults(
+                        {
+                            complete: function () {
+                                element.css({height: ''});
+                                done();
+                            }
+                        },
+                        {
+                            duration: animationsConfig.transitionDuration,
+                            easing: animationsConfig.easeInOutBezierPoints
+                        }));
             },
             leave: noopAnimation,
             move: noopAnimation

@@ -264,6 +264,7 @@ body {
     width: 100%;
 
     background-color: rgba($secondaryBgColor, .8);
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
