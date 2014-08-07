@@ -121,7 +121,7 @@
             });
         });
 
-    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, mtYoutubeClient) {
+    mt.MixTubeApp.controller('mtSearchResultsCtrl', function ($scope, $rootScope, $timeout, $q, mtYoutubeClient) {
 
         var searchResultsCtrl = this;
 
@@ -136,82 +136,150 @@
         /** @type {promise} */
         var instantSearchPromise = null;
 
+
+        // the following variables will be initialized by the initSearch function.
+
         /**
          * The user already executed one search. Used to hide the results pane until there is something to show.
          *
          * @type {boolean}
          */
-        searchResultsCtrl.inSearch = false;
-        /** @type {Object.<string, Array.<mt.model.Video>>} */
+        searchResultsCtrl.inSearch = null;
+        /**
+         * A list of results pages.
+         *
+         * @type {Object.<string, Array.<Array.<mt.model.Video>>>}
+         */
         searchResultsCtrl.results = null;
         /** @type {Object.<string, boolean>} */
         searchResultsCtrl.pending = null;
         /** @type {Object.<string, boolean>} */
+        searchResultsCtrl.pendingMore = null;
+        /** @type {Object.<string, boolean>} */
         searchResultsCtrl.delivered = null;
+        /** @type {Object.<string, boolean>} */
+        searchResultsCtrl.error = null;
+        /** @type {Object.<string, boolean>} */
+        searchResultsCtrl.errorMore = null;
+        /** @type {Object.<string, string>} */
+        searchResultsCtrl.nextPageId = null;
 
-        function reset() {
-            searchResultsCtrl.inSearch = false;
-            searchResultsCtrl.results = {youtube: []};
-            searchResultsCtrl.pending = {youtube: false};
-            searchResultsCtrl.delivered = {youtube: false};
+        searchResultsCtrl.shouldShowSearchResultPanel = shouldShowSearchResultPanel;
+        searchResultsCtrl.showMore = showMore;
+
+        activate();
+
+        function shouldShowSearchResultPanel() {
+            return $scope.props.searchShown && searchResultsCtrl.inSearch;
         }
 
-        function search(term) {
-            // store the current request count
+        function initSearch() {
+            instantSearchPromise = null;
+            searchResultsCtrl.inSearch = false;
+            searchResultsCtrl.results = {youtube: [[]]};
+            searchResultsCtrl.pending = {youtube: false};
+            searchResultsCtrl.pendingMore = {youtube: false};
+            searchResultsCtrl.delivered = {youtube: false};
+            searchResultsCtrl.nextPageId = {youtube: null};
+            searchResultsCtrl.error = {youtube: false};
+            searchResultsCtrl.errorMore = {youtube: false};
+        }
+
+        function showMore(pId, nextPageId) {
+            if (pId === 'youtube') {
+                searchYoutube($scope.props.searchTerm, nextPageId);
+            }
+        }
+
+        /**
+         *
+         * @param {string} term
+         * @param {string=} nextPageId
+         * @returns {promise}
+         */
+        function searchYoutube(term, nextPageId) {
+            var first = !nextPageId;
+
             var startSearchRequestCount = searchRequestCount;
 
+            if (first) {
+                // reset the results to trigger the animation
+                searchResultsCtrl.results.youtube = [];
+                searchResultsCtrl.pending.youtube = true;
+                searchResultsCtrl.error.youtube = false;
+            } else {
+                searchResultsCtrl.pendingMore.youtube = true;
+                searchResultsCtrl.errorMore.youtube = false;
+            }
 
-            // reset the results to trigger the animation
-            searchResultsCtrl.results.youtube = [];
+            return mtYoutubeClient.searchVideosByQuery(term, {pageSize: first ? 11 : 12, pageId: nextPageId})
+                .then(function doneCb() {
+                    if (searchRequestCount === startSearchRequestCount) {
+                        if (first) {
+                            searchResultsCtrl.pending.youtube = false;
+                        } else {
+                            searchResultsCtrl.pendingMore.youtube = false;
+                        }
+                    }
+                }, null, function progressCb(results) {
+                    if (searchRequestCount === startSearchRequestCount) {
+                        if (first) {
+                            searchResultsCtrl.delivered.youtube = true;
+                        }
+                        searchResultsCtrl.results.youtube.push(results.videos);
+                        searchResultsCtrl.nextPageId.youtube = results.nextPageId;
+                    }
+                })
+                .catch(function catchCb() {
+                    if (searchRequestCount === startSearchRequestCount) {
+                        if (first) {
+                            searchResultsCtrl.error.youtube = true;
+                            searchResultsCtrl.delivered.youtube = true;
+                            searchResultsCtrl.pending.youtube = false;
+                            searchResultsCtrl.results.youtube = [];
+                            searchResultsCtrl.nextPageId.youtube = null;
+                        } else {
+                            searchResultsCtrl.errorMore.youtube = true;
+                            searchResultsCtrl.pendingMore.youtube = false;
+                        }
+                    }
+                });
+        }
 
-            searchResultsCtrl.inSearch = true;
-            searchResultsCtrl.pending.youtube = true;
+        function activate() {
+            initSearch();
 
-            mtYoutubeClient.searchVideosByQuery(term, function (videos) {
-                // check if the request is outdated, it is a workaround until Angular provides a way to cancel requests
-                if (searchRequestCount === startSearchRequestCount) {
-                    searchResultsCtrl.pending.youtube = false;
-                    searchResultsCtrl.delivered.youtube = true;
-                    searchResultsCtrl.results.youtube = videos;
+            // when the user types we automatically execute the search
+            $scope.$watch('props.searchTerm', function (newSearchTerm) {
+                if (newSearchTerm !== null) {
+
+                    // new inputs so we stop the previous request
+                    $timeout.cancel(instantSearchPromise);
+
+                    searchResultsCtrl.delivered.youtube = false;
+
+                    // if the search has to be longer than two characters
+                    if (newSearchTerm.length > 2) {
+                        searchRequestCount++;
+
+                        $timeout.cancel(instantSearchPromise);
+                        instantSearchPromise = $timeout(function search() {
+                            searchResultsCtrl.inSearch = true;
+                            searchYoutube(newSearchTerm);
+                        }, INSTANT_SEARCH_DELAY);
+                    }
+                }
+            });
+
+            // ensures everything is cleared when the search is hidden
+            $scope.$watch('props.searchShown', function (searchShown) {
+                if (!searchShown) {
+                    // new inputs so we stop the previous request
+                    $timeout.cancel(instantSearchPromise);
+                    initSearch();
                 }
             });
         }
-
-        // when the user types we automatically execute the search
-        $scope.$watch('props.searchTerm', function (newSearchTerm) {
-            if (newSearchTerm !== null) {
-
-                // new inputs so we stop the previous request
-                $timeout.cancel(instantSearchPromise);
-
-                searchResultsCtrl.delivered.youtube = false;
-
-                // if the search has to be longer than two characters
-                if (newSearchTerm.length > 2) {
-                    searchRequestCount++;
-
-                    $timeout.cancel(instantSearchPromise);
-                    instantSearchPromise = $timeout(function () {
-                        search(newSearchTerm);
-                    }, INSTANT_SEARCH_DELAY);
-                }
-            }
-        });
-
-        // ensures everything is cleared when the search is hidden
-        $scope.$watch('props.searchShown', function (searchShown) {
-            if (!searchShown) {
-                // new inputs so we stop the previous request
-                $timeout.cancel(instantSearchPromise);
-                reset();
-            }
-        });
-
-        searchResultsCtrl.shouldShowSearchResultPanel = function () {
-            return $scope.props.searchShown && searchResultsCtrl.inSearch;
-        };
-
-        reset();
     });
 
     mt.MixTubeApp.controller('mtSearchResultCtrl', function ($scope, $timeout, mtQueueManager, mtQueuesRegistry, mtOrchestrator) {

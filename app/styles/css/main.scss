@@ -256,7 +256,7 @@ body {
 @mixin search {
 
   $headerFontSize: 1.25rem;
-  $resultsHorizontalPadding: .5rem;
+  $resultsPadding: .5rem;
 
   .mt-search {
     // right aligned so that in large screen mode the search keeps its position even when the queue is hidden
@@ -290,13 +290,13 @@ body {
   }
 
   .mt-search__provider {
-    margin: 1rem 1rem 0 1rem;
+    margin: 1rem 1rem 1rem 1rem;
   }
 
   .mt-search__provider__header {
 
     margin-bottom: $unitVerticalPadding / 2;
-    padding: 0 $resultsHorizontalPadding;
+    padding: 0 $resultsPadding;
 
     > .title {
       display: inline-block;
@@ -314,28 +314,38 @@ body {
     }
   }
 
-  .mt-search__no-results-message {
-    padding: 0 $resultsHorizontalPadding;
+  .mt-search__results__message {
+    padding: 0 $resultsPadding;
   }
 
   .mt-results {
     @include clearfix;
+  }
 
-    .mt-result {
-      width: 100%;
-
-      // more than 1 item per line when more space is available
-      @include mt-media-large-screen {
-        $resultsColumnsCount: 3;
-        width: 100% / $resultsColumnsCount;
-      }
-    }
+  .mt-results__page {
+    @include clearfix;
+    overflow: hidden;
   }
 
   .mt-result {
     float: left;
-    padding: 0 $resultsHorizontalPadding $unitVerticalPadding $resultsHorizontalPadding;
+    padding: 0 $resultsPadding $resultsPadding * 2 $resultsPadding;
     vertical-align: top;
+
+    width: 100%;
+
+    // more than 1 item per line when more space is available
+    @include mt-media-large-screen {
+      $resultsPromotedColumnsCount: 3;
+      $resultsColumnsCount: 4;
+
+      width: 100% / $resultsColumnsCount;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n+3) {
+        width: 100% /  $resultsPromotedColumnsCount;
+      }
+    }
   }
 
   .mt-result__container {
@@ -418,7 +428,7 @@ body {
     bottom: 0;
     width: 100%;
     z-index: 2;
-    transform: translate3d(0, 0, 0); // use 3D here to avoid animation flickering in webkit
+    transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
 
     background-color: $baseBgColor;
     border-radius: 2px 2px 0 0;
@@ -477,36 +487,72 @@ body {
 
     color: $lightTextColor;
     background: rgba(0, 0, 0, .3);
+  }
 
-    .mt-result__data__item {
-      overflow: hidden;
+  .mt-result__data__item {
+    overflow: hidden;
 
-      white-space: nowrap;
-      text-overflow: ellipsis;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 
-      &.head {
-        display: flex;
-        align-items: baseline;
+    &.head {
+      display: flex;
+      align-items: baseline;
+    }
+  }
+
+  .mt-result__data__title {
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: (14rem/16);
+    font-weight: 600;
+  }
+
+  .mt-result__data__publisher {
+    font-size: (13rem/16);
+  }
+
+  .mt-result__data__duration {
+    width: 4em; // based on the idea that the widest value would be 000:00
+    font-size: (12rem/16);
+    text-align: right;
+  }
+
+  .mt-search__show-more {
+    padding: 0 .5rem;
+    overflow: hidden; // makes sure nothing overflows
+  }
+
+  .mt-search__show-more__button {
+    @extend %mt-chromeless-button;
+    width: 100%;
+
+    background-color: $baseBgColor;
+    font-size: (14rem/16);
+    line-height: 1;
+    padding: 1em;
+    border-radius: 2px;
+
+    .mt-mouse-based-interaction &:hover {
+      color: $contrastedColor;
+    }
+
+    .label {
+      display: inline-block;
+      position: relative;
+    }
+
+    .progress {
+      position: absolute;
+      right: -1.5em;
+      top: 0;
+
+      progress {
+        @extend %mt-chromeless-progress;
+        @include mt-spinner(1em, $lightTextColor);
       }
-    }
-
-    .mt-result__data__title {
-      flex: 1;
-
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: (14rem/16);
-      font-weight: 600;
-    }
-
-    .mt-result__data__publisher {
-      font-size: (13rem/16);
-    }
-
-    .mt-result__data__duration {
-      width: 4em; // based on the idea that the widest value would be 000:00
-      font-size: (12rem/16);
-      text-align: right;
     }
   }
 }

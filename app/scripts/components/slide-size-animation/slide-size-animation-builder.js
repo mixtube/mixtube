@@ -1,11 +1,11 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtSlideSizeAnimationBuilder', function (EASE_IN_OUT_BEZIER_POINTS) {
+    mt.MixTubeApp.factory('mtSlideSizeAnimationBuilder', function (animationsConfig) {
 
         var BASE_VELOCITY_ANIM_CONF = {
-            duration: 175,
-            easing: EASE_IN_OUT_BEZIER_POINTS
+            duration: animationsConfig.transitionDuration,
+            easing: animationsConfig.easeInOutBezierPoints
         };
 
         /**

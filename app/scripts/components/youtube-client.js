@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration) {
 
         /**
          * @const
@@ -27,8 +27,6 @@
          * @type {RegExp}
          */
         var ISO8601_REGEXP = /PT(?:(\d*)H)?(?:(\d*)M)?(?:(\d*)S)?/;
-
-        var logger = mtLoggerFactory.logger('mtYoutubeClient');
 
         /**
          * Converts a ISO8601 duration string to a duration in milliseconds.
@@ -64,33 +62,34 @@
                     key: mtConfiguration.youtubeAPIKey
                 }
             }).then(function (response) {
-                    var data = response.data;
+                var data = response.data;
 
-                    if (data.hasOwnProperty('error')) {
-                        // youtube API does not return an error HTTP status in case of error but a success with a
-                        // special error object in the response
-                        logger.debug('An error occurred when loading videos from YouTube API : %s', data.error.errors);
-                        return $q.defer().reject();
-                    } else {
-                        var videoDetailsById = {};
-                        data.items.forEach(function (item) {
-                            videoDetailsById[item.id] = {
-                                provider: 'youtube',
-                                id: item.id,
-                                title: item.snippet.title,
-                                thumbnailUrl: item.snippet.thumbnails.medium.url,
-                                publisherName: item.snippet.channelTitle,
-                                duration: convertISO8601DurationToMillis(item.contentDetails.duration),
-                                viewCount: parseInt(item.statistics.viewCount, 10)
-                            };
-                        });
+                if ('error'  in data) {
+                    // youtube API does not return an error HTTP status in case of error but a success with a
+                    // special error object in the response
+                    return $q.reject(data.error.errors);
+                } else {
+                    var videoDetailsById = {};
+                    data.items.forEach(function (item) {
+                        videoDetailsById[item.id] = {
+                            provider: 'youtube',
+                            id: item.id,
+                            title: item.snippet.title,
+                            thumbnailUrl: item.snippet.thumbnails.medium.url,
+                            publisherName: item.snippet.channelTitle,
+                            duration: convertISO8601DurationToMillis(item.contentDetails.duration),
+                            viewCount: parseInt(item.statistics.viewCount, 10)
+                        };
+                    });
 
-                        // extend the video with the details
-                        videos.forEach(function (video) {
-                            angular.extend(video, videoDetailsById[video.id]);
-                        });
-                    }
-                });
+                    // extend the video with the details
+                    videos.forEach(function (video) {
+                        angular.extend(video, videoDetailsById[video.id]);
+                    });
+
+                    return videos;
+                }
+            });
         };
 
         return {
@@ -105,7 +104,7 @@
              * least the id. That doesn't mean that it was found, check properties values to know if it was.
              *
              * @param {Array.<string>} ids the list of youtube videos ids
-             * @returns {promise} a promise resolved with Array.<mt.model.Video>
+             * @return {Promise} a promise resolved with Array.<mt.model.Video>
              */
             listVideosByIds: function (ids) {
                 // prepare an array of pseudo videos that have only the id property defined
@@ -129,31 +128,48 @@
             },
 
             /**
-             * Searches the 20 first videos on youtube matching the query.
+             * Searches videos on youtube matching the query.
              *
              * The goal is to provide lite results as fast as possible and upgrade each item when there are more details
              * available. It is impossible to get all the properties in one shot because of the design of the Youtube API.
              *
-             * The videos objects are passed by callback to be able to update the model as the details arrive.
-             * The callback parameter is an array of {@link mt.model.Video} for the first call and a projection of
-             * videos after with only the properties available at the execution time.
+             * The videos objects are passed by the returned promise to be able to update the model as the details
+             * arrive. The promise parameter is an array of {@link mt.model.Video} for the first call and a projection
+             * of videos after with only the properties available at the execution time.
              *
              * @param {string} queryString the query as used for a classic youtube search
-             * @param {function(Array.<(mt.model.Video)>)} dataCallback executed the first time we receive data
+             * @param {{pageId: string=, pageSize: number}} pageSpec parameters for paging (default to
+             * {@link mtConfiguration.maxSearchResults})
+             * @return {promise.<{videos: Array.<mt.model.Video>, netPageId: string}>} resolved when finished.
+             * Intermediary states are delivered through the promise's progress callback.
              */
-            searchVideosByQuery: function (queryString, dataCallback) {
+            searchVideosByQuery: function (queryString, pageSpec) {
+
+                pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: mtConfiguration.maxSearchResults});
+
+                var deferred = $q.defer();
+
                 $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         q: queryString,
                         type: 'video',
                         part: 'snippet',
                         order: 'relevance',
-                        maxResults: mtConfiguration.maxSearchResults,
+                        pageToken: pageSpec.pageId,
+                        maxResults: pageSpec.pageSize,
                         callback: 'JSON_CALLBACK',
                         key: mtConfiguration.youtubeAPIKey
                     }
-                }).success(function (response) {
-                        var videos = response.items.map(function (item) {
+                }).then(function (response) {
+
+                    var data = response.data;
+
+                    if ('error' in data) {
+                        // youtube API does not return an error HTTP status in case of error but a success with a
+                        // special error object in the response
+                        return deferred.reject(data.error.errors);
+                    } else {
+                        var videos = data.items.map(function (item) {
                             return {
                                 id: item.id.videoId,
                                 title: item.snippet.title,
@@ -166,9 +182,19 @@
                             };
                         });
 
-                        dataCallback(videos);
-                        extendVideosWithDetails(videos);
-                    });
+                        // first batch of results just notify (will call the progress handler)
+                        deferred.notify({videos: videos, nextPageId: data.nextPageToken});
+
+                        // second batch that will resolve (or reject) the promise
+                        extendVideosWithDetails(videos)
+                            .then(function (videos) {
+                                deferred.resolve({videos: videos, nextPageId: data.nextPageToken});
+                            })
+                            .catch(deferred.reject);
+                    }
+                }).catch(deferred.reject);
+
+                return deferred.promise;
             }
         };
     });

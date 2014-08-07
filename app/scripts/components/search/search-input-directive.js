@@ -14,11 +14,11 @@
      * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
      * ".mt-search-input".
      */
-    mt.MixTubeApp.directive('mtSearchInput', function (mtSearchInputsRegistry, mtDirectivesRegistryHelper, BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
+    mt.MixTubeApp.directive('mtSearchInput', function (mtSearchInputsRegistry, mtDirectivesRegistryHelper, animationsConfig) {
 
         return {
             restrict: 'E',
-            templateUrl: '/scripts/components/search-input/search-input.html',
+            templateUrl: '/scripts/components/search/search-input.html',
             replace: true,
             scope: {
                 inputModel: '=ngModel'
@@ -43,8 +43,8 @@
 
                     var baseAnimConf = {
                         // in init phase we don't want to animate
-                        duration: init ? 0 : BASE_TRANSITION_DURATION,
-                        easing: EASE_IN_OUT_BEZIER_POINTS
+                        duration: init ? 0 : animationsConfig.transitionDuration,
+                        easing: animationsConfig.easeInOutBezierPoints
                     };
 
                     if (_show) {

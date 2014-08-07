@@ -121,57 +121,76 @@
                     </div>
                 </div>
 
-                <p class="mt-search__no-results-message"
-                   ng-show="searchResultsCtrl.delivered[pId] && searchResultsCtrl.results[pId].length === 0 && props.searchTerm">
+                <p class="mt-search__results__message" ng-if="searchResultsCtrl.error[pId]">
+                    Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
+                    connection or try again later.
+                </p>
+
+                <p class="mt-search__results__message"
+                   ng-if="!searchResultsCtrl.error[pId] && searchResultsCtrl.delivered[pId] && searchResultsCtrl.results[pId].length === 0 && props.searchTerm">
                     Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another title.
                 </p>
 
-                <ul class="mt-results">
-                    <li class="mt-result mt-animation__fade"
-                        ng-repeat="searchResult in searchResultsCtrl.results[pId]"
-                        ng-controller="mtSearchResultCtrl as searchResultCtrl">
-                        <button class="mt-result__container"
-                                ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
-                            <div class="mt-result__add-affordance"></div>
+                <div class="mt-results">
+                    <div class="mt-results__page mt-results__page__animation-repeat"
+                         ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
+                        <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
+                             ng-controller="mtSearchResultCtrl as searchResultCtrl">
+                            <button class="mt-result__container"
+                                    ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
+                                <div class="mt-result__add-affordance"></div>
 
-                            <div class="mt-result__thumbnail">
-                                <mt-smart-img source="{{searchResult.thumbnailUrl}}"
-                                              class="mt-result__thumbnail__img fill-crop">
-                                    <div class="loading-indicator">
+                                <div class="mt-result__thumbnail">
+                                    <mt-smart-img source="{{searchResult.thumbnailUrl}}"
+                                                  class="mt-result__thumbnail__img fill-crop">
+                                        <div class="loading-indicator">
                                         <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
                                               data-mt-icon="&#xe806">
                                             <span class="mt-replaced-text">Loading video thumbnail</span>
                                         </span>
-                                    </div>
-                                </mt-smart-img>
+                                        </div>
+                                    </mt-smart-img>
 
-                                <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
-                                     ng-if="searchResultCtrl.shouldShowConfirmation">
-                                    <div class="text" mt-short-text="Video added to the queue">
+                                    <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
+                                         ng-if="searchResultCtrl.shouldShowConfirmation">
+                                        <div class="text" mt-short-text="Video added to the queue">
                                         <span class="mt-replaced-text">Video added to the queue.
                                             <ng-pluralize count="searchResultCtrl.countBeforePlayback"
                                                           when="{'one': '1 remaining tune before yours to be played.',
                                                                  'other': '{} remaining tunes before yours to be played.'}">
                                             </ng-pluralize>
                                             Enjoy!</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <ul class="mt-result__data">
-                                <li class="mt-result__data__item head" title="{{searchResult.title}}">
-                                    <span class="mt-result__data__title">{{searchResult.title}}</span>
+                                <ul class="mt-result__data">
+                                    <li class="mt-result__data__item head" title="{{searchResult.title}}">
+                                        <span class="mt-result__data__title">{{searchResult.title}}</span>
                                     <span class="mt-result__data__duration">
                                         {{searchResult.duration | mtDuration:'shortTime'}}
                                     </span>
-                                </li>
-                                <li class="mt-result__data__item mt-result__data__publisher"
-                                    ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">by
-                                    {{searchResult.publisherName}}
-                                </li>
-                            </ul>
-                        </button>
-                    </li>
-                </ul>
+                                    </li>
+                                    <li class="mt-result__data__item mt-result__data__publisher"
+                                        ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">by
+                                        {{searchResult.publisherName}}
+                                    </li>
+                                </ul>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- show the button only when the first page of results is fetched -->
+                <div class="mt-search__show-more" ng-show="searchResultsCtrl.delivered[pId]">
+                    <button class="mt-search__show-more__button"
+                            ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
+                        <div class="label">
+                            Show more
+                            <div class="progress" ng-show="searchResultsCtrl.pendingMore[pId]">
+                                <progress></progress>
+                            </div>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -206,8 +225,9 @@
 <script src="scripts/components/slide-size-animation/slide-size-animation-builder.js"></script>
 <script src="scripts/components/slide-size-animation/slide-size-animation.js"></script>
 <script src="scripts/components/scrollable-directive.js"></script>
-<script src="scripts/components/search-input/search-inputs-registry.js"></script>
-<script src="scripts/components/search-input/search-input-directive.js"></script>
+<script src="scripts/components/search/search-inputs-registry.js"></script>
+<script src="scripts/components/search/search-input-directive.js"></script>
+<script src="scripts/components/search/results-page-animation-repeat.js"></script>
 <script src="scripts/components/notification/notification-centers-registry.js"></script>
 <script src="scripts/components/notification/notification-center-directive.js"></script>
 <script src="scripts/components/modal/modal-manager.js"></script>

@@ -12,7 +12,7 @@
      * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
      * is visible.
      */
-    mt.MixTubeApp.directive('mtScrollable', function ($timeout, BASE_TRANSITION_DURATION, EASE_IN_OUT_BEZIER_POINTS) {
+    mt.MixTubeApp.directive('mtScrollable', function ($timeout, animationsConfig) {
 
         /**
          * @param {JQLite} container
@@ -43,8 +43,8 @@
                             'scroll',
                             {
                                 container: scrollable,
-                                duration: BASE_TRANSITION_DURATION,
-                                easing: EASE_IN_OUT_BEZIER_POINTS,
+                                duration: animationsConfig.transitionDuration,
+                                easing: animationsConfig.easeInOutBezierPoints,
                                 complete: done
                             }
                         );

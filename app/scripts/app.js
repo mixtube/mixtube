@@ -6,15 +6,28 @@
         angular.bootstrap(document, ['mtMixTubeApp']);
     });
 
+    /**
+     * Default configuration for animations. These values are shared with the SASS counterpart.
+     *
+     * @name animationsConfig
+     */
+    var animationsConfig = {
+        // SASS $baseTransitionDuration
+        get transitionDuration() {
+            return 200;
+        },
+        // SASS $easeInOut
+        get easeInOutBezierPoints() {
+            return [.8, 0, .2, 1];
+        }
+    };
+
     mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngAnimate', 'ngTouch'])
         .config(function ($locationProvider) {
             $locationProvider.html5Mode(true);
         })
 
-        // keep in sync with the SASS counterpart $baseTransitionDuration
-        .constant('BASE_TRANSITION_DURATION', 200)
-        // A JS function equivalent of "cubic-bezier(.8, 0, .2, 1)". Keep in sync with the SASS counterpart $easeInOut
-        .constant('EASE_IN_OUT_BEZIER_POINTS', [.8, 0, .2, 1])
+        .constant('animationsConfig', animationsConfig)
 
         .run(function ($rootScope, $controller, mtConfiguration) {
             // make sure the scope always has the props property
