@@ -34,12 +34,25 @@ module.exports = function (grunt) {
             }
         ],
 
-        autoprefixer: {
+        pleeease: {
             options: {
-                browsers: ['last 1 version']
+                optimizers: {
+                    import: false,
+                    minifier: false,
+                    mqpacker: false
+
+                },
+                fallbacks: {
+                    autoprefixer: ['last 1 version'],
+                    variables: false,
+                    rem: false,
+                    pseudoElements: false
+                }
             },
-            all: {
-                src: '.tmp/**/*.css'
+            css: {
+                files: {
+                    '.tmp/styles/css/main.css': '.tmp/**/*.css'
+                }
             }
         },
 
@@ -132,7 +145,7 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-sass');
-    grunt.loadNpmTasks('grunt-autoprefixer');
+    grunt.loadNpmTasks('grunt-pleeease');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-usemin');
@@ -143,7 +156,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-inline-angular-templates');
 
     // sass and autoprefix the styles
-    grunt.registerTask('style', ['sass', 'autoprefixer']);
+    grunt.registerTask('style', ['sass', 'pleeease']);
 
     // a dev oriented task that watches file that need to be compiled and starts a local server
     grunt.registerTask('server', ['clean:server', 'style', 'connect', 'watch']);
