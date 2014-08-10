@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.animation('.mt-results__page__animation-repeat', function (animationsConfig) {
+    mt.MixTubeApp.animation('.mt-js-animation__slide', function (animationsConfig) {
 
         function noopAnimation(element, done) {
             done();
@@ -26,7 +26,18 @@
                             easing: animationsConfig.easeInOutBezierPoints
                         }));
             },
-            leave: noopAnimation,
+            leave: function (element, done) {
+
+                element
+                    .velocity({height: 0}, _.defaults(
+                        {
+                            complete: done
+                        },
+                        {
+                            duration: animationsConfig.transitionDuration,
+                            easing: animationsConfig.easeInOutBezierPoints
+                        }));
+            },
             move: noopAnimation
         };
     });

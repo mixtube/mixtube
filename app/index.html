@@ -121,18 +121,8 @@
                     </div>
                 </div>
 
-                <p class="mt-search__results__message" ng-if="searchResultsCtrl.error[pId]">
-                    Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
-                    connection or try again later.
-                </p>
-
-                <p class="mt-search__results__message"
-                   ng-if="!searchResultsCtrl.error[pId] && searchResultsCtrl.delivered[pId] && searchResultsCtrl.results[pId].length === 0 && props.searchTerm">
-                    Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another title.
-                </p>
-
                 <div class="mt-results">
-                    <div class="mt-results__page mt-results__page__animation-repeat"
+                    <div class="mt-results__page mt-js-animation__slide"
                          ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
                         <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
                              ng-controller="mtSearchResultCtrl as searchResultCtrl">
@@ -179,8 +169,24 @@
                         </div>
                     </div>
                 </div>
+
+
+                <div class="mt-search__message mt-js-animation__slide" ng-if="searchResultsCtrl.error[pId]">
+                    <p class="mt-search__message__padding">
+                        Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
+                        connection or try again later.
+                    </p>
+                </div>
+
+                <div class="mt-search__message mt-js-animation__slide"
+                     ng-if="searchResultsCtrl.noneFound[pId]">
+                    <p class="mt-search__message__padding">
+                        Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another title.
+                    </p>
+                </div>
+
                 <!-- show the button only when the first page of results is fetched -->
-                <div class="mt-search__show-more" ng-show="searchResultsCtrl.delivered[pId]">
+                <div class="mt-search__show-more" ng-show="searchResultsCtrl.nextPageId[pId]">
                     <button class="mt-search__show-more__button"
                             ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
                         <div class="label">
@@ -227,7 +233,7 @@
 <script src="scripts/components/scrollable-directive.js"></script>
 <script src="scripts/components/search/search-inputs-registry.js"></script>
 <script src="scripts/components/search/search-input-directive.js"></script>
-<script src="scripts/components/search/results-page-animation-repeat.js"></script>
+<script src="scripts/components/slide-animation.js"></script>
 <script src="scripts/components/notification/notification-centers-registry.js"></script>
 <script src="scripts/components/notification/notification-center-directive.js"></script>
 <script src="scripts/components/modal/modal-manager.js"></script>

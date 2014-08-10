@@ -156,11 +156,9 @@
         /** @type {Object.<string, boolean>} */
         searchResultsCtrl.pendingMore = null;
         /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.delivered = null;
-        /** @type {Object.<string, boolean>} */
         searchResultsCtrl.error = null;
         /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.errorMore = null;
+        searchResultsCtrl.noneFound = null;
         /** @type {Object.<string, string>} */
         searchResultsCtrl.nextPageId = null;
 
@@ -179,14 +177,15 @@
             searchResultsCtrl.results = {youtube: [[]]};
             searchResultsCtrl.pending = {youtube: false};
             searchResultsCtrl.pendingMore = {youtube: false};
-            searchResultsCtrl.delivered = {youtube: false};
             searchResultsCtrl.nextPageId = {youtube: null};
             searchResultsCtrl.error = {youtube: false};
-            searchResultsCtrl.errorMore = {youtube: false};
+            searchResultsCtrl.noneFound = {youtube: false};
         }
 
         function showMore(pId, nextPageId) {
             if (pId === 'youtube') {
+                // clear any error message (case of retry after error)
+                searchResultsCtrl.error.youtube = false;
                 searchYoutube($scope.props.searchTerm, nextPageId);
             }
         }
@@ -203,13 +202,13 @@
             var startSearchRequestCount = searchRequestCount;
 
             if (first) {
-                // reset the results to trigger the animation
-                searchResultsCtrl.results.youtube = [];
                 searchResultsCtrl.pending.youtube = true;
-                searchResultsCtrl.error.youtube = false;
+
+                // reset the results list and the next page token since we are starting a new search
+                searchResultsCtrl.results.youtube = [];
+                searchResultsCtrl.nextPageId.youtube = null;
             } else {
                 searchResultsCtrl.pendingMore.youtube = true;
-                searchResultsCtrl.errorMore.youtube = false;
             }
 
             return mtYoutubeClient.searchVideosByQuery(term, {pageSize: first ? 11 : 12, pageId: nextPageId})
@@ -223,23 +222,21 @@
                     }
                 }, null, function progressCb(results) {
                     if (searchRequestCount === startSearchRequestCount) {
-                        if (first) {
-                            searchResultsCtrl.delivered.youtube = true;
+                        if (results.videos.length) {
+                            searchResultsCtrl.results.youtube.push(results.videos);
+                            searchResultsCtrl.nextPageId.youtube = results.nextPageId;
+                        } else {
+                            searchResultsCtrl.noneFound.youtube = true;
                         }
-                        searchResultsCtrl.results.youtube.push(results.videos);
-                        searchResultsCtrl.nextPageId.youtube = results.nextPageId;
                     }
                 })
                 .catch(function catchCb() {
                     if (searchRequestCount === startSearchRequestCount) {
+                        searchResultsCtrl.error.youtube = true;
                         if (first) {
-                            searchResultsCtrl.error.youtube = true;
-                            searchResultsCtrl.delivered.youtube = true;
                             searchResultsCtrl.pending.youtube = false;
                             searchResultsCtrl.results.youtube = [];
-                            searchResultsCtrl.nextPageId.youtube = null;
                         } else {
-                            searchResultsCtrl.errorMore.youtube = true;
                             searchResultsCtrl.pendingMore.youtube = false;
                         }
                     }
@@ -256,7 +253,9 @@
                     // new inputs so we stop the previous request
                     $timeout.cancel(instantSearchPromise);
 
-                    searchResultsCtrl.delivered.youtube = false;
+                    // as soon as the query changes clear messages
+                    searchResultsCtrl.error.youtube = false;
+                    searchResultsCtrl.noneFound.youtube = false;
 
                     // if the search has to be longer than two characters
                     if (newSearchTerm.length > 2) {

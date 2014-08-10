@@ -315,8 +315,13 @@ body {
     }
   }
 
-  .mt-search__results__message {
+  .mt-search__message {
+    overflow: hidden;
     padding: 0 $resultsPadding;
+  }
+
+  .mt-search__message__padding {
+    padding-bottom: $resultsPadding * 2;
   }
 
   .mt-results {
