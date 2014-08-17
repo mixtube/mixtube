@@ -39,8 +39,8 @@
                 return mtOrchestrator.playing;
             };
 
-            rootCtrl.isUserInteracting = function () {
-                return mtUserInteractionManager.userInteracting;
+            rootCtrl.shouldIdleChrome = function () {
+                return !mtUserInteractionManager.userInteracting;
             };
 
             /**

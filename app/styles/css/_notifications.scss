@@ -2,6 +2,10 @@
 
 @mixin notifications {
 
+  .mt-notifications-center__container {
+    overflow: hidden;
+  }
+
   .mt-notifications-center__container__padding {
     padding: $unitVerticalPadding / 2 .5rem 0 .5rem;
   }

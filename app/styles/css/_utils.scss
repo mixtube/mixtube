@@ -163,7 +163,7 @@
 }
 
 @mixin mt-horizontal-screen {
-  @media screen and (min-aspect-ratio: 8/9) {
+  @media screen and (min-aspect-ratio: 8/9) and (min-width: 500px) {
     @content;
   }
 }

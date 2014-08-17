@@ -1,5 +1,4 @@
-@import '../vendor/bourbon/addons/position';
-
+@import '../vendor/bourbon/bourbon';
 @import 'variables';
 @import 'utils';
 @import 'modals';
@@ -25,6 +24,10 @@ body {
   background-color: $black;
 
   line-height: $lineHeight;
+
+  &.idle {
+    cursor: none;
+  }
 }
 
 .mt-queue-loading__message {
@@ -80,23 +83,16 @@ body {
 .mt-notification-center-tile {
   $notificationsNominalWidth: 30rem;
 
-  @include position(absolute, 0px 0px 0px auto);
+  @include position(absolute, 0px 0px auto auto);
   width: 100%;
   max-width: $notificationsNominalWidth;
 
   z-index: 3;
-  pointer-events: none;
 
   mt-notification-center {
     // reverts the behaviour to make notifications clickable
     pointer-events: auto;
   }
-
-  // if the available size is larger than the minimum notification size stop expansion
-  // could have been done with width + min-width but FF doesn't behave like the others
-  //  @media screen and (min-width: $notificationsNominalWidth) {
-  //    width: $notificationsNominalWidth;
-  //  }
 }
 
 .mt-queue-tile {
@@ -107,20 +103,18 @@ body {
     position: absolute;
     width: 25%;
     height: 100%;
-  }
 
-  &.animation-show-hide {
-
-    &.ng-hide-add, &.ng-hide-remove {
+    &.idle-add, &.idle-remove {
       transition-property: transform, opacity;
       transition-duration: $baseTransitionDuration;
       transition-timing-function: $easeInOut, linear;
 
-      // needed by the transition
       display: block !important;
     }
 
-    &.ng-hide {
+    &.idle {
+      display: none;
+
       opacity: 0;
       transform: translateX(-50%);
     }

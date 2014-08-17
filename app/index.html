@@ -13,8 +13,8 @@
     <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
     <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
 </head>
-<body mt-mouse-interaction-detection="mt-mouse-based-interaction"
-      ng-style="{cursor: rootCtrl.isUserInteracting() ? '' : 'none'}" ng-cloak>
+<body mt-mouse-interaction-detection="mt-mouse-based-interaction" ng-class="{idle: rootCtrl.shouldIdleChrome()}"
+      ng-cloak>
 <!--we don't want to use a class for the cursor change to avoid whole page style recalculation-->
 
 <!-- queue loading progress block -->
@@ -32,7 +32,7 @@
 <div class="mt-main-tile">
     <div class="mt-header-tile">
         <div class="mt-header" mt-interactive-chrome>
-            <div class="mt-header__bg mt-header__bg__animation-show" ng-show="rootCtrl.isUserInteracting()"></div>
+            <div class="mt-header__bg" ng-class="{idle: rootCtrl.shouldIdleChrome()}"></div>
             <div class="mt-header__container">
                 <div class="start">
                     <h1 class="mt-header__app-title">
@@ -82,8 +82,7 @@
             <mt-notification-center name="notificationCenter"></mt-notification-center>
         </div>
 
-        <div class="mt-queue-tile animation-show-hide" ng-show="rootCtrl.isUserInteracting()"
-             mt-interactive-chrome>
+        <div class="mt-queue-tile" ng-class="{idle: rootCtrl.shouldIdleChrome()}" mt-interactive-chrome>
             <div class="mt-queue" ng-controller="mtQueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
                 <div>
                     <div class="mt-queue__entry mt-js-animation__queue-entry"

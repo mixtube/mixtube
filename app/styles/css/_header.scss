@@ -1,5 +1,4 @@
-@import '../vendor/bourbon/addons/position';
-
+@import '../vendor/bourbon/bourbon';
 @import 'variables';
 @import 'utils';
 
@@ -21,18 +20,13 @@
 
     background-color: $baseBgColor;
 
-    &.mt-header__bg__animation-show {
+    @include mt-horizontal-screen {
 
-      &.ng-hide-add, &.ng-hide-remove {
-        transition-property: transform, opacity;
-        transition-duration: $baseTransitionDuration;
-        transition-timing-function: $easeInOut, linear;
+      transition-property: transform, opacity;
+      transition-duration: $baseTransitionDuration;
+      transition-timing-function: $easeInOut, linear;
 
-        // needed by the transition
-        display: block !important;
-      }
-
-      &.ng-hide {
+      &.idle {
         opacity: 0;
         transform: translateY(-50%);
       }

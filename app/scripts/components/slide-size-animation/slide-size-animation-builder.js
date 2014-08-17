@@ -31,7 +31,15 @@
 
                     element
                         .css({height: 0, transform: 'translateX(' + txBeginning + ')'})
-                        .velocity({height: [nominalHeight, 0]}, BASE_VELOCITY_ANIM_CONF)
+
+                        .velocity({height: [nominalHeight, 0]}, _.defaults(
+                            {
+                                // disable mobile optimisation because VelocityJS uses the null transform hack
+                                // which would override our translate value
+                                mobileHA: false
+                            },
+                            BASE_VELOCITY_ANIM_CONF))
+
                         .velocity({translateX: [0, txBeginning]}, _.defaults(
                             {
                                 complete: function () {
