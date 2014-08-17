@@ -4,23 +4,19 @@
 
 @mixin header {
 
-  $headerHeight: 4rem;
   $searchInputPadding: 0 3rem 0 .5rem;
   $textShadowSize: 8rem / $baseFontSizeUnitless;
   $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
 
   .mt-header {
-    position: relative;
-    height: $headerHeight;
+    @include position(absolute, 0px 0px 0px 0px);
     z-index: 1;
     overflow: hidden; // hide overflowing search field
   }
 
   //fake background so that we can animate the header background color by using opacity
   .mt-header__bg {
-    position: absolute;
-    height: 100%;
-    width: 100%;
+    @include position(absolute, 0px 0px 0px 0px);
 
     background-color: $baseBgColor;
 

@@ -1,0 +1,130 @@
+@mixin queue {
+
+  .mt-queue {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    overflow-x: hidden; // needed by FF sometimes
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    background-color: $darkestBgColor;
+  }
+
+  .mt-queue__entry {
+    @include queue-item-color($baseBgColor);
+    overflow: hidden;
+
+    &.active {
+      @include queue-item-color($contrastedColor);
+    }
+
+    &.broken {
+      @include queue-item-color($errorBgColor);
+    }
+  }
+
+  .mt-queue__entry__thumbnail {
+    @extend %mt-chromeless-button;
+    display: block;
+    position: relative;
+    width: 100%;
+
+    > .image {
+      @include mt-fluid-image(.4);
+      filter: saturate(5%);
+    }
+
+    .mt-queue__entry.active & {
+      > .image {
+        filter: none;
+      }
+    }
+  }
+
+  .mt-queue__entry__broken-message {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    display: none; // hidden by default
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    background-color: rgba($errorBgColor, $overlayOpacity);
+
+    .mt-queue__entry.broken & {
+      display: flex;
+    }
+  }
+
+  .mt-queue__entry__progress {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    progress {
+      @extend %mt-chromeless-progress;
+      @include mt-spinner(3rem, $contrastedColor);
+    }
+  }
+
+  .mt-queue__entry__data {
+    position: relative;
+
+    display: flex;
+
+    // decorative up arrow
+    &:before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 2rem;
+
+      @include triangle(1.25rem, $baseBgColor, up);
+    }
+  }
+
+  .mt-queue__entry__title {
+    flex: 1;
+    align-self: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: $unitVerticalPadding/2 .5rem;
+  }
+
+  .mt-queue__entry__commands {
+    align-self: stretch;
+
+    display: flex;
+    align-items: stretch;
+  }
+
+  .mt-queue__entry__remove-button {
+    @extend %mt-chromeless-button;
+    @include mt-click-reaction;
+    padding: 0 .5rem;
+
+    opacity: .1;
+    font-size: 2.5rem;
+
+    .mt-mouse-based-interaction &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+@mixin queue-item-color($bgColor) {
+  background-color: $bgColor;
+
+  .mt-queue__entry__data:before {
+    @include triangle(1.25rem, $bgColor, up);
+  }
+}

@@ -1,0 +1,24 @@
+@mixin coming-next {
+
+  .mt-coming-next__group {
+    padding-bottom: $unitVerticalPadding / 2;
+
+    &.next {
+      font-weight: 600;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  .mt-coming-next__header {
+    font-size: 0.875rem;
+  }
+
+  .mt-coming-next__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

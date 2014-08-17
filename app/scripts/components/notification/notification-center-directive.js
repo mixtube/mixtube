@@ -6,36 +6,46 @@
         return {
             restrict: 'E',
             templateUrl: '/scripts/components/notification/notification.html',
-            replace: true,
+            controllerAs: 'notificationCenterCtrl',
             scope: {
             },
             controller: function ($scope, $element, $attrs) {
 
-                mtDirectivesRegistryHelper.install(this, mtNotificationCentersRegistry, 'name', $scope, $attrs);
+                var notificationCenterCtrl = this;
 
-                function close(notification) {
-                    _.pull($scope.notifications, notification);
-                }
+                notificationCenterCtrl.notifications = [];
 
-                $scope.notifications = [];
+                notificationCenterCtrl.comingNext = comingNext;
+                notificationCenterCtrl.error = error;
                 // publish the close function to be used in the template
-                $scope.close = close;
+                notificationCenterCtrl.close = close;
 
-                this.error = function (message) {
-                    $scope.notifications.unshift({type: 'error', data: {message: message}});
-                };
+                activate();
 
                 /**
                  * @param {Object} data the data structure passed to the template
                  * @returns {Function} a callback to close the coming next notification
                  */
-                this.comingNext = function (data) {
+                function comingNext(data) {
                     var notification = {type: 'comingNext', data: data};
-                    $scope.notifications.unshift(notification);
+                    notificationCenterCtrl.notifications.unshift(notification);
                     return function () {
                         close(notification);
                     };
-                };
+                }
+
+                function error(message) {
+                    notificationCenterCtrl.notifications.unshift({type: 'error', data: {message: message}});
+                }
+
+                function close(notification) {
+                    _.pull(notificationCenterCtrl.notifications, notification);
+                }
+
+                function activate() {
+                    mtDirectivesRegistryHelper.install(
+                        notificationCenterCtrl, mtNotificationCentersRegistry, 'name', $scope, $attrs);
+                }
             }
         };
     });

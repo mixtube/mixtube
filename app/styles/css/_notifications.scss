@@ -5,33 +5,12 @@
 
   $notificationsNominalWidth: 30rem;
 
-  .mt-notifications-center {
-    position: absolute;
-    right: 0;
-    z-index: 500;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    pointer-events: none;
-
-    padding-top: $unitVerticalPadding / 2;
-
-    // if the available size is larger than the minimum notification size stop expansion
-    // could have been done with width + min-width but FF doesn't behave like the others
-    @media screen and (min-width: $notificationsNominalWidth) {
-      width: $notificationsNominalWidth;
-    }
-  }
-
   .mt-notifications-center__container__padding {
-    padding: 0 .5rem $unitVerticalPadding / 2 .5rem;
+    padding: $unitVerticalPadding / 2 .5rem 0 .5rem;
   }
 
   .mt-notification {
     @extend %mt-chromeless-button;
-
-    // make the notification "interactable" (reverse parent behavior)
-    pointer-events: auto;
 
     // clear the button properties
     text-align: left;

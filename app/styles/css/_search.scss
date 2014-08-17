@@ -1,0 +1,290 @@
+@mixin search {
+
+  $headerFontSize: 1.25rem;
+  $resultsPadding: .5rem;
+
+  .mt-search {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    background-color: rgba($secondaryBgColor, .8);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    //    @include mt-media-large-screen {
+    //      width: (3 * 100%/$columnsCount); // width is 3 "columns" out of 4
+    //    }
+  }
+
+  .mt-search__provider {
+    margin: 1rem 1rem 1rem 1rem;
+  }
+
+  .mt-search__provider__header {
+
+    margin-bottom: $unitVerticalPadding / 2;
+    padding: 0 $resultsPadding;
+
+    > .title {
+      display: inline-block;
+
+      font-size: $headerFontSize;
+    }
+
+    .progress {
+      display: inline-block;
+
+      progress {
+        @extend %mt-chromeless-progress;
+        @include mt-spinner($headerFontSize, $lightTextColor);
+      }
+    }
+  }
+
+  .mt-search__message {
+    overflow: hidden;
+    padding: 0 $resultsPadding;
+  }
+
+  .mt-search__message__padding {
+    padding-bottom: $resultsPadding * 2;
+  }
+
+  .mt-results {
+    @include clearfix;
+  }
+
+  .mt-results__page {
+    @include clearfix;
+    overflow: hidden;
+  }
+
+  .mt-result {
+    float: left;
+    padding: 0 $resultsPadding $resultsPadding * 2 $resultsPadding;
+    vertical-align: top;
+
+    width: 100%;
+
+    //    // more than 1 item per line when more space is available
+    //    @include mt-media-large-screen {
+    //      $resultsPromotedColumnsCount: 3;
+    //      $resultsColumnsCount: 4;
+    //
+    //      width: 100% / $resultsColumnsCount;
+    //
+    //      // the first three children of the first page are "promoted"
+    //      .mt-results__page:first-child &:nth-child(-n+3) {
+    //        width: 100% /  $resultsPromotedColumnsCount;
+    //      }
+    //    }
+  }
+
+  .mt-result__container {
+    @extend %mt-chromeless-button;
+    position: relative;
+    display: block;
+    width: 100%;
+
+    text-align: inherit;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mt-result__add-affordance {
+    position: absolute;
+    top: 0;
+    right: 0;
+    overflow: visible;
+    @include triangle(3rem, rgba($baseBgColor, $overlayOpacity), up-right);
+    z-index: 1;
+
+    &:before {
+      position: absolute;
+      content: '\e803';
+      bottom: .80rem;
+      right: .5rem;
+
+      color: $lightTextColor;
+      opacity: .8;
+      font-size: 1.5rem;
+      font-family: fontello;
+    }
+
+    // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
+    // state remains after a tap until the next tap)
+    .mt-mouse-based-interaction .mt-result__container:hover &:before {
+      color: $contrastedColor;
+      opacity: 1;
+    }
+  }
+
+  .mt-result__thumbnail {
+    position: relative;
+    overflow: hidden;
+
+    background-color: $baseBgColor;
+  }
+
+  .mt-result__thumbnail__img {
+    padding-top: 56.25%; // fluid height
+
+    .mt-smart-img__image {
+      filter: saturate(100%);
+
+      &.mt-loading {
+        opacity: 0;
+        filter: saturate(0);
+      }
+
+      &.mt-loading-remove {
+        transition-property: opacity, filter;
+        transition-duration: $baseTransitionDuration * 5, $baseTransitionDuration * 10;
+      }
+    }
+
+    .loading-indicator {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: $darkestBgColor;
+      font-size: 4rem;
+    }
+  }
+
+  .mt-result__added-confirmation {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+    transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
+
+    background-color: $baseBgColor;
+    border-radius: 2px 2px 0 0;
+
+    // vertically center the text
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    > .text {
+      padding: .25rem;
+      text-align: center;
+      overflow: hidden;
+
+      // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
+      // is made of 5 columns which doesn't give much place to the message
+      @include mt-media-large-screen {
+
+        font-size: (14rem/$baseFontSizeUnitless);
+
+        &:before {
+          content: attr(mt-short-text);
+        }
+
+        > .mt-replaced-text {
+          display: none;
+        }
+      }
+    }
+
+    &.mt-result__added-confirmation__animation-if {
+
+      &.ng-enter, &.ng-leave {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+      }
+
+      &.ng-enter, &.ng-leave.ng-leave-active {
+        transform: translate3d(-100%, 0, 0);
+        opacity: .5;
+      }
+
+      &.ng-leave, &.ng-enter.ng-enter-active {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+      }
+    }
+  }
+
+  .mt-result__data {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: $unitVerticalPadding/4 .5rem;
+
+    color: $lightTextColor;
+    background: rgba(0, 0, 0, .3);
+  }
+
+  .mt-result__data__item {
+    overflow: hidden;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &.head {
+      display: flex;
+      align-items: baseline;
+    }
+  }
+
+  .mt-result__data__title {
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: (14rem/16);
+    font-weight: 600;
+  }
+
+  .mt-result__data__publisher {
+    font-size: (13rem/16);
+  }
+
+  .mt-result__data__duration {
+    width: 4em; // based on the idea that the widest value would be 000:00
+    font-size: (12rem/16);
+    text-align: right;
+  }
+
+  .mt-search__show-more {
+    padding: 0 .5rem;
+    overflow: hidden; // makes sure nothing overflows
+  }
+
+  .mt-search__show-more__button {
+    @extend %mt-chromeless-button;
+    width: 100%;
+
+    background-color: $baseBgColor;
+    font-size: (14rem/16);
+    line-height: 1;
+    padding: 1em;
+    border-radius: 2px;
+
+    .mt-mouse-based-interaction &:hover {
+      color: $contrastedColor;
+    }
+
+    .label {
+      display: inline-block;
+      position: relative;
+    }
+
+    .progress {
+      position: absolute;
+      right: -1.5em;
+      top: 0;
+
+      progress {
+        @extend %mt-chromeless-progress;
+        @include mt-spinner(1em, $lightTextColor);
+      }
+    }
+  }
+}
