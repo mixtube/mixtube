@@ -1,3 +1,5 @@
+@import '../vendor/bourbon/addons/position';
+
 @mixin scene {
 
   .mt-scene {
@@ -6,10 +8,7 @@
   }
 
   .mt-scene__element-host {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    @include position(absolute, 0px 0px 0px 0px);
 
     // players and wrappers might do some "weird" stuff by appending iframe
     // we want to make sure the opacity value is inherited by the whole DOM subtree

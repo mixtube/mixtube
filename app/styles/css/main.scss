@@ -1,3 +1,5 @@
+@import '../vendor/bourbon/addons/position';
+
 @import 'variables';
 @import 'utils';
 @import 'modals';
@@ -65,28 +67,47 @@ body {
     display: block;
     padding-top: 56.25%; /* 16/9eme*/
   }
+
+  @include mt-horizontal-screen {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    &:before {
+      display: none;
+    }
+  }
 }
 
 .mt-notification-center-tile {
-  @include position(absolute, 0px 0px 0px 0px);
+  $notificationsNominalWidth: 30rem;
+
+  @include position(absolute, 0px 0px 0px auto);
+  width: 100%;
+  max-width: $notificationsNominalWidth;
+
   z-index: 3;
   pointer-events: none;
 
   mt-notification-center {
-    // revert the behaviour to make notifications clickable
+    // reverts the behaviour to make notifications clickable
     pointer-events: auto;
   }
 
   // if the available size is larger than the minimum notification size stop expansion
   // could have been done with width + min-width but FF doesn't behave like the others
-//  @media screen and (min-width: $notificationsNominalWidth) {
-//    width: $notificationsNominalWidth;
-//  }
+  //  @media screen and (min-width: $notificationsNominalWidth) {
+  //    width: $notificationsNominalWidth;
+  //  }
 }
 
 .mt-queue-tile {
   position: relative;
   flex: 1;
+
+  @include mt-horizontal-screen {
+    position: absolute;
+    width: 25%;
+    height: 100%;
+  }
 
   &.animation-show-hide {
 
@@ -107,10 +128,12 @@ body {
 }
 
 .mt-search-tile {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  @include position(absolute, 0px 0px 0px 0px);
+
+  @include mt-horizontal-screen {
+    width: 75%;
+    left: auto;
+  }
 
   &.animation-show-hide {
 

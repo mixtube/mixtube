@@ -1,3 +1,16 @@
+@import '../vendor/bourbon/addons/position';
+@import '../vendor/bourbon/addons/triangle';
+
+@import 'utils';
+
+@mixin queue-item-color($bgColor) {
+  background-color: $bgColor;
+
+  .mt-queue__entry__data:before {
+    @include triangle(1.25rem, $bgColor, up);
+  }
+}
+
 @mixin queue {
 
   .mt-queue {
@@ -42,10 +55,7 @@
   }
 
   .mt-queue__entry__broken-message {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    @include position(absolute, 0px 0px 0px 0px);
 
     display: none; // hidden by default
     align-items: center;
@@ -60,10 +70,7 @@
   }
 
   .mt-queue__entry__progress {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    @include position(absolute, 0px 0px 0px 0px);
 
     display: flex;
     align-items: center;
@@ -118,13 +125,5 @@
     .mt-mouse-based-interaction &:hover {
       opacity: 1;
     }
-  }
-}
-
-@mixin queue-item-color($bgColor) {
-  background-color: $bgColor;
-
-  .mt-queue__entry__data:before {
-    @include triangle(1.25rem, $bgColor, up);
   }
 }

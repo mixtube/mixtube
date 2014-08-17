@@ -162,8 +162,8 @@
   animation: mt-spinner-rotation 500ms infinite linear;
 }
 
-@mixin mt-media-large-screen {
-  @media screen and (min-width: 50rem) {
+@mixin mt-horizontal-screen {
+  @media screen and (min-aspect-ratio: 8/9) {
     @content;
   }
 }

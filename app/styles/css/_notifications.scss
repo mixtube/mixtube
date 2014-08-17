@@ -1,9 +1,6 @@
-@import '../vendor/bourbon/bourbon';
 @import 'utils';
 
 @mixin notifications {
-
-  $notificationsNominalWidth: 30rem;
 
   .mt-notifications-center__container__padding {
     padding: $unitVerticalPadding / 2 .5rem 0 .5rem;

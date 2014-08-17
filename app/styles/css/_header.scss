@@ -1,4 +1,5 @@
-@import '../vendor/bourbon/bourbon';
+@import '../vendor/bourbon/addons/position';
+
 @import 'variables';
 @import 'utils';
 
@@ -85,7 +86,7 @@
 
       font-size: (28rem/$baseFontSizeUnitless);
 
-      @include mt-media-large-screen {
+      @include mt-horizontal-screen {
         display: inline;
       }
     }
@@ -103,10 +104,8 @@
     text-shadow: $textShadow;
 
     .facet {
-      position: absolute; // facets stacks but only one is visible at the time
-      top: 0;
-      height: 100%;
-      width: 100%;
+      // facets stacks but only one is visible at the time
+      @include position(absolute, 0px 0px 0px 0px);
 
       // center the icon
       display: flex;
@@ -146,10 +145,9 @@
   .mt-search-input__button {
     @extend %mt-chromeless-button;
     @include mt-click-reaction;
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
+
+    @include position(absolute, 0px 0px 0px auto);
+
     z-index: 1;
     width: 2.5rem + 2 * .5rem; // we need to fix the size here because the content is absolutely positioned
 
@@ -157,10 +155,8 @@
     text-shadow: $textShadow;
 
     .facet {
-      position: absolute; // facets stacks but only one is visible at the time
-      top: 0;
-      height: 100%;
-      width: 100%;
+      // facets stacks but only one is visible at the time
+      @include position(absolute, 0px 0px 0px 0px);
 
       // center the icon
       display: flex;
@@ -190,11 +186,8 @@
 
   // the container, will be translated but not animated
   .mt-search-input {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 100%;
+    @include position(absolute, 0px 0px 0px auto);
+
     max-width: 30rem;
     padding: $searchInputPadding;
     overflow: hidden;

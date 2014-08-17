@@ -1,3 +1,9 @@
+@import '../vendor/bourbon/addons/clearfix';
+@import '../vendor/bourbon/addons/position';
+
+@import 'variables';
+@import 'utils';
+
 @mixin search {
 
   $headerFontSize: 1.25rem;
@@ -10,14 +16,10 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-
-    //    @include mt-media-large-screen {
-    //      width: (3 * 100%/$columnsCount); // width is 3 "columns" out of 4
-    //    }
   }
 
   .mt-search__provider {
-    margin: 1rem 1rem 1rem 1rem;
+    margin: 1rem;
   }
 
   .mt-search__provider__header {
@@ -66,18 +68,18 @@
 
     width: 100%;
 
-    //    // more than 1 item per line when more space is available
-    //    @include mt-media-large-screen {
-    //      $resultsPromotedColumnsCount: 3;
-    //      $resultsColumnsCount: 4;
-    //
-    //      width: 100% / $resultsColumnsCount;
-    //
-    //      // the first three children of the first page are "promoted"
-    //      .mt-results__page:first-child &:nth-child(-n+3) {
-    //        width: 100% /  $resultsPromotedColumnsCount;
-    //      }
-    //    }
+    // more than 1 item per line when more horizontal space is available
+    @include mt-horizontal-screen {
+      $resultsPromotedColumnsCount: 3;
+      $resultsColumnsCount: 4;
+
+      width: 100% / $resultsColumnsCount;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n+3) {
+        width: 100% /  $resultsPromotedColumnsCount;
+      }
+    }
   }
 
   .mt-result__container {
@@ -177,7 +179,7 @@
 
       // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
       // is made of 5 columns which doesn't give much place to the message
-      @include mt-media-large-screen {
+      @include mt-horizontal-screen {
 
         font-size: (14rem/$baseFontSizeUnitless);
 
