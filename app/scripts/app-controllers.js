@@ -3,7 +3,7 @@
 
     mt.MixTubeApp.controller('mtRootCtrl',
         function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-                  mtNotificationCentersRegistry, mtOrchestrator, mtUserInteractionManager, mtQueuesRegistry) {
+                  mtNotificationCentersRegistry, mtOrchestrator, UserInteractionManager, mtQueuesRegistry) {
 
             var rootCtrl = this;
 
@@ -40,7 +40,7 @@
             };
 
             rootCtrl.shouldIdleChrome = function () {
-                return !mtUserInteractionManager.userInteracting;
+                return !UserInteractionManager.userInteracting;
             };
 
             /**

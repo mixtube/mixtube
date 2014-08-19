@@ -1,20 +1,7 @@
 (function (mt) {
     'use strict';
 
-    /**
-     * @ngdoc directive
-     * @name mt.directive:mtSearchInput
-     * @restrict A
-     *
-     * @description
-     * A single usage directive that controls the sequencing of search input animation.
-     *
-     * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
-     * can't be guaranteed by AngularJS when using ngTouch module.
-     * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
-     * ".mt-search-input".
-     */
-    mt.MixTubeApp.directive('mtSearchInput', function (mtSearchInputsRegistry, mtDirectivesRegistryHelper, animationsConfig) {
+    function mtSearchInput(mtSearchInputsRegistry, mtDirectivesRegistryHelper, InteractiveChromesManager, animationsConfig) {
 
         return {
             restrict: 'E',
@@ -78,12 +65,25 @@
                     field[0][_show ? 'focus' : 'blur']();
                 }
 
-                // we need to blur the field on form submit to hide the virtual keyboard on mobile
-                form.on('submit', function () {
-                    if (!animationRunning) {
-                        field[0].blur();
-                    }
-                });
+                function activate() {
+                    // we need to blur the field on form submit to hide the virtual keyboard on mobile
+                    form.on('submit', function () {
+                        if (!animationRunning) {
+                            field[0].blur();
+                        }
+                    });
+
+                    // as long as the search input is open we consider it as an active interaction
+                    var unmanageChromeFn = InteractiveChromesManager.addInteractiveChrome(
+                        {
+                            isInteracted: function () {
+                                return _show;
+                            }
+                        });
+
+                    // make sure mw notify when an element is destroyed
+                    $scope.$on('$destroy', unmanageChromeFn);
+                }
 
                 this.toggle = function (show) {
                     if (show !== _show && !animationRunning) {
@@ -91,7 +91,24 @@
                         sync();
                     }
                 };
+
+                activate();
             }
         }
-    });
+    }
+
+    /**
+     * @ngdoc directive
+     * @name mt.directive:mtSearchInput
+     * @restrict A
+     *
+     * @description
+     * A single usage directive that controls the sequencing of search input animation.
+     *
+     * Focus needs to be called inside a user initiated DOM event handler to show the virtual keyboard on mobile which
+     * can't be guaranteed by AngularJS when using ngTouch module.
+     * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
+     * ".mt-search-input".
+     */
+    mt.MixTubeApp.directive('mtSearchInput', mtSearchInput);
 })(mt);

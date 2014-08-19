@@ -1,30 +1,49 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtInteractiveChromesManager', function () {
+    function InteractiveChromesManagerFactory() {
 
-        var chromeInteractionCount = 0;
+        var facades = [];
 
-        return {
+        function isChromeInteracted() {
+            var length = facades.length;
+            for (var idx = 0; idx < length; idx++) {
+                if (facades[idx].isInteracted()) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
+        function addInteractiveChrome(facade) {
+            facades.push(facade);
+            return function remove() {
+                _.remove(facades, facade);
+            }
+        }
+
+        /**
+         * @name InteractiveChromesManager
+         */
+        var InteractiveChromesManager = {
             /**
-             * Is the user actively interacting with one of the chrome.
+             * Is the user actively interacting with one of the managed chrome.
              *
              * @returns {boolean}
              */
-            get chromeInteracted() {
-                return !!chromeInteractionCount;
-            },
+            isChromeInteracted: isChromeInteracted,
 
-            chromeInteractionBegan: function () {
-                chromeInteractionCount++;
-            },
-
-            chromeInteractionEnded: function () {
-                if (chromeInteractionCount > 0) {
-                    chromeInteractionCount--;
-                }
-            }
+            /**
+             * Adds interactive chrome to the manager.
+             *
+             * @param {{isInteracted: function():boolean}} facade the facade containing the methods to expose
+             * @returns {function()} a function to call to remove the chrome from the manager
+             */
+            addInteractiveChrome: addInteractiveChrome
         };
-    });
+
+        return InteractiveChromesManager;
+    }
+
+    mt.MixTubeApp.factory('InteractiveChromesManager', InteractiveChromesManagerFactory);
 })(mt);

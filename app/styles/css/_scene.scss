@@ -5,6 +5,13 @@
   .mt-scene {
     @include position(absolute, 0px 0px 0px 0px);
     overflow: hidden;
+
+    // a glass pane to prevent any pointer event to reach the video elements (dbclick -> full screen)
+    &:after {
+      @include position(absolute, 0px 0px 0px 0px);
+      content: '';
+      display: block;
+    }
   }
 
   .mt-scene__element-host {
