@@ -22,7 +22,7 @@
         }
     };
 
-    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngAnimate', 'ngTouch'])
+    mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngAnimate'])
         .config(function ($locationProvider) {
             $locationProvider.html5Mode(true);
         })

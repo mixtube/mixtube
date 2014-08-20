@@ -29,7 +29,7 @@
         }
 
         function activate() {
-            PointerManager.listenMove({
+            PointerManager.bindMove({
                 start: function () {
                     suspendActivityTO();
                     $rootScope.$apply(function () {

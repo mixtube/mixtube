@@ -13,8 +13,7 @@
     <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
     <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
 </head>
-<body mt-mouse-interaction-detection="mt-mouse-based-interaction" ng-class="{idle: rootCtrl.shouldIdleChrome()}"
-      ng-cloak>
+<body ng-class="{idle: rootCtrl.shouldIdleChrome(), 'mt-mouse-based-interaction': rootCtrl.isMouseDetected()}" ng-cloak>
 <!--we don't want to use a class for the cursor change to avoid whole page style recalculation-->
 
 <!-- queue loading progress block -->
@@ -56,8 +55,7 @@
                 </div>
             </div>
 
-            <button class="mt-search-input__button" mt-click-sync="rootCtrl.toggleSearch()"
-                    mt-click-active-class="ng-click-active">
+            <button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
             <span class="facet facet__animation-toggle" ng-hide="props.searchShown"
                   data-mt-icon="&#xe800">
                 <span class="mt-replaced-text">Open search</span>
@@ -105,7 +103,8 @@
 
                             <div class="mt-queue__entry__commands">
                                 <button class="mt-queue__entry__remove-button" data-mt-icon="&#xe801"
-                                        ng-click="queueCtrl.removeQueueEntry(entry)">
+                                        ng-click="queueCtrl.removeQueueEntry(entry)"
+                                        mt-click-active-class="ng-click-active">
                                     <span class="mt-replaced-text">Remove</span>
                                 </button>
                             </div>
@@ -217,7 +216,6 @@
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-animate/angular-animate.js"></script>
-<script src="bower_components/angular-touch/angular-touch.js"></script>
 <script src="bower_components/lodash/dist/lodash.js"></script>
 <script src="bower_components/popcorn-js/popcorn.js"></script>
 <script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
@@ -235,7 +233,7 @@
 <script src="scripts/components/logger-factory.js"></script>
 <script src="scripts/components/directives-registry/async-registry-factory.js"></script>
 <script src="scripts/components/directives-registry/directives-registry-helper.js"></script>
-<script src="scripts/components/pointing-directives.js"></script>
+<script src="scripts/components/click-active-class-directive.js"></script>
 <script src="scripts/components/smart-img-directive.js"></script>
 <script src="scripts/components/duration-filter.js"></script>
 <script src="scripts/components/cache-img-url-filter.js"></script>
