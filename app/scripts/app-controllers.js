@@ -345,7 +345,7 @@
     });
 
     mt.MixTubeApp.controller('mtDebuggingCtrl',
-        function (mtConfiguration, mtKeyboardShortcutManager, mtNotificationCentersRegistry) {
+        function (Configuration, mtKeyboardShortcutManager, mtNotificationCentersRegistry) {
 
             function notification(message) {
                 mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {
@@ -353,7 +353,7 @@
                 });
             }
 
-            if (mtConfiguration.debugNotifications) {
+            if (Configuration.debugNotifications) {
                 // register the global space shortcut
                 mtKeyboardShortcutManager.register('ctrl+n', function (evt) {
                     evt.preventDefault();

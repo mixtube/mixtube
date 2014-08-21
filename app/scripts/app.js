@@ -29,11 +29,11 @@
 
         .constant('animationsConfig', animationsConfig)
 
-        .run(function ($rootScope, $controller, mtConfiguration) {
+        .run(function ($rootScope, $controller, Configuration) {
             // make sure the scope always has the props property
             $rootScope.props = {};
 
-            if (mtConfiguration.debug) {
+            if (Configuration.debug) {
                 $controller('mtDebuggingCtrl');
             }
         });

@@ -1,13 +1,16 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtConfiguration', function ($location) {
+    function ConfigurationFactory($location) {
 
         var locationSearch = $location.search();
-        var debug = 'debug' in  locationSearch && locationSearch.debug.trim().length > 0 ?
-            JSON.parse(locationSearch.debug) : {};
+        var debug = _.has(locationSearch, 'debug') && locationSearch.debug.trim().length > 0;
+        var debugParams = debug ? JSON.parse(locationSearch.debug) : {};
 
-        return {
+        /**
+         * @name Configuration
+         */
+        var Configuration = {
             get youtubeAPIKey() {
                 return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
             },
@@ -15,14 +18,14 @@
                 return 20;
             },
             get debug() {
-                return 'debug' in  locationSearch;
+                return debug;
             },
             get fadeDuration() {
-                return 'fade' in debug ? debug.fade : 5;
+                return _.has(debugParams, 'fade') ? debugParams.fade : 5;
             },
             get autoEndCueTimeProvider() {
-                if ('duration' in debug) {
-                    return _.constant(debug.duration);
+                if (_.has(debugParams, 'duration')) {
+                    return _.constant(debugParams.duration);
                 } else {
                     var config = this;
                     return function (duration) {
@@ -33,11 +36,15 @@
                 }
             },
             get debugNotifications() {
-                return 'notifications' in debug && debug.notifications === true;
+                return _.has(debugParams, 'notifications') && debugParams.notifications === true;
             },
             get imgCache() {
-                return !('imgCache' in debug && debug.imgCache === false);
+                return !_.has(debugParams, 'imgCache') || debugParams.imgCache !== false;
             }
         };
-    });
+
+        return Configuration;
+    }
+
+    mt.MixTubeApp.factory('Configuration', ConfigurationFactory);
 })(mt);

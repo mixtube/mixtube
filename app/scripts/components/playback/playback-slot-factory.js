@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtPlaybackSlotFactory', function ($rootScope, $q, mtMediaElementsPool, mtQueueManager, mtConfiguration, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtPlaybackSlotFactory', function ($rootScope, $q, mtMediaElementsPool, mtQueueManager, Configuration, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtPlaybackSlotFactory');
 
@@ -224,7 +224,7 @@
                         slot._playback.onResume.add(popcorn.play, popcorn);
 
                         popcorn.play();
-                        popcorn.fade({direction: 'in', duration: mtConfiguration.fadeDuration});
+                        popcorn.fade({direction: 'in', duration: Configuration.fadeDuration});
                     }
                 });
             },
@@ -233,7 +233,7 @@
                 var slot = this;
                 slot._stopOutCalled = true;
                 slot._player.popcorn.fade({
-                    direction: 'out', duration: mtConfiguration.fadeDuration, done: function () {
+                    direction: 'out', duration: Configuration.fadeDuration, done: function () {
                         $rootScope.$apply(function () {
                             var popcorn = slot._player.popcorn;
                             slot._playback.onPause.remove(popcorn.pause, popcorn);

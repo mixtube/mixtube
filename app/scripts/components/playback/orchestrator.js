@@ -4,7 +4,7 @@
     /**
      * @name mtOrchestrator
      */
-    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry, mtConfiguration, mtLoggerFactory) {
+    mt.MixTubeApp.factory('mtOrchestrator', function ($q, $rootScope, $timeout, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry, Configuration, mtLoggerFactory) {
 
         var logger = mtLoggerFactory('mtOrchestrator');
 
@@ -117,7 +117,7 @@
                 _finishingSlots.push(slot);
                 slot.finishedPromise.then(function () {
 
-                    _.remove(_finishingSlots, slot);
+                    _.pull(_finishingSlots, slot);
 
                     if (!_startedSlot && !_finishingSlots.length) {
                         _runningQueueEntry = null;
@@ -164,7 +164,7 @@
                 }, [
                     {
                         id: 'AutoEndCue',
-                        timeProvider: mtConfiguration.autoEndCueTimeProvider,
+                        timeProvider: Configuration.autoEndCueTimeProvider,
                         fn: function autoEndCueCb() {
                             logger.debug('auto ending %O', slot.actualQueueEntry.video);
 
@@ -175,7 +175,7 @@
                     {
                         id: 'ComingNextCue',
                         timeProvider: function (duration) {
-                            return mtConfiguration.autoEndCueTimeProvider(duration) - 10;
+                            return Configuration.autoEndCueTimeProvider(duration) - 10;
                         },
                         fn: function comingNextCueCb() {
                             mtNotificationCentersRegistry('notificationCenter').ready(function (notificationCenter) {

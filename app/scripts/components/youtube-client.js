@@ -1,7 +1,7 @@
 (function (mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, mtConfiguration) {
+    mt.MixTubeApp.factory('mtYoutubeClient', function ($http, $q, Configuration) {
 
         /**
          * @const
@@ -59,7 +59,7 @@
                     id: videosIds.join(','),
                     part: 'snippet,statistics,contentDetails',
                     callback: 'JSON_CALLBACK',
-                    key: mtConfiguration.youtubeAPIKey
+                    key: Configuration.youtubeAPIKey
                 }
             }).then(function (response) {
                 var data = response.data;
@@ -139,13 +139,13 @@
              *
              * @param {string} queryString the query as used for a classic youtube search
              * @param {{pageId: string=, pageSize: number}} pageSpec parameters for paging (default to
-             * {@link mtConfiguration.maxSearchResults})
+             * {@link Configuration.maxSearchResults})
              * @return {promise.<{videos: Array.<mt.model.Video>, netPageId: string}>} resolved when finished.
              * Intermediary states are delivered through the promise's progress callback.
              */
             searchVideosByQuery: function (queryString, pageSpec) {
 
-                pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: mtConfiguration.maxSearchResults});
+                pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
 
                 var deferred = $q.defer();
 
@@ -158,7 +158,7 @@
                         pageToken: pageSpec.pageId,
                         maxResults: pageSpec.pageSize,
                         callback: 'JSON_CALLBACK',
-                        key: mtConfiguration.youtubeAPIKey
+                        key: Configuration.youtubeAPIKey
                     }
                 }).then(function (response) {
 

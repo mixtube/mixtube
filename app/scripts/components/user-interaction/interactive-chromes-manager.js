@@ -18,7 +18,7 @@
         function addInteractiveChrome(facade) {
             facades.push(facade);
             return function remove() {
-                _.remove(facades, facade);
+                _.pull(facades, facade);
             }
         }
 

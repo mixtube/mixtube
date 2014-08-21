@@ -20,8 +20,8 @@
 
         function bindMove(handler) {
             handlers.push(handler);
-            return function unlisten() {
-                _.remove(handlers, handler);
+            return function unbind() {
+                _.pull(handlers, handler);
             }
         }
 
