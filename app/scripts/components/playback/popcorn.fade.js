@@ -51,15 +51,15 @@
         var volumeTweenableConfig = {
             duration: durationInMillis,
             step: _.partial(volumeStep, instance),
-            from: { volume: instance.volume() },
-            to: { volume: null }
+            from: {volume: instance.volume()},
+            to: {volume: null}
         };
 
         var opacityTweenableConfig = {
             duration: durationInMillis,
             step: _.partial(opacityStep, instance),
-            from: { opacity: parseFloat(instance.media.style.opacity) },
-            to: { opacity: null }
+            from: {opacity: parseFloat(instance.media.style.opacity)},
+            to: {opacity: null}
         };
 
         if (options.direction === 'in') {
@@ -72,7 +72,7 @@
             instance.off('play', playHandler);
             instance.off('pause', pauseHandler);
 
-            if ('done' in options) {
+            if (_.has(options, 'done')) {
                 options.done();
             }
         });

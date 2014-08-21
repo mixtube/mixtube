@@ -64,7 +64,7 @@
             }).then(function (response) {
                 var data = response.data;
 
-                if ('error'  in data) {
+                if (_.has(data, 'error')) {
                     // youtube API does not return an error HTTP status in case of error but a success with a
                     // special error object in the response
                     return $q.reject(data.error.errors);
@@ -164,7 +164,7 @@
 
                     var data = response.data;
 
-                    if ('error' in data) {
+                    if (_.has(data, 'error')) {
                         // youtube API does not return an error HTTP status in case of error but a success with a
                         // special error object in the response
                         return deferred.reject(data.error.errors);

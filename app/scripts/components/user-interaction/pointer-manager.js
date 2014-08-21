@@ -34,7 +34,7 @@
         function notifyMoveEvent(event) {
             for (var idx = 0; idx < handlers.length; idx++) {
                 var handler = handlers[idx];
-                if (event in handler) {
+                if (_.has(handler, event)) {
                     handler[event]();
                 }
             }
