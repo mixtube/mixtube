@@ -89,7 +89,6 @@
   .mt-header__playback-button {
     $width: 49rem / $baseFontSizeUnitless;
 
-    @extend %mt-chromeless-button;
     position: relative;
     height: 100%;
     width: $width + 2 * $textShadowSize; // leave some space for proper rendering of shadow (IE)
@@ -137,9 +136,6 @@
   //  - at the end of the fake input animation we make the real one visible (opacity: 1)
 
   .mt-search-input__button {
-    @extend %mt-chromeless-button;
-    @include mt-click-reaction;
-
     @include position(absolute, 0px 0px 0px auto);
 
     z-index: 1;

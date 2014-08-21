@@ -1,6 +1,4 @@
-@import '../vendor/bourbon/addons/clearfix';
-@import '../vendor/bourbon/addons/position';
-
+@import '../vendor/bourbon/bourbon';
 @import 'variables';
 @import 'utils';
 
@@ -83,10 +81,7 @@
   }
 
   .mt-result__container {
-    @extend %mt-chromeless-button;
     position: relative;
-    display: block;
-    width: 100%;
 
     text-align: inherit;
     border-radius: 2px;
@@ -260,10 +255,8 @@
   }
 
   .mt-search__show-more__button {
-    @extend %mt-chromeless-button;
-    width: 100%;
-
     background-color: $baseBgColor;
+    text-align: center;
     font-size: (14rem/16);
     line-height: 1;
     padding: 1em;

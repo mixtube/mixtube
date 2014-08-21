@@ -11,12 +11,7 @@
   }
 
   .mt-notification {
-    @extend %mt-chromeless-button;
-
-    // clear the button properties
-    text-align: left;
     line-height: $lineHeight;
-    width: 100%;
 
     background-color: $lightTextColor;
     color: $secondaryBgColor;

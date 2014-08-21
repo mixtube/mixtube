@@ -37,10 +37,7 @@
   }
 
   .mt-queue__entry__thumbnail {
-    @extend %mt-chromeless-button;
-    display: block;
     position: relative;
-    width: 100%;
 
     > .image {
       @include mt-fluid-image(.4);
@@ -111,11 +108,10 @@
     align-self: stretch;
 
     display: flex;
-    align-items: stretch;
+    align-items: center;
   }
 
   .mt-queue__entry__remove-button {
-    @extend %mt-chromeless-button;
     @include mt-click-reaction;
     padding: 0 .5rem;
 

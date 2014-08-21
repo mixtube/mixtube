@@ -15,7 +15,9 @@
     text-decoration: inherit;
   }
 
-  button {
+  button, [role=button] {
+    cursor: pointer;
+    outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   }
 
@@ -109,25 +111,6 @@
   }
   &::-moz-progress-bar {
     background: none;
-  }
-}
-
-%mt-chromeless-button {
-  display: block;
-
-  padding: 0;
-  margin: 0;
-
-  font: inherit;
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  outline: none;
-
-  &::-moz-focus-inner {
-    padding: 0;
-    border: 0
   }
 }
 

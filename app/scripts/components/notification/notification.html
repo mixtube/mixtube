@@ -3,8 +3,8 @@
     <!-- the next div is required for proper height animation by containing the padding it allows to shrink the parent height to 0 -->
     <!-- normally even with height 0 the padding is shown -->
     <div class="mt-notifications-center__container__padding">
-        <button class="mt-notification" ng-switch on="notification.type"
-                ng-class="{error: notification.type === 'error'}" ng-click="notificationCenterCtrl.close(notification)">
+        <div role="button" tabindex="0" class="mt-notification" ng-switch on="notification.type"
+             ng-class="{error: notification.type === 'error'}" ng-click="notificationCenterCtrl.close(notification)">
             <div class="mt-notification__content" ng-switch-when="error">
                 <div class="text">
                     {{notification.data.message}}
@@ -26,6 +26,6 @@
                     </div>
                 </div>
             </div>
-        </button>
+        </div>
     </div>
 </div>
