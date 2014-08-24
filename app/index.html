@@ -73,7 +73,7 @@
 
     <div class="mt-body-tile">
 
-        <div class="mt-scene-tile" ng-if="rootCtrl.canAutoplayVideo()">
+        <div class="mt-scene-tile" ng-if="rootCtrl.canPlayback()">
             <div class="mt-scene" mt-scene="scene"></div>
         </div>
 
@@ -214,21 +214,14 @@
     </div>
 </div>
 
-<!-- build:js scripts/ext-dependencies.js -->
+<!-- build:js scripts/base.js -->
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-animate/angular-animate.js"></script>
 <script src="bower_components/lodash/dist/lodash.js"></script>
-<script src="bower_components/popcorn-js/popcorn.js"></script>
-<script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
-<script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
-<script src="bower_components/shifty/dist/shifty.js"></script>
-<script src="bower_components/js-signals/dist/signals.js"></script>
 <script src="bower_components/keymaster/keymaster.js"></script>
 <script src="bower_components/velocity/jquery.velocity.js"></script>
-<!-- endbuild -->
 
-<!-- build:js scripts/app.js -->
 <script src="scripts/commons.js"></script>
 <script src="scripts/app.js"></script>
 <script src="scripts/app-controllers.js"></script>
@@ -248,13 +241,6 @@
 <script src="scripts/components/notification/notification-centers-registry.js"></script>
 <script src="scripts/components/notification/notification-center-directive.js"></script>
 <script src="scripts/components/modal/modal-manager.js"></script>
-<script src="scripts/components/playback/media-elements-pool.js"></script>
-<script src="scripts/components/playback/orchestrator.js"></script>
-<script src="scripts/components/playback/playback-slot-factory.js"></script>
-<script src="scripts/components/playback/scene-directive.js"></script>
-<script src="scripts/components/playback/scenes-registry.js"></script>
-<script src="scripts/components/playback/popcorn.one.js"></script>
-<script src="scripts/components/playback/popcorn.fade.js"></script>
 <script src="scripts/components/queue/queue-directive.js"></script>
 <script src="scripts/components/queue/queues-registry.js"></script>
 <script src="scripts/components/queue/queue-entry-animation.js"></script>
@@ -263,12 +249,29 @@
 <script src="scripts/components/user-interaction/interactive-chrome-directive.js"></script>
 <script src="scripts/components/user-interaction/interactive-chromes-manager.js"></script>
 <script src="scripts/components/user-interaction/user-interaction-manager.js"></script>
-<script src="scripts/components/sniffer/custom-modernizr.js"></script>
-<script src="scripts/components/sniffer/sniffer.js"></script>
+<script src="scripts/components/capabilities/custom-modernizr.js"></script>
+<script src="scripts/components/capabilities/capabilities.js"></script>
 <script src="scripts/components/configuration.js"></script>
 <script src="scripts/components/queue-manager.js"></script>
 <script src="scripts/components/youtube-client.js"></script>
 <!-- endbuild -->
+
+<div ng-if="rootCtrl.canPlayback()">
+    <!-- build:js scripts/playback.js -->
+    <script src="bower_components/popcorn-js/popcorn.js"></script>
+    <script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
+    <script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
+    <script src="bower_components/shifty/dist/shifty.js"></script>
+    <script src="bower_components/js-signals/dist/signals.js"></script>
+    <script src="scripts/components/playback/media-elements-pool.js"></script>
+    <script src="scripts/components/playback/orchestrator.js"></script>
+    <script src="scripts/components/playback/playback-slot-factory.js"></script>
+    <script src="scripts/components/playback/scene-directive.js"></script>
+    <script src="scripts/components/playback/scenes-registry.js"></script>
+    <script src="scripts/components/playback/popcorn.one.js"></script>
+    <script src="scripts/components/playback/popcorn.fade.js"></script>
+    <!-- endbuild -->
+</div>
 
 </body>
 </html>
