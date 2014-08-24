@@ -3,7 +3,8 @@
 
     mt.MixTubeApp.controller('mtRootCtrl',
         function ($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-                  mtNotificationCentersRegistry, mtOrchestrator, UserInteractionManager, mtQueuesRegistry, PointerManager) {
+                  mtNotificationCentersRegistry, mtOrchestrator, UserInteractionManager, mtQueuesRegistry,
+                  PointerManager, Sniffer) {
 
             var rootCtrl = this;
 
@@ -45,6 +46,10 @@
 
             rootCtrl.isMouseDetected = function () {
                 return PointerManager.mouseDetected;
+            };
+
+            rootCtrl.canAutoplayVideo = function () {
+                return Sniffer.videoAutoplay;
             };
 
             /**
