@@ -7,7 +7,7 @@
 
         $window.Modernizr.on('videoautoplay', function (result) {
             $rootScope.$apply(function () {
-                videoAutoplay = !!result;
+                videoAutoplay = result;
             });
         });
 
