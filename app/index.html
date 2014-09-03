@@ -40,7 +40,7 @@
                 </div>
                 <div class="center">
                     <div role="button" tabindex="0" class="mt-header__playback-button"
-                         ng-click="rootCtrl.togglePlayback()">
+                         ng-click="rootCtrl.togglePlayback()" ng-show="rootCtrl.shouldShowPlaybackControls()">
                         <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
                               data-mt-icon="&#xe805">
                             <span class="mt-replaced-text">Play</span>
@@ -73,7 +73,7 @@
 
     <div class="mt-body-tile">
 
-        <div class="mt-scene-tile" ng-if="rootCtrl.canPlayback()">
+        <div class="mt-scene-tile" ng-if="rootCtrl.shouldShowScene()">
             <div class="mt-scene" mt-scene="scene"></div>
         </div>
 
@@ -214,7 +214,7 @@
     </div>
 </div>
 
-<!-- build:js scripts/base.js -->
+<!-- build:js scripts/app.js -->
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-animate/angular-animate.js"></script>
@@ -254,24 +254,20 @@
 <script src="scripts/components/configuration.js"></script>
 <script src="scripts/components/queue-manager.js"></script>
 <script src="scripts/components/youtube-client.js"></script>
-<!-- endbuild -->
 
-<div ng-if="rootCtrl.canPlayback()">
-    <!-- build:js scripts/playback.js -->
-    <script src="bower_components/popcorn-js/popcorn.js"></script>
-    <script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
-    <script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
-    <script src="bower_components/shifty/dist/shifty.js"></script>
-    <script src="bower_components/js-signals/dist/signals.js"></script>
-    <script src="scripts/components/playback/media-elements-pool.js"></script>
-    <script src="scripts/components/playback/orchestrator.js"></script>
-    <script src="scripts/components/playback/playback-slot-factory.js"></script>
-    <script src="scripts/components/playback/scene-directive.js"></script>
-    <script src="scripts/components/playback/scenes-registry.js"></script>
-    <script src="scripts/components/playback/popcorn.one.js"></script>
-    <script src="scripts/components/playback/popcorn.fade.js"></script>
-    <!-- endbuild -->
-</div>
+<script src="bower_components/popcorn-js/popcorn.js"></script>
+<script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
+<script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
+<script src="bower_components/shifty/dist/shifty.js"></script>
+<script src="bower_components/js-signals/dist/signals.js"></script>
+<script src="scripts/components/playback/media-elements-pool.js"></script>
+<script src="scripts/components/playback/orchestrator.js"></script>
+<script src="scripts/components/playback/playback-slot-factory.js"></script>
+<script src="scripts/components/playback/scene-directive.js"></script>
+<script src="scripts/components/playback/scenes-registry.js"></script>
+<script src="scripts/components/playback/popcorn.one.js"></script>
+<script src="scripts/components/playback/popcorn.fade.js"></script>
+<!-- endbuild -->
 
 </body>
 </html>

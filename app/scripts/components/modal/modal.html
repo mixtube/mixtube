@@ -13,7 +13,7 @@
                 <div role="button" tabindex="0" class="mt-modal__button"
                         ng-repeat="command in commands"
                         ng-class="{secondary: !command.primary}"
-                        ng-click="command.action">
+                        ng-click="close(command)">
                     {{command.label}}
                 </div>
             </div>

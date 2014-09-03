@@ -1,12 +1,12 @@
-(function (mt) {
+(function(mt, undefined) {
     'use strict';
 
-    function CapabilitiesFactory($window, $rootScope) {
+    function CapabilitiesFactory($window, $rootScope, Configuration) {
 
-        var videoAutoplay = false;
+        var videoAutoplay = undefined;
 
-        $window.Modernizr.on('videoautoplay', function (result) {
-            $rootScope.$apply(function () {
+        $window.Modernizr.on('videoautoplay', function(result) {
+            $rootScope.$apply(function() {
                 videoAutoplay = result;
             });
         });
@@ -20,10 +20,19 @@
              *
              * This property is a combinations of multiple rules but the main one is "being able to auto play video".
              *
-             * @returns {boolean}
+             * @returns {boolean|undefined}
              */
             get playback() {
-                return videoAutoplay;
+                return Configuration.videoAutoplay !== null ? Configuration.videoAutoplay : videoAutoplay;
+            },
+
+            /**
+             * Is the current platform capable of acting as controller for a remote playback device.
+             *
+             * @returns {boolean|undefined}
+             */
+            get remoteControl() {
+                return false;
             }
         };
 

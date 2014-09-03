@@ -1,10 +1,11 @@
-@import '../vendor/bourbon/addons/position';
+@import '../vendor/bourbon/bourbon';
 
 @import 'variables';
 @import 'utils';
 
 @mixin modals {
 
+  $modalMaxWidth: 500rem/16;
   $modalZIndex: 500;
 
   .mt-backdrop {
@@ -59,7 +60,7 @@
 
   .mt-modal__container {
     padding: $unitVerticalPadding / 2 .5rem;
-    max-width: 100%;
+    max-width: $modalMaxWidth;
 
     // propagate the "flexibility"
     display: flex;
@@ -98,6 +99,14 @@
     text-align: justify;
   }
 
+  .mt-modal__paragraph {
+    margin-bottom: 1rem;
+  }
+
+  .mt-modal__sub-paragraph {
+    font-size: (12rem/16);
+  }
+
   .mt-modal__commands {
     flex: none;
     padding: 1rem;
@@ -113,6 +122,7 @@
 
     background-color: $contrastedColor;
     font-weight: 700;
+    text-align: center;
 
     &.secondary {
       border: 1px solid $contrastedColor;

@@ -7,6 +7,10 @@
         var debug = _.has(locationSearch, 'debug') && locationSearch.debug.trim().length > 0;
         var debugParams = debug ? JSON.parse(locationSearch.debug) : {};
 
+        function undefinedToNullOrValue(value) {
+            return _.isUndefined(value) ? null : value;
+        }
+
         /**
          * @name Configuration
          */
@@ -35,11 +39,26 @@
                     };
                 }
             },
+
+            /**
+             * @returns {boolean|null}
+             */
             get debugNotifications() {
-                return _.has(debugParams, 'notifications') && debugParams.notifications === true;
+                return undefinedToNullOrValue(debugParams.notifications);
             },
+
+            /**
+             * @returns {boolean|null}
+             */
             get imgCache() {
-                return !_.has(debugParams, 'imgCache') || debugParams.imgCache !== false;
+                return undefinedToNullOrValue(debugParams.imgCache);
+            },
+
+            /**
+             * @returns {boolean|null}
+             */
+            get videoAutoplay() {
+                return undefinedToNullOrValue(debugParams.videoAutoplay);
             }
         };
 
