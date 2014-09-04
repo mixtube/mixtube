@@ -30,123 +30,132 @@ body {
   }
 }
 
-.mt-queue-loading__message {
-  margin-bottom: $unitVerticalPadding;
-}
-
-.mt-queue-loading__progress {
-  progress {
-    @extend %mt-chromeless-progress;
-    @include mt-spinner(4rem, $contrastedColor);
-  }
-}
-
-.mt-main-tile {
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.mt-header-tile {
-  position: relative;
-  height: 4rem;
-}
-
-.mt-body-tile {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.mt-scene-tile {
-  position: relative;
-
-  &:before {
-    content: '';
-    display: block;
-    padding-top: 56.25%; /* 16/9eme*/
+@mixin queue-loading {
+  .mt-queue-loading__message {
+    margin-bottom: $unitVerticalPadding;
   }
 
-  @include mt-horizontal-screen {
-    @include position(absolute, 0px 0px 0px 0px);
-
-    &:before {
-      display: none;
+  .mt-queue-loading__progress {
+    progress {
+      @extend %mt-chromeless-progress;
+      @include mt-spinner(4rem, $contrastedColor);
     }
   }
 }
 
-.mt-notification-center-tile {
-  $notificationsNominalWidth: 30rem;
+@mixin tiles {
+  $headerHeight: 4rem;
 
-  @include position(absolute, 0px 0px auto auto);
-  width: 100%;
-  max-width: $notificationsNominalWidth;
-
-  z-index: 3;
-
-  mt-notification-center {
-    // reverts the behaviour to make notifications clickable
-    pointer-events: auto;
-  }
-}
-
-.mt-queue-tile {
-  position: relative;
-  flex: 1;
-
-  @include mt-horizontal-screen {
-    position: absolute;
-    width: 25%;
+  .mt-main-tile {
     height: 100%;
 
-    &.idle-add, &.idle-remove {
-      transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+    display: flex;
+    flex-direction: column;
+  }
 
-      display: block !important;
+  .mt-header-tile {
+    position: relative;
+    height: 4rem;
+  }
+
+  .mt-body-tile {
+    position: relative;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mt-scene-tile {
+    position: relative;
+
+    &:before {
+      content: '';
+      display: block;
+      padding-top: 56.25%; /* 16/9eme*/
     }
 
-    &.idle {
-      display: none;
+    @include mt-horizontal-screen {
+      // in horizontal mode we move the scene underneath the header
+      @include position(absolute, -$headerHeight 0px 0px 0px);
 
-      opacity: 0;
-      transform: translateX(-50%);
+      &:before {
+        display: none;
+      }
+    }
+  }
+
+  .mt-notification-center-tile {
+    $notificationsNominalWidth: 30rem;
+
+    @include position(absolute, 0px 0px auto auto);
+    width: 100%;
+    max-width: $notificationsNominalWidth;
+
+    z-index: 3;
+
+    mt-notification-center {
+      // reverts the behaviour to make notifications clickable
+      pointer-events: auto;
+    }
+  }
+
+  .mt-queue-tile {
+    position: relative;
+    flex: 1;
+
+    @include mt-horizontal-screen {
+      position: absolute;
+      width: 25%;
+      height: 100%;
+
+      &.idle-add, &.idle-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+        transition-timing-function: $easeInOut, linear;
+
+        display: block !important;
+      }
+
+      &.idle {
+        display: none;
+
+        opacity: 0;
+        transform: translateX(-50%);
+      }
+    }
+  }
+
+  .mt-search-tile {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    @include mt-horizontal-screen {
+      width: 75%;
+      left: auto;
+    }
+
+    &.animation-show-hide {
+
+      &.ng-hide-add, &.ng-hide-remove {
+        transition-property: transform, opacity;
+        transition-duration: $baseTransitionDuration;
+
+        transition-timing-function: $easeInOut, linear;
+
+        // don't hide it straight: wait for the end of the animation
+        display: block !important;
+      }
+
+      &.ng-hide {
+        transform: translateY(-50%);
+        opacity: 0;
+      }
     }
   }
 }
 
-.mt-search-tile {
-  @include position(absolute, 0px 0px 0px 0px);
-
-  @include mt-horizontal-screen {
-    width: 75%;
-    left: auto;
-  }
-
-  &.animation-show-hide {
-
-    &.ng-hide-add, &.ng-hide-remove {
-      transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-
-      transition-timing-function: $easeInOut, linear;
-
-      // don't hide it straight: wait for the end of the animation
-      display: block !important;
-    }
-
-    &.ng-hide {
-      transform: translateY(-50%);
-      opacity: 0;
-    }
-  }
-}
+@include queue-loading;
+@include tiles;
 
 // includes imported modules styles
 @include utils;
