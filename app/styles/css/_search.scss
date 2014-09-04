@@ -84,7 +84,7 @@
     position: relative;
 
     text-align: inherit;
-    border-radius: 2px;
+    border-radius: $baseBorderRadius;
     overflow: hidden;
   }
 
@@ -160,7 +160,7 @@
     transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
 
     background-color: $baseBgColor;
-    border-radius: 2px 2px 0 0;
+    border-radius: $baseBorderRadius $baseBorderRadius 0 0;
 
     // vertically center the text
     display: flex;
@@ -260,7 +260,7 @@
     font-size: (14rem/16);
     line-height: 1;
     padding: 1em;
-    border-radius: 2px;
+    border-radius: $baseBorderRadius;
 
     .mt-mouse-based-interaction &:hover {
       color: $contrastedColor;

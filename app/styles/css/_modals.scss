@@ -71,7 +71,7 @@
     overflow: hidden;
 
     background-color: $lightTextColor;
-    border-radius: 2px;
+    border-radius: $baseBorderRadius;
     color: $secondaryBgColor;
 
     // propagate the "flexibility"
@@ -121,6 +121,7 @@
     margin: 0 .5rem;
 
     background-color: $contrastedColor;
+    border-radius: $baseBorderRadius;
     font-weight: 700;
     text-align: center;
 

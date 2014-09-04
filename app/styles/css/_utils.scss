@@ -15,6 +15,10 @@
     text-decoration: inherit;
   }
 
+  mt-button {
+    display: block;
+  }
+
   [role=button] {
     cursor: pointer;
     outline: none;
@@ -29,7 +33,6 @@
 
   mt-smart-img {
     display: block;
-    width: 100%;
     position: relative;
 
     background-repeat: no-repeat;
