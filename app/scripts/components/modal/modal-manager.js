@@ -1,15 +1,14 @@
 (function(mt) {
     'use strict';
 
-    function ModalManagerFactory($document, $http, $templateCache, $compile, $q, $animate, $rootScope) {
+    function ModalManagerFactory($document, $compile, $q, $animate, $rootScope, $templateRequest) {
 
         var body = $document.find('body').eq(0);
         var backdropElement = angular.element('<div class="mt-backdrop mt-animation-enter-leave__fade"></div>');
 
-        var linkFnDeferred = $q.defer();
-        $http.get('/scripts/components/modal/modal.html', {cache: $templateCache})
-            .success(function(response) {
-                linkFnDeferred.resolve($compile(angular.element(response)));
+        var linkFnPromise = $templateRequest('/scripts/components/modal/modal.html')
+            .then(function(template) {
+                return $compile(template);
             });
 
         var open = function(options) {
@@ -17,12 +16,12 @@
 
             function leave(modalElement, done) {
                 $animate.leave(backdropElement);
-                $animate.leave(modalElement, function() {
-                    done();
+                $animate.leave(modalElement).then(function() {
+                    $rootScope.$apply(done);
                 });
             }
 
-            return linkFnDeferred.promise.then(function(modalLinkFn) {
+            return linkFnPromise.then(function(modalLinkFn) {
 
                 var scope = angular.extend($rootScope.$new(true), options);
 

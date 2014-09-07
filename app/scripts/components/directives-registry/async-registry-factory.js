@@ -1,7 +1,7 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtAsyncRegistryFactory', function ($cacheFactory, $q) {
+    var AsyncRegistryFactoryFactory = function($cacheFactory, $q) {
 
         function locateDeferred(cache, key) {
             var deferred = cache.get(key);
@@ -11,21 +11,33 @@
             return deferred;
         }
 
-        return function (cacheId) {
+        /**
+         * @name AsyncRegistryFactory
+         * @param {string} cacheId
+         * @returns {AsyncRegistry}
+         */
+        function AsyncRegistryFactory(cacheId) {
             var delegateCache = $cacheFactory(cacheId);
 
-            function getter(name) {
+            /**
+             * @name AsyncRegistry
+             * @param {string} name
+             * @returns {{ready: function(function)}}
+             */
+            function AsyncRegistry(name) {
                 var deferred = locateDeferred(delegateCache, name);
                 return {
-                    ready: deferred.promise.then
+                    ready: function(readyFn) {
+                        deferred.promise.then(readyFn);
+                    }
                 };
             }
 
-            getter.register = function (name, value) {
+            AsyncRegistry.register = function(name, value) {
                 locateDeferred(delegateCache, name).resolve(value);
             };
 
-            getter.unregister = function (name) {
+            AsyncRegistry.unregister = function(name) {
                 var deferred = delegateCache.get(name);
                 if (deferred !== null) {
                     delegateCache.remove(name);
@@ -33,7 +45,11 @@
                 }
             };
 
-            return getter;
-        };
-    });
+            return AsyncRegistry;
+        }
+
+        return AsyncRegistryFactory;
+    };
+
+    mt.MixTubeApp.factory('AsyncRegistryFactory', AsyncRegistryFactoryFactory);
 })(mt);

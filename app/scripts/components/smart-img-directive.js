@@ -1,7 +1,7 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
-    mt.MixTubeApp.directive('mtSmartImg', function ($document, $animate, $filter) {
+    function mtSmartImg($rootScope, $document, $animate, $filter) {
 
         var imgCacheUrlFilter = $filter('mtCacheImgUrl');
 
@@ -9,27 +9,28 @@
             restrict: 'E',
             template: '<div class="mt-smart-img__image"></div><div class="mt-smart-img__loading-indicator-container"></div>',
             transclude: true,
-            link: function (scope, iElement, iAttrs, controller, transcludeFn) {
+            link: function(scope, iElement, iAttrs, controller, transcludeFn) {
 
                 var children = iElement.children();
                 var image = children.eq(0);
                 var indicatorContainer = children.eq(1);
 
                 var indicator;
-                transcludeFn(scope, function (indicatorClone) {
+                transcludeFn(scope, function(indicatorClone) {
                     indicator = indicatorClone;
                     indicatorContainer.append(indicatorClone);
                 });
 
                 var loader = $document[0].createElement('img');
 
-                iAttrs.$observe('source', function (source) {
+                iAttrs.$observe('source', function(source) {
                     if (source) {
                         source = imgCacheUrlFilter(source);
                         loader.src = source;
-                        loader.onload = function () {
+                        loader.onload = function() {
                             $animate.addClass(indicatorContainer, 'ng-hide');
                             $animate.removeClass(image, 'mt-loading');
+                            $rootScope.$digest();
                         };
 
                         $animate.removeClass(indicatorContainer, 'ng-hide');
@@ -42,5 +43,7 @@
                 });
             }
         };
-    });
+    }
+
+    mt.MixTubeApp.directive('mtSmartImg', mtSmartImg);
 })(mt);
