@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html ng-controller="mtRootCtrl as rootCtrl">
 <head>
-    <!--preventing the user to zoom is not really nice but this is to prevent the browser from zooming when an input is focused-->
-    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--hopefully triggers GPU Rasterization on Chrome-->
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0,  initial-scale=1.0, user-scalable=yes">
     <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
     <!-- usemin must look for files in app and .tmp directory for compiled css -->
     <!-- build:css({app,.tmp}) styles/app.css -->
