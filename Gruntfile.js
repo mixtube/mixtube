@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
 
     grunt.initConfig({
 
@@ -15,11 +15,22 @@ module.exports = function (grunt) {
                 files: [
                     {
                         dot: true,
-                        src: [ '.tmp', '<%= mixtube.dist %>/*']
+                        src: ['.tmp', '<%= mixtube.dist %>/*']
                     }
                 ]
             },
             server: '.tmp'
+        },
+
+        // replaces the meta base with one working on github pages
+        replace: {
+            'gh-pages': {
+                options: {
+                    patterns: [{match: '<base href="/">', replacement: '<base href="/mixtube/">'}],
+                    usePrefix: false
+                },
+                files: {'dist/index.html': ['dist/index.html']}
+            }
         },
 
         // compiles sass files to css but excludes external libs
@@ -28,7 +39,7 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'app',
                 // we need to manually exclude the sass partials (see https://github.com/gruntjs/grunt-contrib-sass/issues/72)
-                src: [ '**/*.scss', '!**/_*.scss', '!**/vendor/**'],
+                src: ['**/*.scss', '!**/_*.scss', '!**/vendor/**'],
                 dest: '.tmp',
                 ext: '.css'
             }
@@ -99,7 +110,13 @@ module.exports = function (grunt) {
         // copies all the files that don't need any special processing
         copy: [
             {expand: true, cwd: '<%= mixtube.app %>', dest: '<%= mixtube.dist %>', src: ['*.html']},
-            {expand: true, flatten: true, cwd: '<%= mixtube.app %>', dest: '<%= mixtube.dist %>/styles', src: ['**/*.{eot,svg,ttf,woff}']}
+            {
+                expand: true,
+                flatten: true,
+                cwd: '<%= mixtube.app %>',
+                dest: '<%= mixtube.dist %>/styles',
+                src: ['**/*.{eot,svg,ttf,woff}']
+            }
         ],
 
         inline_angular_templates: {
@@ -153,6 +170,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-rev');
     grunt.loadNpmTasks('grunt-gh-pages');
+    grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-inline-angular-templates');
 
     // sass and autoprefix the styles
@@ -161,7 +179,9 @@ module.exports = function (grunt) {
     // a dev oriented task that watches file that need to be compiled and starts a local server
     grunt.registerTask('server', ['clean:server', 'style', 'connect', 'watch']);
 
-    grunt.registerTask('build', ['clean:dist', 'style', 'useminPrepare', 'concat', 'copy', 'inline_angular_templates', 'rev:css', 'usemin:css', 'rev:html', 'usemin:html']);
+    grunt.registerTask('build',
+        ['clean:dist', 'style', 'useminPrepare', 'concat', 'copy', 'inline_angular_templates', 'rev:css', 'usemin:css',
+            'rev:html', 'usemin:html']);
 
-    grunt.registerTask('publish-gh-pages', ['build', 'gh-pages']);
+    grunt.registerTask('publish-gh-pages', ['build', 'replace:gh-pages', 'gh-pages']);
 };

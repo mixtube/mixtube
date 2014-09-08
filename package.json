@@ -22,6 +22,7 @@
     "grunt-gh-pages": "^0.9.1",
     "grunt-inline-angular-templates": "^0.1.5",
     "grunt-pleeease": "^0.0.5",
+    "grunt-replace": "^0.7.9",
     "grunt-rev": "latest",
     "grunt-usemin": "latest"
   }
