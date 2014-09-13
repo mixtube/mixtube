@@ -2,15 +2,15 @@
     'use strict';
 
     mt.MixTubeApp.controller('mtRootCtrl',
-        function($interval, $scope, $location, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
+        function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
                  mtNotificationCentersRegistry, mtOrchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
-                 PointerManager, Capabilities) {
+                 PointerManager, Capabilities, SearchCtrlHelper) {
 
             var rootCtrl = this;
 
             /**
-             * Stores the serialized version of the queue. Useful to check the new url state against the internal state to prevent
-             * infinite loops when changing the url internally.
+             * Stores the serialized version of the queue. Useful to check the new url state against the internal state
+             * to prevent infinite loops when changing the url internally.
              *
              * @type {string}
              */
@@ -18,291 +18,309 @@
 
             rootCtrl.queueLoading = false;
 
-            // the queue, the search and the focused entry term are declared in the scope (instead of the root controller)
-            // so that they can be read, written and watched from any controller
-            /** @type {mt.model.Queue} */
-            $scope.props.queue = mtQueueManager.queue;
+            rootCtrl.isSearchShown = isSearchShown;
+            rootCtrl.getQueue = getQueue;
+            rootCtrl.getRunningQueueEntry = getRunningQueueEntry;
+            rootCtrl.getLoadingQueueEntry = getLoadingQueueEntry;
+            rootCtrl.isPlaying = isPlaying;
+            rootCtrl.shouldIdleChrome = shouldIdleChrome;
+            rootCtrl.isMouseDetected = isMouseDetected;
+            rootCtrl.shouldShowScene = shouldShowScene;
+            rootCtrl.shouldShowPlaybackControls = shouldShowPlaybackControls;
+            rootCtrl.toggleSearch = SearchCtrlHelper.toggleSearch;
+            rootCtrl.togglePlayback = togglePlayback;
 
-            /** @type {string}*/
-            $scope.props.searchTerm = null;
-            /** @type {boolean}*/
-            $scope.props.searchShown = false;
-
-            rootCtrl.getRunningQueueEntry = function() {
-                return mtOrchestrator.runningQueueEntry;
-            };
-
-            rootCtrl.getLoadingQueueEntry = function() {
-                return mtOrchestrator.loadingQueueEntry;
-            };
-
-            rootCtrl.isPlaying = function() {
-                return mtOrchestrator.playing;
-            };
-
-            rootCtrl.shouldIdleChrome = function() {
-                return !UserInteractionManager.userInteracting;
-            };
-
-            rootCtrl.isMouseDetected = function() {
-                return PointerManager.mouseDetected;
-            };
-
-            rootCtrl.shouldShowScene = function() {
-                return Capabilities.playback;
-            };
-
-            rootCtrl.shouldShowPlaybackControls = function() {
-                return Capabilities.playback || Capabilities.remoteControl;
-            };
-
-            /**
-             * @param {boolean=} showOrHide if not given it will toggle the visibility
-             */
-            rootCtrl.toggleSearch = function(showOrHide) {
-                $scope.props.searchShown = _.isUndefined(showOrHide) ? !$scope.props.searchShown : showOrHide;
-
-                if ($scope.props.searchShown) {
-                    // reset search term before showing the search input
-                    $scope.props.searchTerm = null;
-                    mtKeyboardShortcutManager.enterScope('search');
-                } else {
-                    mtKeyboardShortcutManager.leaveScope('search');
+            // setup direct access to the property for double binding
+            Object.defineProperty(rootCtrl, 'searchTerm', {
+                get: function() {
+                    return SearchCtrlHelper.searchTerm;
+                },
+                set: function(value) {
+                    SearchCtrlHelper.searchTerm = value;
                 }
+            });
 
-                mtSearchInputsRegistry('search').ready(function(searchInput) {
-                    searchInput.toggle($scope.props.searchShown);
+            function isSearchShown() {
+                return SearchCtrlHelper.searchShown;
+            }
+
+            function getQueue() {
+                return mtQueueManager.queue;
+            }
+
+            function getRunningQueueEntry() {
+                return mtOrchestrator.runningQueueEntry;
+            }
+
+            function getLoadingQueueEntry() {
+                return mtOrchestrator.loadingQueueEntry;
+            }
+
+            function isPlaying() {
+                return mtOrchestrator.playing;
+            }
+
+            function shouldIdleChrome() {
+                return !UserInteractionManager.userInteracting;
+            }
+
+            function isMouseDetected() {
+                return PointerManager.mouseDetected;
+            }
+
+            function shouldShowScene() {
+                return Capabilities.playback;
+            }
+
+            function shouldShowPlaybackControls() {
+                return Capabilities.playback || Capabilities.remoteControl;
+            }
+
+            function togglePlayback() {
+                mtOrchestrator.togglePlayback();
+            }
+
+            // we need to wait for the loading phase to be done to avoid race problems (loading for ever)
+            $timeout(activate);
+
+            function activate() {
+                // hide the input search at startup
+                SearchCtrlHelper.toggleSearch(false);
+
+                // register the global space shortcut
+                mtKeyboardShortcutManager.register('space', function(evt) {
+                    evt.preventDefault();
+                    mtOrchestrator.togglePlayback();
                 });
-            };
 
-            rootCtrl.togglePlayback = function() {
-                mtOrchestrator.togglePlayback();
-            };
+                mtKeyboardShortcutManager.register('search', 'esc', function(evt) {
+                    evt.preventDefault();
+                    SearchCtrlHelper.toggleSearch(false);
+                });
 
-            // hide the input search at startup
-            rootCtrl.toggleSearch(false);
+                $scope.$watch(function() {
+                    return mtQueueManager.queue;
+                }, function(newVal, oldVal) {
+                    // this test is here to prevent to serialize during the init phase
+                    if (newVal !== oldVal) {
+                        var newSerializedQueue = mtQueueManager.serialize();
+                        if (serializedQueue !== newSerializedQueue) {
+                            serializedQueue = newSerializedQueue;
+                            // replace queue parameter but keep the rest
+                            $location.search(angular.extend({}, $location.search(), {queue: serializedQueue}));
+                        }
+                    }
+                }, true);
 
-            // register the global space shortcut
-            mtKeyboardShortcutManager.register('space', function(evt) {
-                evt.preventDefault();
-                mtOrchestrator.togglePlayback();
-            });
-
-            mtKeyboardShortcutManager.register('search', 'esc', function(evt) {
-                evt.preventDefault();
-                rootCtrl.toggleSearch(false);
-            });
-
-            $scope.$watch('props.queue', function(newVal, oldVal) {
-                // this test is here to prevent to serialize during the init phase
-                if (newVal !== oldVal) {
-                    var newSerializedQueue = mtQueueManager.serialize();
+                $scope.$watch(function() {
+                    return $location.search().queue;
+                }, function(newSerializedQueue) {
                     if (serializedQueue !== newSerializedQueue) {
                         serializedQueue = newSerializedQueue;
-                        // replace queue parameter but keep the rest
-                        $location.search(angular.extend({}, $location.search(), {queue: serializedQueue}));
-                    }
-                }
-            }, true);
-
-            $scope.$watch(function() {
-                return $location.search().queue;
-            }, function(newSerializedQueue) {
-                if (serializedQueue !== newSerializedQueue) {
-                    serializedQueue = newSerializedQueue;
-                    // change initiated by user (back / forward etc.), need to be deserialized
-                    rootCtrl.queueLoading = true;
-                    mtQueueManager.deserialize(serializedQueue).catch(function(message) {
-                        mtNotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
-                            notificationCenter.error(message);
+                        // change initiated by user (back / forward etc.), need to be deserialized
+                        rootCtrl.queueLoading = true;
+                        mtQueueManager.deserialize(serializedQueue).catch(function(message) {
+                            mtNotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+                                notificationCenter.error(message);
+                            });
+                        }).finally(function() {
+                            rootCtrl.queueLoading = false;
                         });
-                    }).finally(function() {
-                        rootCtrl.queueLoading = false;
-                    });
-                }
-            });
+                    }
+                });
 
-            $scope.$watch(function() {
-                return mtOrchestrator.runningQueueEntry;
-            }, function(runningQueueEntry, oldVal) {
-                if (runningQueueEntry !== oldVal) {
-                    mtQueuesRegistry('queue').ready(function(queue) {
-                        queue.focusEntry(runningQueueEntry);
-                    });
-                }
-            });
+                $scope.$watch(function() {
+                    return mtOrchestrator.runningQueueEntry;
+                }, function(runningQueueEntry, oldVal) {
+                    if (runningQueueEntry !== oldVal) {
+                        mtQueuesRegistry('queue').ready(function(queue) {
+                            queue.focusEntry(runningQueueEntry);
+                        });
+                    }
+                });
 
-            $scope.$watch(function() {
-                return Capabilities.playback;
-            }, function(playback) {
-                if (playback === false) {
-                    ModalManager.open({
-                        title: 'MixTube won\'t work on your device',
-                        contentTemplateUrl: '/scripts/components/capabilities/no-playback-modal-content.html',
-                        commands: [{label: 'OK', primary: true}]
-                    });
-                }
-            });
+                $scope.$watch(function() {
+                    return Capabilities.playback;
+                }, function(playback) {
+                    if (playback === false) {
+                        ModalManager.open({
+                            title: 'MixTube won\'t work on your device',
+                            contentTemplateUrl: '/scripts/components/capabilities/no-playback-modal-content.html',
+                            commands: [{label: 'OK', primary: true}]
+                        });
+                    }
+                });
+            }
         });
 
-    mt.MixTubeApp.controller('mtSearchResultsCtrl', function($scope, $rootScope, $timeout, $q, mtYoutubeClient) {
+    mt.MixTubeApp.controller('mtSearchResultsCtrl',
+        function($scope, $rootScope, $timeout, $q, mtYoutubeClient, SearchCtrlHelper) {
 
-        var searchResultsCtrl = this;
+            var searchResultsCtrl = this;
 
-        /**
-         * @const
-         * @type {number}
-         */
-        var INSTANT_SEARCH_DELAY = 500;
+            /**
+             * @const
+             * @type {number}
+             */
+            var INSTANT_SEARCH_DELAY = 500;
 
-        /** @type {number} */
-        var searchRequestCount = 0;
-        /** @type {promise} */
-        var instantSearchPromise = null;
+            /** @type {number} */
+            var searchRequestCount = 0;
+            /** @type {promise} */
+            var instantSearchPromise = null;
 
 
-        // the following variables will be initialized by the initSearch function.
+            // the following variables will be initialized by the initSearch function.
 
-        /**
-         * The user already executed one search. Used to hide the results pane until there is something to show.
-         *
-         * @type {boolean}
-         */
-        searchResultsCtrl.inSearch = null;
-        /**
-         * A list of results pages.
-         *
-         * @type {Object.<string, Array.<Array.<mt.model.Video>>>}
-         */
-        searchResultsCtrl.results = null;
-        /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.pending = null;
-        /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.pendingMore = null;
-        /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.error = null;
-        /** @type {Object.<string, boolean>} */
-        searchResultsCtrl.noneFound = null;
-        /** @type {Object.<string, string>} */
-        searchResultsCtrl.nextPageId = null;
+            /**
+             * The user already executed one search. Used to hide the results pane until there is something to show.
+             *
+             * @type {boolean}
+             */
+            searchResultsCtrl.inSearch = null;
+            /**
+             * A list of results pages.
+             *
+             * @type {Object.<string, Array.<Array.<mt.model.Video>>>}
+             */
+            searchResultsCtrl.results = null;
+            /** @type {Object.<string, boolean>} */
+            searchResultsCtrl.pending = null;
+            /** @type {Object.<string, boolean>} */
+            searchResultsCtrl.pendingMore = null;
+            /** @type {Object.<string, boolean>} */
+            searchResultsCtrl.error = null;
+            /** @type {Object.<string, boolean>} */
+            searchResultsCtrl.noneFound = null;
+            /** @type {Object.<string, string>} */
+            searchResultsCtrl.nextPageId = null;
 
-        searchResultsCtrl.shouldShowSearchResultPanel = shouldShowSearchResultPanel;
-        searchResultsCtrl.showMore = showMore;
+            searchResultsCtrl.getSearchTerm = getSearchTerm;
+            searchResultsCtrl.shouldShowSearchResultPanel = shouldShowSearchResultPanel;
+            searchResultsCtrl.showMore = showMore;
 
-        activate();
+            activate();
 
-        function shouldShowSearchResultPanel() {
-            return $scope.props.searchShown && searchResultsCtrl.inSearch;
-        }
-
-        function initSearch() {
-            instantSearchPromise = null;
-            searchResultsCtrl.inSearch = false;
-            searchResultsCtrl.results = {youtube: [[]]};
-            searchResultsCtrl.pending = {youtube: false};
-            searchResultsCtrl.pendingMore = {youtube: false};
-            searchResultsCtrl.nextPageId = {youtube: null};
-            searchResultsCtrl.error = {youtube: false};
-            searchResultsCtrl.noneFound = {youtube: false};
-        }
-
-        function showMore(pId, nextPageId) {
-            if (pId === 'youtube') {
-                // clear any error message (case of retry after error)
-                searchResultsCtrl.error.youtube = false;
-                searchYoutube($scope.props.searchTerm, nextPageId);
-            }
-        }
-
-        /**
-         *
-         * @param {string} term
-         * @param {string=} nextPageId
-         * @returns {promise}
-         */
-        function searchYoutube(term, nextPageId) {
-            var first = !nextPageId;
-
-            var startSearchRequestCount = searchRequestCount;
-
-            if (first) {
-                searchResultsCtrl.pending.youtube = true;
-
-                // reset the results list and the next page token since we are starting a new search
-                searchResultsCtrl.results.youtube = [];
-                searchResultsCtrl.nextPageId.youtube = null;
-            } else {
-                searchResultsCtrl.pendingMore.youtube = true;
+            function getSearchTerm() {
+                return SearchCtrlHelper.searchTerm;
             }
 
-            return mtYoutubeClient.searchVideosByQuery(term,
-                {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
-                    if (searchRequestCount === startSearchRequestCount) {
-                        if (first) {
-                            searchResultsCtrl.pending.youtube = false;
-                        } else {
-                            searchResultsCtrl.pendingMore.youtube = false;
+            function shouldShowSearchResultPanel() {
+                return SearchCtrlHelper.searchShown && searchResultsCtrl.inSearch;
+            }
+
+            function initSearch() {
+                instantSearchPromise = null;
+                searchResultsCtrl.inSearch = false;
+                searchResultsCtrl.results = {youtube: [[]]};
+                searchResultsCtrl.pending = {youtube: false};
+                searchResultsCtrl.pendingMore = {youtube: false};
+                searchResultsCtrl.nextPageId = {youtube: null};
+                searchResultsCtrl.error = {youtube: false};
+                searchResultsCtrl.noneFound = {youtube: false};
+            }
+
+            function showMore(pId, nextPageId) {
+                if (pId === 'youtube') {
+                    // clear any error message (case of retry after error)
+                    searchResultsCtrl.error.youtube = false;
+                    searchYoutube(SearchCtrlHelper.searchTerm, nextPageId);
+                }
+            }
+
+            /**
+             *
+             * @param {string} term
+             * @param {string=} nextPageId
+             * @returns {promise}
+             */
+            function searchYoutube(term, nextPageId) {
+                var first = !nextPageId;
+
+                var startSearchRequestCount = searchRequestCount;
+
+                if (first) {
+                    searchResultsCtrl.pending.youtube = true;
+
+                    // reset the results list and the next page token since we are starting a new search
+                    searchResultsCtrl.results.youtube = [];
+                    searchResultsCtrl.nextPageId.youtube = null;
+                } else {
+                    searchResultsCtrl.pendingMore.youtube = true;
+                }
+
+                return mtYoutubeClient.searchVideosByQuery(term,
+                    {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
+                        if (searchRequestCount === startSearchRequestCount) {
+                            if (first) {
+                                searchResultsCtrl.pending.youtube = false;
+                            } else {
+                                searchResultsCtrl.pendingMore.youtube = false;
+                            }
                         }
-                    }
-                }, null, function progressCb(results) {
-                    if (searchRequestCount === startSearchRequestCount) {
-                        if (results.videos.length) {
-                            searchResultsCtrl.results.youtube.push(results.videos);
-                            searchResultsCtrl.nextPageId.youtube = results.nextPageId;
-                        } else {
-                            searchResultsCtrl.noneFound.youtube = true;
+                    }, null, function progressCb(results) {
+                        if (searchRequestCount === startSearchRequestCount) {
+                            if (results.videos.length) {
+                                searchResultsCtrl.results.youtube.push(results.videos);
+                                searchResultsCtrl.nextPageId.youtube = results.nextPageId;
+                            } else {
+                                searchResultsCtrl.noneFound.youtube = true;
+                            }
                         }
-                    }
-                }).catch(function catchCb() {
-                    if (searchRequestCount === startSearchRequestCount) {
-                        searchResultsCtrl.error.youtube = true;
-                        if (first) {
-                            searchResultsCtrl.pending.youtube = false;
-                            searchResultsCtrl.results.youtube = [];
-                        } else {
-                            searchResultsCtrl.pendingMore.youtube = false;
+                    }).catch(function catchCb() {
+                        if (searchRequestCount === startSearchRequestCount) {
+                            searchResultsCtrl.error.youtube = true;
+                            if (first) {
+                                searchResultsCtrl.pending.youtube = false;
+                                searchResultsCtrl.results.youtube = [];
+                            } else {
+                                searchResultsCtrl.pendingMore.youtube = false;
+                            }
+                        }
+                    });
+            }
+
+            function activate() {
+                initSearch();
+
+                // when the user types we automatically execute the search
+                $scope.$watch(function() {
+                    return SearchCtrlHelper.searchTerm;
+                }, function(newSearchTerm) {
+                    if (newSearchTerm !== null) {
+
+                        // new inputs so we stop the previous request
+                        $timeout.cancel(instantSearchPromise);
+
+                        // as soon as the query changes clear messages
+                        searchResultsCtrl.error.youtube = false;
+                        searchResultsCtrl.noneFound.youtube = false;
+
+                        // if the search has to be longer than two characters
+                        if (newSearchTerm.length > 2) {
+                            searchRequestCount++;
+
+                            $timeout.cancel(instantSearchPromise);
+                            instantSearchPromise = $timeout(function search() {
+                                searchResultsCtrl.inSearch = true;
+                                searchYoutube(newSearchTerm);
+                            }, INSTANT_SEARCH_DELAY);
                         }
                     }
                 });
-        }
 
-        function activate() {
-            initSearch();
-
-            // when the user types we automatically execute the search
-            $scope.$watch('props.searchTerm', function(newSearchTerm) {
-                if (newSearchTerm !== null) {
-
-                    // new inputs so we stop the previous request
-                    $timeout.cancel(instantSearchPromise);
-
-                    // as soon as the query changes clear messages
-                    searchResultsCtrl.error.youtube = false;
-                    searchResultsCtrl.noneFound.youtube = false;
-
-                    // if the search has to be longer than two characters
-                    if (newSearchTerm.length > 2) {
-                        searchRequestCount++;
-
+                // ensures everything is cleared when the search is hidden
+                $scope.$watch(function() {
+                    SearchCtrlHelper.searchShown;
+                }, function(searchShown) {
+                    if (!searchShown) {
+                        // new inputs so we stop the previous request
                         $timeout.cancel(instantSearchPromise);
-                        instantSearchPromise = $timeout(function search() {
-                            searchResultsCtrl.inSearch = true;
-                            searchYoutube(newSearchTerm);
-                        }, INSTANT_SEARCH_DELAY);
+                        initSearch();
                     }
-                }
-            });
-
-            // ensures everything is cleared when the search is hidden
-            $scope.$watch('props.searchShown', function(searchShown) {
-                if (!searchShown) {
-                    // new inputs so we stop the previous request
-                    $timeout.cancel(instantSearchPromise);
-                    initSearch();
-                }
-            });
-        }
-    });
+                });
+            }
+        });
 
     mt.MixTubeApp.controller('mtSearchResultCtrl',
         function($scope, $timeout, mtQueueManager, mtQueuesRegistry, mtOrchestrator) {

@@ -57,17 +57,17 @@
             </div>
 
             <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
-                <span class="facet facet__animation-toggle" ng-hide="props.searchShown"
+                <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isSearchShown()"
                       data-mt-icon="&#xe800">
                     <span class="mt-replaced-text">Open search</span>
                 </span>
-                <span class="facet close facet__animation-toggle" ng-show="props.searchShown"
+                <span class="facet close facet__animation-toggle" ng-show="rootCtrl.isSearchShown()"
                       data-mt-icon="&#xe802">
                     <span class="mt-replaced-text">Close search</span>
                 </span>
             </mt-button>
 
-            <mt-search-input name="search" ng-model="props.searchTerm"></mt-search-input>
+            <mt-search-input name="search" ng-model="rootCtrl.searchTerm"></mt-search-input>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
             <div class="mt-queue" ng-controller="mtQueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
                 <div>
                     <div class="mt-queue__entry mt-js-animation__queue-entry"
-                         ng-repeat="entry in props.queue.entries"
+                         ng-repeat="entry in rootCtrl.getQueue().entries"
                          ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
                          mt-anchor="{{entry.id}}">
                         <mt-button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
@@ -171,8 +171,7 @@
                                         </li>
                                         <li class="mt-result__data__item mt-result__data__publisher"
                                             ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">
-                                            by
-                                            {{searchResult.publisherName}}
+                                            by {{searchResult.publisherName}}
                                         </li>
                                     </ul>
                                 </mt-button>
@@ -191,7 +190,8 @@
                     <div class="mt-search__message mt-js-animation__slide"
                          ng-if="searchResultsCtrl.noneFound[pId]">
                         <p class="mt-search__message__padding">
-                            Sorry, no video found on {{pLabel}} for "{{props.searchTerm}}". Please try with another
+                            Sorry, no video found on {{pLabel}} for "{{searchResultsCtrl.getSearchTerm()}}". Please try
+                            with another
                             title.
                         </p>
                     </div>
@@ -225,6 +225,7 @@
 <script src="scripts/commons.js"></script>
 <script src="scripts/app.js"></script>
 <script src="scripts/app-controllers.js"></script>
+<script src="scripts/search-ctrl-helper.js"></script>
 <script src="scripts/components/logger-factory.js"></script>
 <script src="scripts/components/directives-registry/async-registry-factory.js"></script>
 <script src="scripts/components/directives-registry/directives-registry-helper.js"></script>
