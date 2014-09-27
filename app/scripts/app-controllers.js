@@ -309,14 +309,14 @@
                     }
                 });
 
-                // ensures everything is cleared when the search is hidden
+                // ensures everything is initialized when the search is shown and stopped when it is hidden
                 $scope.$watch(function() {
-                    SearchCtrlHelper.searchShown;
+                    return SearchCtrlHelper.searchShown;
                 }, function(searchShown) {
-                    if (!searchShown) {
-                        // new inputs so we stop the previous request
-                        $timeout.cancel(instantSearchPromise);
+                    if (searchShown) {
                         initSearch();
+                    } else {
+                        $timeout.cancel(instantSearchPromise);
                     }
                 });
             }
