@@ -12,6 +12,6 @@
     "popcorn-js": "~1.5",
     "js-signals": "~1.0.0",
     "keymaster": "~1.6.2",
-    "velocity": "~0.1.0"
+    "velocity": "~1.1.0"
   }
 }

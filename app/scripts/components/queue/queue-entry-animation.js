@@ -1,4 +1,4 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
     /**
@@ -6,12 +6,12 @@
      *
      * It overrides the default size and slide animation to add a special queue entry event (needed by mtQueue directive)
      */
-    mt.MixTubeApp.animation('.mt-js-animation__queue-entry', function (mtSlideSizeAnimationBuilder) {
+    function AnimationQueueEntry(SlideSizeAnimationBuilder, Velocity) {
 
         return _.extend(
-            mtSlideSizeAnimationBuilder(),
+            SlideSizeAnimationBuilder(),
             {
-                enter: function (element, done) {
+                enter: function(element, done) {
 
                     var txBeginning = '-100%';
                     var scope = element.scope();
@@ -23,21 +23,23 @@
 
                     // second step that may be delayed
                     function nextStep() {
-                        element.velocity({translateX: [0, txBeginning]},
+                        Velocity(
+                            element[0],
+                            {translateX: [0, txBeginning]},
                             _.defaults({
-                                complete: function () {
+                                complete: function() {
                                     element.css({transform: ''});
                                     done();
                                 }
-                            }, mtSlideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF));
+                            }, SlideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF));
                     }
 
                     var suspended = false;
                     var continuation = {
-                        suspend: function () {
+                        suspend: function() {
                             suspended = true;
                         },
-                        continue: function () {
+                        continue: function() {
                             suspended = false;
                             nextStep();
                         }
@@ -53,5 +55,7 @@
                     }
                 }
             });
-    });
+    }
+
+    mt.MixTubeApp.animation('.mt-js-animation__queue-entry', AnimationQueueEntry);
 })(mt);

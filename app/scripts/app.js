@@ -1,17 +1,17 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
     var $document = angular.element(document);
-    $document.ready(function () {
+    $document.ready(function() {
         angular.bootstrap(document, ['mtMixTubeApp']);
     });
 
     /**
      * Default configuration for animations. These values are shared with the SASS counterpart.
      *
-     * @name animationsConfig
+     * @name AnimationsConfig
      */
-    var animationsConfig = {
+    var AnimationsConfig = {
         // SASS $baseTransitionDuration
         get transitionDuration() {
             return 200;
@@ -23,13 +23,15 @@
     };
 
     mt.MixTubeApp = angular.module('mtMixTubeApp', ['ngAnimate'])
-        .config(function ($locationProvider) {
+        .config(function($locationProvider) {
             $locationProvider.html5Mode(true);
         })
 
-        .constant('animationsConfig', animationsConfig)
+        .constant('Velocity', window.Velocity)
 
-        .run(function ($rootScope, $controller, Configuration) {
+        .constant('AnimationsConfig', AnimationsConfig)
+
+        .run(function($rootScope, $controller, Configuration) {
             // make sure the scope always has the props property
             $rootScope.props = {};
 

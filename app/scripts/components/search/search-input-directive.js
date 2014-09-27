@@ -1,7 +1,8 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
-    function mtSearchInput(mtSearchInputsRegistry, mtDirectivesRegistryHelper, InteractiveChromesManager, animationsConfig) {
+    function mtSearchInput(mtSearchInputsRegistry, mtDirectivesRegistryHelper, InteractiveChromesManager,
+                           AnimationsConfig) {
 
         return {
             restrict: 'E',
@@ -10,7 +11,7 @@
             scope: {
                 inputModel: '=ngModel'
             },
-            controller: function ($scope, $element, $attrs) {
+            controller: function($scope, $element, $attrs) {
 
                 mtDirectivesRegistryHelper.install(this, mtSearchInputsRegistry, 'name', $scope, $attrs);
 
@@ -30,31 +31,33 @@
 
                     var baseAnimConf = {
                         // in init phase we don't want to animate
-                        duration: init ? 0 : animationsConfig.transitionDuration,
-                        easing: animationsConfig.easeInOutBezierPoints
+                        duration: init ? 0 : AnimationsConfig.transitionDuration,
+                        easing: AnimationsConfig.easeInOutBezierPoints
                     };
 
                     if (_show) {
                         form.css({display: ''});
-                        fakeField.velocity(
+                        Velocity(
+                            fakeField,
                             {translateX: ['0', '100%']},
-                            _.extend(baseAnimConf, {
-                                complete: function () {
+                            _.defaults({
+                                complete: function() {
                                     field.css({opacity: ''});
                                     animationRunning = false;
                                 }
-                            })
+                            }, baseAnimConf)
                         );
                     } else {
-                        fakeField.velocity(
+                        Velocity(
+                            fakeField,
                             {translateX: ['100%', '0']},
-                            _.extend(baseAnimConf, {
-                                complete: function () {
+                            _.defaults({
+                                complete: function() {
                                     form.css({display: 'none'});
                                     field.css({opacity: ''});
                                     animationRunning = false;
                                 }
-                            })
+                            }, baseAnimConf)
                         );
                     }
 
@@ -67,7 +70,7 @@
 
                 function activate() {
                     // we need to blur the field on form submit to hide the virtual keyboard on mobile
-                    form.on('submit', function () {
+                    form.on('submit', function() {
                         if (!animationRunning) {
                             field[0].blur();
                         }
@@ -76,7 +79,7 @@
                     // as long as the search input is open we consider it as an active interaction
                     var unmanageChromeFn = InteractiveChromesManager.addInteractiveChrome(
                         {
-                            isInteracted: function () {
+                            isInteracted: function() {
                                 return _show;
                             }
                         });
@@ -85,7 +88,7 @@
                     $scope.$on('$destroy', unmanageChromeFn);
                 }
 
-                this.toggle = function (show) {
+                this.toggle = function(show) {
                     if (show !== _show && !animationRunning) {
                         _show = show;
                         sync();

@@ -91,6 +91,8 @@ body {
     @include position(absolute, 0px 0px auto auto);
     width: 100%;
     max-width: $notificationsNominalWidth;
+    max-height: 100%;
+    overflow: hidden;
 
     z-index: 3;
 

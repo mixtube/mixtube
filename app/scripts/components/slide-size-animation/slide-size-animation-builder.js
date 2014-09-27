@@ -1,11 +1,11 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
-    mt.MixTubeApp.factory('mtSlideSizeAnimationBuilder', function (animationsConfig) {
+    function SlideSizeAnimationBuilderFactory(AnimationsConfig, Velocity) {
 
         var BASE_VELOCITY_ANIM_CONF = {
-            duration: animationsConfig.transitionDuration,
-            easing: animationsConfig.easeInOutBezierPoints
+            duration: AnimationsConfig.transitionDuration,
+            easing: AnimationsConfig.easeInOutBezierPoints
         };
 
         /**
@@ -20,54 +20,78 @@
             };
         }
 
-        function builder() {
+        /**
+         * @name SlideSizeAnimationBuilder
+         */
+        function SlideSizeAnimationBuilder() {
             return {
 
-                enter: function (element, done) {
+                enter: function(element, done) {
 
                     var config = buildConfig(element);
                     var txBeginning = config.ltr ? '-100%' : '100%';
-                    var nominalHeight = element[0].getBoundingClientRect().height;
 
-                    element
-                        .css({height: 0, transform: 'translateX(' + txBeginning + ')'})
-
-                        .velocity({height: [nominalHeight, 0]}, _.defaults(
+                    Velocity(
+                        element[0],
+                        'slideDown',
+                        _.defaults(
                             {
                                 // disable mobile optimisation because VelocityJS uses the null transform hack
                                 // which would override our translate value
-                                mobileHA: false
-                            },
-                            BASE_VELOCITY_ANIM_CONF))
+                                mobileHA: false,
 
-                        .velocity({translateX: [0, txBeginning]}, _.defaults(
-                            {
-                                complete: function () {
-                                    element.css({height: '', transform: ''});
-                                    done();
+                                complete: function() {
+                                    Velocity(
+                                        element[0],
+                                        {translateX: [0, txBeginning]},
+                                        _.defaults(
+                                            {
+                                                complete: function() {
+                                                    element.css({height: '', transform: ''});
+                                                    done();
+                                                }
+                                            }, BASE_VELOCITY_ANIM_CONF));
                                 }
-                            }, BASE_VELOCITY_ANIM_CONF));
+                            },
+                            BASE_VELOCITY_ANIM_CONF));
+
+                    element.css({height: 0, transform: 'translateX(' + txBeginning + ')'});
                 },
 
-                leave: function (element, done) {
+                leave: function(element, done) {
 
                     var config = buildConfig(element);
-                    var nominalHeight = element[0].getBoundingClientRect().height;
 
-                    element
-                        .velocity({translateX: [config.ltr ? '-100%' : '100%', 0]}, BASE_VELOCITY_ANIM_CONF)
-                        .velocity({height: [0, nominalHeight]}, _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
+                    Velocity(
+                        element[0],
+                        {translateX: [config.ltr ? '-100%' : '100%', 0]},
+                        _.defaults(
+                            {
+                                complete: function() {
+                                    Velocity(
+                                        element[0],
+                                        'slideUp',
+                                        _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
+                                }
+                            }, BASE_VELOCITY_ANIM_CONF)
+                    );
+
+
                 },
 
-                move: function (element, done) {
+                move: function(element, done) {
                     // move doesn't really make sense for the use cases sor far
                     done();
                 }
             };
         }
 
-        builder.buildConfig = buildConfig;
-        builder.BASE_VELOCITY_ANIM_CONF = BASE_VELOCITY_ANIM_CONF;
-        return builder;
-    });
+        SlideSizeAnimationBuilder.buildConfig = buildConfig;
+        SlideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF = BASE_VELOCITY_ANIM_CONF;
+
+        return SlideSizeAnimationBuilder;
+    }
+
+    mt.MixTubeApp.factory('SlideSizeAnimationBuilder', SlideSizeAnimationBuilderFactory);
+
 })(mt);

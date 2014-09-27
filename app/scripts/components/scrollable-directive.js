@@ -1,4 +1,4 @@
-(function (mt) {
+(function(mt) {
     'use strict';
 
     /**
@@ -12,7 +12,7 @@
      * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
      * is visible.
      */
-    mt.MixTubeApp.directive('mtScrollable', function ($timeout, animationsConfig) {
+    function mtScrollable($timeout, AnimationsConfig, Velocity) {
 
         /**
          * @param {JQLite} container
@@ -27,7 +27,7 @@
 
         return {
             restrict: 'A',
-            controller: function ($scope, $element) {
+            controller: function($scope, $element) {
 
                 var scrollable = $element;
 
@@ -35,16 +35,17 @@
                  * @param {string} anchor
                  * @param {Function=} done
                  */
-                this.putAnchorInViewPort = function (anchor, done) {
+                this.putAnchorInViewPort = function(anchor, done) {
                     var target = mt.commons.querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
                     if (target.length > 0 && !containsY(scrollable, target)) {
                         // the target needs to be animated to reveal the item
-                        target.velocity(
+                        Velocity(
+                            target[0],
                             'scroll',
                             {
-                                container: scrollable,
-                                duration: animationsConfig.transitionDuration,
-                                easing: animationsConfig.easeInOutBezierPoints,
+                                container: scrollable[0],
+                                duration: AnimationsConfig.transitionDuration,
+                                easing: AnimationsConfig.easeInOutBezierPoints,
                                 complete: done
                             }
                         );
@@ -55,5 +56,7 @@
                 };
             }
         };
-    });
+    }
+
+    mt.MixTubeApp.directive('mtScrollable', mtScrollable);
 })(mt);
