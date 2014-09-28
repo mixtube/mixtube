@@ -1,9 +1,12 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.factory('mtDirectivesRegistryHelper', function() {
+  function DirectivesRegistryHelperFactory() {
 
-    return {
+    /**
+     * @name DirectivesRegistryHelper
+     */
+    var DirectivesRegistryHelper = {
       install: function(facade, registry, attributeName, directiveScope, directiveAttrs) {
         var name = directiveAttrs[attributeName];
         if (!name || name.trim().length === 0) {
@@ -15,6 +18,10 @@
         });
       }
     };
-  });
+
+    return DirectivesRegistryHelper;
+  }
+
+  mt.MixTubeApp.factory('DirectivesRegistryHelper', DirectivesRegistryHelperFactory);
 
 })(mt);

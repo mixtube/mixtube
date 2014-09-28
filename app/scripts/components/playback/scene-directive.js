@@ -1,11 +1,11 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.directive('mtScene', function(mtScenesRegistry, mtDirectivesRegistryHelper) {
+  mt.MixTubeApp.directive('mtScene', function(mtScenesRegistry, DirectivesRegistryHelper) {
     return {
       restrict: 'A',
       controller: function($scope, $element, $attrs) {
-        mtDirectivesRegistryHelper.install(this, mtScenesRegistry, 'mtScene', $scope, $attrs);
+        DirectivesRegistryHelper.install(this, mtScenesRegistry, 'mtScene', $scope, $attrs);
 
         var sceneElement = $element;
 

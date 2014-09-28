@@ -2,7 +2,7 @@
   'use strict';
 
   mt.MixTubeApp.directive('mtNotificationCenter',
-    function($timeout, mtNotificationCentersRegistry, mtDirectivesRegistryHelper) {
+    function($timeout, mtNotificationCentersRegistry, DirectivesRegistryHelper) {
 
       return {
         restrict: 'E',
@@ -43,7 +43,7 @@
           }
 
           function activate() {
-            mtDirectivesRegistryHelper.install(
+            DirectivesRegistryHelper.install(
               notificationCenterCtrl, mtNotificationCentersRegistry, 'name', $scope, $attrs);
           }
         }

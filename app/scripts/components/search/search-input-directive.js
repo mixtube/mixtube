@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function mtSearchInput(mtSearchInputsRegistry, mtDirectivesRegistryHelper, InteractiveChromesManager,
+  function mtSearchInput(mtSearchInputsRegistry, DirectivesRegistryHelper, InteractiveChromesManager,
                          AnimationsConfig) {
 
     return {
@@ -13,7 +13,7 @@
       },
       controller: function($scope, $element, $attrs) {
 
-        mtDirectivesRegistryHelper.install(this, mtSearchInputsRegistry, 'name', $scope, $attrs);
+        DirectivesRegistryHelper.install(this, mtSearchInputsRegistry, 'name', $scope, $attrs);
 
         var form = $element;
         var field = mt.commons.querySelector($element, '.mt-js-search-input__field');

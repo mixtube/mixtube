@@ -1,11 +1,11 @@
 (function(mt, undefined) {
   'use strict';
 
-  function CapabilitiesFactory($window, $rootScope, Configuration) {
+  function CapabilitiesFactory($rootScope, Configuration) {
 
     var videoAutoplay = undefined;
 
-    $window.Modernizr.on('videoautoplay', function(result) {
+    Modernizr.on('videoautoplay', function(result) {
       $rootScope.$apply(function() {
         videoAutoplay = result;
       });

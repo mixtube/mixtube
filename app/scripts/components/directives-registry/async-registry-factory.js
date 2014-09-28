@@ -52,4 +52,5 @@
   };
 
   mt.MixTubeApp.factory('AsyncRegistryFactory', AsyncRegistryFactoryFactory);
+
 })(mt);
