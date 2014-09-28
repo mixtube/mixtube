@@ -3,7 +3,7 @@
 
   mt.MixTubeApp.controller('mtRootCtrl',
     function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-             NotificationCentersRegistry, Orchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
+             NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 
       var rootCtrl = this;
@@ -133,7 +133,7 @@
           return Orchestrator.runningQueueEntry;
         }, function(runningQueueEntry, oldVal) {
           if (runningQueueEntry !== oldVal) {
-            mtQueuesRegistry('queue').ready(function(queue) {
+            QueuesRegistry('queue').ready(function(queue) {
               queue.focusEntry(runningQueueEntry);
             });
           }
@@ -323,7 +323,7 @@
     });
 
   mt.MixTubeApp.controller('mtSearchResultCtrl',
-    function($scope, $timeout, mtQueueManager, mtQueuesRegistry, Orchestrator) {
+    function($scope, $timeout, mtQueueManager, QueuesRegistry, Orchestrator) {
 
       /**
        * @const
@@ -351,7 +351,7 @@
           searchResultCtrl.countBeforePlayback = null;
         }
 
-        mtQueuesRegistry('queue').ready(function(queue) {
+        QueuesRegistry('queue').ready(function(queue) {
           queue.focusEntry(queueEntry);
         });
 

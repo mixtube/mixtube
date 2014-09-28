@@ -1,13 +1,12 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.directive('mtQueue', function($timeout, DirectivesRegistryHelper, mtQueuesRegistry) {
-
+  function mtQueue($timeout, DirectivesRegistryHelper, QueuesRegistry) {
     return {
       restrict: 'A',
       require: ['mtQueue', 'mtScrollable'],
       controller: function($scope, $element, $attrs) {
-        DirectivesRegistryHelper.install(this, mtQueuesRegistry, 'mtQueue', $scope, $attrs);
+        DirectivesRegistryHelper.install(this, QueuesRegistry, 'mtQueue', $scope, $attrs);
       },
       link: function(scope, iElement, iAttrs, ctrls) {
         var controller = ctrls[0];
@@ -56,5 +55,8 @@
         };
       }
     };
-  });
+  }
+
+  mt.MixTubeApp.directive('mtQueue', mtQueue);
+
 })(mt);

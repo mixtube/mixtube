@@ -58,4 +58,5 @@
   }
 
   mt.MixTubeApp.animation('.mt-js-animation__queue-entry', AnimationQueueEntry);
+
 })(mt);
