@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function PlaybackSlotFactoryFactory($rootScope, $q, MediaElementsPool, mtQueueManager, Configuration,
+  function PlaybackSlotFactoryFactory($rootScope, $q, MediaElementsPool, QueueManager, Configuration,
                                       LoggerFactory) {
 
     var logger = LoggerFactory('PlaybackSlotFactory');
@@ -60,7 +60,7 @@
 
     PlaybackSlot.PREPARE_RETRY = function(queueEntryIndexToTry, prepareDeferred) {
 
-      var queueEntryTrying = mtQueueManager.closestValidEntryByIndex(queueEntryIndexToTry);
+      var queueEntryTrying = QueueManager.closestValidEntryByIndex(queueEntryIndexToTry);
 
       prepareDeferred.notify(queueEntryTrying);
 

@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function OrchestratorFactory($rootScope, mtQueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
+  function OrchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
                                Configuration, LoggerFactory) {
 
     var logger = LoggerFactory('Orchestrator');
@@ -155,7 +155,7 @@
             _startedSlot = slot;
 
             _runningQueueEntry = slot.actualQueueEntry;
-            _runningQueueIndex = mtQueueManager.queue.entries.indexOf(_runningQueueEntry);
+            _runningQueueIndex = QueueManager.queue.entries.indexOf(_runningQueueEntry);
 
             prepareAuto(_runningQueueIndex + 1);
           }
@@ -227,7 +227,7 @@
      *  - something has changed between the currently playing entry and the auto prepared one -> launch a new cycle to pick and prepare
      */
     $rootScope.$watchCollection(function() {
-      return mtQueueManager.queue.entries;
+      return QueueManager.queue.entries;
     }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
       if (!angular.equals(newEntries, oldEntries)) {
 
@@ -327,7 +327,7 @@
           _playback.pause();
         } else if (_playback.paused) {
           _playback.resume();
-        } else if (_playback.stopped && mtQueueManager.queue.entries.length) {
+        } else if (_playback.stopped && QueueManager.queue.entries.length) {
           _playback.resume();
           moveTo(0);
         }

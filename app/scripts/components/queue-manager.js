@@ -34,9 +34,8 @@
     }
   };
 
-
-  mt.MixTubeApp.factory('mtQueueManager', function($q, mtYoutubeClient, LoggerFactory) {
-    var logger = LoggerFactory.logger('mtQueueManager');
+  function QueueManagerFactory($q, mtYoutubeClient, LoggerFactory) {
+    var logger = LoggerFactory.logger('QueueManager');
 
     function serialize(queue) {
       var buffer = [];
@@ -93,7 +92,10 @@
     // initialize queue
     var queue = new mt.model.Queue();
 
-    return {
+    /**
+     * @name QueueManager
+     */
+    var QueueManager = {
       /**
        * @returns {mt.model.Queue}
        */
@@ -186,5 +188,11 @@
         return serialize(queue);
       }
     };
-  });
+
+    return QueueManager;
+  }
+
+
+  mt.MixTubeApp.factory('QueueManager', QueueManagerFactory);
+
 })(mt);

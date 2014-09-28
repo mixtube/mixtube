@@ -2,7 +2,7 @@
   'use strict';
 
   mt.MixTubeApp.controller('mtRootCtrl',
-    function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, SearchInputsRegistry,
+    function($scope, $location, $timeout, mtKeyboardShortcutManager, QueueManager, SearchInputsRegistry,
              NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 
@@ -45,7 +45,7 @@
       }
 
       function getQueue() {
-        return mtQueueManager.queue;
+        return QueueManager.queue;
       }
 
       function getRunningQueueEntry() {
@@ -99,11 +99,11 @@
         });
 
         $scope.$watch(function() {
-          return mtQueueManager.queue;
+          return QueueManager.queue;
         }, function(newVal, oldVal) {
           // this test is here to prevent to serialize during the init phase
           if (newVal !== oldVal) {
-            var newSerializedQueue = mtQueueManager.serialize();
+            var newSerializedQueue = QueueManager.serialize();
             if (serializedQueue !== newSerializedQueue) {
               serializedQueue = newSerializedQueue;
               // replace queue parameter but keep the rest
@@ -119,7 +119,7 @@
             serializedQueue = newSerializedQueue;
             // change initiated by user (back / forward etc.), need to be deserialized
             rootCtrl.queueLoading = true;
-            mtQueueManager.deserialize(serializedQueue).catch(function(message) {
+            QueueManager.deserialize(serializedQueue).catch(function(message) {
               NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
                 notificationCenter.error(message);
               });
@@ -323,7 +323,7 @@
     });
 
   mt.MixTubeApp.controller('mtSearchResultCtrl',
-    function($scope, $timeout, mtQueueManager, QueuesRegistry, Orchestrator) {
+    function($scope, $timeout, QueueManager, QueuesRegistry, Orchestrator) {
 
       /**
        * @const
@@ -342,10 +342,10 @@
        */
       searchResultCtrl.appendResultToQueue = function(video) {
 
-        var queueEntry = mtQueueManager.appendVideo(video);
+        var queueEntry = QueueManager.appendVideo(video);
 
         if (Orchestrator.runningQueueEntry) {
-          var entries = mtQueueManager.queue.entries;
+          var entries = QueueManager.queue.entries;
           searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(Orchestrator.runningQueueEntry);
         } else {
           searchResultCtrl.countBeforePlayback = null;
@@ -363,7 +363,7 @@
       };
     });
 
-  mt.MixTubeApp.controller('mtQueueCtrl', function(Orchestrator, mtQueueManager) {
+  mt.MixTubeApp.controller('mtQueueCtrl', function(Orchestrator, QueueManager) {
 
     var queueCtrl = this;
 
@@ -378,7 +378,7 @@
      * @param {mt.model.QueueEntry} queueEntry
      */
     queueCtrl.removeQueueEntry = function(queueEntry) {
-      mtQueueManager.removeEntry(queueEntry);
+      QueueManager.removeEntry(queueEntry);
     };
   });
 
