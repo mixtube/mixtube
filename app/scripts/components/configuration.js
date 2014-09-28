@@ -66,4 +66,5 @@
   }
 
   mt.MixTubeApp.factory('Configuration', ConfigurationFactory);
+
 })(mt);

@@ -46,4 +46,5 @@
   }
 
   mt.MixTubeApp.factory('InteractiveChromesManager', InteractiveChromesManagerFactory);
+
 })(mt);

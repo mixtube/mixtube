@@ -17,4 +17,5 @@
   }
 
   mt.MixTubeApp.directive('mtClickActiveClass', mtClickActiveClass);
+
 })(mt);

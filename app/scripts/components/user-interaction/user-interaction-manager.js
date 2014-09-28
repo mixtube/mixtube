@@ -63,4 +63,5 @@
   }
 
   mt.MixTubeApp.factory('UserInteractionManager', UserInteractionManagerFactory);
+
 })(mt);
