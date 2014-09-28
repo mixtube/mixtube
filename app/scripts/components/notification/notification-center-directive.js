@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function mtNotificationCenter(mtNotificationCentersRegistry, DirectivesRegistryHelper) {
+  function mtNotificationCenter(NotificationCentersRegistry, DirectivesRegistryHelper) {
 
     return {
       restrict: 'E',
@@ -41,7 +41,7 @@
         }
 
         function activate() {
-          DirectivesRegistryHelper.install(notificationCenterCtrl, mtNotificationCentersRegistry, 'name', $scope,
+          DirectivesRegistryHelper.install(notificationCenterCtrl, NotificationCentersRegistry, 'name', $scope,
             $attrs);
         }
       }

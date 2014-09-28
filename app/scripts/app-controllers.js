@@ -3,7 +3,7 @@
 
   mt.MixTubeApp.controller('mtRootCtrl',
     function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-             mtNotificationCentersRegistry, Orchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
+             NotificationCentersRegistry, Orchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 
       var rootCtrl = this;
@@ -120,7 +120,7 @@
             // change initiated by user (back / forward etc.), need to be deserialized
             rootCtrl.queueLoading = true;
             mtQueueManager.deserialize(serializedQueue).catch(function(message) {
-              mtNotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+              NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
                 notificationCenter.error(message);
               });
             }).finally(function() {
@@ -383,10 +383,10 @@
   });
 
   mt.MixTubeApp.controller('mtDebuggingCtrl',
-    function(Configuration, mtKeyboardShortcutManager, mtNotificationCentersRegistry) {
+    function(Configuration, mtKeyboardShortcutManager, NotificationCentersRegistry) {
 
       function notification(message) {
-        mtNotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+        NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
           notificationCenter.error(message);
         });
       }

@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function OrchestratorFactory($rootScope, mtQueueManager, mtPlaybackSlotFactory, mtNotificationCentersRegistry,
+  function OrchestratorFactory($rootScope, mtQueueManager, mtPlaybackSlotFactory, NotificationCentersRegistry,
                                Configuration, mtLoggerFactory) {
 
     var logger = mtLoggerFactory('Orchestrator');
@@ -176,7 +176,7 @@
               return Configuration.autoEndCueTimeProvider(duration) - 10;
             },
             fn: function comingNextCueCb() {
-              mtNotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+              NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
                 var autoPreparedSlot = autoPreparedSlotAccessor();
                 var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
                 var closeComingNextFn = notificationCenter.comingNext({
