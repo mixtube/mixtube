@@ -1,43 +1,43 @@
 (function(mt, undefined) {
-    'use strict';
+  'use strict';
 
-    function CapabilitiesFactory($window, $rootScope, Configuration) {
+  function CapabilitiesFactory($window, $rootScope, Configuration) {
 
-        var videoAutoplay = undefined;
+    var videoAutoplay = undefined;
 
-        $window.Modernizr.on('videoautoplay', function(result) {
-            $rootScope.$apply(function() {
-                videoAutoplay = result;
-            });
-        });
+    $window.Modernizr.on('videoautoplay', function(result) {
+      $rootScope.$apply(function() {
+        videoAutoplay = result;
+      });
+    });
 
-        /**
-         * @name Capabilities
-         */
-        var Capabilities = {
-            /**
-             * Is the current platform capable of acting as a playback device.
-             *
-             * This property is a combinations of multiple rules but the main one is "being able to auto play video".
-             *
-             * @returns {boolean|undefined}
-             */
-            get playback() {
-                return Configuration.videoAutoplay !== null ? Configuration.videoAutoplay : videoAutoplay;
-            },
+    /**
+     * @name Capabilities
+     */
+    var Capabilities = {
+      /**
+       * Is the current platform capable of acting as a playback device.
+       *
+       * This property is a combinations of multiple rules but the main one is "being able to auto play video".
+       *
+       * @returns {boolean|undefined}
+       */
+      get playback() {
+        return Configuration.videoAutoplay !== null ? Configuration.videoAutoplay : videoAutoplay;
+      },
 
-            /**
-             * Is the current platform capable of acting as controller for a remote playback device.
-             *
-             * @returns {boolean|undefined}
-             */
-            get remoteControl() {
-                return false;
-            }
-        };
+      /**
+       * Is the current platform capable of acting as controller for a remote playback device.
+       *
+       * @returns {boolean|undefined}
+       */
+      get remoteControl() {
+        return false;
+      }
+    };
 
-        return Capabilities;
-    }
+    return Capabilities;
+  }
 
-    mt.MixTubeApp.factory('Capabilities', CapabilitiesFactory);
+  mt.MixTubeApp.factory('Capabilities', CapabilitiesFactory);
 })(mt);

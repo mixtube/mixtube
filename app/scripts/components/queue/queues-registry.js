@@ -1,8 +1,8 @@
 (function(mt) {
-    'use strict';
+  'use strict';
 
-    mt.MixTubeApp.factory('mtQueuesRegistry', function(AsyncRegistryFactory) {
-        return AsyncRegistryFactory('mtQueues');
-    });
+  mt.MixTubeApp.factory('mtQueuesRegistry', function(AsyncRegistryFactory) {
+    return AsyncRegistryFactory('mtQueues');
+  });
 
 })(mt);

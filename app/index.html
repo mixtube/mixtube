@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html ng-controller="mtRootCtrl as rootCtrl">
 <head>
-    <base href="/">
-    <!--hopefully triggers GPU Rasterization on Chrome-->
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0,  initial-scale=1.0, user-scalable=yes">
-    <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
-    <!-- usemin must look for files in app and .tmp directory for compiled css -->
-    <!-- build:css({app,.tmp}) styles/app.css -->
-    <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
-    <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
-    <link rel="stylesheet" href="styles/css/main.css" type="text/css">
-    <!-- endbuild -->
-    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
-    <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
+  <base href="/">
+  <!--hopefully triggers GPU Rasterization on Chrome-->
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0,  initial-scale=1.0, user-scalable=yes">
+  <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
+  <!-- usemin must look for files in app and .tmp directory for compiled css -->
+  <!-- build:css({app,.tmp}) styles/app.css -->
+  <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
+  <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
+  <link rel="stylesheet" href="styles/css/main.css" type="text/css">
+  <!-- endbuild -->
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
 </head>
 <body ng-class="{idle: rootCtrl.shouldIdleChrome(), 'mt-mouse-based-interaction': rootCtrl.isMouseDetected()}" ng-cloak>
 
@@ -20,198 +20,194 @@
 <div class="mt-backdrop" ng-show="rootCtrl.queueLoading"></div>
 
 <div class="mt-modal" ng-show="rootCtrl.queueLoading">
-    <p class="mt-queue-loading__message">Loading queue, please wait...</p>
+  <p class="mt-queue-loading__message">Loading queue, please wait...</p>
 
-    <div class="mt-queue-loading__progress">
-        <progress></progress>
-    </div>
+  <div class="mt-queue-loading__progress">
+    <progress></progress>
+  </div>
 </div>
 <!-- end of queue loading progress block -->
 
 <div class="mt-main-tile">
-    <div class="mt-header-tile">
-        <div class="mt-header" mt-interactive-chrome>
-            <div class="mt-header__bg" ng-class="{idle: rootCtrl.shouldIdleChrome()}"></div>
-            <div class="mt-header__container">
-                <div class="start">
-                    <h1 class="mt-header__app-title">
-                        <span class="logo">M</span><span class="remaining">ixtube</span>
-                    </h1>
-                </div>
-                <div class="center">
-                    <mt-button class="mt-header__playback-button"
-                               ng-click="rootCtrl.togglePlayback()" ng-show="rootCtrl.shouldShowPlaybackControls()">
-                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
-                              data-mt-icon="&#xe805">
-                            <span class="mt-replaced-text">Play</span>
-                        </span>
-                        <span class="facet facet__animation-toggle" ng-show="rootCtrl.isPlaying()"
-                              data-mt-icon="&#xe804">
-                            <span class="mt-replaced-text">Pause</span>
-                        </span>
-                    </mt-button>
-                </div>
-                <div class="end">
-                    <!--just padding container to ensure proper centering of header-center -->
-                </div>
-            </div>
+  <div class="mt-header-tile">
+    <div class="mt-header" mt-interactive-chrome>
+      <div class="mt-header__bg" ng-class="{idle: rootCtrl.shouldIdleChrome()}"></div>
+      <div class="mt-header__container">
+        <div class="start">
+          <h1 class="mt-header__app-title">
+            <span class="logo">M</span><span class="remaining">ixtube</span>
+          </h1>
+        </div>
+        <div class="center">
+          <mt-button class="mt-header__playback-button" ng-click="rootCtrl.togglePlayback()"
+                     ng-show="rootCtrl.shouldShowPlaybackControls()">
+            <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
+                  data-mt-icon="&#xe805">
+              <span class="mt-replaced-text">Play</span>
+            </span>
+            <span class="facet facet__animation-toggle" ng-show="rootCtrl.isPlaying()"
+                  data-mt-icon="&#xe804">
+              <span class="mt-replaced-text">Pause</span>
+            </span>
+          </mt-button>
+        </div>
+        <div class="end">
+          <!--just padding container to ensure proper centering of header-center -->
+        </div>
+      </div>
 
-            <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
-                <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isSearchShown()"
-                      data-mt-icon="&#xe800">
-                    <span class="mt-replaced-text">Open search</span>
-                </span>
-                <span class="facet close facet__animation-toggle" ng-show="rootCtrl.isSearchShown()"
-                      data-mt-icon="&#xe802">
-                    <span class="mt-replaced-text">Close search</span>
-                </span>
+      <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
+      <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isSearchShown()" data-mt-icon="&#xe800">
+        <span class="mt-replaced-text">Open search</span>
+      </span>
+      <span class="facet close facet__animation-toggle" ng-show="rootCtrl.isSearchShown()" data-mt-icon="&#xe802">
+        <span class="mt-replaced-text">Close search</span>
+      </span>
+      </mt-button>
+
+      <mt-search-input name="search" ng-model="rootCtrl.searchTerm"></mt-search-input>
+    </div>
+  </div>
+
+  <div class="mt-body-tile">
+
+    <div class="mt-scene-tile" ng-if="rootCtrl.shouldShowScene()">
+      <div class="mt-scene" mt-scene="scene"></div>
+    </div>
+
+    <div class="mt-notification-center-tile">
+      <mt-notification-center name="notificationCenter"></mt-notification-center>
+    </div>
+
+    <div class="mt-queue-tile" ng-class="{idle: rootCtrl.shouldIdleChrome()}" mt-interactive-chrome>
+      <div class="mt-queue" ng-controller="mtQueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
+        <div>
+          <div class="mt-queue__entry mt-js-animation__queue-entry"
+               ng-repeat="entry in rootCtrl.getQueue().entries"
+               ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
+               mt-anchor="{{entry.id}}">
+            <mt-button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
+                       ng-disabled="!rootCtrl.shouldShowPlaybackControls()">
+              <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
+                   class="image"></div>
+              <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
+
+              <div class="mt-queue__entry__progress" ng-show="entry === rootCtrl.getLoadingQueueEntry()">
+                <progress></progress>
+              </div>
             </mt-button>
+            <div class="mt-queue__entry__data">
+              <p class="mt-queue__entry__title" title="{{entry.video.title}}">
+                {{entry.video.title}}
+              </p>
 
-            <mt-search-input name="search" ng-model="rootCtrl.searchTerm"></mt-search-input>
+              <div class="mt-queue__entry__commands">
+                <mt-button class="mt-queue__entry__remove-button"
+                           data-mt-icon="&#xe801" ng-click="queueCtrl.removeQueueEntry(entry)"
+                           mt-click-active-class="ng-click-active">
+                  <span class="mt-replaced-text">Remove</span>
+                </mt-button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <div class="mt-body-tile">
+    <div class="mt-search-tile animation-show-hide"
+         ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
+         ng-show="searchResultsCtrl.shouldShowSearchResultPanel()"
+         mt-interactive-chrome="searchResultsCtrl.shouldShowSearchResultPanel()">
+      <div class="mt-search">
+        <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
+          <div class="mt-search__provider__header">
+            <h3 class="title">{{pLabel}}</h3>
 
-        <div class="mt-scene-tile" ng-if="rootCtrl.shouldShowScene()">
-            <div class="mt-scene" mt-scene="scene"></div>
-        </div>
-
-        <div class="mt-notification-center-tile">
-            <mt-notification-center name="notificationCenter"></mt-notification-center>
-        </div>
-
-        <div class="mt-queue-tile" ng-class="{idle: rootCtrl.shouldIdleChrome()}" mt-interactive-chrome>
-            <div class="mt-queue" ng-controller="mtQueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
-                <div>
-                    <div class="mt-queue__entry mt-js-animation__queue-entry"
-                         ng-repeat="entry in rootCtrl.getQueue().entries"
-                         ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
-                         mt-anchor="{{entry.id}}">
-                        <mt-button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
-                                   ng-disabled="!rootCtrl.shouldShowPlaybackControls()">
-                            <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
-                                 class="image"></div>
-                            <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
-
-                            <div class="mt-queue__entry__progress" ng-show="entry === rootCtrl.getLoadingQueueEntry()">
-                                <progress></progress>
-                            </div>
-                        </mt-button>
-                        <div class="mt-queue__entry__data">
-                            <p class="mt-queue__entry__title" title="{{entry.video.title}}">
-                                {{entry.video.title}}
-                            </p>
-
-                            <div class="mt-queue__entry__commands">
-                                <mt-button class="mt-queue__entry__remove-button"
-                                           data-mt-icon="&#xe801" ng-click="queueCtrl.removeQueueEntry(entry)"
-                                           mt-click-active-class="ng-click-active">
-                                    <span class="mt-replaced-text">Remove</span>
-                                </mt-button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="progress" ng-show="searchResultsCtrl.pending[pId]">
+              <progress></progress>
             </div>
-        </div>
+          </div>
 
-        <div class="mt-search-tile animation-show-hide"
-             ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
-             ng-show="searchResultsCtrl.shouldShowSearchResultPanel()"
-             mt-interactive-chrome="searchResultsCtrl.shouldShowSearchResultPanel()">
-            <div class="mt-search">
-                <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
-                    <div class="mt-search__provider__header">
-                        <h3 class="title">{{pLabel}}</h3>
+          <div class="mt-results">
+            <div class="mt-results__page mt-js-animation__slide"
+                 ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
+              <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
+                   ng-controller="mtSearchResultCtrl as searchResultCtrl">
+                <mt-button class="mt-result__container"
+                           ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
+                  <div class="mt-result__add-affordance"></div>
 
-                        <div class="progress" ng-show="searchResultsCtrl.pending[pId]">
-                            <progress></progress>
-                        </div>
+                  <div class="mt-result__thumbnail">
+                    <mt-smart-img source="{{searchResult.thumbnailUrl}}"
+                                  class="mt-result__thumbnail__img fill-crop">
+                      <div class="loading-indicator">
+                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
+                              data-mt-icon="&#xe806">
+                            <span class="mt-replaced-text">Loading video thumbnail</span>
+                        </span>
+                      </div>
+                    </mt-smart-img>
+
+                    <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
+                         ng-if="searchResultCtrl.shouldShowConfirmation">
+                      <div class="text" mt-short-text="Video added to the queue">
+                        <span class="mt-replaced-text">Video added to the queue.
+                            <ng-pluralize count="searchResultCtrl.countBeforePlayback"
+                                          when="{'one': '1 remaining tune before yours to be played.',
+                                                 'other': '{} remaining tunes before yours to be played.'}">
+                            </ng-pluralize>
+                            Enjoy!</span>
+                      </div>
                     </div>
-
-                    <div class="mt-results">
-                        <div class="mt-results__page mt-js-animation__slide"
-                             ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
-                            <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
-                                 ng-controller="mtSearchResultCtrl as searchResultCtrl">
-                                <mt-button class="mt-result__container"
-                                           ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
-                                    <div class="mt-result__add-affordance"></div>
-
-                                    <div class="mt-result__thumbnail">
-                                        <mt-smart-img source="{{searchResult.thumbnailUrl}}"
-                                                      class="mt-result__thumbnail__img fill-crop">
-                                            <div class="loading-indicator">
-                                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
-                                              data-mt-icon="&#xe806">
-                                            <span class="mt-replaced-text">Loading video thumbnail</span>
-                                        </span>
-                                            </div>
-                                        </mt-smart-img>
-
-                                        <div class="mt-result__added-confirmation mt-result__added-confirmation__animation-if"
-                                             ng-if="searchResultCtrl.shouldShowConfirmation">
-                                            <div class="text" mt-short-text="Video added to the queue">
-                                        <span class="mt-replaced-text">Video added to the queue.
-                                            <ng-pluralize count="searchResultCtrl.countBeforePlayback"
-                                                          when="{'one': '1 remaining tune before yours to be played.',
-                                                                 'other': '{} remaining tunes before yours to be played.'}">
-                                            </ng-pluralize>
-                                            Enjoy!</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <ul class="mt-result__data">
-                                        <li class="mt-result__data__item head" title="{{searchResult.title}}">
-                                            <span class="mt-result__data__title">{{searchResult.title}}</span>
-                                    <span class="mt-result__data__duration">
-                                        {{searchResult.duration | mtDuration:'shortTime'}}
-                                    </span>
-                                        </li>
-                                        <li class="mt-result__data__item mt-result__data__publisher"
-                                            ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">
-                                            by {{searchResult.publisherName}}
-                                        </li>
-                                    </ul>
-                                </mt-button>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="mt-search__message mt-js-animation__slide" ng-if="searchResultsCtrl.error[pId]">
-                        <p class="mt-search__message__padding">
-                            Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
-                            connection or try again later.
-                        </p>
-                    </div>
-
-                    <div class="mt-search__message mt-js-animation__slide"
-                         ng-if="searchResultsCtrl.noneFound[pId]">
-                        <p class="mt-search__message__padding">
-                            Sorry, no video found on {{pLabel}} for "{{searchResultsCtrl.getSearchTerm()}}". Please try
-                            with another
-                            title.
-                        </p>
-                    </div>
-
-                    <!-- show the button only when the first page of results is fetched -->
-                    <div class="mt-search__show-more" ng-show="searchResultsCtrl.nextPageId[pId]">
-                        <mt-button class="mt-search__show-more__button"
-                                   ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
-                            <div class="label">
-                                Show more
-                                <div class="progress" ng-show="searchResultsCtrl.pendingMore[pId]">
-                                    <progress></progress>
-                                </div>
-                            </div>
-                        </mt-button>
-                    </div>
-                </div>
+                  </div>
+                  <ul class="mt-result__data">
+                    <li class="mt-result__data__item head" title="{{searchResult.title}}">
+                      <span class="mt-result__data__title">{{searchResult.title}}</span>
+                      <span class="mt-result__data__duration">{{searchResult.duration | mtDuration:'shortTime'}}</span>
+                    </li>
+                    <li class="mt-result__data__item mt-result__data__publisher"
+                        ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">
+                      by {{searchResult.publisherName}}
+                    </li>
+                  </ul>
+                </mt-button>
+              </div>
             </div>
+          </div>
+
+
+          <div class="mt-search__message mt-js-animation__slide" ng-if="searchResultsCtrl.error[pId]">
+            <p class="mt-search__message__padding">
+              Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
+              connection or try again later.
+            </p>
+          </div>
+
+          <div class="mt-search__message mt-js-animation__slide"
+               ng-if="searchResultsCtrl.noneFound[pId]">
+            <p class="mt-search__message__padding">
+              Sorry, no video found on {{pLabel}} for "{{searchResultsCtrl.getSearchTerm()}}". Please try
+              with another
+              title.
+            </p>
+          </div>
+
+          <!-- show the button only when the first page of results is fetched -->
+          <div class="mt-search__show-more" ng-show="searchResultsCtrl.nextPageId[pId]">
+            <mt-button class="mt-search__show-more__button"
+                       ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
+              <div class="label">
+                Show more
+                <div class="progress" ng-show="searchResultsCtrl.pendingMore[pId]">
+                  <progress></progress>
+                </div>
+              </div>
+            </mt-button>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- build:js scripts/app.js -->
