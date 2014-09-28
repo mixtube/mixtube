@@ -12,7 +12,7 @@
      * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
      * is visible.
      */
-    function mtScrollable($timeout, AnimationsConfig, Velocity) {
+    function mtScrollable($timeout, AnimationsConfig) {
 
         /**
          * @param {JQLite} container

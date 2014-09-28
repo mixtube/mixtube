@@ -1,7 +1,7 @@
 (function(mt) {
     'use strict';
 
-    function SlideSizeAnimationBuilderFactory(AnimationsConfig, Velocity) {
+    function SlideSizeAnimationBuilderFactory(AnimationsConfig) {
 
         var BASE_VELOCITY_ANIM_CONF = {
             duration: AnimationsConfig.transitionDuration,

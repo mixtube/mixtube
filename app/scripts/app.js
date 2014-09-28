@@ -27,8 +27,6 @@
             $locationProvider.html5Mode(true);
         })
 
-        .constant('Velocity', window.Velocity)
-
         .constant('AnimationsConfig', AnimationsConfig)
 
         .run(function($rootScope, $controller, Configuration) {

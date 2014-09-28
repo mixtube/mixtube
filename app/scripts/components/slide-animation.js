@@ -1,7 +1,7 @@
 (function(mt) {
     'use strict';
 
-    function AnimationSlide(AnimationsConfig, Velocity) {
+    function AnimationSlide(AnimationsConfig) {
 
         function emptyAnimation(element, done) {
             done();
