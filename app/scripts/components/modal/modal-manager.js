@@ -53,4 +53,5 @@
   }
 
   mt.MixTubeApp.factory('ModalManager', ModalManagerFactory);
+
 })(mt);
