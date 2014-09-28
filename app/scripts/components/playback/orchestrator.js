@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function OrchestratorFactory($rootScope, mtQueueManager, mtPlaybackSlotFactory, NotificationCentersRegistry,
+  function OrchestratorFactory($rootScope, mtQueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
                                Configuration, mtLoggerFactory) {
 
     var logger = mtLoggerFactory('Orchestrator');
@@ -203,7 +203,7 @@
      */
     function prepareAuto(queueIndex) {
       finishSlot(autoPreparedSlotAccessor);
-      _autoPreparedSlot = mtPlaybackSlotFactory(_playback);
+      _autoPreparedSlot = PlaybackSlotFactory(_playback);
       _autoPreparedSlot.prepareSafe(queueIndex);
     }
 
@@ -214,7 +214,7 @@
      */
     function moveTo(queueIndex) {
       finishSlot(movePreparedSlotAccessor);
-      _movePreparedSlot = mtPlaybackSlotFactory(_playback);
+      _movePreparedSlot = PlaybackSlotFactory(_playback);
       _movePreparedSlot.prepareSafe(queueIndex);
       engageSlot(movePreparedSlotAccessor);
     }
