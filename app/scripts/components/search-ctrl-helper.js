@@ -49,4 +49,5 @@
   }
 
   mt.MixTubeApp.factory('SearchCtrlHelper', SearchCtrlHelperFactory);
+
 })(mt);

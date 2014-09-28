@@ -154,7 +154,7 @@
     });
 
   mt.MixTubeApp.controller('mtSearchResultsCtrl',
-    function($scope, $rootScope, $timeout, $q, mtYoutubeClient, SearchCtrlHelper) {
+    function($scope, $rootScope, $timeout, $q, YoutubeClient, SearchCtrlHelper) {
 
       var searchResultsCtrl = this;
 
@@ -249,7 +249,7 @@
           searchResultsCtrl.pendingMore.youtube = true;
         }
 
-        return mtYoutubeClient.searchVideosByQuery(term,
+        return YoutubeClient.searchVideosByQuery(term,
           {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
             if (searchRequestCount === startSearchRequestCount) {
               if (first) {

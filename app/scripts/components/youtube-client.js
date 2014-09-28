@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.factory('mtYoutubeClient', function($http, $q, Configuration) {
+  function YoutubeClientFactory($http, $q, Configuration) {
 
     /**
      * @const
@@ -92,7 +92,10 @@
       });
     };
 
-    return {
+    /**
+     * @name YoutubeClient
+     */
+    var YoutubeClient = {
       get shortName() {
         return SHORT_NAME;
       },
@@ -189,13 +192,17 @@
             extendVideosWithDetails(videos)
               .then(function(videos) {
                 deferred.resolve({videos: videos, nextPageId: data.nextPageToken});
-              })
-              .catch(deferred.reject);
+              }).catch(deferred.reject);
           }
         }).catch(deferred.reject);
 
         return deferred.promise;
       }
     };
-  });
+
+    return YoutubeClient;
+  }
+
+  mt.MixTubeApp.factory('YoutubeClient', YoutubeClientFactory);
+
 })(mt);

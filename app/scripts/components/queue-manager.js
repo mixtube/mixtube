@@ -34,7 +34,7 @@
     }
   };
 
-  function QueueManagerFactory($q, mtYoutubeClient, LoggerFactory) {
+  function QueueManagerFactory($q, YoutubeClient, LoggerFactory) {
     var logger = LoggerFactory.logger('QueueManager');
 
     function serialize(queue) {
@@ -42,7 +42,7 @@
 
       buffer.push((queue.name || ''));
       queue.entries.forEach(function(queueEntry) {
-        buffer.push(mtYoutubeClient.shortName + queueEntry.video.id);
+        buffer.push(YoutubeClient.shortName + queueEntry.video.id);
       });
 
       var jsonString = JSON.stringify(buffer);
@@ -67,15 +67,15 @@
       var youtubeVideosIds = [];
       for (var idx = 1; idx < buffer.length; idx++) {
         var serializedEntry = buffer[idx];
-        if (serializedEntry.indexOf(mtYoutubeClient.shortName) === 0) {
-          youtubeVideosIds.push(serializedEntry.substring(mtYoutubeClient.shortName.length));
+        if (serializedEntry.indexOf(YoutubeClient.shortName) === 0) {
+          youtubeVideosIds.push(serializedEntry.substring(YoutubeClient.shortName.length));
         } else {
           logger.debug('Unable to find a provider for serialized entry %s', serializedEntry);
           return $q.reject('Sorry we are unable to load your queue because of an internal error.');
         }
       }
 
-      return mtYoutubeClient.listVideosByIds(youtubeVideosIds).then(function(videos) {
+      return YoutubeClient.listVideosByIds(youtubeVideosIds).then(function(videos) {
         videos.forEach(function(video) {
           var queueEntry = new mt.model.QueueEntry();
           queueEntry.id = _.uniqueId();

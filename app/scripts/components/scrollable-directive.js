@@ -59,4 +59,5 @@
   }
 
   mt.MixTubeApp.directive('mtScrollable', mtScrollable);
+
 })(mt);

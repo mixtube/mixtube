@@ -46,4 +46,5 @@
   }
 
   mt.MixTubeApp.directive('mtSmartImg', mtSmartImg);
+
 })(mt);
