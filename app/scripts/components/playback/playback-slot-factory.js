@@ -2,7 +2,7 @@
   'use strict';
 
   mt.MixTubeApp.factory('mtPlaybackSlotFactory',
-    function($rootScope, $q, mtMediaElementsPool, mtQueueManager, Configuration, mtLoggerFactory) {
+    function($rootScope, $q, MediaElementsPool, mtQueueManager, Configuration, mtLoggerFactory) {
 
       var logger = mtLoggerFactory('mtPlaybackSlotFactory');
 
@@ -11,7 +11,7 @@
        * @constructor
        */
       function Player(queueEntry) {
-        this._mediaElementWrapper = mtMediaElementsPool(queueEntry.video.provider);
+        this._mediaElementWrapper = MediaElementsPool(queueEntry.video.provider);
         this.popcorn = Popcorn(this._mediaElementWrapper.get());
         this._queueEntry = queueEntry;
         this._disposed = false;

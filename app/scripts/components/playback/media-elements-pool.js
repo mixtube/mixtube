@@ -1,34 +1,34 @@
 (function(mt) {
   'use strict';
 
-  /**
-   * @typedef {Object} mtMediaElementWrapper
-   * @property {function(): jqLite} get
-   * @property {function} release
-   */
+  function MediaElementsPoolFactory(mtScenesRegistry) {
 
-  mt.MixTubeApp.factory('mtMediaElementsPool', function(mtScenesRegistry) {
-
-    var _scene = null;
-    mtScenesRegistry('scene').ready(function(scene) {
-      _scene = scene;
+    var scene = null;
+    mtScenesRegistry('scene').ready(function(newScene) {
+      scene = newScene;
     });
 
-    return function(type) {
+    /**
+     * @name MediaElementsPool
+     */
+    function MediaElementsPool(type) {
 
       if (type !== 'youtube') {
-        throw new Error('Unmanaged type of player: ' + type);
+        throw new Error('Un-managed type of player: ' + type);
       }
 
       // no free player instance, create a new one
-      var hostElement = _scene.newHostElement();
+      var hostElement = scene.newHostElement();
       var mediaElement = Popcorn.HTMLYouTubeVideoElement(hostElement[0]);
 
       // hide and make the player silent at the beginning
       hostElement.css('opacity', 0);
       mediaElement.volume = 0;
 
-      return {
+      /**
+       * @name mediaElementWrapper
+       */
+      var mediaElementWrapper = {
         _alive: true,
 
         _checkState: function() {
@@ -50,6 +50,13 @@
           this._alive = false;
         }
       };
-    };
-  })
+
+      return mediaElementWrapper;
+    }
+
+    return MediaElementsPool;
+  }
+
+  mt.MixTubeApp.factory('MediaElementsPool', MediaElementsPoolFactory);
+
 })(mt);
