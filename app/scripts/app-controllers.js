@@ -3,7 +3,7 @@
 
   mt.MixTubeApp.controller('mtRootCtrl',
     function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
-             mtNotificationCentersRegistry, mtOrchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
+             mtNotificationCentersRegistry, Orchestrator, UserInteractionManager, mtQueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 
       var rootCtrl = this;
@@ -49,15 +49,15 @@
       }
 
       function getRunningQueueEntry() {
-        return mtOrchestrator.runningQueueEntry;
+        return Orchestrator.runningQueueEntry;
       }
 
       function getLoadingQueueEntry() {
-        return mtOrchestrator.loadingQueueEntry;
+        return Orchestrator.loadingQueueEntry;
       }
 
       function isPlaying() {
-        return mtOrchestrator.playing;
+        return Orchestrator.playing;
       }
 
       function shouldIdleChrome() {
@@ -77,7 +77,7 @@
       }
 
       function togglePlayback() {
-        mtOrchestrator.togglePlayback();
+        Orchestrator.togglePlayback();
       }
 
       // we need to wait for the loading phase to be done to avoid race problems (loading for ever)
@@ -90,7 +90,7 @@
         // register the global space shortcut
         mtKeyboardShortcutManager.register('space', function(evt) {
           evt.preventDefault();
-          mtOrchestrator.togglePlayback();
+          Orchestrator.togglePlayback();
         });
 
         mtKeyboardShortcutManager.register('search', 'esc', function(evt) {
@@ -130,7 +130,7 @@
         });
 
         $scope.$watch(function() {
-          return mtOrchestrator.runningQueueEntry;
+          return Orchestrator.runningQueueEntry;
         }, function(runningQueueEntry, oldVal) {
           if (runningQueueEntry !== oldVal) {
             mtQueuesRegistry('queue').ready(function(queue) {
@@ -323,7 +323,7 @@
     });
 
   mt.MixTubeApp.controller('mtSearchResultCtrl',
-    function($scope, $timeout, mtQueueManager, mtQueuesRegistry, mtOrchestrator) {
+    function($scope, $timeout, mtQueueManager, mtQueuesRegistry, Orchestrator) {
 
       /**
        * @const
@@ -344,9 +344,9 @@
 
         var queueEntry = mtQueueManager.appendVideo(video);
 
-        if (mtOrchestrator.runningQueueEntry) {
+        if (Orchestrator.runningQueueEntry) {
           var entries = mtQueueManager.queue.entries;
-          searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(mtOrchestrator.runningQueueEntry);
+          searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(Orchestrator.runningQueueEntry);
         } else {
           searchResultCtrl.countBeforePlayback = null;
         }
@@ -363,7 +363,7 @@
       };
     });
 
-  mt.MixTubeApp.controller('mtQueueCtrl', function(mtOrchestrator, mtQueueManager) {
+  mt.MixTubeApp.controller('mtQueueCtrl', function(Orchestrator, mtQueueManager) {
 
     var queueCtrl = this;
 
@@ -371,7 +371,7 @@
      * @param {number} queueIndex
      */
     queueCtrl.playQueueEntry = function(queueIndex) {
-      mtOrchestrator.skipTo(queueIndex);
+      Orchestrator.skipTo(queueIndex);
     };
 
     /**
