@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.factory('mtLoggerFactory', function($log) {
+  function LoggerFactoryFactory($log) {
 
     /** @type {Object.<string, Object>} */
     var loggerByName = {};
@@ -9,9 +9,10 @@
     /**
      * Returns a logger for the given name or the global logger if no name provided.
      *
+     * @name LoggerFactory
      * @param {string=} name the logger name. Empty means global logger.
      */
-    function logger(name) {
+    function LoggerFactory(name) {
       var loggerName = angular.isDefined(name) ? name : 'global';
       if (!loggerByName.hasOwnProperty(loggerName)) {
         var decoratedLogger = {};
@@ -29,8 +30,11 @@
     }
 
     // backward dependency
-    logger.logger = logger;
+    LoggerFactory.logger = LoggerFactory;
 
-    return logger;
-  });
+    return LoggerFactory;
+  }
+
+  mt.MixTubeApp.factory('LoggerFactory', LoggerFactoryFactory);
+
 })(mt);

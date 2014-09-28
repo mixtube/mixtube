@@ -2,9 +2,9 @@
   'use strict';
 
   function PlaybackSlotFactoryFactory($rootScope, $q, MediaElementsPool, mtQueueManager, Configuration,
-                                      mtLoggerFactory) {
+                                      LoggerFactory) {
 
-    var logger = mtLoggerFactory('PlaybackSlotFactory');
+    var logger = LoggerFactory('PlaybackSlotFactory');
 
     /**
      * @name Player

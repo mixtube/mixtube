@@ -35,8 +35,8 @@
   };
 
 
-  mt.MixTubeApp.factory('mtQueueManager', function($q, mtYoutubeClient, mtLoggerFactory) {
-    var logger = mtLoggerFactory.logger('mtQueueManager');
+  mt.MixTubeApp.factory('mtQueueManager', function($q, mtYoutubeClient, LoggerFactory) {
+    var logger = LoggerFactory.logger('mtQueueManager');
 
     function serialize(queue) {
       var buffer = [];

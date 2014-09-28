@@ -2,9 +2,9 @@
   'use strict';
 
   function OrchestratorFactory($rootScope, mtQueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
-                               Configuration, mtLoggerFactory) {
+                               Configuration, LoggerFactory) {
 
-    var logger = mtLoggerFactory('Orchestrator');
+    var logger = LoggerFactory('Orchestrator');
 
     /**
      * @name Playback
