@@ -1,11 +1,11 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.directive('mtScene', function(mtScenesRegistry, DirectivesRegistryHelper) {
+  function mtScene(ScenesRegistry, DirectivesRegistryHelper) {
     return {
       restrict: 'A',
       controller: function($scope, $element, $attrs) {
-        DirectivesRegistryHelper.install(this, mtScenesRegistry, 'mtScene', $scope, $attrs);
+        DirectivesRegistryHelper.install(this, ScenesRegistry, 'mtScene', $scope, $attrs);
 
         var sceneElement = $element;
 
@@ -16,5 +16,8 @@
         };
       }
     };
-  });
+  }
+
+  mt.MixTubeApp.directive('mtScene', mtScene);
+
 })(mt);

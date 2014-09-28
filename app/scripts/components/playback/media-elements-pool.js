@@ -1,10 +1,10 @@
 (function(mt) {
   'use strict';
 
-  function MediaElementsPoolFactory(mtScenesRegistry) {
+  function MediaElementsPoolFactory(ScenesRegistry) {
 
     var scene = null;
-    mtScenesRegistry('scene').ready(function(newScene) {
+    ScenesRegistry('scene').ready(function(newScene) {
       scene = newScene;
     });
 
