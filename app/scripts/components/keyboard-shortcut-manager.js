@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.factory('mtKeyboardShortcutManager', function($rootScope) {
+  function KeyboardShortcutManagerFactory($rootScope) {
 
     var keymaster = key.noConflict();
     var defaultFilter = keymaster.filter;
@@ -11,7 +11,10 @@
       return event.keyCode === ESC_KEY_CODE || defaultFilter(event);
     };
 
-    return {
+    /**
+     * @name KeyboardShortcutManager
+     */
+    var KeyboardShortcutManager = {
       /**
        * Registers a shortcut in the given scope.
        *
@@ -53,5 +56,10 @@
         }
       }
     };
-  });
+
+    return KeyboardShortcutManager;
+  }
+
+  mt.MixTubeApp.factory('KeyboardShortcutManager', KeyboardShortcutManagerFactory);
+
 })(mt);

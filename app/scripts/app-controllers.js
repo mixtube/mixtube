@@ -2,7 +2,7 @@
   'use strict';
 
   mt.MixTubeApp.controller('mtRootCtrl',
-    function($scope, $location, $timeout, mtKeyboardShortcutManager, QueueManager, SearchInputsRegistry,
+    function($scope, $location, $timeout, KeyboardShortcutManager, QueueManager, SearchInputsRegistry,
              NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 
@@ -88,12 +88,12 @@
         SearchCtrlHelper.toggleSearch(false);
 
         // register the global space shortcut
-        mtKeyboardShortcutManager.register('space', function(evt) {
+        KeyboardShortcutManager.register('space', function(evt) {
           evt.preventDefault();
           Orchestrator.togglePlayback();
         });
 
-        mtKeyboardShortcutManager.register('search', 'esc', function(evt) {
+        KeyboardShortcutManager.register('search', 'esc', function(evt) {
           evt.preventDefault();
           SearchCtrlHelper.toggleSearch(false);
         });
@@ -383,7 +383,7 @@
   });
 
   mt.MixTubeApp.controller('mtDebuggingCtrl',
-    function(Configuration, mtKeyboardShortcutManager, NotificationCentersRegistry) {
+    function(Configuration, KeyboardShortcutManager, NotificationCentersRegistry) {
 
       function notification(message) {
         NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
@@ -393,7 +393,7 @@
 
       if (Configuration.debugNotifications) {
         // register the global space shortcut
-        mtKeyboardShortcutManager.register('ctrl+n', function(evt) {
+        KeyboardShortcutManager.register('ctrl+n', function(evt) {
           evt.preventDefault();
           notification('Debugging: Test notification');
         });

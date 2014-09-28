@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function SearchCtrlHelperFactory(mtKeyboardShortcutManager, SearchInputsRegistry) {
+  function SearchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) {
 
     var searchShown = false;
     var searchTerm = null;
@@ -15,9 +15,9 @@
       if (searchShown) {
         // reset search term before showing the search input
         searchTerm = null;
-        mtKeyboardShortcutManager.enterScope('search');
+        KeyboardShortcutManager.enterScope('search');
       } else {
-        mtKeyboardShortcutManager.leaveScope('search');
+        KeyboardShortcutManager.leaveScope('search');
       }
 
       SearchInputsRegistry('search').ready(function(searchInput) {
