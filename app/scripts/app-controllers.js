@@ -2,7 +2,7 @@
   'use strict';
 
   mt.MixTubeApp.controller('mtRootCtrl',
-    function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, mtSearchInputsRegistry,
+    function($scope, $location, $timeout, mtKeyboardShortcutManager, mtQueueManager, SearchInputsRegistry,
              NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
              PointerManager, Capabilities, SearchCtrlHelper) {
 

@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  function mtSearchInput(mtSearchInputsRegistry, DirectivesRegistryHelper, InteractiveChromesManager,
+  function mtSearchInput(SearchInputsRegistry, DirectivesRegistryHelper, InteractiveChromesManager,
                          AnimationsConfig) {
 
     return {
@@ -13,7 +13,7 @@
       },
       controller: function($scope, $element, $attrs) {
 
-        DirectivesRegistryHelper.install(this, mtSearchInputsRegistry, 'name', $scope, $attrs);
+        DirectivesRegistryHelper.install(this, SearchInputsRegistry, 'name', $scope, $attrs);
 
         var form = $element;
         var field = mt.commons.querySelector($element, '.mt-js-search-input__field');
@@ -114,4 +114,5 @@
    * ".mt-search-input".
    */
   mt.MixTubeApp.directive('mtSearchInput', mtSearchInput);
+
 })(mt);
