@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function UserInteractionManagerFactory($rootScope, $timeout, InteractiveChromesManager, PointerManager) {
@@ -64,4 +64,4 @@
 
   angular.module('Mixtube').factory('UserInteractionManager', UserInteractionManagerFactory);
 
-})(mt);
+})();

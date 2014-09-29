@@ -1,4 +1,4 @@
-(function(mt) {
+(function(querySelector) {
   'use strict';
 
   function mtSearchInput(SearchInputsRegistry, DirectivesRegistryHelper, InteractiveChromesManager,
@@ -16,8 +16,8 @@
         DirectivesRegistryHelper.install(this, SearchInputsRegistry, 'name', $scope, $attrs);
 
         var form = $element;
-        var field = mt.commons.querySelector($element, '.mt-js-search-input__field');
-        var fakeField = mt.commons.querySelector($element, '.mt-js-search-input__fake-field');
+        var field = querySelector($element, '.mt-js-search-input__field');
+        var fakeField = querySelector($element, '.mt-js-search-input__fake-field');
 
         // helps to differentiate first rendering from next ones
         var init = true;
@@ -115,4 +115,4 @@
    */
   angular.module('Mixtube').directive('mtSearchInput', mtSearchInput);
 
-})(mt);
+})(mt.commons.querySelector);

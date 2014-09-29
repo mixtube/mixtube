@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtQueue($timeout, DirectivesRegistryHelper, QueuesRegistry) {
@@ -59,4 +59,4 @@
 
   angular.module('Mixtube').directive('mtQueue', mtQueue);
 
-})(mt);
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function ConfigurationFactory($location) {
@@ -67,4 +67,4 @@
 
   angular.module('Mixtube').factory('Configuration', ConfigurationFactory);
 
-})(mt);
+})();

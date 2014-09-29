@@ -1,4 +1,4 @@
-(function(mt, undefined) {
+(function(undefined) {
   'use strict';
 
   function CapabilitiesFactory($rootScope, Configuration) {
@@ -40,4 +40,4 @@
   }
 
   angular.module('Mixtube').factory('Capabilities', CapabilitiesFactory);
-})(mt);
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function KeyboardShortcutManagerFactory($rootScope) {
@@ -62,4 +62,4 @@
 
   angular.module('Mixtube').factory('KeyboardShortcutManager', KeyboardShortcutManagerFactory);
 
-})(mt);
+})();

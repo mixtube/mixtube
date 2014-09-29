@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtInteractiveChrome($parse, InteractiveChromesManager, PointerManager) {
@@ -24,4 +24,4 @@
 
   angular.module('Mixtube').directive('mtInteractiveChrome', mtInteractiveChrome);
 
-})(mt);
+})();

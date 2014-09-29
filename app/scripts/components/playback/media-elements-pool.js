@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function MediaElementsPoolFactory(ScenesRegistry) {
@@ -59,4 +59,4 @@
 
   angular.module('Mixtube').factory('MediaElementsPool', MediaElementsPoolFactory);
 
-})(mt);
+})();

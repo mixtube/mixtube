@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   // unbind and rebind click event handlers by removing and re adding event listener at the DOM level
@@ -56,4 +56,4 @@
   }
 
   angular.module('Mixtube').directive('mtButton', mtButton);
-})(mt);
+})();

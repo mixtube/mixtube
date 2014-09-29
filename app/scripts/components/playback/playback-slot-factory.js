@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function PlaybackSlotFactoryFactory($rootScope, $q, MediaElementsPool, QueueManager, Configuration,
@@ -262,4 +262,4 @@
 
   angular.module('Mixtube').factory('PlaybackSlotFactory', PlaybackSlotFactoryFactory);
 
-})(mt);
+})();

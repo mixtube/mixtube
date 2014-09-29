@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function InteractiveChromesManagerFactory() {
@@ -47,4 +47,4 @@
 
   angular.module('Mixtube').factory('InteractiveChromesManager', InteractiveChromesManagerFactory);
 
-})(mt);
+})();

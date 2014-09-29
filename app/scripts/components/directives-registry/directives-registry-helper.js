@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function DirectivesRegistryHelperFactory() {
@@ -24,4 +24,4 @@
 
   angular.module('Mixtube').factory('DirectivesRegistryHelper', DirectivesRegistryHelperFactory);
 
-})(mt);
+})();

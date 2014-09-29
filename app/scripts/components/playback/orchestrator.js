@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function OrchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
@@ -342,4 +342,4 @@
    */
   angular.module('Mixtube').factory('Orchestrator', OrchestratorFactory);
 
-})(mt);
+})();

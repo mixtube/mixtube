@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function PointerManagerFactory($rootScope, $timeout, $document) {
@@ -124,4 +124,5 @@
   }
 
   angular.module('Mixtube').factory('PointerManager', PointerManagerFactory);
-})(mt);
+
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function(Velocity) {
   'use strict';
 
   /**
@@ -59,4 +59,4 @@
 
   angular.module('Mixtube').animation('.mt-js-animation__queue-entry', AnimationQueueEntry);
 
-})(mt);
+})(window.Velocity);

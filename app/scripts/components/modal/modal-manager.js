@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function ModalManagerFactory($document, $compile, $q, $animate, $rootScope, $templateRequest) {
@@ -54,4 +54,4 @@
 
   angular.module('Mixtube').factory('ModalManager', ModalManagerFactory);
 
-})(mt);
+})();

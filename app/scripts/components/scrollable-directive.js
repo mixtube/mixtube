@@ -1,4 +1,4 @@
-(function(mt) {
+(function(Velocity, querySelector) {
   'use strict';
 
   /**
@@ -36,7 +36,7 @@
          * @param {Function=} done
          */
         this.putAnchorInViewPort = function(anchor, done) {
-          var target = mt.commons.querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
+          var target = querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
           if (target.length > 0 && !containsY(scrollable, target)) {
             // the target needs to be animated to reveal the item
             Velocity(
@@ -60,4 +60,4 @@
 
   angular.module('Mixtube').directive('mtScrollable', mtScrollable);
 
-})(mt);
+})(window.Velocity, mt.commons.querySelector);

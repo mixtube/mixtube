@@ -1,38 +1,5 @@
-(function(mt) {
+(function(Queue, QueueEntry) {
   'use strict';
-
-  mt.model = {
-    Video: function() {
-      /** @type {string} */
-      this.id = null;
-      /** @type {string} */
-      this.title = null;
-      /** @type {string} */
-      this.thumbnailUrl = null;
-      /** @type {number} */
-      this.duration = null;
-      /** @type {number} */
-      this.viewCount = null;
-      /** @type {string} */
-      this.publisherName = null;
-      /** @type {string} */
-      this.provider = null;
-    },
-    QueueEntry: function() {
-      /** @type {string} */
-      this.id = null;
-      /** @type {mt.model.Video} */
-      this.video = null;
-      /** @type {boolean} */
-      this.skippedAtRuntime = false;
-    },
-    Queue: function() {
-      /** @type {string} */
-      this.name = null;
-      /** @type {Array.<mt.model.QueueEntry} */
-      this.entries = [];
-    }
-  };
 
   function QueueManagerFactory($q, YoutubeClient, LoggerFactory) {
     var logger = LoggerFactory.logger('QueueManager');
@@ -60,7 +27,7 @@
         return $q.reject('Sorry we are unable to load your queue. Seems that the link you used is not valid.');
       }
 
-      var queue = new mt.model.Queue();
+      var queue = new Queue();
       // the first bucket is the name of the queue
       queue.name = buffer[0];
 
@@ -77,7 +44,7 @@
 
       return YoutubeClient.listVideosByIds(youtubeVideosIds).then(function(videos) {
         videos.forEach(function(video) {
-          var queueEntry = new mt.model.QueueEntry();
+          var queueEntry = new QueueEntry();
           queueEntry.id = _.uniqueId();
           queueEntry.video = video;
           queue.entries.push(queueEntry);
@@ -90,7 +57,7 @@
     }
 
     // initialize queue
-    var queue = new mt.model.Queue();
+    var queue = new Queue();
 
     /**
      * @name QueueManager
@@ -110,7 +77,7 @@
        * @return {mt.model.QueueEntry} the newly created entry in the queue
        */
       appendVideo: function(video) {
-        var queueEntry = new mt.model.QueueEntry();
+        var queueEntry = new QueueEntry();
         queueEntry.id = _.uniqueId();
         queueEntry.video = video;
         queue.entries.push(queueEntry);
@@ -192,7 +159,6 @@
     return QueueManager;
   }
 
-
   angular.module('Mixtube').factory('QueueManager', QueueManagerFactory);
 
-})(mt);
+})(mt.model.Queue, mt.model.QueueEntry);

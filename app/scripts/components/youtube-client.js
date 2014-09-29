@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function YoutubeClientFactory($http, $q, Configuration) {
@@ -205,4 +205,4 @@
 
   angular.module('Mixtube').factory('YoutubeClient', YoutubeClientFactory);
 
-})(mt);
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtCacheImgUrl(Configuration) {
@@ -18,4 +18,4 @@
   // timestamp to the url
   angular.module('Mixtube').filter('mtCacheImgUrl', mtCacheImgUrl);
 
-})(mt);
+})();

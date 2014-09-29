@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   var AsyncRegistryFactoryFactory = function($cacheFactory, $q) {
@@ -53,4 +53,4 @@
 
   angular.module('Mixtube').factory('AsyncRegistryFactory', AsyncRegistryFactoryFactory);
 
-})(mt);
+})();

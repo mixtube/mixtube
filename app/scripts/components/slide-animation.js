@@ -1,4 +1,4 @@
-(function(mt) {
+(function(Velocity) {
   'use strict';
 
   function AnimationSlide(AnimationsConfig) {
@@ -36,4 +36,4 @@
 
   angular.module('Mixtube').animation('.mt-js-animation__slide', AnimationSlide);
 
-})(mt);
+})(window.Velocity);

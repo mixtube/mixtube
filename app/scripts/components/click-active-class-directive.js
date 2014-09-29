@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtClickActiveClass() {
@@ -18,4 +18,4 @@
 
   angular.module('Mixtube').directive('mtClickActiveClass', mtClickActiveClass);
 
-})(mt);
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtSmartImg($rootScope, $document, $animate, $filter) {
@@ -47,4 +47,4 @@
 
   angular.module('Mixtube').directive('mtSmartImg', mtSmartImg);
 
-})(mt);
+})();

@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtScene(ScenesRegistry, DirectivesRegistryHelper) {
@@ -20,4 +20,4 @@
 
   angular.module('Mixtube').directive('mtScene', mtScene);
 
-})(mt);
+})();

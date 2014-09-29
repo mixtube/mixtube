@@ -1,4 +1,4 @@
-(function(mt) {
+(function(Velocity) {
   'use strict';
 
   function SlideSizeAnimationBuilderFactory(AnimationsConfig) {
@@ -94,4 +94,4 @@
 
   angular.module('Mixtube').factory('SlideSizeAnimationBuilder', SlideSizeAnimationBuilderFactory);
 
-})(mt);
+})(window.Velocity);

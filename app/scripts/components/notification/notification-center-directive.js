@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function mtNotificationCenter(NotificationCentersRegistry, DirectivesRegistryHelper) {
@@ -50,4 +50,4 @@
 
   angular.module('Mixtube').directive('mtNotificationCenter', mtNotificationCenter);
 
-})(mt);
+})();

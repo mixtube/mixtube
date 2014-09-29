@@ -1,4 +1,4 @@
-(function(mt) {
+(function(buildTimeString) {
   'use strict';
 
   function LoggerFactoryFactory($log) {
@@ -18,9 +18,7 @@
         var decoratedLogger = {};
         _.functions($log).forEach(function(fnName) {
           decoratedLogger[fnName] = function() {
-            arguments[0] =
-              '[' + mt.commons.buildTimeString(new Date()) + ']' + ' '
-              + loggerName + ': ' + arguments[0];
+            arguments[0] = '[' + buildTimeString(new Date()) + ']' + ' ' + loggerName + ': ' + arguments[0];
             $log[fnName].apply(null, arguments);
           };
         });
@@ -37,4 +35,4 @@
 
   angular.module('Mixtube').factory('LoggerFactory', LoggerFactoryFactory);
 
-})(mt);
+})(mt.commons.buildTimeString);

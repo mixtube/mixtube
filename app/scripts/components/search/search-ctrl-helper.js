@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function SearchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) {
@@ -50,4 +50,4 @@
 
   angular.module('Mixtube').factory('SearchCtrlHelper', SearchCtrlHelperFactory);
 
-})(mt);
+})();

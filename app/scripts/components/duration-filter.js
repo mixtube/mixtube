@@ -1,4 +1,4 @@
-(function(mt) {
+(function(leftPad) {
   'use strict';
 
   function mtDuration() {
@@ -17,12 +17,12 @@
       singletonDate.setTime(absoluteDateZero);
       singletonDate.setMilliseconds(time);
 
-      return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':' + mt.commons.leftPad(singletonDate.getSeconds().toString(10),
-          2, '0');
+      return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':'
+        + leftPad(singletonDate.getSeconds().toString(10), 2, '0');
     }
   }
 
   // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
   angular.module('Mixtube').filter('mtDuration', mtDuration);
 
-})(mt);
+})(mt.commons.leftPad);
