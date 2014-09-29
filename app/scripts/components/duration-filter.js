@@ -23,6 +23,6 @@
   }
 
   // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
-  mt.MixTubeApp.filter('mtDuration', mtDuration());
+  mt.MixTubeApp.filter('mtDuration', mtDuration);
 
 })(mt);

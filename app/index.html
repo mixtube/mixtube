@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-controller="mtRootCtrl as rootCtrl">
+<html ng-controller="RootCtrl as rootCtrl">
 <head>
   <base href="/">
   <!--hopefully triggers GPU Rasterization on Chrome-->
@@ -80,7 +80,7 @@
     </div>
 
     <div class="mt-queue-tile" ng-class="{idle: rootCtrl.shouldIdleChrome()}" mt-interactive-chrome>
-      <div class="mt-queue" ng-controller="mtQueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
+      <div class="mt-queue" ng-controller="QueueCtrl as queueCtrl" mt-queue="queue" mt-scrollable>
         <div>
           <div class="mt-queue__entry mt-js-animation__queue-entry"
                ng-repeat="entry in rootCtrl.getQueue().entries"
@@ -115,7 +115,7 @@
     </div>
 
     <div class="mt-search-tile animation-show-hide"
-         ng-controller="mtSearchResultsCtrl as searchResultsCtrl"
+         ng-controller="SearchResultsCtrl as searchResultsCtrl"
          ng-show="searchResultsCtrl.shouldShowSearchResultPanel()"
          mt-interactive-chrome="searchResultsCtrl.shouldShowSearchResultPanel()">
       <div class="mt-search">
@@ -132,7 +132,7 @@
             <div class="mt-results__page mt-js-animation__slide"
                  ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
               <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
-                   ng-controller="mtSearchResultCtrl as searchResultCtrl">
+                   ng-controller="SearchResultCtrl as searchResultCtrl">
                 <mt-button class="mt-result__container"
                            ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
                   <div class="mt-result__add-affordance"></div>

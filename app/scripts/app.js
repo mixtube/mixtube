@@ -34,7 +34,7 @@
       $rootScope.props = {};
 
       if (Configuration.debug) {
-        $controller('mtDebuggingCtrl');
+        $controller('DebuggingCtrl');
       }
     });
 
