@@ -57,6 +57,6 @@
       });
   }
 
-  mt.MixTubeApp.animation('.mt-js-animation__queue-entry', AnimationQueueEntry);
+  angular.module('Mixtube').animation('.mt-js-animation__queue-entry', AnimationQueueEntry);
 
 })(mt);

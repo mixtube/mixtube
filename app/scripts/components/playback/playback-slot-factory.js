@@ -260,6 +260,6 @@
     return PlaybackSlotFactory;
   }
 
-  mt.MixTubeApp.factory('PlaybackSlotFactory', PlaybackSlotFactoryFactory);
+  angular.module('Mixtube').factory('PlaybackSlotFactory', PlaybackSlotFactoryFactory);
 
 })(mt);

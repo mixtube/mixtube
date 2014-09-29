@@ -340,6 +340,6 @@
   /**
    * @name Orchestrator
    */
-  mt.MixTubeApp.factory('Orchestrator', OrchestratorFactory);
+  angular.module('Mixtube').factory('Orchestrator', OrchestratorFactory);
 
 })(mt);

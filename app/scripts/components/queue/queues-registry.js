@@ -1,7 +1,7 @@
 (function(mt) {
   'use strict';
 
-  mt.MixTubeApp.factory('QueuesRegistry', function(AsyncRegistryFactory) {
+  angular.module('Mixtube').factory('QueuesRegistry', function(AsyncRegistryFactory) {
     return AsyncRegistryFactory('Queues');
   });
 

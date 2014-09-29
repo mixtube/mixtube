@@ -16,6 +16,6 @@
 
   // a filter that prevent image URLs to be cached if the debug configuration asks so (debug.imgCache) by appending a
   // timestamp to the url
-  mt.MixTubeApp.filter('mtCacheImgUrl', mtCacheImgUrl);
+  angular.module('Mixtube').filter('mtCacheImgUrl', mtCacheImgUrl);
 
 })(mt);

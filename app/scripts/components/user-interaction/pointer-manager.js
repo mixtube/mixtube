@@ -123,5 +123,5 @@
     return PointerManager;
   }
 
-  mt.MixTubeApp.factory('PointerManager', PointerManagerFactory);
+  angular.module('Mixtube').factory('PointerManager', PointerManagerFactory);
 })(mt);

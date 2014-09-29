@@ -52,6 +52,6 @@
     return ModalManager;
   }
 
-  mt.MixTubeApp.factory('ModalManager', ModalManagerFactory);
+  angular.module('Mixtube').factory('ModalManager', ModalManagerFactory);
 
 })(mt);

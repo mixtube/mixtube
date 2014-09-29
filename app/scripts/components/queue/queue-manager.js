@@ -193,6 +193,6 @@
   }
 
 
-  mt.MixTubeApp.factory('QueueManager', QueueManagerFactory);
+  angular.module('Mixtube').factory('QueueManager', QueueManagerFactory);
 
 })(mt);

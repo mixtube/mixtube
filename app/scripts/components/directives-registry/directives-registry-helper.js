@@ -22,6 +22,6 @@
     return DirectivesRegistryHelper;
   }
 
-  mt.MixTubeApp.factory('DirectivesRegistryHelper', DirectivesRegistryHelperFactory);
+  angular.module('Mixtube').factory('DirectivesRegistryHelper', DirectivesRegistryHelperFactory);
 
 })(mt);

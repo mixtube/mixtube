@@ -55,5 +55,5 @@
     }
   }
 
-  mt.MixTubeApp.directive('mtButton', mtButton);
+  angular.module('Mixtube').directive('mtButton', mtButton);
 })(mt);

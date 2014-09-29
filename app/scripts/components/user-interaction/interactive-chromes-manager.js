@@ -45,6 +45,6 @@
     return InteractiveChromesManager;
   }
 
-  mt.MixTubeApp.factory('InteractiveChromesManager', InteractiveChromesManagerFactory);
+  angular.module('Mixtube').factory('InteractiveChromesManager', InteractiveChromesManagerFactory);
 
 })(mt);

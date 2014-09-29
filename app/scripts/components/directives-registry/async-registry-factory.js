@@ -51,6 +51,6 @@
     return AsyncRegistryFactory;
   };
 
-  mt.MixTubeApp.factory('AsyncRegistryFactory', AsyncRegistryFactoryFactory);
+  angular.module('Mixtube').factory('AsyncRegistryFactory', AsyncRegistryFactoryFactory);
 
 })(mt);

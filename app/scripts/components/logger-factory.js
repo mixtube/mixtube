@@ -35,6 +35,6 @@
     return LoggerFactory;
   }
 
-  mt.MixTubeApp.factory('LoggerFactory', LoggerFactoryFactory);
+  angular.module('Mixtube').factory('LoggerFactory', LoggerFactoryFactory);
 
 })(mt);

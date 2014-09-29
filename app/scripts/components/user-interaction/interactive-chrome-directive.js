@@ -22,6 +22,6 @@
     };
   }
 
-  mt.MixTubeApp.directive('mtInteractiveChrome', mtInteractiveChrome);
+  angular.module('Mixtube').directive('mtInteractiveChrome', mtInteractiveChrome);
 
 })(mt);

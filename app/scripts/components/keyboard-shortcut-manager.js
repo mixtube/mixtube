@@ -60,6 +60,6 @@
     return KeyboardShortcutManager;
   }
 
-  mt.MixTubeApp.factory('KeyboardShortcutManager', KeyboardShortcutManagerFactory);
+  angular.module('Mixtube').factory('KeyboardShortcutManager', KeyboardShortcutManagerFactory);
 
 })(mt);

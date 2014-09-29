@@ -58,6 +58,6 @@
     };
   }
 
-  mt.MixTubeApp.directive('mtScrollable', mtScrollable);
+  angular.module('Mixtube').directive('mtScrollable', mtScrollable);
 
 })(mt);

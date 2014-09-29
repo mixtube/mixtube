@@ -48,6 +48,6 @@
     return SearchCtrlHelper;
   }
 
-  mt.MixTubeApp.factory('SearchCtrlHelper', SearchCtrlHelperFactory);
+  angular.module('Mixtube').factory('SearchCtrlHelper', SearchCtrlHelperFactory);
 
 })(mt);

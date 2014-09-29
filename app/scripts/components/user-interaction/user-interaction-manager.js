@@ -62,6 +62,6 @@
     return UserInteractionManager;
   }
 
-  mt.MixTubeApp.factory('UserInteractionManager', UserInteractionManagerFactory);
+  angular.module('Mixtube').factory('UserInteractionManager', UserInteractionManagerFactory);
 
 })(mt);

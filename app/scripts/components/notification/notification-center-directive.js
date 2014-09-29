@@ -48,6 +48,6 @@
     };
   }
 
-  mt.MixTubeApp.directive('mtNotificationCenter', mtNotificationCenter);
+  angular.module('Mixtube').directive('mtNotificationCenter', mtNotificationCenter);
 
 })(mt);

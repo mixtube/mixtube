@@ -16,6 +16,6 @@
     }
   }
 
-  mt.MixTubeApp.directive('mtClickActiveClass', mtClickActiveClass);
+  angular.module('Mixtube').directive('mtClickActiveClass', mtClickActiveClass);
 
 })(mt);

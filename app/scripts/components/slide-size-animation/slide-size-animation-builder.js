@@ -92,6 +92,6 @@
     return SlideSizeAnimationBuilder;
   }
 
-  mt.MixTubeApp.factory('SlideSizeAnimationBuilder', SlideSizeAnimationBuilderFactory);
+  angular.module('Mixtube').factory('SlideSizeAnimationBuilder', SlideSizeAnimationBuilderFactory);
 
 })(mt);

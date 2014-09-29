@@ -113,6 +113,6 @@
    * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
    * ".mt-search-input".
    */
-  mt.MixTubeApp.directive('mtSearchInput', mtSearchInput);
+  angular.module('Mixtube').directive('mtSearchInput', mtSearchInput);
 
 })(mt);

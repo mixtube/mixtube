@@ -203,6 +203,6 @@
     return YoutubeClient;
   }
 
-  mt.MixTubeApp.factory('YoutubeClient', YoutubeClientFactory);
+  angular.module('Mixtube').factory('YoutubeClient', YoutubeClientFactory);
 
 })(mt);

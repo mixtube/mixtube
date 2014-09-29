@@ -45,6 +45,6 @@
     };
   }
 
-  mt.MixTubeApp.directive('mtSmartImg', mtSmartImg);
+  angular.module('Mixtube').directive('mtSmartImg', mtSmartImg);
 
 })(mt);

@@ -57,6 +57,6 @@
     return MediaElementsPool;
   }
 
-  mt.MixTubeApp.factory('MediaElementsPool', MediaElementsPoolFactory);
+  angular.module('Mixtube').factory('MediaElementsPool', MediaElementsPoolFactory);
 
 })(mt);

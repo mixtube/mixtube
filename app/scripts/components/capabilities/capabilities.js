@@ -39,5 +39,5 @@
     return Capabilities;
   }
 
-  mt.MixTubeApp.factory('Capabilities', CapabilitiesFactory);
+  angular.module('Mixtube').factory('Capabilities', CapabilitiesFactory);
 })(mt);

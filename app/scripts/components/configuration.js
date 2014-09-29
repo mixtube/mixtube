@@ -65,6 +65,6 @@
     return Configuration;
   }
 
-  mt.MixTubeApp.factory('Configuration', ConfigurationFactory);
+  angular.module('Mixtube').factory('Configuration', ConfigurationFactory);
 
 })(mt);

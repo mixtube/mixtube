@@ -34,6 +34,6 @@
     };
   }
 
-  mt.MixTubeApp.animation('.mt-js-animation__slide', AnimationSlide);
+  angular.module('Mixtube').animation('.mt-js-animation__slide', AnimationSlide);
 
 })(mt);

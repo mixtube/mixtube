@@ -1,4 +1,4 @@
-(function(mt) {
+(function() {
   'use strict';
 
   function RootCtrl($scope, $location, $timeout, KeyboardShortcutManager, QueueManager, NotificationCentersRegistry,
@@ -152,7 +152,7 @@
     }
   }
 
-  mt.MixTubeApp.controller('RootCtrl', RootCtrl);
+  angular.module('Mixtube').controller('RootCtrl', RootCtrl);
 
 
   function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
@@ -322,7 +322,7 @@
     }
   }
 
-  mt.MixTubeApp.controller('SearchResultsCtrl', SearchResultsCtrl);
+  angular.module('Mixtube').controller('SearchResultsCtrl', SearchResultsCtrl);
 
 
   function SearchResultCtrl($timeout, QueueManager, QueuesRegistry, Orchestrator) {
@@ -371,7 +371,7 @@
     }
   }
 
-  mt.MixTubeApp.controller('SearchResultCtrl', SearchResultCtrl);
+  angular.module('Mixtube').controller('SearchResultCtrl', SearchResultCtrl);
 
 
   function QueueCtrl(Orchestrator, QueueManager) {
@@ -396,7 +396,7 @@
     }
   }
 
-  mt.MixTubeApp.controller('QueueCtrl', QueueCtrl);
+  angular.module('Mixtube').controller('QueueCtrl', QueueCtrl);
 
 
   function DebuggingCtrl(Configuration, KeyboardShortcutManager, NotificationCentersRegistry) {
@@ -420,5 +420,5 @@
     }
   }
 
-  mt.MixTubeApp.controller('DebuggingCtrl', DebuggingCtrl);
-})(mt);
+  angular.module('Mixtube').controller('DebuggingCtrl', DebuggingCtrl);
+})();

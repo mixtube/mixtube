@@ -57,6 +57,6 @@
     };
   }
 
-  mt.MixTubeApp.directive('mtQueue', mtQueue);
+  angular.module('Mixtube').directive('mtQueue', mtQueue);
 
 })(mt);
