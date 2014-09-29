@@ -167,7 +167,7 @@
 
     /** @type {number} */
     var searchRequestCount = 0;
-    /** @type {promise} */
+    /** @type {?Promise} */
     var instantSearchPromise = null;
 
 
@@ -230,10 +230,9 @@
     }
 
     /**
-     *
      * @param {string} term
      * @param {string=} nextPageId
-     * @returns {promise}
+     * @returns {Promise}
      */
     function searchYoutube(term, nextPageId) {
       var first = !nextPageId;
@@ -336,6 +335,7 @@
      */
     var CONFIRMATION_DURATION = 4000;
 
+    /** @type {?Promise} */
     var tmoPromise = null;
 
     /** @type {boolean} */
