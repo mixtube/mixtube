@@ -11,6 +11,30 @@
       return event.keyCode === ESC_KEY_CODE || defaultFilter(event);
     };
 
+    function register(scope, combo, callback) {
+      if (_.isUndefined(callback)) {
+        callback = combo;
+        combo = scope;
+        scope = 'all';
+      }
+
+      keymaster(combo, scope, function(evt) {
+        $rootScope.$apply(function() {
+          callback(evt);
+        });
+      });
+    }
+
+    function enterScope(name) {
+      keymaster.setScope(name);
+    }
+
+    function leaveScope(name) {
+      if (name === keymaster.getScope(name)) {
+        keymaster.setScope('all');
+      }
+    }
+
     /**
      * @name KeyboardShortcutManager
      */
@@ -22,26 +46,12 @@
        * @param {string} combo
        * @param {?function} callback
        */
-      register: function(scope, combo, callback) {
-        if (_.isUndefined(callback)) {
-          callback = combo;
-          combo = scope;
-          scope = 'all';
-        }
-
-        keymaster(combo, scope, function(evt) {
-          $rootScope.$apply(function() {
-            callback(evt);
-          });
-        });
-      },
+      register: register,
 
       /**
        * @param {string} name the scope name
        */
-      enterScope: function(name) {
-        keymaster.setScope(name);
-      },
+      enterScope: enterScope,
 
       /**
        * Unbind the given scope and restore the global one.
@@ -50,11 +60,7 @@
        *
        * @param {string} name scope name
        */
-      leaveScope: function(name) {
-        if (name === keymaster.getScope(name)) {
-          keymaster.setScope('all');
-        }
-      }
+      leaveScope: leaveScope
     };
 
     return KeyboardShortcutManager;
