@@ -42,7 +42,7 @@
       return (hours * 3600 + minutes * 60 + seconds) * 1000;
     }
 
-    var extendVideosWithDetails = function(videos) {
+    function extendVideosWithDetails(videos) {
       if (videos.length > MAX_RESULT_LIMIT) {
         throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.')
       }
@@ -90,7 +90,83 @@
           return videos;
         }
       });
-    };
+    }
+
+    function listVideosByIds(ids) {
+      // prepare an array of pseudo videos that have only the id property defined
+      var videos = ids.map(function(id) {
+        return {id: id};
+      });
+
+      var pagesPromises = [];
+
+      var pagesCount = videos.length / MAX_RESULT_LIMIT;
+      for (var pageIdx = 0; pageIdx < pagesCount; pageIdx++) {
+
+        var pageStart = pageIdx * MAX_RESULT_LIMIT;
+        var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULT_LIMIT, videos.length));
+        pagesPromises.push(extendVideosWithDetails(videosPaged));
+      }
+
+      return $q.all(pagesPromises).then(function() {
+        return videos;
+      });
+    }
+
+    function searchVideosByQuery(queryString, pageSpec) {
+
+      pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
+
+      var deferred = $q.defer();
+
+      $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
+        params: {
+          q: queryString,
+          type: 'video',
+          part: 'snippet',
+          order: 'relevance',
+          pageToken: pageSpec.pageId,
+          maxResults: pageSpec.pageSize,
+          callback: 'JSON_CALLBACK',
+          key: Configuration.youtubeAPIKey
+        }
+      }).then(function(response) {
+
+        var data = response.data;
+
+        if (_.has(data, 'error')) {
+          // youtube API does not return an error HTTP status in case of error but a success with a
+          // special error object in the response
+          return deferred.reject(data.error.errors);
+        } else {
+          var videos = data.items.map(function(item) {
+            return {
+              id: item.id.videoId,
+              title: item.snippet.title,
+              thumbnailUrl: item.snippet.thumbnails.medium.url,
+              // a reminder that the channelTitle returned by YT search API is wrong
+              // publisherName: item.snippet.channelTitle,
+              provider: 'youtube',
+              // temporary store the channel, used after to add the video channel name
+              __youtubeChannelId: item.snippet.channelId
+            };
+          });
+
+          // first batch of results just notify (will call the progress handler)
+          deferred.notify({videos: videos, nextPageId: data.nextPageToken});
+
+          // second batch that will resolve (or reject) the promise
+          extendVideosWithDetails(videos)
+            .then(function(videos) {
+              deferred.resolve({videos: videos, nextPageId: data.nextPageToken});
+            })
+            .catch(deferred.reject);
+        }
+      }).catch(deferred.reject);
+
+      return deferred.promise;
+    }
+
 
     /**
      * @name YoutubeClient
@@ -109,26 +185,7 @@
        * @param {Array.<string>} ids the list of youtube videos ids
        * @return {Promise} a promise resolved with Array.<mt.model.Video>
        */
-      listVideosByIds: function(ids) {
-        // prepare an array of pseudo videos that have only the id property defined
-        var videos = ids.map(function(id) {
-          return {id: id};
-        });
-
-        var pagesPromises = [];
-
-        var pagesCount = videos.length / MAX_RESULT_LIMIT;
-        for (var pageIdx = 0; pageIdx < pagesCount; pageIdx++) {
-
-          var pageStart = pageIdx * MAX_RESULT_LIMIT;
-          var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULT_LIMIT, videos.length));
-          pagesPromises.push(extendVideosWithDetails(videosPaged));
-        }
-
-        return $q.all(pagesPromises).then(function() {
-          return videos;
-        });
-      },
+      listVideosByIds: listVideosByIds,
 
       /**
        * Searches videos on youtube matching the query.
@@ -146,58 +203,7 @@
        * @return {promise.<{videos: Array.<mt.model.Video>, netPageId: string}>} resolved when finished.
        * Intermediary states are delivered through the promise's progress callback.
        */
-      searchVideosByQuery: function(queryString, pageSpec) {
-
-        pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
-
-        var deferred = $q.defer();
-
-        $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
-          params: {
-            q: queryString,
-            type: 'video',
-            part: 'snippet',
-            order: 'relevance',
-            pageToken: pageSpec.pageId,
-            maxResults: pageSpec.pageSize,
-            callback: 'JSON_CALLBACK',
-            key: Configuration.youtubeAPIKey
-          }
-        }).then(function(response) {
-
-          var data = response.data;
-
-          if (_.has(data, 'error')) {
-            // youtube API does not return an error HTTP status in case of error but a success with a
-            // special error object in the response
-            return deferred.reject(data.error.errors);
-          } else {
-            var videos = data.items.map(function(item) {
-              return {
-                id: item.id.videoId,
-                title: item.snippet.title,
-                thumbnailUrl: item.snippet.thumbnails.medium.url,
-                // a reminder that the channelTitle returned by YT search API is wrong
-                // publisherName: item.snippet.channelTitle,
-                provider: 'youtube',
-                // temporary store the channel, used after to add the video channel name
-                __youtubeChannelId: item.snippet.channelId
-              };
-            });
-
-            // first batch of results just notify (will call the progress handler)
-            deferred.notify({videos: videos, nextPageId: data.nextPageToken});
-
-            // second batch that will resolve (or reject) the promise
-            extendVideosWithDetails(videos)
-              .then(function(videos) {
-                deferred.resolve({videos: videos, nextPageId: data.nextPageToken});
-              }).catch(deferred.reject);
-          }
-        }).catch(deferred.reject);
-
-        return deferred.promise;
-      }
+      searchVideosByQuery: searchVideosByQuery
     };
 
     return YoutubeClient;
