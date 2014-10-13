@@ -2,12 +2,16 @@
   'use strict';
 
   function QueueManagerFactory($q, YoutubeClient, LoggerFactory) {
+
     var logger = LoggerFactory.logger('QueueManager');
 
-    function serialize(queue) {
+    // initialize queue
+    var queue = new Queue();
+
+    function serialize() {
       var buffer = [];
 
-      buffer.push((queue.name || ''));
+      buffer.push(queue.name || '');
       queue.entries.forEach(function(queueEntry) {
         buffer.push(YoutubeClient.shortName + queueEntry.video.id);
       });
@@ -19,17 +23,16 @@
 
     function deserialize(input) {
       // add removed array delimiters
-      var buffer;
       try {
-        buffer = JSON.parse('[' + input + ']');
+        var buffer = JSON.parse('[' + input + ']');
       } catch (e) {
         logger.debug('Unable to parse a serialized queue because of an exception %s', e);
         return $q.reject('Sorry we are unable to load your queue. Seems that the link you used is not valid.');
       }
 
-      var queue = new Queue();
+      var newQueue = new Queue();
       // the first bucket is the name of the queue
-      queue.name = buffer[0];
+      newQueue.name = buffer[0];
 
       var youtubeVideosIds = [];
       for (var idx = 1; idx < buffer.length; idx++) {
@@ -42,22 +45,62 @@
         }
       }
 
-      return YoutubeClient.listVideosByIds(youtubeVideosIds).then(function(videos) {
-        videos.forEach(function(video) {
-          var queueEntry = new QueueEntry();
-          queueEntry.id = _.uniqueId();
-          queueEntry.video = video;
-          queue.entries.push(queueEntry);
-        });
+      return YoutubeClient.listVideosByIds(youtubeVideosIds)
+        .then(function(videos) {
+          videos.forEach(function(video) {
+            var queueEntry = new QueueEntry();
+            queueEntry.id = _.uniqueId();
+            queueEntry.video = video;
+            newQueue.entries.push(queueEntry);
+          });
 
-        return queue;
-      }, function() {
-        return $q.reject('Sorry we are unable to load videos from YouTube while loading your queue. May be you should try later.');
-      });
+          // remove invalid entries
+          newQueue.entries = newQueue.entries.filter(function(entry) {
+            return _.has(entry.video, 'publisherName');
+          });
+
+          // replacing the queue object prevents the Angular digest / watch mechanism to work
+          // by extending the object it allows it to detect the changes
+          angular.extend(queue, newQueue);
+        })
+        .catch(function() {
+          return $q.reject('Sorry we are unable to load videos from YouTube while loading your queue. ' +
+          'May be you should try later.');
+        });
     }
 
-    // initialize queue
-    var queue = new Queue();
+    function appendVideo(video) {
+      var queueEntry = new QueueEntry();
+      queueEntry.id = _.uniqueId();
+      queueEntry.video = video;
+      queue.entries.push(queueEntry);
+      return queueEntry;
+    }
+
+    function removeEntry(entry) {
+      var position = queue.entries.indexOf(entry);
+      if (position === -1) {
+        throw new Error('The given entry is not in the queue array');
+      }
+      queue.entries.splice(position, 1);
+    }
+
+    function closestValidEntryByIndex(fromIndex) {
+      var validEntry = null;
+
+      if (fromIndex !== -1) {
+        while (!validEntry && fromIndex < queue.entries.length) {
+          var entry = queue.entries[fromIndex];
+          if (entry.skippedAtRuntime) {
+            fromIndex++;
+          } else {
+            validEntry = entry;
+          }
+        }
+      }
+
+      return validEntry;
+    }
 
     /**
      * @name QueueManager
@@ -76,33 +119,14 @@
        * @param {mt.model.Video} video
        * @return {mt.model.QueueEntry} the newly created entry in the queue
        */
-      appendVideo: function(video) {
-        var queueEntry = new QueueEntry();
-        queueEntry.id = _.uniqueId();
-        queueEntry.video = video;
-        queue.entries.push(queueEntry);
-        return queueEntry;
-      },
+      appendVideo: appendVideo,
 
       /**
        * Removes an entry from the queue.
        *
        * @param {mt.model.QueueEntry} entry
        */
-      removeEntry: function(entry) {
-        var position = queue.entries.indexOf(entry);
-        if (position === -1) {
-          throw new Error('The given entry is not in the queue array');
-        }
-        queue.entries.splice(position, 1);
-      },
-
-      /**
-       * Restores the queue in a pristine state.
-       */
-      clear: function() {
-        queue.entries = [];
-      },
+      removeEntry: removeEntry,
 
       /**
        * Returns the closest valid (not skipped yet) entry in the queue from the given entry index included.
@@ -110,22 +134,7 @@
        * @param {number} fromIndex the index in the queue to start to search from
        * @return {mt.model.QueueEntry} the next entry or null if none
        */
-      closestValidEntryByIndex: function(fromIndex) {
-        var validEntry = null;
-
-        if (fromIndex !== -1) {
-          while (!validEntry && fromIndex < queue.entries.length) {
-            var entry = queue.entries[fromIndex];
-            if (entry.skippedAtRuntime) {
-              fromIndex++;
-            } else {
-              validEntry = entry;
-            }
-          }
-        }
-
-        return validEntry;
-      },
+      closestValidEntryByIndex: closestValidEntryByIndex,
 
       /**
        * Deserialize the queue from the given string, load the entry details from remote providers and "extends"
@@ -134,26 +143,14 @@
        * @param {string} serialized
        * @return {promise}
        */
-      deserialize: function(serialized) {
-        return deserialize(serialized).then(function(newQueue) {
-          // remove invalid entries
-          newQueue.entries = newQueue.entries.filter(function(entry) {
-            return entry.video.hasOwnProperty('publisherName');
-          });
-          // replacing the queue object prevents the Angular digest / watch mechanism to work
-          // by extending the object it allows it to detect the changes
-          angular.extend(queue, newQueue);
-        });
-      },
+      deserialize: deserialize,
 
       /**
        * Serialize the queue.
        *
        * @returns {string} the serialized version of the queue
        */
-      serialize: function() {
-        return serialize(queue);
-      }
+      serialize: serialize
     };
 
     return QueueManager;
