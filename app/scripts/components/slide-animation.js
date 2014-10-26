@@ -7,29 +7,33 @@
       done();
     }
 
+    function enter(element, done) {
+      Velocity(
+        element[0],
+        'slideDown',
+        _.defaults(
+          {complete: done},
+          {
+            duration: AnimationsConfig.transitionDuration,
+            easing: AnimationsConfig.easeInOutBezierPoints
+          }));
+    }
+
+    function leave(element, done) {
+      Velocity(
+        element[0],
+        'slideUp',
+        _.defaults(
+          {complete: done},
+          {
+            duration: AnimationsConfig.transitionDuration,
+            easing: AnimationsConfig.easeInOutBezierPoints
+          }));
+    }
+
     return {
-      enter: function(element, done) {
-        Velocity(
-          element[0],
-          'slideDown',
-          _.defaults(
-            {complete: done},
-            {
-              duration: AnimationsConfig.transitionDuration,
-              easing: AnimationsConfig.easeInOutBezierPoints
-            }));
-      },
-      leave: function(element, done) {
-        Velocity(
-          element[0],
-          'slideUp',
-          _.defaults(
-            {complete: done},
-            {
-              duration: AnimationsConfig.transitionDuration,
-              easing: AnimationsConfig.easeInOutBezierPoints
-            }));
-      },
+      enter: enter,
+      leave: leave,
       move: emptyAnimation
     };
   }
