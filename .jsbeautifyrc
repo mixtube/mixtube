@@ -1,0 +1,6 @@
+{
+  "indent_size": 2,
+  "preserve_newlines": true,
+  "max_preserve_newlines": 4,
+  "wrap_line_length": 120
+}
