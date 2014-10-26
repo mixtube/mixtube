@@ -6,6 +6,8 @@
 
     var logger = LoggerFactory('Orchestrator');
 
+    activate();
+
     /**
      * @name Playback
      * @constructor
@@ -219,64 +221,77 @@
       engageSlot(movePreparedSlotAccessor);
     }
 
-    /**
-     * The watcher bellow observes the queue entries to check if a modification the queue and impacts the playback if required.
-     *
-     * Two main cases:
-     *  - the currently playing entry has been removed -> move to the next valid one
-     *  - something has changed between the currently playing entry and the auto prepared one -> launch a new cycle to pick and prepare
-     */
-    $rootScope.$watchCollection(function() {
-      return QueueManager.queue.entries;
-    }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
-      if (!angular.equals(newEntries, oldEntries)) {
-
-        var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
-
-        // the concept of activated entry is only relevant here
-        // we want to consider the currently started entry or the one about to be the next started entry mainly
-        // to properly manage moved to entry removal while still preparing
-        var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
-          || startedEntry;
-
-        var removedEntries = _.difference(oldEntries, newEntries);
-        if (_.contains(removedEntries, activatedEntry)) {
-          // the active entry has just been removed
-          // move to the entry which is now at the same position in the queue
-          moveTo(oldEntries.indexOf(activatedEntry));
-        } else if (startedEntry) {
-          // nothing changed for the active entry
-
-          // we need the check if the change impacted the auto prepared entry
-          var prepareAutoRequired = false;
-
-          var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
-          var startedEntryNewIndex = newEntries.indexOf(startedEntry);
-
-          var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
-          var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
-          if (autoPreparedEntryNewIndex === -1) {
-            // the auto prepared entry has just been removed so we know straight that we have to re-prepare
-            prepareAutoRequired = true;
-          } else {
-            // we have to compare slices of old and new entries from the entry following the started one
-            // to the auto prepared one the check if something changes in between
-            var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
-            var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
-            var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
-            prepareAutoRequired = !angular.equals(sliceOfOldEntries, sliceOfNewEntries);
-          }
-
-          if (prepareAutoRequired) {
-            // something changed so just in case we re (auto)prepare the entry
-            prepareAuto(startedEntryNewIndex + 1);
-
-            logger.debug('something changed in the queue that required a re-preparation of the previously ' +
-            'auto prepared entry %O', autoPreparedEntry);
+    function activate() {
+      /**
+       * The watcher bellow observes the queue entries to check if a modification the queue and impacts the playback if required.
+       *
+       * Two main cases:
+       *  - the currently playing entry has been removed -> move to the next valid one
+       *  - something has changed between the currently playing entry and the auto prepared one -> launch a new cycle to pick and prepare
+       */
+      $rootScope.$watchCollection(function() {
+        return QueueManager.queue.entries;
+      }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
+        if (!angular.equals(newEntries, oldEntries)) {
+          var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
+          // the concept of activated entry is only relevant here
+          // we want to consider the currently started entry or the one about to be the next started entry mainly
+          // to properly manage moved to entry removal while still preparing
+          var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
+            || startedEntry;
+          var removedEntries = _.difference(oldEntries, newEntries);
+          if (_.contains(removedEntries, activatedEntry)) {
+            // the active entry has just been removed
+            // move to the entry which is now at the same position in the queue
+            moveTo(oldEntries.indexOf(activatedEntry));
+          } else if (startedEntry) {
+            // nothing changed for the active entry
+            // we need the check if the change impacted the auto prepared entry
+            var prepareAutoRequired = false;
+            var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
+            var startedEntryNewIndex = newEntries.indexOf(startedEntry);
+            var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
+            var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
+            if (autoPreparedEntryNewIndex === -1) {
+              // the auto prepared entry has just been removed so we know straight that we have to re-prepare
+              prepareAutoRequired = true;
+            } else {
+              // we have to compare slices of old and new entries from the entry following the started one
+              // to the auto prepared one the check if something changes in between
+              var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
+              var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
+              var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
+              prepareAutoRequired = !angular.equals(sliceOfOldEntries, sliceOfNewEntries);
+            }
+            if (prepareAutoRequired) {
+              // something changed so just in case we re (auto)prepare the entry
+              prepareAuto(startedEntryNewIndex + 1);
+              logger.debug('something changed in the queue that required a re-preparation of the previously ' +
+              'auto prepared entry %O', autoPreparedEntry);
+            }
           }
         }
+      });
+    }
+
+    function skipTo(queueIndex) {
+      if (_playback.paused || _playback.stopped) {
+        _playback.resume();
       }
-    });
+
+      moveTo(queueIndex);
+    }
+
+    function togglePlayback() {
+      if (_playback.playing) {
+        _playback.pause();
+      } else if (_playback.paused) {
+        _playback.resume();
+      } else if (_playback.stopped && QueueManager.queue.entries.length) {
+        _playback.resume();
+        moveTo(0);
+      }
+    }
 
     /**
      * @name Orchestrator
@@ -314,24 +329,9 @@
       /**
        * @param {number} queueIndex
        */
-      skipTo: function(queueIndex) {
-        if (_playback.paused || _playback.stopped) {
-          _playback.resume();
-        }
+      skipTo: skipTo,
 
-        moveTo(queueIndex);
-      },
-
-      togglePlayback: function() {
-        if (_playback.playing) {
-          _playback.pause();
-        } else if (_playback.paused) {
-          _playback.resume();
-        } else if (_playback.stopped && QueueManager.queue.entries.length) {
-          _playback.resume();
-          moveTo(0);
-        }
-      }
+      togglePlayback: togglePlayback
     };
 
     return Orchestrator;
