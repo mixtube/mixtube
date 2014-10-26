@@ -13,7 +13,7 @@
      * @param {string=} name the logger name. Empty means global logger.
      */
     function LoggerFactory(name) {
-      var loggerName = angular.isDefined(name) ? name : 'global';
+      var loggerName = _.isUndefined(name) ? 'global' : name;
       if (!loggerByName.hasOwnProperty(loggerName)) {
         var decoratedLogger = {};
         _.functions($log).forEach(function(fnName) {
@@ -26,9 +26,6 @@
       }
       return loggerByName[loggerName];
     }
-
-    // backward dependency
-    LoggerFactory.logger = LoggerFactory;
 
     return LoggerFactory;
   }

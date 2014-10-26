@@ -3,7 +3,7 @@
 
   function QueueManagerFactory($q, YoutubeClient, LoggerFactory) {
 
-    var logger = LoggerFactory.logger('QueueManager');
+    var logger = LoggerFactory('QueueManager');
 
     // initialize queue
     var queue = new Queue();
