@@ -35,7 +35,9 @@
          * @param {string} anchor
          * @param {Function=} done
          */
-        this.putAnchorInViewPort = function(anchor, done) {
+        this.putAnchorInViewPort = putAnchorInViewPort;
+
+        function putAnchorInViewPort(anchor, done) {
           var target = querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
           if (target.length > 0 && !containsY(scrollable, target)) {
             // the target needs to be animated to reveal the item
@@ -53,7 +55,7 @@
             // no animation required but call the callback asynchronously if given
             $timeout(done, 0, false);
           }
-        };
+        }
       }
     };
   }
