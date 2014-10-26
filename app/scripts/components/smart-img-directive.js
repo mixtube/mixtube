@@ -1,9 +1,7 @@
 (function() {
   'use strict';
 
-  function mtSmartImg($rootScope, $document, $animate, $filter) {
-
-    var imgCacheUrlFilter = $filter('mtCacheImgUrl');
+  function mtSmartImg($rootScope, $document, $animate) {
 
     return {
       restrict: 'E',
@@ -25,7 +23,6 @@
 
         iAttrs.$observe('source', function(source) {
           if (source) {
-            source = imgCacheUrlFilter(source);
             loader.src = source;
             loader.onload = function() {
               $animate.addClass(indicatorContainer, 'ng-hide');
