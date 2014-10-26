@@ -20,69 +20,70 @@
       };
     }
 
+    function enter(element, done) {
+
+      var config = buildConfig(element);
+      var txBeginning = config.ltr ? '-100%' : '100%';
+
+      Velocity(
+        element[0],
+        'slideDown',
+        _.defaults(
+          {
+            // disable mobile optimisation because VelocityJS uses the null transform hack
+            // which would override our translate value
+            mobileHA: false,
+
+            complete: function() {
+              Velocity(
+                element[0],
+                {translateX: [0, txBeginning]},
+                _.defaults(
+                  {
+                    complete: function() {
+                      element.css({height: '', transform: ''});
+                      done();
+                    }
+                  }, BASE_VELOCITY_ANIM_CONF));
+            }
+          },
+          BASE_VELOCITY_ANIM_CONF));
+
+      element.css({height: 0, transform: 'translateX(' + txBeginning + ')'});
+    }
+
+    function leave(element, done) {
+
+      var config = buildConfig(element);
+
+      Velocity(
+        element[0],
+        {translateX: [config.ltr ? '-100%' : '100%', 0]},
+        _.defaults(
+          {
+            complete: function() {
+              Velocity(
+                element[0],
+                'slideUp',
+                _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
+            }
+          }, BASE_VELOCITY_ANIM_CONF)
+      );
+    }
+
+    function move(element, done) {
+      // move doesn't really make sense for the use cases sor far
+      done();
+    }
+
     /**
      * @name SlideSizeAnimationBuilder
      */
     function SlideSizeAnimationBuilder() {
       return {
-
-        enter: function(element, done) {
-
-          var config = buildConfig(element);
-          var txBeginning = config.ltr ? '-100%' : '100%';
-
-          Velocity(
-            element[0],
-            'slideDown',
-            _.defaults(
-              {
-                // disable mobile optimisation because VelocityJS uses the null transform hack
-                // which would override our translate value
-                mobileHA: false,
-
-                complete: function() {
-                  Velocity(
-                    element[0],
-                    {translateX: [0, txBeginning]},
-                    _.defaults(
-                      {
-                        complete: function() {
-                          element.css({height: '', transform: ''});
-                          done();
-                        }
-                      }, BASE_VELOCITY_ANIM_CONF));
-                }
-              },
-              BASE_VELOCITY_ANIM_CONF));
-
-          element.css({height: 0, transform: 'translateX(' + txBeginning + ')'});
-        },
-
-        leave: function(element, done) {
-
-          var config = buildConfig(element);
-
-          Velocity(
-            element[0],
-            {translateX: [config.ltr ? '-100%' : '100%', 0]},
-            _.defaults(
-              {
-                complete: function() {
-                  Velocity(
-                    element[0],
-                    'slideUp',
-                    _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
-                }
-              }, BASE_VELOCITY_ANIM_CONF)
-          );
-
-
-        },
-
-        move: function(element, done) {
-          // move doesn't really make sense for the use cases sor far
-          done();
-        }
+        enter: enter,
+        leave: leave,
+        move: move
       };
     }
 
