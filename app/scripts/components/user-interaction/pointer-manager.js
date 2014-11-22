@@ -81,7 +81,7 @@
 
 
       $document
-        .on('click', function() {
+        .on('mouseout', function() {
           pointerPosition.x = pointerPosition.y = null;
 
           mouseMoved();
