@@ -41,6 +41,11 @@
         // ngClick binds its listeners in the link phase
         var clickEventsGate = new ClickEventsGate($element);
 
+        // provide a default value if the attribute is not available to trigger $observe anyway
+        if (!_.has($attrs, 'disabled')) {
+          $attrs.disabled = false;
+        }
+
         $attrs.$observe('disabled', function(disabled) {
           $attrs.$set('role', disabled ? null : 'button');
           $attrs.$set('tabindex', disabled ? null : '0');
