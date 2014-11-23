@@ -111,19 +111,13 @@ body {
       width: 25%;
       height: 100%;
 
-      &.idle-add, &.idle-remove {
-        transition-property: transform, opacity;
-        transition-duration: $baseTransitionDuration;
-        transition-timing-function: $easeInOut, linear;
-
-        display: block !important;
-      }
+      transition-property: transform, opacity;
+      transition-duration: $baseTransitionDuration;
+      transition-timing-function: $easeInOut, linear;
 
       &.idle {
-        display: none;
-
         opacity: 0;
-        transform: translateX(-50%);
+        transform: translateX(-100%);
       }
     }
   }
