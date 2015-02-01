@@ -1,6 +1,6 @@
 {
   "name": "mixtube",
-  "version": "0.0.0-snapshot",
+  "version": "1.0.0-alpha.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/jraoult/mixtube.git"
@@ -25,5 +25,13 @@
     "grunt-replace": "^0.7.9",
     "grunt-rev": "latest",
     "grunt-usemin": "latest"
+  },
+  "dependencies": {
+    "angular": "^1.3.11",
+    "angular-animate": "^1.3.11",
+    "keymaster": "^1.6.2",
+    "lodash": "^3.0.1",
+    "shifty": "^1.3.10",
+    "velocity-animate": "^1.2.1"
   }
 }
