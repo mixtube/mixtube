@@ -1,5 +1,9 @@
 'use strict';
 
+var defaults = require('lodash/object/defaults'),
+  has = require('lodash/object/has'),
+  pluck = require('lodash/collection/pluck');
+
 function youtubeClientFactory($http, $q, Configuration) {
 
   /**
@@ -46,7 +50,7 @@ function youtubeClientFactory($http, $q, Configuration) {
       throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.')
     }
 
-    var videosIds = _.pluck(videos, 'id');
+    var videosIds = pluck(videos, 'id');
 
     // We have to use JSONP here
     //  - IE11 manages CORS request if originating page and requested resource have the same protocol
@@ -63,7 +67,7 @@ function youtubeClientFactory($http, $q, Configuration) {
     }).then(function(response) {
       var data = response.data;
 
-      if (_.has(data, 'error')) {
+      if (has(data, 'error')) {
         // youtube API does not return an error HTTP status in case of error but a success with a
         // special error object in the response
         return $q.reject(data.error.errors);
@@ -114,7 +118,7 @@ function youtubeClientFactory($http, $q, Configuration) {
 
   function searchVideosByQuery(queryString, pageSpec) {
 
-    pageSpec = _.defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
+    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
 
     var deferred = $q.defer();
 
@@ -133,7 +137,7 @@ function youtubeClientFactory($http, $q, Configuration) {
 
       var data = response.data;
 
-      if (_.has(data, 'error')) {
+      if (has(data, 'error')) {
         // youtube API does not return an error HTTP status in case of error but a success with a
         // special error object in the response
         return deferred.reject(data.error.errors);

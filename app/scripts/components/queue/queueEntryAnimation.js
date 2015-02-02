@@ -1,6 +1,8 @@
 'use strict';
 
-var Velocity = require('velocity-animate');
+var Velocity = require('velocity-animate'),
+  assign = require('lodash/object/assign'),
+  defaults = require('lodash/object/defaults');
 
 /**
  * A animation tailored for queue's items (enter and leave events).
@@ -9,7 +11,7 @@ var Velocity = require('velocity-animate');
  */
 function queueEntryAnimation(SlideSizeAnimationBuilder) {
 
-  return _.extend(
+  return assign(
     SlideSizeAnimationBuilder(),
     {
       enter: function(element, done) {
@@ -27,7 +29,7 @@ function queueEntryAnimation(SlideSizeAnimationBuilder) {
           Velocity(
             element[0],
             {translateX: [0, txBeginning]},
-            _.defaults({
+            defaults({
               complete: function() {
                 element.css({transform: ''});
                 done();

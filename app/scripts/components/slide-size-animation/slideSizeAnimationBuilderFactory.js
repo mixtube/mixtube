@@ -1,6 +1,7 @@
 'use strict';
 
-var Velocity = require('velocity-animate');
+var defaults = require('lodash/object/defaults'),
+  Velocity = require('velocity-animate');
 
 function slideSizeAnimationBuilderFactory(AnimationsConfig) {
 
@@ -29,7 +30,7 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
     Velocity(
       element[0],
       'slideDown',
-      _.defaults(
+      defaults(
         {
           // disable mobile optimisation because VelocityJS uses the null transform hack
           // which would override our translate value
@@ -39,7 +40,7 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
             Velocity(
               element[0],
               {translateX: [0, txBeginning]},
-              _.defaults(
+              defaults(
                 {
                   complete: function() {
                     element.css({height: '', transform: ''});
@@ -60,13 +61,13 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
     Velocity(
       element[0],
       {translateX: [config.ltr ? '-100%' : '100%', 0]},
-      _.defaults(
+      defaults(
         {
           complete: function() {
             Velocity(
               element[0],
               'slideUp',
-              _.defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
+              defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
           }
         }, BASE_VELOCITY_ANIM_CONF)
     );

@@ -1,7 +1,9 @@
 'use strict';
 
 var buildTimeString = require('../commons').buildTimeString,
-  functions = require('lodash/object/functions');
+  functions = require('lodash/object/functions'),
+  isUndefined = require('lodash/lang/isUndefined'),
+  has = require('lodash/object/has');
 
 function loggerFactoryFactory($log) {
 
@@ -15,8 +17,8 @@ function loggerFactoryFactory($log) {
    * @param {string=} name the logger name. Empty means global logger.
    */
   function LoggerFactory(name) {
-    var loggerName = _.isUndefined(name) ? 'global' : name;
-    if (!loggerByName.hasOwnProperty(loggerName)) {
+    var loggerName = isUndefined(name) ? 'global' : name;
+    if (!has(loggerByName, loggerName)) {
       var decoratedLogger = {};
       functions($log).forEach(function(fnName) {
         decoratedLogger[fnName] = function() {

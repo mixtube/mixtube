@@ -1,5 +1,10 @@
 'use strict';
 
+var isUndefined = require('lodash/lang/isUndefined'),
+  pull = require('lodash/array/pull'),
+  difference = require('lodash/array/difference'),
+  includes = require('lodash/collection/includes');
+
 function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
                              Configuration, LoggerFactory) {
 
@@ -87,7 +92,7 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
   var _runningQueueEntry = null;
 
   function startedSlotAccessor(value) {
-    if (_.isUndefined(value)) {
+    if (isUndefined(value)) {
       return _startedSlot;
     } else {
       _startedSlot = value;
@@ -95,7 +100,7 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
   }
 
   function movePreparedSlotAccessor(value) {
-    if (_.isUndefined(value)) {
+    if (isUndefined(value)) {
       return _movePreparedSlot;
     } else {
       _movePreparedSlot = value;
@@ -103,7 +108,7 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
   }
 
   function autoPreparedSlotAccessor(value) {
-    if (_.isUndefined(value)) {
+    if (isUndefined(value)) {
       return _autoPreparedSlot;
     } else {
       _autoPreparedSlot = value;
@@ -116,7 +121,7 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
       _finishingSlots.push(slot);
       slot.finishedPromise.then(function() {
 
-        _.pull(_finishingSlots, slot);
+        pull(_finishingSlots, slot);
 
         if (!_startedSlot && !_finishingSlots.length) {
           _runningQueueEntry = null;
@@ -238,8 +243,8 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
         // to properly manage moved to entry removal while still preparing
         var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
           || startedEntry;
-        var removedEntries = _.difference(oldEntries, newEntries);
-        if (_.contains(removedEntries, activatedEntry)) {
+        var removedEntries = difference(oldEntries, newEntries);
+        if (includes(removedEntries, activatedEntry)) {
           // the active entry has just been removed
           // move to the entry which is now at the same position in the queue
           moveTo(oldEntries.indexOf(activatedEntry));

@@ -1,5 +1,8 @@
 'use strict';
 
+var pull = require('lodash/array/pull'),
+  has = require('lodash/object/has');
+
 function pointerManagerFactory($rootScope, $timeout, $document) {
 
   var MOVE_THRESHOLD = 5;
@@ -20,7 +23,7 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
   function bindMove(handler) {
     handlers.push(handler);
     return function unbind() {
-      _.pull(handlers, handler);
+      pull(handlers, handler);
     }
   }
 
@@ -33,7 +36,7 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
   function notifyMoveEvent(event) {
     for (var idx = 0; idx < handlers.length; idx++) {
       var handler = handlers[idx];
-      if (_.has(handler, event)) {
+      if (has(handler, event)) {
         handler[event]();
       }
     }

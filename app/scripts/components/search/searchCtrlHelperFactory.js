@@ -1,5 +1,7 @@
 'use strict';
 
+var isUndefined = require('lodash/lang/isUndefined');
+
 function searchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) {
 
   var searchShown = false;
@@ -9,7 +11,7 @@ function searchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) 
    * @param {boolean=} showOrHide if not given it will toggle the visibility
    */
   function toggleSearch(showOrHide) {
-    searchShown = _.isUndefined(showOrHide) ? !searchShown : showOrHide;
+    searchShown = isUndefined(showOrHide) ? !searchShown : showOrHide;
 
     if (searchShown) {
       // reset search term before showing the search input

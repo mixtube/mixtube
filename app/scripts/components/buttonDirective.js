@@ -1,5 +1,8 @@
 'use strict';
 
+var toArray = require('lodash/lang/toArray'),
+  has = require('lodash/object/has');
+
 // unbind and rebind click event handlers by removing and re adding event listener at the DOM level
 function ClickEventsGate(element) {
   var aelClickCallsArgs = [];
@@ -10,7 +13,7 @@ function ClickEventsGate(element) {
 
   rElement.addEventListener = function addEventListenerInterceptor(type) {
     if (type === 'click') {
-      aelClickCallsArgs.push(_.toArray(arguments));
+      aelClickCallsArgs.push(toArray(arguments));
     }
     origAddEventListener.apply(rElement, arguments);
   };
@@ -41,7 +44,7 @@ function buttonDirective() {
       var clickEventsGate = new ClickEventsGate($element);
 
       // provide a default value if the attribute is not available to trigger $observe anyway
-      if (!_.has($attrs, 'disabled')) {
+      if (!has($attrs, 'disabled')) {
         $attrs.disabled = false;
       }
 

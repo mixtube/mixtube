@@ -1,6 +1,8 @@
 'use strict';
 
-var querySelector = require('../../commons').querySelector;
+var querySelector = require('../../commons').querySelector,
+  Velocity = require('velocity-animate'),
+  defaults = require('lodash/object/defaults');
 
 /**
  * @ngdoc directive
@@ -55,7 +57,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
           Velocity(
             fakeField,
             {translateX: ['0', '100%']},
-            _.defaults({
+            defaults({
               complete: function() {
                 field.css({opacity: ''});
                 animationRunning = false;
@@ -66,7 +68,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
           Velocity(
             fakeField,
             {translateX: ['100%', '0']},
-            _.defaults({
+            defaults({
               complete: function() {
                 form.css({display: 'none'});
                 field.css({opacity: ''});

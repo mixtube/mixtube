@@ -1,7 +1,9 @@
 'use strict';
 
 var Queue = require('./queueModel').Queue,
-  QueueEntry = require('./queueModel').QueueEntry;
+  QueueEntry = require('./queueModel').QueueEntry,
+  uniqueId = require('lodash/utility/uniqueId'),
+  has = require('lodash/object/has');
 
 function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
 
@@ -51,14 +53,14 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
       .then(function(videos) {
         videos.forEach(function(video) {
           var queueEntry = new QueueEntry();
-          queueEntry.id = _.uniqueId();
+          queueEntry.id = uniqueId();
           queueEntry.video = video;
           newQueue.entries.push(queueEntry);
         });
 
         // remove invalid entries
         newQueue.entries = newQueue.entries.filter(function(entry) {
-          return _.has(entry.video, 'publisherName');
+          return has(entry.video, 'publisherName');
         });
 
         // replacing the queue object prevents the Angular digest / watch mechanism to work
@@ -73,7 +75,7 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
 
   function appendVideo(video) {
     var queueEntry = new QueueEntry();
-    queueEntry.id = _.uniqueId();
+    queueEntry.id = uniqueId();
     queueEntry.video = video;
     queue.entries.push(queueEntry);
     return queueEntry;

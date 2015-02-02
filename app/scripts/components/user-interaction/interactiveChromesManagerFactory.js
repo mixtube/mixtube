@@ -1,5 +1,7 @@
 'use strict';
 
+var pull = require('lodash/array/pull');
+
 function interactiveChromesManagerFactory() {
 
   var facades = [];
@@ -17,7 +19,7 @@ function interactiveChromesManagerFactory() {
   function addInteractiveChrome(facade) {
     facades.push(facade);
     return function remove() {
-      _.pull(facades, facade);
+      pull(facades, facade);
     }
   }
 

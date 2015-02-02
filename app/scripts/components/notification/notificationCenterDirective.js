@@ -1,5 +1,7 @@
 'use strict';
 
+var pull = require('lodash/array/pull');
+
 function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegistryHelper) {
 
   return {
@@ -36,7 +38,7 @@ function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegi
       }
 
       function close(notification) {
-        _.pull(notificationCenterCtrl.notifications, notification);
+        pull(notificationCenterCtrl.notifications, notification);
       }
 
       function activate() {

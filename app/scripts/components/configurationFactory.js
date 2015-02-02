@@ -1,13 +1,17 @@
 'use strict';
 
+var has = require('lodash/object/has'),
+  isUndefined = require('lodash/lang/isUndefined'),
+  constant = require('lodash/utility/constant');
+
 function configurationFactory($location) {
 
   var locationSearch = $location.search();
-  var debug = _.has(locationSearch, 'debug') && locationSearch.debug.trim().length > 0;
+  var debug = has(locationSearch, 'debug') && locationSearch.debug.trim().length > 0;
   var debugParams = debug ? JSON.parse(locationSearch.debug) : {};
 
   function undefinedToNullOrValue(value) {
-    return _.isUndefined(value) ? null : value;
+    return isUndefined(value) ? null : value;
   }
 
   /**
@@ -24,11 +28,11 @@ function configurationFactory($location) {
       return debug;
     },
     get fadeDuration() {
-      return _.has(debugParams, 'fade') ? debugParams.fade : 5;
+      return has(debugParams, 'fade') ? debugParams.fade : 5;
     },
     get autoEndCueTimeProvider() {
-      if (_.has(debugParams, 'duration')) {
-        return _.constant(debugParams.duration);
+      if (has(debugParams, 'duration')) {
+        return constant(debugParams.duration);
       } else {
         var config = this;
         return function(duration) {

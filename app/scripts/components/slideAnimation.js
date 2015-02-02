@@ -1,6 +1,8 @@
 'use strict';
 
-var Velocity = require('velocity-animate');
+var Velocity = require('velocity-animate'),
+  defaults = require('lodash/object/defaults'),
+  has = require('lodash/object/has');
 
 function slideAnimation(AnimationsConfig) {
 
@@ -12,7 +14,7 @@ function slideAnimation(AnimationsConfig) {
     Velocity(
       element[0],
       'slideDown',
-      _.defaults(
+      defaults(
         {complete: done},
         {
           duration: AnimationsConfig.transitionDuration,
@@ -24,7 +26,7 @@ function slideAnimation(AnimationsConfig) {
     Velocity(
       element[0],
       'slideUp',
-      _.defaults(
+      defaults(
         {complete: done},
         {
           duration: AnimationsConfig.transitionDuration,
