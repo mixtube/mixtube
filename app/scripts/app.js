@@ -1,6 +1,7 @@
 'use strict';
 
-var mixtubeModule = require('./mixtubeModule');
+var angular = require('angular'),
+  mixtubeModule = require('./mixtubeModule');
 
 angular.module('mixtubeApp', [mixtubeModule.name])
   .config(function($locationProvider) {

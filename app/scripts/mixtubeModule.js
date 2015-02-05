@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 var mixtube = angular.module('mixtube', ['ngAnimate']);
 
 mixtube.factory('Capabilities', require('./components/capabilities/capabilitiesFactory'));
