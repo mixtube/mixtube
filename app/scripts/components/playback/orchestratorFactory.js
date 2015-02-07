@@ -1,232 +1,83 @@
 'use strict';
 
 var angular = require('angular'),
-  isUndefined = require('lodash/lang/isUndefined'),
-  pull = require('lodash/array/pull'),
-  difference = require('lodash/array/difference'),
-  includes = require('lodash/collection/includes');
+//isUndefined = require('lodash/lang/isUndefined'),
+//pull = require('lodash/array/pull'),
+//difference = require('lodash/array/difference'),
+//includes = require('lodash/collection/includes'),
+  mixtubePlayback = require('mixtube-playback');
 
-function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, NotificationCentersRegistry,
+function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCentersRegistry, ScenesRegistry,
                              Configuration, LoggerFactory) {
 
-  var logger = LoggerFactory('Orchestrator');
+  var _logger = LoggerFactory('Orchestrator'),
+    _playback,
+    _playbackState,
+    _loadingEntry;
 
   activate();
 
-  /**
-   * @name Playback
-   * @constructor
-   */
-  function Playback() {
-    //this.onPause = new signals.Signal();
-    //this.onResume = new signals.Signal();
-    this._status = Playback.Status.STOPPED;
-  }
+  function activate() {
 
-  Playback.Status = {
-    PLAYING: 'PLAYING',
-    PAUSED: 'PAUSED',
-    STOPPED: 'STOPPED'
-  };
-  Playback.prototype = {
+    ScenesRegistry('scene').ready(function(scene) {
 
-    get playing() {
-      return this._status === Playback.Status.PLAYING;
-    },
+      _playback = mixtubePlayback({
+        elementProducer: function() {
+          return scene.newHostElement()[0];
+        },
 
-    get paused() {
-      return this._status === Playback.Status.PAUSED;
-    },
+        videoProducer: function(entry) {
+          return entry.video;
+        },
 
-    get stopped() {
-      return this._status === Playback.Status.STOPPED;
-    },
+        nextEntryProducer: function(entry) {
+          return QueueManager.closestValidEntryByIndex(QueueManager.queue.entries.indexOf(entry));
+        },
 
-    whenPlaying: function(cb) {
-      if (this._status !== Playback.Status.PLAYING) {
-        this.onResume.addOnce(cb);
-      } else {
-        cb();
-      }
-    },
+        transitionDuration: Configuration.fadeDuration * 1000,
 
-    pause: function() {
-      if (this._status !== Playback.Status.PAUSED) {
-        this._status = Playback.Status.PAUSED;
-        this.onPause.dispatch();
-      }
-    },
+        stateChanged: function(prevState, state) {
+          $rootScope.$evalAsync(function() {
+            _playbackState = state;
+          });
+        },
 
-    resume: function() {
-      if (this._status !== Playback.Status.PLAYING) {
-        this._status = Playback.Status.PLAYING;
-        this.onResume.dispatch();
-      }
-    },
+        loadingChanged: function(entry, loading) {
+          $rootScope.$evalAsync(function() {
+            if (loading) {
+              _loadingEntry = entry;
+            } else if (_loadingEntry === entry) {
+              _loadingEntry = null;
+            }
+          });
+        },
 
-    stop: function() {
-      this._status = Playback.Status.STOPPED;
-      this.onPause.removeAll();
-      this.onResume.removeAll();
-    }
-  };
+        comingNext: function(currentVideo, nextVideo) {
+          $rootScope.$evalAsync(function() {
+            NotificationCentersRegistry('notificationCenter').ready(
+              function(notificationCenter) {
+                var closeComingNextFn = notificationCenter.comingNext({
+                  current: currentVideo.title,
+                  next: nextVideo ? nextVideo.title : null,
+                  imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
+                });
 
-  /**
-   * The orchestrator's current playback state
-   *
-   * @type {Playback}
-   */
-  var _playback = new Playback();
+                $timeout(closeComingNextFn, 10000);
+              });
+          });
+        },
 
-  /** @type {PlaybackSlot} */
-  var _autoPreparedSlot = null;
-  /** @type {PlaybackSlot} */
-  var _movePreparedSlot = null;
-  /** @type {PlaybackSlot} */
-  var _startedSlot = null;
-  /** @type {Array.<PlaybackSlot>} */
-  var _finishingSlots = [];
-
-  /** @type {number} */
-  var _runningQueueIndex = -1;
-  /** @type {mt.model.QueueEntry} */
-  var _runningQueueEntry = null;
-
-  function startedSlotAccessor(value) {
-    if (isUndefined(value)) {
-      return _startedSlot;
-    } else {
-      _startedSlot = value;
-    }
-  }
-
-  function movePreparedSlotAccessor(value) {
-    if (isUndefined(value)) {
-      return _movePreparedSlot;
-    } else {
-      _movePreparedSlot = value;
-    }
-  }
-
-  function autoPreparedSlotAccessor(value) {
-    if (isUndefined(value)) {
-      return _autoPreparedSlot;
-    } else {
-      _autoPreparedSlot = value;
-    }
-  }
-
-  function finishSlot(slotAccessor) {
-    var slot = slotAccessor();
-    if (slot) {
-      _finishingSlots.push(slot);
-      slot.finishedPromise.then(function() {
-
-        pull(_finishingSlots, slot);
-
-        if (!_startedSlot && !_finishingSlots.length) {
-          _runningQueueEntry = null;
-          _runningQueueIndex = -1;
-
-          if (!_movePreparedSlot && !_autoPreparedSlot) {
-            // no new started or about to start slot when the slot is finished means we reach the end of the queue
-            _playback.stop();
-          }
+        loadFailed: function(entry, error) {
+          $rootScope.$evalAsync(function() {
+            entry.skippedAtRuntime = true;
+            _logger.warn('Error while loading a entry');
+            _logger.warn(error.stack);
+          });
         }
       });
-      slot.finish();
-      slotAccessor(null);
-    }
-  }
+    });
 
-  /**
-   * Engages the slot returned by the given accessor.
-   *
-   * When engaged, a slot starts playing as soon as the preparation is done. When playing starts it finishes the
-   * started slot and triggers the auto preparation for the next slot.
-   *
-   * If the accessor returns null, it just finishes the started slot.
-   *
-   * @param {function(PlaybackSlot=): PlaybackSlot} slotAccessor
-   */
-  function engageSlot(slotAccessor) {
-    var slot = slotAccessor();
-    if (slot) {
-      slot.engage({
-        prepareFinished: function() {
-          // might be unnecessary but finish is robust enough to figure out
-          finishSlot(startedSlotAccessor);
-          slotAccessor(null);
-        },
-        aboutToStart: function() {
-          _startedSlot = slot;
 
-          _runningQueueEntry = slot.actualQueueEntry;
-          _runningQueueIndex = QueueManager.queue.entries.indexOf(_runningQueueEntry);
-
-          prepareAuto(_runningQueueIndex + 1);
-        }
-      }, [
-        {
-          id: 'AutoEndCue',
-          timeProvider: Configuration.autoEndCueTimeProvider,
-          fn: function autoEndCueCb() {
-            logger.debug('auto ending %O', slot.actualQueueEntry.video);
-
-            engageSlot(autoPreparedSlotAccessor);
-            slot.finish();
-          }
-        },
-        {
-          id: 'ComingNextCue',
-          timeProvider: function(duration) {
-            return Configuration.autoEndCueTimeProvider(duration) - 10;
-          },
-          fn: function comingNextCueCb() {
-            NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
-              var autoPreparedSlot = autoPreparedSlotAccessor();
-              var nextVideo = autoPreparedSlot && autoPreparedSlot.actualQueueEntry && autoPreparedSlot.actualQueueEntry.video;
-              var closeComingNextFn = notificationCenter.comingNext({
-                current: slot.actualQueueEntry.video.title,
-                next: nextVideo ? nextVideo.title : null,
-                imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
-              });
-
-              slot.finishedPromise.finally(closeComingNextFn);
-            });
-          }
-        }
-      ]);
-    } else {
-      // engaging a null slot just finishes the started one
-      finishSlot(startedSlotAccessor);
-    }
-  }
-
-  /**
-   * Starts the preparation of a new auto slot.
-   *
-   * @param {number} queueIndex the index of the "wished" queue item to prepare
-   */
-  function prepareAuto(queueIndex) {
-    finishSlot(autoPreparedSlotAccessor);
-    _autoPreparedSlot = PlaybackSlotFactory(_playback);
-    _autoPreparedSlot.prepareSafe(queueIndex);
-  }
-
-  /**
-   * Starts the preparation of a new move slot and engages it.
-   *
-   * @param {number} queueIndex the index of the "wished" queue item to prepare
-   */
-  function moveTo(queueIndex) {
-    finishSlot(movePreparedSlotAccessor);
-    _movePreparedSlot = PlaybackSlotFactory(_playback);
-    _movePreparedSlot.prepareSafe(queueIndex);
-    engageSlot(movePreparedSlotAccessor);
-  }
-
-  function activate() {
     /**
      * The watcher bellow observes the queue entries to check if a modification the queue and impacts the playback if required.
      *
@@ -234,67 +85,68 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
      *  - the currently playing entry has been removed -> move to the next valid one
      *  - something has changed between the currently playing entry and the auto prepared one -> launch a new cycle to pick and prepare
      */
-    $rootScope.$watchCollection(function() {
-      return QueueManager.queue.entries;
-    }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
-      if (!angular.equals(newEntries, oldEntries)) {
-        var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
-        // the concept of activated entry is only relevant here
-        // we want to consider the currently started entry or the one about to be the next started entry mainly
-        // to properly manage moved to entry removal while still preparing
-        var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
-          || startedEntry;
-        var removedEntries = difference(oldEntries, newEntries);
-        if (includes(removedEntries, activatedEntry)) {
-          // the active entry has just been removed
-          // move to the entry which is now at the same position in the queue
-          moveTo(oldEntries.indexOf(activatedEntry));
-        } else if (startedEntry) {
-          // nothing changed for the active entry
-          // we need the check if the change impacted the auto prepared entry
-          var prepareAutoRequired = false;
-          var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
-          var startedEntryNewIndex = newEntries.indexOf(startedEntry);
-          var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
-          var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
-          if (autoPreparedEntryNewIndex === -1) {
-            // the auto prepared entry has just been removed so we know straight that we have to re-prepare
-            prepareAutoRequired = true;
-          } else {
-            // we have to compare slices of old and new entries from the entry following the started one
-            // to the auto prepared one the check if something changes in between
-            var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
-            var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
-            var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
-            prepareAutoRequired = !angular.equals(sliceOfOldEntries, sliceOfNewEntries);
-          }
-          if (prepareAutoRequired) {
-            // something changed so just in case we re (auto)prepare the entry
-            prepareAuto(startedEntryNewIndex + 1);
-            logger.debug('something changed in the queue that required a re-preparation of the previously ' +
-            'auto prepared entry %O', autoPreparedEntry);
-          }
-        }
-      }
-    });
+    //  $rootScope.$watchCollection(function() {
+    //    return QueueManager.queue.entries;
+    //  }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
+    //    if (!angular.equals(newEntries, oldEntries)) {
+    //      var startedEntry = _startedSlot && _startedSlot.actualQueueEntry;
+    //      // the concept of activated entry is only relevant here
+    //      // we want to consider the currently started entry or the one about to be the next started entry mainly
+    //      // to properly manage moved to entry removal while still preparing
+    //      var activatedEntry = _movePreparedSlot && (_movePreparedSlot.actualQueueEntry || _movePreparedSlot.tryingQueueEntry)
+    //        || startedEntry;
+    //      var removedEntries = difference(oldEntries, newEntries);
+    //      if (includes(removedEntries, activatedEntry)) {
+    //        // the active entry has just been removed
+    //        // move to the entry which is now at the same position in the queue
+    //        moveTo(oldEntries.indexOf(activatedEntry));
+    //      } else if (startedEntry) {
+    //        // nothing changed for the active entry
+    //        // we need the check if the change impacted the auto prepared entry
+    //        var prepareAutoRequired = false;
+    //        var startedEntryOldIndex = oldEntries.indexOf(startedEntry);
+    //        var startedEntryNewIndex = newEntries.indexOf(startedEntry);
+    //        var autoPreparedEntry = _autoPreparedSlot && (_autoPreparedSlot.actualQueueEntry || _autoPreparedSlot.tryingQueueEntry);
+    //        var autoPreparedEntryNewIndex = newEntries.indexOf(autoPreparedEntry);
+    //        if (autoPreparedEntryNewIndex === -1) {
+    //          // the auto prepared entry has just been removed so we know straight that we have to re-prepare
+    //          prepareAutoRequired = true;
+    //        } else {
+    //          // we have to compare slices of old and new entries from the entry following the started one
+    //          // to the auto prepared one the check if something changes in between
+    //          var autoPreparedEntryOldIndex = oldEntries.indexOf(autoPreparedEntry);
+    //          var sliceOfOldEntries = oldEntries.slice(startedEntryOldIndex + 1, autoPreparedEntryOldIndex);
+    //          var sliceOfNewEntries = newEntries.slice(startedEntryNewIndex + 1, autoPreparedEntryNewIndex);
+    //          prepareAutoRequired = !angular.equals(sliceOfOldEntries, sliceOfNewEntries);
+    //        }
+    //        if (prepareAutoRequired) {
+    //          // something changed so just in case we re (auto)prepare the entry
+    //          prepareAuto(startedEntryNewIndex + 1);
+    //          _logger.debug('something changed in the queue that required a re-preparation of the previously ' +
+    //          'auto prepared entry %O', autoPreparedEntry);
+    //        }
+    //      }
+    //    }
+    //  });
   }
 
   function skipTo(queueIndex) {
-    if (_playback.paused || _playback.stopped) {
-      _playback.resume();
-    }
+    _playback.skip(QueueManager.queue.entries[queueIndex]);
 
-    moveTo(queueIndex);
+    if (_playbackState !== mixtubePlayback.States.playing) {
+      _playback.play();
+    }
   }
 
   function togglePlayback() {
-    if (_playback.playing) {
+    if (_playbackState === mixtubePlayback.States.playing) {
       _playback.pause();
-    } else if (_playback.paused) {
-      _playback.resume();
-    } else if (_playback.stopped && QueueManager.queue.entries.length) {
-      _playback.resume();
-      moveTo(0);
+    } else if (_playbackState === mixtubePlayback.States.paused) {
+      _playback.play();
+    } else if (QueueManager.queue.entries.length) {
+      // stopped or pristine
+      _playback.skip(QueueManager.queue.entries[0]);
+      _playback.play();
     }
   }
 
@@ -309,7 +161,8 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
      * @returns {?mt.model.QueueEntry}
      */
     get runningQueueEntry() {
-      return _runningQueueEntry;
+      // todo need support form mixtube playback here, missing info
+      return null;
     },
 
     /**
@@ -321,14 +174,14 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
      * @returns {?mt.model.QueueEntry}
      */
     get loadingQueueEntry() {
-      return _movePreparedSlot && _movePreparedSlot.tryingQueueEntry;
+      return _loadingEntry;
     },
 
     /**
      * @returns {boolean}
      */
     get playing() {
-      return _playback.playing;
+      return _playbackState === mixtubePlayback.States.playing;
     },
 
     /**
