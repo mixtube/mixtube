@@ -90,7 +90,7 @@ module.exports = function(grunt) {
                 options: {
                     hostname: '*',
                     port: 8080,
-                    base: ['.tmp', '<%= mixtube.app %>']
+                    base: ['.tmp', '<%= mixtube.app %>', 'build/app']
                 }
             }
         },

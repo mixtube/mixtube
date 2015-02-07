@@ -18,8 +18,8 @@ function orchestratorFactory($rootScope, QueueManager, PlaybackSlotFactory, Noti
    * @constructor
    */
   function Playback() {
-    this.onPause = new signals.Signal();
-    this.onResume = new signals.Signal();
+    //this.onPause = new signals.Signal();
+    //this.onResume = new signals.Signal();
     this._status = Playback.Status.STOPPED;
   }
 

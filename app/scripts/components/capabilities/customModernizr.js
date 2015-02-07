@@ -459,7 +459,7 @@
   }
 
   // Leak Modernizr namespace
-  window.Modernizr = Modernizr;
-
+  //window.Modernizr = Modernizr;
+  module.exports = Modernizr;
 
 })(this, document);

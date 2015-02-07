@@ -1,5 +1,7 @@
 'use strict';
 
+var Modernizr = require('./customModernizr');
+
 function capabilitiesFactory($rootScope, Configuration) {
 
   var videoAutoplay = undefined;
