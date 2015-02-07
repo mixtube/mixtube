@@ -1,6 +1,7 @@
 'use strict';
 
-var defaults = require('lodash/object/defaults'),
+var angular = require('angular'),
+  defaults = require('lodash/object/defaults'),
   has = require('lodash/object/has'),
   pluck = require('lodash/collection/pluck');
 

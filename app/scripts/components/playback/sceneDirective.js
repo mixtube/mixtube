@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular')
+
 function sceneDirective(ScenesRegistry, DirectivesRegistryHelper) {
   return {
     restrict: 'A',

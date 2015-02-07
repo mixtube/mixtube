@@ -1,6 +1,7 @@
 'use strict';
 
-var isUndefined = require('lodash/lang/isUndefined'),
+var angular = require('angular'),
+  isUndefined = require('lodash/lang/isUndefined'),
   pull = require('lodash/array/pull'),
   difference = require('lodash/array/difference'),
   includes = require('lodash/collection/includes');

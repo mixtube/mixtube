@@ -1,6 +1,7 @@
 'use strict';
 
-var Queue = require('./queueModel').Queue,
+var angular = require('angular'),
+  Queue = require('./queueModel').Queue,
   QueueEntry = require('./queueModel').QueueEntry,
   uniqueId = require('lodash/utility/uniqueId'),
   has = require('lodash/object/has');

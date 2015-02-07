@@ -1,8 +1,9 @@
 'use strict';
 
-var angular = require('angular');
+var angular = require('angular'),
+  angularAnimate = require('angular-animate');
 
-var mixtube = angular.module('mixtube', ['ngAnimate']);
+var mixtube = angular.module('mixtube', [angularAnimate.name]);
 
 mixtube.factory('Capabilities', require('./components/capabilities/capabilitiesFactory'));
 mixtube.factory('AsyncRegistryFactory', require('./components/directives-registry/asyncRegistryFactoryFactory'));

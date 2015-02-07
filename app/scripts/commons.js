@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 /**
  * Pads a string to the left.
  *

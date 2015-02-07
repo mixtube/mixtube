@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 function RootCtrl($scope, $location, $timeout, KeyboardShortcutManager, QueueManager, NotificationCentersRegistry,
                   Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager, PointerManager, Capabilities,
                   SearchCtrlHelper) {

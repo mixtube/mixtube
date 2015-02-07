@@ -15,11 +15,15 @@
     "transform": ["browserify-shim"]
   },
   "browser": {
-    "angular":"./node_modules/angular/angular.js"
+    "angular":"./node_modules/angular/angular.js",
+    "angular-animate":"./node_modules/angular-animate/angular-animate.js"
   },
   "browserify-shim": {
     "angular": {
       "exports": "angular"
+    },
+    "angular-animate": {
+      "exports": "angular.module('ngAnimate')"
     }
   },
   "devDependencies": {

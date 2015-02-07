@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 function modalManagerFactory($document, $compile, $q, $animate, $rootScope, $templateRequest) {
 
   var body = $document.find('body').eq(0);
