@@ -31,7 +31,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         },
 
         nextEntryProducer: function(entry) {
-          return QueueManager.closestValidEntryByIndex(QueueManager.queue.entries.indexOf(entry));
+          return QueueManager.closestValidEntryByIndex(QueueManager.queue.entries.indexOf(entry) + 1);
         },
 
         transitionDuration: Configuration.fadeDuration * 1000,
@@ -52,19 +52,21 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
           });
         },
 
-        comingNext: function(currentVideo, nextVideo) {
-          $rootScope.$evalAsync(function() {
+        comingNext: function(currentEntry, nextEntry) {
+          // notify only if there was a current entry
+          // otherwise it means we just started to play and we don't need to show anything in this case
+          if (currentEntry) {
             NotificationCentersRegistry('notificationCenter').ready(
               function(notificationCenter) {
                 var closeComingNextFn = notificationCenter.comingNext({
-                  current: currentVideo.title,
-                  next: nextVideo ? nextVideo.title : null,
-                  imageUrl: nextVideo ? nextVideo.thumbnailUrl : null
+                  current: currentEntry.video.title,
+                  next: nextEntry ? nextEntry.video.title : null,
+                  imageUrl: nextEntry ? nextEntry.video.thumbnailUrl : null
                 });
 
                 $timeout(closeComingNextFn, 10000);
               });
-          });
+          }
         },
 
         loadFailed: function(entry, error) {
