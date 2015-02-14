@@ -13,6 +13,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
   var _logger = LoggerFactory('Orchestrator'),
     _playback,
     _playbackState,
+    _playingEntry,
     _loadingEntry;
 
   activate();
@@ -39,6 +40,17 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         stateChanged: function(prevState, state) {
           $rootScope.$evalAsync(function() {
             _playbackState = state;
+
+            // when the playbacks stops we need to tell that the last playing video is not playing anymore
+            if(_playbackState === mixtubePlayback.States.stopped) {
+              _playingEntry = null;
+            }
+          });
+        },
+
+        playingChanged: function(entry) {
+          $rootScope.$evalAsync(function() {
+            _playingEntry = entry;
           });
         },
 
@@ -163,8 +175,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
      * @returns {?mt.model.QueueEntry}
      */
     get runningQueueEntry() {
-      // todo need support form mixtube playback here, missing info
-      return null;
+      return _playingEntry;
     },
 
     /**
