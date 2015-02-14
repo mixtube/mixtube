@@ -112,7 +112,7 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
    */
   var QueueManager = {
     /**
-     * @returns {mt.model.Queue}
+     * @returns {mt.Queue}
      */
     get queue() {
       return queue;
@@ -121,15 +121,15 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
     /**
      * Adds a video at the end of the queue.
      *
-     * @param {mt.model.Video} video
-     * @return {mt.model.QueueEntry} the newly created entry in the queue
+     * @param {mt.Video} video
+     * @return {mt.QueueEntry} the newly created entry in the queue
      */
     appendVideo: appendVideo,
 
     /**
      * Removes an entry from the queue.
      *
-     * @param {mt.model.QueueEntry} entry
+     * @param {mt.QueueEntry} entry
      */
     removeEntry: removeEntry,
 
@@ -137,7 +137,7 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
      * Returns the closest valid (not skipped yet) entry in the queue from the given entry index included.
      *
      * @param {number} fromIndex the index in the queue to start to search from
-     * @return {mt.model.QueueEntry} the next entry or null if none
+     * @return {mt.QueueEntry} the next entry or null if none
      */
     closestValidEntryByIndex: closestValidEntryByIndex,
 

@@ -172,7 +172,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
     /**
      * The currently playing queue entry.
      *
-     * @returns {?mt.model.QueueEntry}
+     * @returns {?mt.QueueEntry}
      */
     get runningQueueEntry() {
       return _playingEntry;
@@ -184,7 +184,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
      * This value is not null only if the loading has been initiated by a external action ie. not by
      * the orchestrator itself.
      *
-     * @returns {?mt.model.QueueEntry}
+     * @returns {?mt.QueueEntry}
      */
     get loadingQueueEntry() {
       return _loadingEntry;

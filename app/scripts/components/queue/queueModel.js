@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * @namespace mt
+ */
+
 function Video() {
   /** @type {string} */
   this.id = null;
@@ -20,14 +24,14 @@ function Video() {
 function Queue() {
   /** @type {string} */
   this.name = null;
-  /** @type {Array.<mt.model.QueueEntry} */
+  /** @type {Array.<mt.QueueEntry>} */
   this.entries = [];
 }
 
 function QueueEntry() {
   /** @type {string} */
   this.id = null;
-  /** @type {mt.model.Video} */
+  /** @type {mt.Video} */
   this.video = null;
   /** @type {boolean} */
   this.skippedAtRuntime = false;

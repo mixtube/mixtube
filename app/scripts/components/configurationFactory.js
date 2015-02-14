@@ -15,7 +15,7 @@ function configurationFactory($location) {
   }
 
   /**
-   * @name Configuration
+   * @typedef {Object} Configuration
    */
   var Configuration = {
     get youtubeAPIKey() {

@@ -181,7 +181,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
   /**
    * A list of results pages.
    *
-   * @type {Object.<string, Array.<Array.<mt.model.Video>>>}
+   * @type {Object.<string, Array.<Array.<Video>>>}
    */
   searchResultsCtrl.results = null;
   /** @type {Object.<string, boolean>} */
@@ -343,7 +343,7 @@ function SearchResultCtrl($timeout, QueueManager, QueuesRegistry, Orchestrator) 
   searchResultCtrl.appendResultToQueue = appendResultToQueue;
 
   /**
-   * @param {mt.model.Video} video
+   * @param {mt.Video} video
    */
   function appendResultToQueue(video) {
 
@@ -384,7 +384,7 @@ function QueueCtrl(Orchestrator, QueueManager) {
   }
 
   /**
-   * @param {mt.model.QueueEntry} queueEntry
+   * @param {mt.QueueEntry} queueEntry
    */
   function removeQueueEntry(queueEntry) {
     QueueManager.removeEntry(queueEntry);

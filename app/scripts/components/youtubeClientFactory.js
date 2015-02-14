@@ -183,11 +183,11 @@ function youtubeClientFactory($http, $q, Configuration) {
     /**
      * Lists the videos for the given ids.
      *
-     * The returned collection always contains video pseudo objects (projection of {@link mt.model.Video} with at
+     * The returned collection always contains video pseudo objects (projection of {@link mt.Video} with at
      * least the id. That doesn't mean that it was found, check properties values to know if it was.
      *
      * @param {Array.<string>} ids the list of youtube videos ids
-     * @return {Promise} a promise resolved with Array.<mt.model.Video>
+     * @return {Promise} a promise resolved with Array.<mt.Video>
      */
     listVideosByIds: listVideosByIds,
 
@@ -198,13 +198,13 @@ function youtubeClientFactory($http, $q, Configuration) {
      * available. It is impossible to get all the properties in one shot because of the design of the Youtube API.
      *
      * The videos objects are passed by the returned promise to be able to update the model as the details
-     * arrive. The promise parameter is an array of {@link mt.model.Video} for the first call and a projection
+     * arrive. The promise parameter is an array of {@link mt.Video} for the first call and a projection
      * of videos after with only the properties available at the execution time.
      *
      * @param {string} queryString the query as used for a classic youtube search
      * @param {{pageId: string=, pageSize: number}} pageSpec parameters for paging (default to
      * {@link Configuration.maxSearchResults})
-     * @return {promise.<{videos: Array.<mt.model.Video>, netPageId: string}>} resolved when finished.
+     * @return {promise.<{videos: Array.<mt.Video>, netPageId: string}>} resolved when finished.
      * Intermediary states are delivered through the promise's progress callback.
      */
     searchVideosByQuery: searchVideosByQuery
