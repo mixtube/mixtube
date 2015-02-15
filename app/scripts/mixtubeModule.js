@@ -11,9 +11,7 @@ mixtube.factory('DirectivesRegistryHelper', require('./components/directives-reg
 mixtube.factory('ModalManager', require('./components/modal/modalManagerFactory.js'));
 mixtube.directive('mtNotificationCenter', require('./components/notification/notificationCenterDirective'));
 mixtube.factory('NotificationCentersRegistry', require('./components/notification/notificationCentersRegistryFactory'));
-mixtube.factory('MediaElementsPool', require('./components/playback/mediaElementsPoolFactory'));
 mixtube.factory('Orchestrator', require('./components/playback/orchestratorFactory'));
-mixtube.factory('PlaybackSlotFactory', require('./components/playback/playbackSlotFactoryFactory'));
 mixtube.directive('mtScene', require('./components/playback/sceneDirective'));
 mixtube.factory('ScenesRegistry', require('./components/playback/scenesRegistryFactory'));
 mixtube.directive('mtQueue', require('./components/queue/queueDirective'));
