@@ -30,17 +30,8 @@ function configurationFactory($location) {
     get fadeDuration() {
       return has(debugParams, 'fade') ? debugParams.fade : 5;
     },
-    get autoEndCueTimeProvider() {
-      if (has(debugParams, 'duration')) {
-        return constant(debugParams.duration);
-      } else {
-        var config = this;
-        return function(duration) {
-          // add a extra second to the fade duration to make sure the video didn't reach the end before
-          // the end of the transition
-          return duration - (config.fadeDuration + 1);
-        };
-      }
+    get mediaDuration() {
+      return parseInt(debugParams.duration, 10);
     },
 
     /**

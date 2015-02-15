@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular'),
+  isNumber = require('lodash/lang/isNumber'),
 //isUndefined = require('lodash/lang/isUndefined'),
 //pull = require('lodash/array/pull'),
 //difference = require('lodash/array/difference'),
@@ -22,7 +23,9 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
 
     ScenesRegistry('scene').ready(function(scene) {
 
-      _playback = mixtubePlayback({
+      var transitionDurationInMillis = Configuration.fadeDuration * 1000;
+
+      var playbackConfig = {
         elementProducer: function() {
           return scene.newHostElement()[0];
         },
@@ -35,14 +38,14 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
           return QueueManager.closestValidEntryByIndex(QueueManager.queue.entries.indexOf(entry) + 1);
         },
 
-        transitionDuration: Configuration.fadeDuration * 1000,
+        transitionDuration: transitionDurationInMillis,
 
         stateChanged: function(prevState, state) {
           $rootScope.$evalAsync(function() {
             _playbackState = state;
 
             // when the playbacks stops we need to tell that the last playing video is not playing anymore
-            if(_playbackState === mixtubePlayback.States.stopped) {
+            if (_playbackState === mixtubePlayback.States.stopped) {
               _playingEntry = null;
             }
           });
@@ -76,7 +79,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
                   imageUrl: nextEntry ? nextEntry.video.thumbnailUrl : null
                 });
 
-                $timeout(closeComingNextFn, 10000);
+                $timeout(closeComingNextFn, 2 * transitionDurationInMillis);
               });
           }
         },
@@ -88,7 +91,16 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
             _logger.warn(error.stack);
           });
         }
-      });
+      };
+
+      if (isNumber(Configuration.mediaDuration)) {
+        playbackConfig.debug = {
+          mediaDuration: Configuration.mediaDuration,
+          mediaQuality: 'low'
+        };
+      }
+
+      _playback = mixtubePlayback(playbackConfig);
     });
 
 
