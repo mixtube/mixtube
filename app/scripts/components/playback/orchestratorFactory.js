@@ -113,6 +113,8 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         } else if (includes(removedEntries, _loadingEntry)) {
           skipTo(oldEntries.indexOf(_loadingEntry));
         } else {
+          // we can get here if some entry has been deleted but was not playing or loading
+          // or if an entry has been added
           _playback.checkNextEntry();
         }
       }
