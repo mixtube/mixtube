@@ -4,8 +4,8 @@ var angular = require('angular'),
   isNumber = require('lodash/lang/isNumber'),
 //isUndefined = require('lodash/lang/isUndefined'),
 //pull = require('lodash/array/pull'),
-//difference = require('lodash/array/difference'),
-//includes = require('lodash/collection/includes'),
+  difference = require('lodash/array/difference'),
+  includes = require('lodash/collection/includes'),
   mixtubePlayback = require('mixtube-playback');
 
 function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCentersRegistry, ScenesRegistry,
@@ -103,6 +103,21 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
       _playback = mixtubePlayback(playbackConfig);
     });
 
+    $rootScope.$watchCollection(function() {
+      return QueueManager.queue.entries;
+    }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
+      if (!angular.equals(newEntries, oldEntries)) {
+        var removedEntries = difference(oldEntries, newEntries);
+        if (includes(removedEntries, _playingEntry)) {
+          skipTo(oldEntries.indexOf(_playingEntry));
+        } else if (includes(removedEntries, _loadingEntry)) {
+          skipTo(oldEntries.indexOf(_loadingEntry));
+        } else {
+          _playback.checkNextEntry();
+        }
+      }
+    });
+
 
     /**
      * The watcher bellow observes the queue entries to check if a modification the queue and impacts the playback if required.
@@ -157,10 +172,15 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
   }
 
   function skipTo(queueIndex) {
-    _playback.skip(QueueManager.queue.entries[queueIndex]);
+    var entry = QueueManager.closestValidEntryByIndex(queueIndex);
+    if (!entry) {
+      _playback.stop();
+    } else {
+      _playback.skip(entry);
 
-    if (_playbackState !== mixtubePlayback.States.playing) {
-      _playback.play();
+      if (_playbackState !== mixtubePlayback.States.playing) {
+        _playback.play();
+      }
     }
   }
 
