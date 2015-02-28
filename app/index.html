@@ -7,7 +7,6 @@
   <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
   <!-- usemin must look for files in app and .tmp directory for compiled css -->
   <!-- build:css({app,.tmp}) styles/app.css -->
-  <link rel="stylesheet" href="bower_components/reset-css/reset.css" type="text/css">
   <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
   <link rel="stylesheet" href="styles/css/main.css" type="text/css">
   <!-- endbuild -->
@@ -211,61 +210,9 @@
 </div>
 
 <!-- build:js scripts/app.js -->
-<script src="bower_components/angular/angular.js"></script>
-<script src="bower_components/angular-animate/angular-animate.js"></script>
-<script src="bower_components/lodash/dist/lodash.js"></script>
-<script src="bower_components/keymaster/keymaster.js"></script>
-<script src="bower_components/velocity/velocity.js"></script>
-
-<script src="scripts/app.js"></script>
-<script src="scripts/commons.js"></script>
-<script src="scripts/app-controllers.js"></script>
-<script src="scripts/components/search/search-ctrl-helper.js"></script>
-<script src="scripts/components/logger-factory.js"></script>
-<script src="scripts/components/directives-registry/async-registry-factory.js"></script>
-<script src="scripts/components/directives-registry/directives-registry-helper.js"></script>
-<script src="scripts/components/click-active-class-directive.js"></script>
-<script src="scripts/components/button-directive.js"></script>
-<script src="scripts/components/smart-img-directive.js"></script>
-<script src="scripts/components/duration-filter.js"></script>
-<script src="scripts/components/slide-size-animation/slide-size-animation-builder.js"></script>
-<script src="scripts/components/slide-size-animation/slide-size-animation.js"></script>
-<script src="scripts/components/scrollable-directive.js"></script>
-<script src="scripts/components/search/search-inputs-registry.js"></script>
-<script src="scripts/components/search/search-input-directive.js"></script>
-<script src="scripts/components/slide-animation.js"></script>
-<script src="scripts/components/notification/notification-centers-registry.js"></script>
-<script src="scripts/components/notification/notification-center-directive.js"></script>
-<script src="scripts/components/modal/modal-manager.js"></script>
-<script src="scripts/components/queue/queue-model.js"></script>
-<script src="scripts/components/queue/queue-directive.js"></script>
-<script src="scripts/components/queue/queues-registry.js"></script>
-<script src="scripts/components/queue/queue-entry-animation.js"></script>
-<script src="scripts/components/queue/queue-manager.js"></script>
-<script src="scripts/components/keyboard-shortcut-manager.js"></script>
-<script src="scripts/components/user-interaction/pointer-manager.js"></script>
-<script src="scripts/components/user-interaction/interactive-chrome-directive.js"></script>
-<script src="scripts/components/user-interaction/interactive-chromes-manager.js"></script>
-<script src="scripts/components/user-interaction/user-interaction-manager.js"></script>
-<script src="scripts/components/capabilities/custom-modernizr.js"></script>
-<script src="scripts/components/capabilities/capabilities.js"></script>
-<script src="scripts/components/configuration.js"></script>
-<script src="scripts/components/animation-config.js"></script>
-<script src="scripts/components/youtube-client.js"></script>
-
-<script src="bower_components/popcorn-js/popcorn.js"></script>
-<script src="bower_components/popcorn-js/wrappers/common/popcorn._MediaElementProto.js"></script>
-<script src="bower_components/popcorn-js/wrappers/youtube/popcorn.HTMLYouTubeVideoElement.js"></script>
-<script src="bower_components/shifty/dist/shifty.js"></script>
-<script src="bower_components/js-signals/dist/signals.js"></script>
-<script src="scripts/components/playback/media-elements-pool.js"></script>
-<script src="scripts/components/playback/orchestrator.js"></script>
-<script src="scripts/components/playback/playback-slot-factory.js"></script>
-<script src="scripts/components/playback/scene-directive.js"></script>
-<script src="scripts/components/playback/scenes-registry.js"></script>
-<script src="scripts/components/playback/popcorn.one.js"></script>
-<script src="scripts/components/playback/popcorn.fade.js"></script>
+<script src="scripts/app.bundle.js"></script>
 <!-- endbuild -->
+<script src="https://www.youtube.com/iframe_api" defer></script>
 
 </body>
 </html>
