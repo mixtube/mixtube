@@ -3,7 +3,7 @@
 var angular = require('angular'),
   angularAnimate = require('angular-animate');
 
-var mixtube = angular.module('mixtube', [angularAnimate.name]);
+var mixtube = angular.module('mixtube', [angularAnimate]);
 
 mixtube.factory('Capabilities', require('./components/capabilities/capabilitiesFactory'));
 mixtube.factory('AsyncRegistryFactory', require('./components/directives-registry/asyncRegistryFactoryFactory'));
@@ -45,4 +45,4 @@ mixtube.controller('SearchResultCtrl', require('./controllers').SearchResultCtrl
 mixtube.controller('QueueCtrl', require('./controllers').QueueCtrl);
 mixtube.controller('DebuggingCtrl', require('./controllers').DebuggingCtrl);
 
-module.exports = mixtube;
+module.exports = mixtube.name;

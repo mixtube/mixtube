@@ -3,7 +3,7 @@
 var angular = require('angular'),
   mixtubeModule = require('./mixtubeModule');
 
-angular.module('mixtubeApp', [mixtubeModule.name])
+angular.module('mixtubeApp', [mixtubeModule])
   .config(function($locationProvider) {
     $locationProvider.html5Mode(true);
   })
