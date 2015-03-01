@@ -98,6 +98,12 @@ function RootCtrl($scope, $location, $timeout, KeyboardShortcutManager, QueueMan
       SearchCtrlHelper.toggleSearch(false);
     });
 
+    // prevents the backspace shortcut
+    // it is really easy to inadvertently hit the key and  triggers a "Go Back" action
+    KeyboardShortcutManager.register('backspace', function(evt) {
+      evt.preventDefault();
+    });
+
     $scope.$watch(function() {
       return QueueManager.queue;
     }, function(newVal, oldVal) {
