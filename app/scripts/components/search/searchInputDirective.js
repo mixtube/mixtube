@@ -4,6 +4,9 @@ var querySelector = require('../../commons').querySelector,
   Velocity = require('velocity-animate'),
   defaults = require('lodash/object/defaults');
 
+// brfs requires this to be on its own line
+var fs = require('fs');
+
 /**
  * @ngdoc directive
  * @name mt.directive:mtSearchInput
@@ -23,7 +26,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
 
   return {
     restrict: 'E',
-    templateUrl: '/scripts/components/search/search-input.html',
+    template: fs.readFileSync(__dirname + '/searchInput.html', 'utf8'),
     replace: true,
     scope: {
       inputModel: '=ngModel'

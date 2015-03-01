@@ -2,15 +2,14 @@
 
 var angular = require('angular');
 
-function modalManagerFactory($document, $compile, $q, $animate, $rootScope, $templateRequest) {
+// brfs requires this to be on its own line
+var fs = require('fs');
+
+function modalManagerFactory($document, $compile, $q, $animate, $rootScope) {
 
   var body = $document.find('body').eq(0);
-  var backdropElement = angular.element('<div class="mt-backdrop mt-animation-enter-leave__fade"></div>');
-
-  var linkFnPromise = $templateRequest('/scripts/components/modal/modal.html')
-    .then(function(template) {
-      return $compile(template);
-    });
+  var backdropElement = angular.element('<div class="mt-backdrop mt-animation-enter-leave__fade"></div>'),
+    modalLinkFn = $compile(fs.readFileSync(__dirname + '/modal.html', 'utf8'));
 
   var open = function(options) {
     $animate.enter(backdropElement, body);
@@ -22,25 +21,22 @@ function modalManagerFactory($document, $compile, $q, $animate, $rootScope, $tem
       });
     }
 
-    return linkFnPromise.then(function(modalLinkFn) {
+    var scope = angular.extend($rootScope.$new(true), options);
 
-      var scope = angular.extend($rootScope.$new(true), options);
+    var modalResult = $q.defer();
 
-      var modalResult = $q.defer();
+    modalLinkFn(scope, function(modalElement) {
 
-      modalLinkFn(scope, function(modalElement) {
+      scope.close = function(command) {
+        leave(modalElement, function() {
+          modalResult.resolve(command);
+        });
+      };
 
-        scope.close = function(command) {
-          leave(modalElement, function() {
-            modalResult.resolve(command);
-          });
-        };
-
-        $animate.enter(modalElement, body);
-      });
-
-      return modalResult.promise;
+      $animate.enter(modalElement, body);
     });
+
+    return modalResult.promise;
   };
 
   /**

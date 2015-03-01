@@ -14,7 +14,8 @@ var path = require('path'),
   reload = browserSync.reload;
 
 function buildBundleJS(src, dest) {
-  var bundler = watchify(browserify(src, watchify.args));
+  var bundler = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
+  bundler.transform('brfs');
   bundler.on('log', gutil.log);
 
   function bundleJS() {
@@ -22,9 +23,6 @@ function buildBundleJS(src, dest) {
       // log errors if they happen
       .on('error', gutil.log.bind(gutil, 'Browserify Error'))
       .pipe(source(path.basename(dest)))
-      .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(sourcemaps.write())
       .pipe(gulp.dest(path.dirname(dest)));
   }
 
@@ -61,7 +59,7 @@ gulp.task('watch', function() {
   gulp.watch('app/**/*.scss', ['style']);
 });
 
-gulp.task('serve', ['watch'], function() {
+gulp.task('serve', ['script', 'style', 'watch'], function() {
   browserSync({
     open: false,
     server: {

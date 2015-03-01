@@ -2,11 +2,14 @@
 
 var pull = require('lodash/array/pull');
 
+// brfs requires this to be on its own line
+var fs = require('fs');
+
 function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegistryHelper) {
 
   return {
     restrict: 'E',
-    templateUrl: '/scripts/components/notification/notification.html',
+    template: fs.readFileSync(__dirname + '/notification.html', 'utf8'),
     controllerAs: 'notificationCenterCtrl',
     controller: function($scope, $element, $attrs) {
 
