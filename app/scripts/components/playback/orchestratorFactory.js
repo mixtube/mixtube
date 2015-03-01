@@ -85,7 +85,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         loadFailed: function(entry, error) {
           $rootScope.$evalAsync(function() {
             entry.skippedAtRuntime = true;
-            _logger.warn('Error while loading a entry');
+            _logger.warn('Error while loading a entry: "%s". See stack trace bellow:', error.message);
             _logger.warn(error.stack);
           });
         }
@@ -99,23 +99,23 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
       }
 
       _playback = mixtubePlayback(playbackConfig);
-    });
 
-    $rootScope.$watchCollection(function() {
-      return QueueManager.queue.entries;
-    }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
-      if (!angular.equals(newEntries, oldEntries)) {
-        var removedEntries = difference(oldEntries, newEntries);
-        if (includes(removedEntries, _playingEntry)) {
-          skipTo(oldEntries.indexOf(_playingEntry));
-        } else if (includes(removedEntries, _loadingEntry)) {
-          skipTo(oldEntries.indexOf(_loadingEntry));
-        } else {
-          // we can get here if some entry has been deleted but was not playing or loading
-          // or if an entry has been added
-          _playback.checkNextEntry();
+      $rootScope.$watchCollection(function() {
+        return QueueManager.queue.entries;
+      }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
+        if (!angular.equals(newEntries, oldEntries)) {
+          var removedEntries = difference(oldEntries, newEntries);
+          if (includes(removedEntries, _playingEntry)) {
+            skipTo(oldEntries.indexOf(_playingEntry));
+          } else if (includes(removedEntries, _loadingEntry)) {
+            skipTo(oldEntries.indexOf(_loadingEntry));
+          } else {
+            // we can get here if some entry has been deleted but was not playing or loading
+            // or if an entry has been added
+            _playback.checkNextEntry();
+          }
         }
-      }
+      });
     });
   }
 
