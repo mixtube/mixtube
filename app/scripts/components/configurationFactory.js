@@ -37,13 +37,6 @@ function configurationFactory($location) {
     /**
      * @returns {?boolean}
      */
-    get debugNotifications() {
-      return undefinedToNullOrValue(debugParams.notifications);
-    },
-
-    /**
-     * @returns {?boolean}
-     */
     get videoAutoplay() {
       return undefinedToNullOrValue(debugParams.videoAutoplay);
     }

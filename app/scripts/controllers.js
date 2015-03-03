@@ -2,9 +2,12 @@
 
 var angular = require('angular');
 
-function RootCtrl($scope, $location, $timeout, KeyboardShortcutManager, QueueManager, NotificationCentersRegistry,
-                  Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager, PointerManager, Capabilities,
-                  SearchCtrlHelper) {
+// brfs requires this to be on its own line
+var fs = require('fs');
+
+function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutManager, QueueManager,
+                  NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
+                  PointerManager, Capabilities, SearchCtrlHelper) {
 
   var rootCtrl = this;
 
@@ -145,13 +148,17 @@ function RootCtrl($scope, $location, $timeout, KeyboardShortcutManager, QueueMan
       }
     });
 
+    // pre-fill the template cache with the content of the modal
+    $templateCache.put('noPlaybackModalContent',
+      fs.readFileSync(__dirname + '/components/capabilities/noPlaybackModalContent.html', 'utf8'));
+
     $scope.$watch(function() {
       return Capabilities.playback;
     }, function(playback) {
       if (playback === false) {
         ModalManager.open({
           title: 'MixTube won\'t work on your device',
-          contentTemplateUrl: '/scripts/components/capabilities/no-playback-modal-content.html',
+          contentTemplateUrl: 'noPlaybackModalContent',
           commands: [{label: 'OK', primary: true}]
         });
       }
@@ -408,7 +415,7 @@ function DebuggingCtrl(Configuration, KeyboardShortcutManager, NotificationCente
   }
 
   function activate() {
-    if (Configuration.debugNotifications) {
+    if (Configuration.debug) {
       // register the global space shortcut
       KeyboardShortcutManager.register('ctrl+n', function(evt) {
         evt.preventDefault();
