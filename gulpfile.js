@@ -39,7 +39,7 @@ gulp.task('script', function() {
 gulp.task('style', function() {
   return gulp.src('app/styles/css/main.scss', {base: 'app'})
     .pipe(sourcemaps.init())
-    .pipe(sass())
+    .pipe(sass({errLogToConsole: true}))
     .pipe(please({
       import: false,
       minifier: false,
