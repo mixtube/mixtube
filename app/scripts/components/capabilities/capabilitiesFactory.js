@@ -2,9 +2,9 @@
 
 var Modernizr = require('./customModernizr');
 
-function capabilitiesFactory($rootScope, Configuration) {
+function capabilitiesFactory($rootScope, configuration) {
 
-  var videoAutoplay = undefined;
+  var videoAutoplay;
 
   // todo CommonJSify Modernizr
   Modernizr.on('videoautoplay', function(result) {
@@ -14,9 +14,9 @@ function capabilitiesFactory($rootScope, Configuration) {
   });
 
   /**
-   * @name Capabilities
+   * @name capabilities
    */
-  var Capabilities = {
+  var capabilities = {
     /**
      * Is the current platform capable of acting as a playback device.
      *
@@ -25,7 +25,7 @@ function capabilitiesFactory($rootScope, Configuration) {
      * @returns {boolean|undefined}
      */
     get playback() {
-      return Configuration.videoAutoplay !== null ? Configuration.videoAutoplay : videoAutoplay;
+      return configuration.videoAutoplay !== null ? configuration.videoAutoplay : videoAutoplay;
     },
 
     /**
@@ -38,7 +38,7 @@ function capabilitiesFactory($rootScope, Configuration) {
     }
   };
 
-  return Capabilities;
+  return capabilities;
 }
 
 module.exports = capabilitiesFactory;

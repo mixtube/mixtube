@@ -1,7 +1,7 @@
 'use strict';
 
-function slideSizeAnimation(SlideSizeAnimationBuilder) {
-  return SlideSizeAnimationBuilder();
+function slideSizeAnimation(slideSizeAnimationBuilder) {
+  return slideSizeAnimationBuilder();
 }
 
 module.exports = slideSizeAnimation;

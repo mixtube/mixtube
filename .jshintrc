@@ -1,0 +1,8 @@
+{
+  "browserify": true,
+  "globalstrict": true,
+  "nonew": true,
+  "forin": true,
+  "devel": true,
+  "indent": 2
+}

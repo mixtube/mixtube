@@ -24,13 +24,13 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
     handlers.push(handler);
     return function unbind() {
       pull(handlers, handler);
-    }
+    };
   }
 
   function isPointerInRect(/*ClientRect*/ rect) {
-    return pointerPosition.x !== null && pointerPosition.y !== null
-      && rect.left < pointerPosition.x && pointerPosition.x < rect.right
-      && rect.top < pointerPosition.y && pointerPosition.y < rect.bottom;
+    return pointerPosition.x !== null && pointerPosition.y !== null &&
+      rect.left < pointerPosition.x && pointerPosition.x < rect.right &&
+      rect.top < pointerPosition.y && pointerPosition.y < rect.bottom;
   }
 
   function notifyMoveEvent(event) {
@@ -89,8 +89,8 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
         mouseMoved();
       })
       .on('mousemove', function(evt) {
-        var moved = Math.abs(evt.clientX - pointerPosition.x) > MOVE_THRESHOLD
-          || Math.abs(evt.clientY - pointerPosition.y) > MOVE_THRESHOLD;
+        var moved = Math.abs(evt.clientX - pointerPosition.x) > MOVE_THRESHOLD ||
+          Math.abs(evt.clientY - pointerPosition.y) > MOVE_THRESHOLD;
         pointerPosition.x = evt.clientX;
         pointerPosition.y = evt.clientY;
         if (moved) {
@@ -100,9 +100,9 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
   }
 
   /**
-   * @name PointerManager
+   * @name pointerManager
    */
-  var PointerManager = {
+  var pointerManager = {
 
     /**
      * Is a mouse based interaction detected.
@@ -122,7 +122,7 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
     bindMove: bindMove
   };
 
-  return PointerManager;
+  return pointerManager;
 }
 
 module.exports = pointerManagerFactory;

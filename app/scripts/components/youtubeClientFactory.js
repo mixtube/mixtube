@@ -5,7 +5,7 @@ var angular = require('angular'),
   has = require('lodash/object/has'),
   pluck = require('lodash/collection/pluck');
 
-function youtubeClientFactory($http, $q, Configuration) {
+function youtubeClientFactory($http, $q, configuration) {
 
   /**
    * @const
@@ -48,7 +48,7 @@ function youtubeClientFactory($http, $q, Configuration) {
 
   function extendVideosWithDetails(videos) {
     if (videos.length > MAX_RESULT_LIMIT) {
-      throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.')
+      throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.');
     }
 
     var videosIds = pluck(videos, 'id');
@@ -63,7 +63,7 @@ function youtubeClientFactory($http, $q, Configuration) {
         id: videosIds.join(','),
         part: 'snippet,statistics,contentDetails',
         callback: 'JSON_CALLBACK',
-        key: Configuration.youtubeAPIKey
+        key: configuration.youtubeAPIKey
       }
     }).then(function(response) {
       var data = response.data;
@@ -119,7 +119,7 @@ function youtubeClientFactory($http, $q, Configuration) {
 
   function searchVideosByQuery(queryString, pageSpec) {
 
-    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: Configuration.maxSearchResults});
+    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: configuration.maxSearchResults});
 
     var deferred = $q.defer();
 
@@ -132,7 +132,7 @@ function youtubeClientFactory($http, $q, Configuration) {
         pageToken: pageSpec.pageId,
         maxResults: pageSpec.pageSize,
         callback: 'JSON_CALLBACK',
-        key: Configuration.youtubeAPIKey
+        key: configuration.youtubeAPIKey
       }
     }).then(function(response) {
 
@@ -173,9 +173,9 @@ function youtubeClientFactory($http, $q, Configuration) {
 
 
   /**
-   * @name YoutubeClient
+   * @name youtubeClient
    */
-  var YoutubeClient = {
+  var youtubeClient = {
     get shortName() {
       return SHORT_NAME;
     },
@@ -203,14 +203,14 @@ function youtubeClientFactory($http, $q, Configuration) {
      *
      * @param {string} queryString the query as used for a classic youtube search
      * @param {{pageId: string=, pageSize: number}} pageSpec parameters for paging (default to
-     * {@link Configuration.maxSearchResults})
+     * {@link configuration.maxSearchResults})
      * @return {promise.<{videos: Array.<mt.Video>, netPageId: string}>} resolved when finished.
      * Intermediary states are delivered through the promise's progress callback.
      */
     searchVideosByQuery: searchVideosByQuery
   };
 
-  return YoutubeClient;
+  return youtubeClient;
 }
 
 module.exports = youtubeClientFactory;

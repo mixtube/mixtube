@@ -6,9 +6,9 @@ var angular = require('angular'),
   uniqueId = require('lodash/utility/uniqueId'),
   has = require('lodash/object/has');
 
-function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
+function queueManagerFactory($q, youtubeClient, loggerFactory) {
 
-  var logger = LoggerFactory('QueueManager');
+  var logger = loggerFactory('queueManager');
 
   // initialize queue
   var queue = new Queue();
@@ -18,7 +18,7 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
 
     buffer.push(queue.name || '');
     queue.entries.forEach(function(queueEntry) {
-      buffer.push(YoutubeClient.shortName + queueEntry.video.id);
+      buffer.push(youtubeClient.shortName + queueEntry.video.id);
     });
 
     var jsonString = JSON.stringify(buffer);
@@ -28,8 +28,9 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
 
   function deserialize(input) {
     // add removed array delimiters
+    var buffer;
     try {
-      var buffer = JSON.parse('[' + input + ']');
+      buffer = JSON.parse('[' + input + ']');
     } catch (e) {
       logger.debug('Unable to parse a serialized queue because of an exception %s', e);
       return $q.reject('Sorry we are unable to load your queue. Seems that the link you used is not valid.');
@@ -42,15 +43,15 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
     var youtubeVideosIds = [];
     for (var idx = 1; idx < buffer.length; idx++) {
       var serializedEntry = buffer[idx];
-      if (serializedEntry.indexOf(YoutubeClient.shortName) === 0) {
-        youtubeVideosIds.push(serializedEntry.substring(YoutubeClient.shortName.length));
+      if (serializedEntry.indexOf(youtubeClient.shortName) === 0) {
+        youtubeVideosIds.push(serializedEntry.substring(youtubeClient.shortName.length));
       } else {
         logger.debug('Unable to find a provider for serialized entry %s', serializedEntry);
         return $q.reject('Sorry we are unable to load your queue because of an internal error.');
       }
     }
 
-    return YoutubeClient.listVideosByIds(youtubeVideosIds)
+    return youtubeClient.listVideosByIds(youtubeVideosIds)
       .then(function(videos) {
         videos.forEach(function(video) {
           var queueEntry = new QueueEntry();
@@ -108,9 +109,9 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
   }
 
   /**
-   * @name QueueManager
+   * @name queueManager
    */
-  var QueueManager = {
+  var queueManager = {
     /**
      * @returns {mt.Queue}
      */
@@ -158,7 +159,7 @@ function queueManagerFactory($q, YoutubeClient, LoggerFactory) {
     serialize: serialize
   };
 
-  return QueueManager;
+  return queueManager;
 }
 
 module.exports = queueManagerFactory;

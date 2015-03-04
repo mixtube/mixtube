@@ -1,7 +1,7 @@
 'use strict';
 
-function scenesRegistryFactory(AsyncRegistryFactory) {
-  return AsyncRegistryFactory('Scenes');
+function scenesRegistryFactory(asyncRegistryFactory) {
+  return asyncRegistryFactory('Scenes');
 }
 
 module.exports = scenesRegistryFactory;

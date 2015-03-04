@@ -2,7 +2,7 @@
 
 var isUndefined = require('lodash/lang/isUndefined');
 
-function searchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) {
+function searchCtrlHelperFactory(keyboardShortcutManager, searchInputsRegistry) {
 
   var searchShown = false;
   var searchTerm = null;
@@ -16,20 +16,20 @@ function searchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) 
     if (searchShown) {
       // reset search term before showing the search input
       searchTerm = null;
-      KeyboardShortcutManager.enterScope('search');
+      keyboardShortcutManager.enterScope('search');
     } else {
-      KeyboardShortcutManager.leaveScope('search');
+      keyboardShortcutManager.leaveScope('search');
     }
 
-    SearchInputsRegistry('search').ready(function(searchInput) {
+    searchInputsRegistry('search').ready(function(searchInput) {
       searchInput.toggle(searchShown);
     });
   }
 
   /**
-   * @name SearchCtrlHelper
+   * @name searchCtrlHelper
    */
-  var SearchCtrlHelper = {
+  var searchCtrlHelper = {
 
     get searchShown() {
       return searchShown;
@@ -46,7 +46,7 @@ function searchCtrlHelperFactory(KeyboardShortcutManager, SearchInputsRegistry) 
     toggleSearch: toggleSearch
   };
 
-  return SearchCtrlHelper;
+  return searchCtrlHelper;
 }
 
 module.exports = searchCtrlHelperFactory;

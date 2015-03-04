@@ -12,7 +12,7 @@ function clickActiveClassDirective() {
       .on('touchend touchmove touchcancel', function() {
         iElement.removeClass(activeClassName);
       });
-  }
+  };
 }
 
 module.exports = clickActiveClassDirective;

@@ -1,36 +1,36 @@
 'use strict';
 
-var Velocity = require('velocity-animate'),
+var velocity = require('velocity-animate'),
   defaults = require('lodash/object/defaults'),
   has = require('lodash/object/has');
 
-function slideAnimation(AnimationsConfig) {
+function slideAnimation(animationsConfig) {
 
   function emptyAnimation(element, done) {
     done();
   }
 
   function enter(element, done) {
-    Velocity(
+    velocity(
       element[0],
       'slideDown',
       defaults(
         {complete: done},
         {
-          duration: AnimationsConfig.transitionDuration,
-          easing: AnimationsConfig.easeInOutBezierPoints
+          duration: animationsConfig.transitionDuration,
+          easing: animationsConfig.easeInOutBezierPoints
         }));
   }
 
   function leave(element, done) {
-    Velocity(
+    velocity(
       element[0],
       'slideUp',
       defaults(
         {complete: done},
         {
-          duration: AnimationsConfig.transitionDuration,
-          easing: AnimationsConfig.easeInOutBezierPoints
+          duration: animationsConfig.transitionDuration,
+          easing: animationsConfig.easeInOutBezierPoints
         }));
   }
 

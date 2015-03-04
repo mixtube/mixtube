@@ -1,13 +1,13 @@
 'use strict';
 
 var defaults = require('lodash/object/defaults'),
-  Velocity = require('velocity-animate');
+  velocity = require('velocity-animate');
 
-function slideSizeAnimationBuilderFactory(AnimationsConfig) {
+function slideSizeAnimationBuilderFactory(animationsConfig) {
 
   var BASE_VELOCITY_ANIM_CONF = {
-    duration: AnimationsConfig.transitionDuration,
-    easing: AnimationsConfig.easeInOutBezierPoints
+    duration: animationsConfig.transitionDuration,
+    easing: animationsConfig.easeInOutBezierPoints
   };
 
   /**
@@ -27,7 +27,7 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
     var config = buildConfig(element);
     var txBeginning = config.ltr ? '-100%' : '100%';
 
-    Velocity(
+    velocity(
       element[0],
       'slideDown',
       defaults(
@@ -37,7 +37,7 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
           mobileHA: false,
 
           complete: function() {
-            Velocity(
+            velocity(
               element[0],
               {translateX: [0, txBeginning]},
               defaults(
@@ -58,13 +58,13 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
 
     var config = buildConfig(element);
 
-    Velocity(
+    velocity(
       element[0],
       {translateX: [config.ltr ? '-100%' : '100%', 0]},
       defaults(
         {
           complete: function() {
-            Velocity(
+            velocity(
               element[0],
               'slideUp',
               defaults({complete: done}, BASE_VELOCITY_ANIM_CONF));
@@ -79,9 +79,9 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
   }
 
   /**
-   * @name SlideSizeAnimationBuilder
+   * @name slideSizeAnimationBuilder
    */
-  function SlideSizeAnimationBuilder() {
+  function slideSizeAnimationBuilder() {
     return {
       enter: enter,
       leave: leave,
@@ -89,10 +89,10 @@ function slideSizeAnimationBuilderFactory(AnimationsConfig) {
     };
   }
 
-  SlideSizeAnimationBuilder.buildConfig = buildConfig;
-  SlideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF = BASE_VELOCITY_ANIM_CONF;
+  slideSizeAnimationBuilder.buildConfig = buildConfig;
+  slideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF = BASE_VELOCITY_ANIM_CONF;
 
-  return SlideSizeAnimationBuilder;
+  return slideSizeAnimationBuilder;
 }
 
 module.exports = slideSizeAnimationBuilderFactory;

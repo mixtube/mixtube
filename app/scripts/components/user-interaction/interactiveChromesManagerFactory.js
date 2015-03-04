@@ -20,13 +20,13 @@ function interactiveChromesManagerFactory() {
     facades.push(facade);
     return function remove() {
       pull(facades, facade);
-    }
+    };
   }
 
   /**
-   * @name InteractiveChromesManager
+   * @name interactiveChromesManager
    */
-  var InteractiveChromesManager = {
+  var interactiveChromesManager = {
     /**
      * Is the user actively interacting with one of the managed chrome.
      *
@@ -43,7 +43,7 @@ function interactiveChromesManagerFactory() {
     addInteractiveChrome: addInteractiveChrome
   };
 
-  return InteractiveChromesManager;
+  return interactiveChromesManager;
 }
 
 module.exports = interactiveChromesManagerFactory;

@@ -1,6 +1,6 @@
 'use strict';
 
-function interactiveChromeDirective($parse, InteractiveChromesManager, PointerManager) {
+function interactiveChromeDirective($parse, interactiveChromesManager, pointerManager) {
   return {
     restrict: 'A',
     compile: function(tElement, tAttrs) {
@@ -8,15 +8,15 @@ function interactiveChromeDirective($parse, InteractiveChromesManager, PointerMa
 
       return function link(scope, iElement) {
 
-        var removeFn = InteractiveChromesManager.addInteractiveChrome({
+        var removeFn = interactiveChromesManager.addInteractiveChrome({
           isInteracted: function() {
-            return getter(scope) || PointerManager.isPointerInRect(iElement[0].getBoundingClientRect());
+            return getter(scope) || pointerManager.isPointerInRect(iElement[0].getBoundingClientRect());
           }
         });
 
         // make sure mw notify when an element is destroyed
         scope.$on('$destroy', removeFn);
-      }
+      };
     }
   };
 }

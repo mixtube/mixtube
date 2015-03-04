@@ -13,10 +13,10 @@ function loggerFactoryFactory($log) {
   /**
    * Returns a logger for the given name or the global logger if no name provided.
    *
-   * @name LoggerFactory
+   * @name loggerFactory
    * @param {string=} name the logger name. Empty means global logger.
    */
-  function LoggerFactory(name) {
+  function loggerFactory(name) {
     var loggerName = isUndefined(name) ? 'global' : name;
     if (!has(loggerByName, loggerName)) {
       var decoratedLogger = {};
@@ -31,7 +31,7 @@ function loggerFactoryFactory($log) {
     return loggerByName[loggerName];
   }
 
-  return LoggerFactory;
+  return loggerFactory;
 }
 
 module.exports = loggerFactoryFactory;

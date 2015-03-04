@@ -3,9 +3,9 @@
 function directivesRegistryHelperFactory() {
 
   /**
-   * @name DirectivesRegistryHelper
+   * @name directivesRegistryHelper
    */
-  var DirectivesRegistryHelper = {
+  var directivesRegistryHelper = {
     install: function(facade, registry, attributeName, directiveScope, directiveAttrs) {
       var name = directiveAttrs[attributeName];
       if (!name || name.trim().length === 0) {
@@ -18,7 +18,7 @@ function directivesRegistryHelperFactory() {
     }
   };
 
-  return DirectivesRegistryHelper;
+  return directivesRegistryHelper;
 }
 
 module.exports = directivesRegistryHelperFactory;

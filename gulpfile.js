@@ -11,7 +11,8 @@ var path = require('path'),
   please = require('gulp-pleeease'),
   sourcemaps = require('gulp-sourcemaps'),
   browserSync = require('browser-sync'),
-  reload = browserSync.reload;
+  reload = browserSync.reload,
+  jshint = require('gulp-jshint');
 
 function buildBundleJS(src, dest) {
   var bundler = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
@@ -31,6 +32,12 @@ function buildBundleJS(src, dest) {
 }
 
 var bundleAppJS = buildBundleJS('./app/scripts/app.js', './build/scripts/app.bundle.js');
+
+gulp.task('jshint', function() {
+  return gulp.src('app/scripts/**/*.js')
+    .pipe(jshint())
+    .pipe(jshint.reporter('jshint-stylish'));
+});
 
 gulp.task('script', function() {
   bundleAppJS();
@@ -56,10 +63,11 @@ gulp.task('style', function() {
 
 gulp.task('watch', function() {
   bundleAppJS.bundler.on('update', bundleAppJS);
-  gulp.watch('app/**/*.scss', ['style']);
+  gulp.watch('app/styles/**/*.scss', ['style']);
+  gulp.watch('app/scripts/**/*.js', ['jshint']);
 });
 
-gulp.task('serve', ['script', 'style', 'watch'], function() {
+gulp.task('serve', ['script', 'jshint', 'style', 'watch'], function() {
   browserSync({
     open: false,
     server: {

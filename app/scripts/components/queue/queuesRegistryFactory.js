@@ -1,7 +1,7 @@
 'use strict';
 
-function queuesRegistryFactory(AsyncRegistryFactory) {
-  return AsyncRegistryFactory('Queues');
+function queuesRegistryFactory(asyncRegistryFactory) {
+  return asyncRegistryFactory('Queues');
 }
 
 module.exports = queuesRegistryFactory;

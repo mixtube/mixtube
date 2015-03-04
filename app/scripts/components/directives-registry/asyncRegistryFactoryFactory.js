@@ -11,19 +11,19 @@ function asyncRegistryFactoryFactory($cacheFactory, $q) {
   }
 
   /**
-   * @name AsyncRegistryFactory
+   * @name asyncRegistryFactory
    * @param {string} cacheId
-   * @returns {AsyncRegistry}
+   * @returns {asyncRegistry}
    */
-  function AsyncRegistryFactory(cacheId) {
+  function asyncRegistryFactory(cacheId) {
     var delegateCache = $cacheFactory(cacheId);
 
     /**
-     * @name AsyncRegistry
+     * @name asyncRegistry
      * @param {string} name
      * @returns {{ready: function(function)}}
      */
-    function AsyncRegistry(name) {
+    function asyncRegistry(name) {
       var deferred = locateDeferred(delegateCache, name);
       return {
         ready: function(readyFn) {
@@ -32,11 +32,11 @@ function asyncRegistryFactoryFactory($cacheFactory, $q) {
       };
     }
 
-    AsyncRegistry.register = function(name, value) {
+    asyncRegistry.register = function(name, value) {
       locateDeferred(delegateCache, name).resolve(value);
     };
 
-    AsyncRegistry.unregister = function(name) {
+    asyncRegistry.unregister = function(name) {
       var deferred = delegateCache.get(name);
       if (deferred !== null) {
         delegateCache.remove(name);
@@ -44,10 +44,10 @@ function asyncRegistryFactoryFactory($cacheFactory, $q) {
       }
     };
 
-    return AsyncRegistry;
+    return asyncRegistry;
   }
 
-  return AsyncRegistryFactory;
+  return asyncRegistryFactory;
 }
 
 module.exports = asyncRegistryFactoryFactory;

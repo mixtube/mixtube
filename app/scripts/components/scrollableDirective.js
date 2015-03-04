@@ -1,6 +1,6 @@
 'use strict';
 
-var Velocity = require('velocity-animate'),
+var velocity = require('velocity-animate'),
   querySelector = require('../commons').querySelector;
 
 /**
@@ -14,7 +14,7 @@ var Velocity = require('velocity-animate'),
  * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
  * is visible.
  */
-function scrollableDirective($timeout, AnimationsConfig) {
+function scrollableDirective($timeout, animationsConfig) {
 
   /**
    * @param {JQLite} container
@@ -43,13 +43,13 @@ function scrollableDirective($timeout, AnimationsConfig) {
         var target = querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
         if (target.length > 0 && !containsY(scrollable, target)) {
           // the target needs to be animated to reveal the item
-          Velocity(
+          velocity(
             target[0],
             'scroll',
             {
               container: scrollable[0],
-              duration: AnimationsConfig.transitionDuration,
-              easing: AnimationsConfig.easeInOutBezierPoints,
+              duration: animationsConfig.transitionDuration,
+              easing: animationsConfig.easeInOutBezierPoints,
               complete: done
             }
           );

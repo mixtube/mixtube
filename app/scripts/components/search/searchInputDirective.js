@@ -1,7 +1,7 @@
 'use strict';
 
 var querySelector = require('../../commons').querySelector,
-  Velocity = require('velocity-animate'),
+  velocity = require('velocity-animate'),
   defaults = require('lodash/object/defaults');
 
 // brfs requires this to be on its own line
@@ -21,8 +21,8 @@ var fs = require('fs');
  * ".mt-search-input".
  */
 
-function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, InteractiveChromesManager,
-                              AnimationsConfig) {
+function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, interactiveChromesManager,
+                              animationsConfig) {
 
   return {
     restrict: 'E',
@@ -33,7 +33,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
     },
     controller: function($scope, $element, $attrs) {
 
-      DirectivesRegistryHelper.install(this, SearchInputsRegistry, 'name', $scope, $attrs);
+      directivesRegistryHelper.install(this, searchInputsRegistry, 'name', $scope, $attrs);
 
       var form = $element;
       var field = querySelector($element, '.mt-js-search-input__field');
@@ -51,13 +51,13 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
 
         var baseAnimConf = {
           // in init phase we don't want to animate
-          duration: init ? 0 : AnimationsConfig.transitionDuration,
-          easing: AnimationsConfig.easeInOutBezierPoints
+          duration: init ? 0 : animationsConfig.transitionDuration,
+          easing: animationsConfig.easeInOutBezierPoints
         };
 
         if (_show) {
           form.css({display: ''});
-          Velocity(
+          velocity(
             fakeField,
             {translateX: ['0', '100%']},
             defaults({
@@ -68,7 +68,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
             }, baseAnimConf)
           );
         } else {
-          Velocity(
+          velocity(
             fakeField,
             {translateX: ['100%', '0']},
             defaults({
@@ -97,7 +97,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
         });
 
         // as long as the search input is open we consider it as an active interaction
-        var unmanageChromeFn = InteractiveChromesManager.addInteractiveChrome(
+        var unmanageChromeFn = interactiveChromesManager.addInteractiveChrome(
           {
             isInteracted: function() {
               return _show;
@@ -117,7 +117,7 @@ function searchInputDirective(SearchInputsRegistry, DirectivesRegistryHelper, In
 
       activate();
     }
-  }
+  };
 }
 
 module.exports = searchInputDirective;

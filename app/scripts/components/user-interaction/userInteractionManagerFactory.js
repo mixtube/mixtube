@@ -1,6 +1,6 @@
 'use strict';
 
-function userInteractionManagerFactory($rootScope, $timeout, InteractiveChromesManager, PointerManager) {
+function userInteractionManagerFactory($rootScope, $timeout, interactiveChromesManager, pointerManager) {
 
   var ACTIVITY_DELAY = 4000;
 
@@ -13,7 +13,7 @@ function userInteractionManagerFactory($rootScope, $timeout, InteractiveChromesM
   function renewActivityTO() {
     $timeout.cancel(activityTO);
     activityTO = $timeout(function activityTOCb() {
-      if (InteractiveChromesManager.isChromeInteracted()) {
+      if (interactiveChromesManager.isChromeInteracted()) {
         renewActivityTO();
       } else {
         $rootScope.$apply(function() {
@@ -28,7 +28,7 @@ function userInteractionManagerFactory($rootScope, $timeout, InteractiveChromesM
   }
 
   function activate() {
-    PointerManager.bindMove({
+    pointerManager.bindMove({
       start: function() {
         suspendActivityTO();
         $rootScope.$apply(function() {
@@ -45,9 +45,9 @@ function userInteractionManagerFactory($rootScope, $timeout, InteractiveChromesM
   }
 
   /**
-   * @name UserInteractionManager
+   * @name userInteractionManager
    */
-  var UserInteractionManager = {
+  var userInteractionManager = {
     /**
      * Is the user actively interacting with the UI.
      *
@@ -58,7 +58,7 @@ function userInteractionManagerFactory($rootScope, $timeout, InteractiveChromesM
     }
   };
 
-  return UserInteractionManager;
+  return userInteractionManager;
 }
 
 module.exports = userInteractionManagerFactory;

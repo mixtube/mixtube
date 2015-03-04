@@ -1,7 +1,7 @@
 'use strict';
 
-function searchInputsRegistryFactory(AsyncRegistryFactory) {
-  return AsyncRegistryFactory('SearchInputs');
+function searchInputsRegistryFactory(asyncRegistryFactory) {
+  return asyncRegistryFactory('SearchInputs');
 }
 
 module.exports = searchInputsRegistryFactory;

@@ -1,12 +1,12 @@
 'use strict';
 
-var angular = require('angular')
+var angular = require('angular');
 
-function sceneDirective(ScenesRegistry, DirectivesRegistryHelper) {
+function sceneDirective(scenesRegistry, directivesRegistryHelper) {
   return {
     restrict: 'A',
     controller: function($scope, $element, $attrs) {
-      DirectivesRegistryHelper.install(this, ScenesRegistry, 'mtScene', $scope, $attrs);
+      directivesRegistryHelper.install(this, scenesRegistry, 'mtScene', $scope, $attrs);
 
       var sceneElement = $element;
 

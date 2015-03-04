@@ -1,6 +1,6 @@
 'use strict';
 
-var Velocity = require('velocity-animate'),
+var velocity = require('velocity-animate'),
   assign = require('lodash/object/assign'),
   defaults = require('lodash/object/defaults');
 
@@ -9,10 +9,10 @@ var Velocity = require('velocity-animate'),
  *
  * It overrides the default size and slide animation to add a special queue entry event (needed by mtQueue directive)
  */
-function queueEntryAnimation(SlideSizeAnimationBuilder) {
+function queueEntryAnimation(slideSizeAnimationBuilder) {
 
   return assign(
-    SlideSizeAnimationBuilder(),
+    slideSizeAnimationBuilder(),
     {
       enter: function(element, done) {
 
@@ -26,7 +26,7 @@ function queueEntryAnimation(SlideSizeAnimationBuilder) {
 
         // second step that may be delayed
         function nextStep() {
-          Velocity(
+          velocity(
             element[0],
             {translateX: [0, txBeginning]},
             defaults({
@@ -34,7 +34,7 @@ function queueEntryAnimation(SlideSizeAnimationBuilder) {
                 element.css({transform: ''});
                 done();
               }
-            }, SlideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF));
+            }, slideSizeAnimationBuilder.BASE_VELOCITY_ANIM_CONF));
         }
 
         var suspended = false;

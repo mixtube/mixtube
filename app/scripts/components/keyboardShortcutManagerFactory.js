@@ -37,9 +37,9 @@ function keyboardShortcutManagerFactory($rootScope) {
   }
 
   /**
-   * @name KeyboardShortcutManager
+   * @name keyboardShortcutManager
    */
-  var KeyboardShortcutManager = {
+  var keyboardShortcutManager = {
     /**
      * Registers a shortcut in the given scope.
      *
@@ -64,7 +64,7 @@ function keyboardShortcutManagerFactory($rootScope) {
     leaveScope: leaveScope
   };
 
-  return KeyboardShortcutManager;
+  return keyboardShortcutManager;
 }
 
 module.exports = keyboardShortcutManagerFactory;

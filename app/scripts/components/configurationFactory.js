@@ -15,9 +15,9 @@ function configurationFactory($location) {
   }
 
   /**
-   * @typedef {Object} Configuration
+   * @typedef {Object} configuration
    */
-  var Configuration = {
+  var configuration = {
     get youtubeAPIKey() {
       return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
     },
@@ -42,7 +42,7 @@ function configurationFactory($location) {
     }
   };
 
-  return Configuration;
+  return configuration;
 }
 
 module.exports = configurationFactory;

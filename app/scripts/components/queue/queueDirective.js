@@ -1,11 +1,11 @@
 'use strict';
 
-function queueDirective($timeout, DirectivesRegistryHelper, QueuesRegistry) {
+function queueDirective($timeout, directivesRegistryHelper, queuesRegistry) {
   return {
     restrict: 'A',
     require: ['mtQueue', 'mtScrollable'],
     controller: function($scope, $element, $attrs) {
-      DirectivesRegistryHelper.install(this, QueuesRegistry, 'mtQueue', $scope, $attrs);
+      directivesRegistryHelper.install(this, queuesRegistry, 'mtQueue', $scope, $attrs);
     },
     link: function(scope, iElement, iAttrs, ctrls) {
       var controller = ctrls[0];

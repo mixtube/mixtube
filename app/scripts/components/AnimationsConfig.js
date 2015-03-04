@@ -3,17 +3,17 @@
 /**
  * Default configuration for animations. These values are shared with the SASS counterpart.
  *
- * @name AnimationsConfig
+ * @name animationsConfig
  */
-var AnimationsConfig = {
+var animationsConfig = {
   // SASS $baseTransitionDuration
   get transitionDuration() {
     return 200;
   },
   // SASS $easeInOut
   get easeInOutBezierPoints() {
-    return [.8, 0, .2, 1];
+    return [0.8, 0, 0.2, 1];
   }
 };
 
-module.exports = AnimationsConfig;
+module.exports = animationsConfig;

@@ -8,11 +8,11 @@ angular.module('mixtubeApp', [mixtubeModule])
     $locationProvider.html5Mode(true);
   })
 
-  .run(function($rootScope, $controller, Configuration) {
+  .run(function($rootScope, $controller, configuration) {
     // make sure the scope always has the props property
     $rootScope.props = {};
 
-    if (Configuration.debug) {
+    if (configuration.debug) {
       $controller('DebuggingCtrl');
     }
   });

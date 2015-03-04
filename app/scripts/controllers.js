@@ -5,9 +5,9 @@ var angular = require('angular');
 // brfs requires this to be on its own line
 var fs = require('fs');
 
-function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutManager, QueueManager,
-                  NotificationCentersRegistry, Orchestrator, UserInteractionManager, QueuesRegistry, ModalManager,
-                  PointerManager, Capabilities, SearchCtrlHelper) {
+function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
+                  notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
+                  pointerManager, capabilities, searchCtrlHelper) {
 
   var rootCtrl = this;
 
@@ -30,57 +30,57 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
   rootCtrl.isMouseDetected = isMouseDetected;
   rootCtrl.shouldShowScene = shouldShowScene;
   rootCtrl.shouldShowPlaybackControls = shouldShowPlaybackControls;
-  rootCtrl.toggleSearch = SearchCtrlHelper.toggleSearch;
+  rootCtrl.toggleSearch = searchCtrlHelper.toggleSearch;
   rootCtrl.togglePlayback = togglePlayback;
 
   // setup direct access to the property for double binding
   Object.defineProperty(rootCtrl, 'searchTerm', {
     get: function() {
-      return SearchCtrlHelper.searchTerm;
+      return searchCtrlHelper.searchTerm;
     },
     set: function(value) {
-      SearchCtrlHelper.searchTerm = value;
+      searchCtrlHelper.searchTerm = value;
     }
   });
 
   function isSearchShown() {
-    return SearchCtrlHelper.searchShown;
+    return searchCtrlHelper.searchShown;
   }
 
   function getQueue() {
-    return QueueManager.queue;
+    return queueManager.queue;
   }
 
   function getRunningQueueEntry() {
-    return Orchestrator.runningQueueEntry;
+    return orchestrator.runningQueueEntry;
   }
 
   function getLoadingQueueEntry() {
-    return Orchestrator.loadingQueueEntry;
+    return orchestrator.loadingQueueEntry;
   }
 
   function isPlaying() {
-    return Orchestrator.playing;
+    return orchestrator.playing;
   }
 
   function shouldIdleChrome() {
-    return !UserInteractionManager.userInteracting;
+    return !userInteractionManager.userInteracting;
   }
 
   function isMouseDetected() {
-    return PointerManager.mouseDetected;
+    return pointerManager.mouseDetected;
   }
 
   function shouldShowScene() {
-    return Capabilities.playback;
+    return capabilities.playback;
   }
 
   function shouldShowPlaybackControls() {
-    return Capabilities.playback || Capabilities.remoteControl;
+    return capabilities.playback || capabilities.remoteControl;
   }
 
   function togglePlayback() {
-    Orchestrator.togglePlayback();
+    orchestrator.togglePlayback();
   }
 
   // we need to wait for the loading phase to be done to avoid race problems (loading for ever)
@@ -88,31 +88,31 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
 
   function activate() {
     // hide the input search at startup
-    SearchCtrlHelper.toggleSearch(false);
+    searchCtrlHelper.toggleSearch(false);
 
     // register the global space shortcut
-    KeyboardShortcutManager.register('space', function(evt) {
+    keyboardShortcutManager.register('space', function(evt) {
       evt.preventDefault();
-      Orchestrator.togglePlayback();
+      orchestrator.togglePlayback();
     });
 
-    KeyboardShortcutManager.register('search', 'esc', function(evt) {
+    keyboardShortcutManager.register('search', 'esc', function(evt) {
       evt.preventDefault();
-      SearchCtrlHelper.toggleSearch(false);
+      searchCtrlHelper.toggleSearch(false);
     });
 
     // prevents the backspace shortcut
     // it is really easy to inadvertently hit the key and  triggers a "Go Back" action
-    KeyboardShortcutManager.register('backspace', function(evt) {
+    keyboardShortcutManager.register('backspace', function(evt) {
       evt.preventDefault();
     });
 
     $scope.$watch(function() {
-      return QueueManager.queue;
+      return queueManager.queue;
     }, function(newVal, oldVal) {
       // this test is here to prevent to serialize during the init phase
       if (newVal !== oldVal) {
-        var newSerializedQueue = QueueManager.serialize();
+        var newSerializedQueue = queueManager.serialize();
         if (serializedQueue !== newSerializedQueue) {
           serializedQueue = newSerializedQueue;
           // replace queue parameter but keep the rest
@@ -128,8 +128,8 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
         serializedQueue = newSerializedQueue;
         // change initiated by user (back / forward etc.), need to be deserialized
         rootCtrl.queueLoading = true;
-        QueueManager.deserialize(serializedQueue).catch(function(message) {
-          NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+        queueManager.deserialize(serializedQueue).catch(function(message) {
+          notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
             notificationCenter.error(message);
           });
         }).finally(function() {
@@ -139,10 +139,10 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
     });
 
     $scope.$watch(function() {
-      return Orchestrator.runningQueueEntry;
+      return orchestrator.runningQueueEntry;
     }, function(runningQueueEntry, oldVal) {
       if (runningQueueEntry !== oldVal) {
-        QueuesRegistry('queue').ready(function(queue) {
+        queuesRegistry('queue').ready(function(queue) {
           queue.focusEntry(runningQueueEntry);
         });
       }
@@ -153,10 +153,10 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
       fs.readFileSync(__dirname + '/components/capabilities/noPlaybackModalContent.html', 'utf8'));
 
     $scope.$watch(function() {
-      return Capabilities.playback;
+      return capabilities.playback;
     }, function(playback) {
       if (playback === false) {
-        ModalManager.open({
+        modalManager.open({
           title: 'MixTube won\'t work on your device',
           contentTemplateUrl: 'noPlaybackModalContent',
           commands: [{label: 'OK', primary: true}]
@@ -167,7 +167,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, KeyboardShortcutM
 }
 
 
-function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
+function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
   var searchResultsCtrl = this;
 
@@ -215,11 +215,11 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
   activate();
 
   function getSearchTerm() {
-    return SearchCtrlHelper.searchTerm;
+    return searchCtrlHelper.searchTerm;
   }
 
   function shouldShowSearchResultPanel() {
-    return SearchCtrlHelper.searchShown && searchResultsCtrl.inSearch;
+    return searchCtrlHelper.searchShown && searchResultsCtrl.inSearch;
   }
 
   function initSearch() {
@@ -237,7 +237,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
     if (pId === 'youtube') {
       // clear any error message (case of retry after error)
       searchResultsCtrl.error.youtube = false;
-      searchYoutube(SearchCtrlHelper.searchTerm, nextPageId);
+      searchYoutube(searchCtrlHelper.searchTerm, nextPageId);
     }
   }
 
@@ -261,7 +261,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
       searchResultsCtrl.pendingMore.youtube = true;
     }
 
-    return YoutubeClient.searchVideosByQuery(term,
+    return youtubeClient.searchVideosByQuery(term,
       {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
         if (searchRequestCount === startSearchRequestCount) {
           if (first) {
@@ -297,7 +297,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
 
     // when the user types we automatically execute the search
     $scope.$watch(function() {
-      return SearchCtrlHelper.searchTerm;
+      return searchCtrlHelper.searchTerm;
     }, function(newSearchTerm) {
       if (newSearchTerm !== null) {
 
@@ -323,7 +323,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
 
     // ensures everything is initialized when the search is shown and stopped when it is hidden
     $scope.$watch(function() {
-      return SearchCtrlHelper.searchShown;
+      return searchCtrlHelper.searchShown;
     }, function(searchShown) {
       if (searchShown) {
         initSearch();
@@ -335,7 +335,7 @@ function SearchResultsCtrl($scope, $timeout, YoutubeClient, SearchCtrlHelper) {
 }
 
 
-function SearchResultCtrl($timeout, QueueManager, QueuesRegistry, Orchestrator) {
+function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) {
 
   var searchResultCtrl = this;
 
@@ -360,16 +360,16 @@ function SearchResultCtrl($timeout, QueueManager, QueuesRegistry, Orchestrator) 
    */
   function appendResultToQueue(video) {
 
-    var queueEntry = QueueManager.appendVideo(video);
+    var queueEntry = queueManager.appendVideo(video);
 
-    if (Orchestrator.runningQueueEntry) {
-      var entries = QueueManager.queue.entries;
-      searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(Orchestrator.runningQueueEntry);
+    if (orchestrator.runningQueueEntry) {
+      var entries = queueManager.queue.entries;
+      searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(orchestrator.runningQueueEntry);
     } else {
       searchResultCtrl.countBeforePlayback = null;
     }
 
-    QueuesRegistry('queue').ready(function(queue) {
+    queuesRegistry('queue').ready(function(queue) {
       queue.focusEntry(queueEntry);
     });
 
@@ -382,7 +382,7 @@ function SearchResultCtrl($timeout, QueueManager, QueuesRegistry, Orchestrator) 
 }
 
 
-function QueueCtrl(Orchestrator, QueueManager) {
+function QueueCtrl(orchestrator, queueManager) {
 
   var queueCtrl = this;
 
@@ -393,31 +393,31 @@ function QueueCtrl(Orchestrator, QueueManager) {
    * @param {number} queueIndex
    */
   function playQueueEntry(queueIndex) {
-    Orchestrator.skipTo(queueIndex);
+    orchestrator.skipTo(queueIndex);
   }
 
   /**
    * @param {mt.QueueEntry} queueEntry
    */
   function removeQueueEntry(queueEntry) {
-    QueueManager.removeEntry(queueEntry);
+    queueManager.removeEntry(queueEntry);
   }
 }
 
-function DebuggingCtrl(Configuration, KeyboardShortcutManager, NotificationCentersRegistry) {
+function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry) {
 
   activate();
 
   function notification(message) {
-    NotificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+    notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
       notificationCenter.error(message);
     });
   }
 
   function activate() {
-    if (Configuration.debug) {
+    if (configuration.debug) {
       // register the global space shortcut
-      KeyboardShortcutManager.register('ctrl+n', function(evt) {
+      keyboardShortcutManager.register('ctrl+n', function(evt) {
         evt.preventDefault();
         notification('Debugging: Test notification');
       });

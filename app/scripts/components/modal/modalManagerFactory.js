@@ -40,13 +40,13 @@ function modalManagerFactory($document, $compile, $q, $animate, $rootScope) {
   };
 
   /**
-   * @name ModalManager
+   * @name modalManager
    */
-  var ModalManager = {
+  var modalManager = {
     open: open
   };
 
-  return ModalManager;
+  return modalManager;
 }
 
 module.exports = modalManagerFactory;

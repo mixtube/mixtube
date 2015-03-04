@@ -5,7 +5,7 @@ var pull = require('lodash/array/pull');
 // brfs requires this to be on its own line
 var fs = require('fs');
 
-function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegistryHelper) {
+function notificationCenterDirective(notificationCentersRegistry, directivesRegistryHelper) {
 
   return {
     restrict: 'E',
@@ -13,16 +13,9 @@ function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegi
     controllerAs: 'notificationCenterCtrl',
     controller: function($scope, $element, $attrs) {
 
-      var notificationCenterCtrl = this;
-
-      notificationCenterCtrl.notifications = [];
-
-      notificationCenterCtrl.comingNext = comingNext;
-      notificationCenterCtrl.error = error;
-      // publish the close function to be used in the template
-      notificationCenterCtrl.close = close;
-
-      activate();
+      function close(notification) {
+        pull(notificationCenterCtrl.notifications, notification);
+      }
 
       /**
        * @param {Object} data the data structure passed to the template
@@ -40,14 +33,21 @@ function notificationCenterDirective(NotificationCentersRegistry, DirectivesRegi
         notificationCenterCtrl.notifications.unshift({type: 'error', data: {message: message}});
       }
 
-      function close(notification) {
-        pull(notificationCenterCtrl.notifications, notification);
-      }
-
       function activate() {
-        DirectivesRegistryHelper.install(notificationCenterCtrl, NotificationCentersRegistry, 'name', $scope,
+        directivesRegistryHelper.install(notificationCenterCtrl, notificationCentersRegistry, 'name', $scope,
           $attrs);
       }
+
+      var notificationCenterCtrl = this;
+
+      notificationCenterCtrl.notifications = [];
+
+      notificationCenterCtrl.comingNext = comingNext;
+      notificationCenterCtrl.error = error;
+      // publish the close function to be used in the template
+      notificationCenterCtrl.close = close;
+
+      activate();
     }
   };
 }

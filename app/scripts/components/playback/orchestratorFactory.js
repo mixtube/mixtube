@@ -6,10 +6,10 @@ var angular = require('angular'),
   includes = require('lodash/collection/includes'),
   mixtubePlayback = require('mixtube-playback');
 
-function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCentersRegistry, ScenesRegistry,
-                             Configuration, LoggerFactory) {
+function orchestratorFactory($rootScope, $timeout, queueManager, notificationCentersRegistry, scenesRegistry,
+                             configuration, loggerFactory) {
 
-  var _logger = LoggerFactory('Orchestrator'),
+  var _logger = loggerFactory('orchestrator'),
     _playback,
     _playbackState,
     _playingEntry,
@@ -19,9 +19,9 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
 
   function activate() {
 
-    ScenesRegistry('scene').ready(function(scene) {
+    scenesRegistry('scene').ready(function(scene) {
 
-      var transitionDurationInMillis = Configuration.fadeDuration * 1000;
+      var transitionDurationInMillis = configuration.fadeDuration * 1000;
 
       var playbackConfig = {
         elementProducer: function() {
@@ -33,7 +33,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         },
 
         nextEntryProducer: function(entry) {
-          return QueueManager.closestValidEntryByIndex(QueueManager.queue.entries.indexOf(entry) + 1);
+          return queueManager.closestValidEntryByIndex(queueManager.queue.entries.indexOf(entry) + 1);
         },
 
         transitionDuration: transitionDurationInMillis,
@@ -69,7 +69,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
           // notify only if there was a current entry
           // otherwise it means we just started to play and we don't need to show anything in this case
           if (currentEntry) {
-            NotificationCentersRegistry('notificationCenter').ready(
+            notificationCentersRegistry('notificationCenter').ready(
               function(notificationCenter) {
                 var closeComingNextFn = notificationCenter.comingNext({
                   current: currentEntry.video.title,
@@ -91,9 +91,9 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
         }
       };
 
-      if (isNumber(Configuration.mediaDuration)) {
+      if (isNumber(configuration.mediaDuration)) {
         playbackConfig.debug = {
-          mediaDuration: Configuration.mediaDuration,
+          mediaDuration: configuration.mediaDuration,
           mediaQuality: 'low'
         };
       }
@@ -101,7 +101,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
       _playback = mixtubePlayback(playbackConfig);
 
       $rootScope.$watchCollection(function() {
-        return QueueManager.queue.entries;
+        return queueManager.queue.entries;
       }, function entriesWatcherChangeHandler(/**Array*/ newEntries, /**Array*/ oldEntries) {
         if (!angular.equals(newEntries, oldEntries)) {
           var removedEntries = difference(oldEntries, newEntries);
@@ -120,7 +120,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
   }
 
   function skipTo(queueIndex) {
-    var entry = QueueManager.closestValidEntryByIndex(queueIndex);
+    var entry = queueManager.closestValidEntryByIndex(queueIndex);
     if (!entry) {
       _playback.stop();
     } else {
@@ -137,17 +137,17 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
       _playback.pause();
     } else if (_playbackState === mixtubePlayback.States.paused) {
       _playback.play();
-    } else if (QueueManager.queue.entries.length) {
+    } else if (queueManager.queue.entries.length) {
       // stopped or pristine
-      _playback.skip(QueueManager.queue.entries[0]);
+      _playback.skip(queueManager.queue.entries[0]);
       _playback.play();
     }
   }
 
   /**
-   * @name Orchestrator
+   * @name orchestrator
    */
-  var Orchestrator = {
+  var orchestrator = {
 
     /**
      * The currently playing queue entry.
@@ -185,7 +185,7 @@ function orchestratorFactory($rootScope, $timeout, QueueManager, NotificationCen
     togglePlayback: togglePlayback
   };
 
-  return Orchestrator;
+  return orchestrator;
 }
 
 module.exports = orchestratorFactory;

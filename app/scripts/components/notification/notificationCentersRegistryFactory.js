@@ -1,7 +1,7 @@
 'use strict';
 
-function notificationCentersRegistryFactory(AsyncRegistryFactory) {
-  return AsyncRegistryFactory('NotificationCenters');
+function notificationCentersRegistryFactory(asyncRegistryFactory) {
+  return asyncRegistryFactory('NotificationCenters');
 }
 
 module.exports = notificationCentersRegistryFactory;
