@@ -92,8 +92,8 @@ body {
   }
 }
 
+$headerHeight: 4rem;
 @mixin tiles {
-  $headerHeight: 4rem;
 
   .mt-main-tile {
     height: 100%;
@@ -207,7 +207,7 @@ body {
 @include modals;
 @include notifications;
 @include coming-next;
-@include header;
+@include header($headerHeight);
 @include scene;
 @include queue;
 @include search;

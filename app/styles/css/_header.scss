@@ -2,7 +2,7 @@
 @import 'variables';
 @import 'utils';
 
-@mixin header {
+@mixin header($headerHeight) {
 
   $searchInputPadding: 0 3rem 0 .5rem;
   $textShadowSize: 8rem / $baseFontSizeUnitless;
@@ -50,10 +50,6 @@
       display: flex;
     }
 
-    > .center {
-      height: 100%;
-    }
-
     > .end {
       flex: 1;
     }
@@ -87,18 +83,15 @@
   }
 
   .mt-header__playback-button {
-    $width: 49rem / $baseFontSizeUnitless;
-
     position: relative;
-    height: 100%;
-    width: $width + 2 * $textShadowSize; // leave some space for proper rendering of shadow (IE)
-
-    font-size: $width;
-    text-shadow: $textShadow;
+    width: $headerHeight;
+    height: $headerHeight;
 
     .facet {
       // facets stacks but only one is visible at the time
       @include position(absolute, 0px 0px 0px 0px);
+
+      padding: (6rem/$baseFontSizeUnitless);
 
       // center the icon
       display: flex;
@@ -137,25 +130,21 @@
 
   .mt-search-input__button {
     @include position(absolute, 0px 0px 0px auto);
+    width: $headerHeight;
+    height: $headerHeight;
 
     z-index: 1;
-    width: 2.5rem + 2 * .5rem; // we need to fix the size here because the content is absolutely positioned
-
-    font-size: 2.5rem;
-    text-shadow: $textShadow;
 
     .facet {
       // facets stacks but only one is visible at the time
       @include position(absolute, 0px 0px 0px 0px);
 
+      padding: (6rem/$baseFontSizeUnitless);
+
       // center the icon
       display: flex;
       justify-content: center;
       align-items: center;
-
-      &.close {
-        font-size: 1.7rem; // the close icon is a little bit larger so we need to adjust the size
-      }
     }
 
     .facet__animation-toggle {

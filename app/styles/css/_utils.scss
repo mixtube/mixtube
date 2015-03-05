@@ -57,26 +57,12 @@
     bottom: 0;
   }
 
-  [data-mt-icon] {
-    overflow: hidden;
-    line-height: 1;
+  .mt-svg-icon {
+    height: 100%;
+    width: 100%;
 
-    &:before {
-      content: attr(data-mt-icon);
-      font-family: fontello;
-    }
-
-    > .mt-replaced-text {
-      // taken from HTML5 Boilerplate's .visuallyhidden
-      border: 0;
-      clip: rect(0 0 0 0);
-      height: 1px;
-      margin: -1px;
-      overflow: hidden;
-      padding: 0;
-      position: absolute;
-      width: 1px;
-    }
+    fill: currentColor;
+    stroke: currentColor;
   }
 
   .mt-animation-enter-leave__fade {

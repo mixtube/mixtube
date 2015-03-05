@@ -16,7 +16,8 @@ var path = require('path'),
   sass = require('gulp-sass'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer-core'),
-  csswring = require('csswring');
+  csswring = require('csswring'),
+  svgSprite = require('gulp-svg-sprite');
 
 function browserifiedSrc(src) {
   var b = browserify(src);
@@ -49,6 +50,20 @@ gulp.task('jshint', function() {
     .pipe(jshint.reporter('jshint-stylish'));
 });
 
+gulp.task('svg', function() {
+  gulp.src('app/images/*.svg')
+    .pipe(svgSprite({
+      svg: {
+        xmlDeclaration: false,
+        doctypeDeclaration: false
+      },
+      mode: {
+        symbol: true
+      }
+    }))
+    .pipe(gulp.dest('build/images'));
+});
+
 gulp.task('css:dev', function() {
   return gulp.src('app/styles/css/main.scss')
     .pipe(sourcemaps.init())
@@ -79,6 +94,7 @@ gulp.task('serve', ['jshint', 'css:dev', 'js:dev'], function() {
 
   browserSync({
     open: false,
+    notify: false,
     server: ['build', 'app'],
     https: true
   });
@@ -117,6 +133,7 @@ gulp.task('dist', ['js:dist', 'css:dist', 'copy:dist']);
 gulp.task('serve:dist', ['dist'], function() {
   browserSync({
     open: false,
+    notify: false,
     server: 'dist',
     https: true
   });

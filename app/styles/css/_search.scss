@@ -96,18 +96,6 @@
     @include triangle(3rem, rgba($baseBgColor, $overlayOpacity), up-right);
     z-index: 1;
 
-    &:before {
-      position: absolute;
-      content: '\e803';
-      bottom: .80rem;
-      right: .5rem;
-
-      color: $lightTextColor;
-      opacity: .8;
-      font-size: 1.5rem;
-      font-family: fontello;
-    }
-
     // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
     // state remains after a tap until the next tap)
     .mt-mouse-based-interaction .mt-result__container:hover &:before {
@@ -148,6 +136,11 @@
 
       color: $darkestBgColor;
       font-size: 4rem;
+    }
+
+    .mt-result__thumbnail__loader {
+      height: 3rem;
+      width: 100%;
     }
   }
 
