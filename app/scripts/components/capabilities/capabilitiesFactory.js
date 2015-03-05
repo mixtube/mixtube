@@ -2,6 +2,7 @@
 
 var Modernizr = require('./customModernizr');
 
+// @ngInject
 function capabilitiesFactory($rootScope, configuration) {
 
   var videoAutoplay;

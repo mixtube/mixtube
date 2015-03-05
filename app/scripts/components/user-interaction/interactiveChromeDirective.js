@@ -1,5 +1,6 @@
 'use strict';
 
+// @ngInject
 function interactiveChromeDirective($parse, interactiveChromesManager, pointerManager) {
   return {
     restrict: 'A',

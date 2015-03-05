@@ -3,6 +3,7 @@
 var keymaster = require('keymaster'),
   isUndefined = require('lodash/lang/isUndefined');
 
+// @ngInject
 function keyboardShortcutManagerFactory($rootScope) {
 
   var defaultFilter = keymaster.filter;

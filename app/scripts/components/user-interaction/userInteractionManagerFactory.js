@@ -1,5 +1,6 @@
 'use strict';
 
+// @ngInject
 function userInteractionManagerFactory($rootScope, $timeout, interactiveChromesManager, pointerManager) {
 
   var ACTIVITY_DELAY = 4000;

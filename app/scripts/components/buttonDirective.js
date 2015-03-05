@@ -37,7 +37,7 @@ function ClickEventsGate(element) {
 function buttonDirective() {
   return {
     restrict: 'E',
-    controller: function($element, $attrs) {
+    controller: /*@ngInject*/ function($element, $attrs) {
 
       // we need to do this in a controller since we want to replace addEventListener before the
       // ngClick binds its listeners in the link phase

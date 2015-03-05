@@ -6,6 +6,7 @@ var angular = require('angular'),
   includes = require('lodash/collection/includes'),
   mixtubePlayback = require('mixtube-playback');
 
+// @ngInject
 function orchestratorFactory($rootScope, $timeout, queueManager, notificationCentersRegistry, scenesRegistry,
                              configuration, loggerFactory) {
 

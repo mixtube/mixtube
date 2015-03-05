@@ -9,6 +9,7 @@ var velocity = require('velocity-animate'),
  *
  * It overrides the default size and slide animation to add a special queue entry event (needed by mtQueue directive)
  */
+// @ngInject
 function queueEntryAnimation(slideSizeAnimationBuilder) {
 
   return assign(

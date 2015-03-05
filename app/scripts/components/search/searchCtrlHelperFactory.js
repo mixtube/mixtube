@@ -2,6 +2,7 @@
 
 var isUndefined = require('lodash/lang/isUndefined');
 
+// @ngInject
 function searchCtrlHelperFactory(keyboardShortcutManager, searchInputsRegistry) {
 
   var searchShown = false;

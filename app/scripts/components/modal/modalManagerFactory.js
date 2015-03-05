@@ -5,6 +5,7 @@ var angular = require('angular');
 // brfs requires this to be on its own line
 var fs = require('fs');
 
+// @ngInject
 function modalManagerFactory($document, $compile, $q, $animate, $rootScope) {
 
   var body = $document.find('body').eq(0);

@@ -7,31 +7,41 @@ var path = require('path'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify'),
   browserify = require('browserify'),
-  sass = require('gulp-sass'),
-  please = require('gulp-pleeease'),
   sourcemaps = require('gulp-sourcemaps'),
   browserSync = require('browser-sync'),
   reload = browserSync.reload,
-  jshint = require('gulp-jshint');
+  jshint = require('gulp-jshint'),
+  uglify = require('gulp-uglify'),
+  ngAnnotate = require('gulp-ng-annotate'),
+  sass = require('gulp-sass'),
+  postcss = require('gulp-postcss'),
+  autoprefixer = require('autoprefixer-core'),
+  csswring = require('csswring');
 
-function buildBundleJS(src, dest) {
-  var bundler = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
-  bundler.transform('brfs');
-  bundler.on('log', gutil.log);
-
-  function bundleJS() {
-    return bundler.bundle()
-      // log errors if they happen
-      .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-      .pipe(source(path.basename(dest)))
-      .pipe(gulp.dest(path.dirname(dest)));
-  }
-
-  bundleJS.bundler = bundler;
-  return bundleJS;
+function browserifiedSrc(src) {
+  var b = browserify(src);
+  b.on('log', gutil.log);
+  return b.bundle()
+    .pipe(source(path.basename(src)))
+    .pipe(buffer());
 }
 
-var bundleAppJS = buildBundleJS('./app/scripts/app.js', './build/scripts/app.bundle.js');
+function watchifiedSrc(src, pipelineFn) {
+  var b = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
+
+  function doBundle() {
+    return pipelineFn(
+      b.bundle()
+        .pipe(source(path.basename(src)))
+        .pipe(buffer())
+    );
+  }
+
+  b.on('log', gutil.log);
+  b.on('update', doBundle);
+
+  return doBundle();
+}
 
 gulp.task('jshint', function() {
   return gulp.src('app/scripts/**/*.js')
@@ -39,39 +49,75 @@ gulp.task('jshint', function() {
     .pipe(jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('script', function() {
-  bundleAppJS();
-});
-
-gulp.task('style', function() {
-  return gulp.src('app/styles/css/main.scss', {base: 'app'})
+gulp.task('css:dev', function() {
+  return gulp.src('app/styles/css/main.scss')
     .pipe(sourcemaps.init())
-    .pipe(sass({errLogToConsole: true}))
-    .pipe(please({
-      import: false,
-      minifier: false,
-      mqpacker: false,
-      autoprefixer: ['last 1 version'],
-      variables: false,
-      rem: false,
-      pseudoElements: false
+    .pipe(sass({
+      errLogToConsole: true
     }))
+    .pipe(postcss([
+      autoprefixer({browsers: ['last 1 version']})
+    ]))
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest('build/styles'))
     .pipe(reload({stream: true}));
 });
 
-gulp.task('watch', function() {
-  bundleAppJS.bundler.on('update', bundleAppJS);
-  gulp.watch('app/styles/**/*.scss', ['style']);
-  gulp.watch('app/scripts/**/*.js', ['jshint']);
+gulp.task('js:dev', function() {
+  // generates the bundle and watches changes
+  return watchifiedSrc('./app/scripts/app.js', function(pipeline) {
+    return pipeline
+      .pipe(ngAnnotate())
+      .pipe(gulp.dest('build/scripts'));
+  });
 });
 
-gulp.task('serve', ['script', 'jshint', 'style', 'watch'], function() {
+gulp.task('serve', ['jshint', 'css:dev', 'js:dev'], function() {
+
+  gulp.watch('app/scripts/**/*.js', ['jshint']);
+  gulp.watch('app/styles/**/*.scss', ['css:dev']);
+
   browserSync({
     open: false,
-    server: {
-      baseDir: ['app', 'build']
-    }
+    server: ['build', 'app'],
+    https: true
+  });
+});
+
+gulp.task('copy:dist', function() {
+  return gulp.src('app/index.html', {base: 'app'})
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('css:dist', function() {
+  return gulp.src('app/styles/css/main.scss')
+    .pipe(sourcemaps.init())
+    .pipe(sass({
+      errLogToConsole: true
+    }))
+    .pipe(postcss([
+      autoprefixer({browsers: ['last 1 version']}),
+      csswring
+    ]))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('dist/styles'));
+});
+
+gulp.task('js:dist', function() {
+  return browserifiedSrc('./app/scripts/app.js')
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(ngAnnotate())
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('dist/scripts'));
+});
+
+gulp.task('dist', ['js:dist', 'css:dist', 'copy:dist']);
+
+gulp.task('serve:dist', ['dist'], function() {
+  browserSync({
+    open: false,
+    server: 'dist',
+    https: true
   });
 });

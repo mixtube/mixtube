@@ -1,5 +1,6 @@
 'use strict';
 
+// @ngInject
 function searchInputsRegistryFactory(asyncRegistryFactory) {
   return asyncRegistryFactory('SearchInputs');
 }

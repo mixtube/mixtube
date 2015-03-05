@@ -1,10 +1,11 @@
 'use strict';
 
+// @ngInject
 function queueDirective($timeout, directivesRegistryHelper, queuesRegistry) {
   return {
     restrict: 'A',
     require: ['mtQueue', 'mtScrollable'],
-    controller: function($scope, $element, $attrs) {
+    controller: /*@ngInject*/ function($scope, $element, $attrs) {
       directivesRegistryHelper.install(this, queuesRegistry, 'mtQueue', $scope, $attrs);
     },
     link: function(scope, iElement, iAttrs, ctrls) {

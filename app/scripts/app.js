@@ -19,5 +19,5 @@ angular.module('mixtubeApp', [mixtubeModule])
 
 var $document = angular.element(document);
 $document.ready(function() {
-  angular.bootstrap(document, ['mixtubeApp']);
+  angular.bootstrap(document, ['mixtubeApp'], {strictDi: true});
 });

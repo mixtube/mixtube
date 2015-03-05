@@ -5,6 +5,7 @@ var angular = require('angular');
 // brfs requires this to be on its own line
 var fs = require('fs');
 
+// @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
                   pointerManager, capabilities, searchCtrlHelper) {
@@ -166,7 +167,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 }
 
-
+// @ngInject
 function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
   var searchResultsCtrl = this;
@@ -334,7 +335,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
   }
 }
 
-
+// @ngInject
 function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) {
 
   var searchResultCtrl = this;
@@ -381,7 +382,7 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) 
   }
 }
 
-
+// @ngInject
 function QueueCtrl(orchestrator, queueManager) {
 
   var queueCtrl = this;
@@ -404,6 +405,7 @@ function QueueCtrl(orchestrator, queueManager) {
   }
 }
 
+// @ngInject
 function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry) {
 
   activate();

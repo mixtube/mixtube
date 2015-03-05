@@ -20,7 +20,7 @@ var fs = require('fs');
  * On click on ".mt-search-input__button" we focus the real input first and then we start the animation of
  * ".mt-search-input".
  */
-
+// @ngInject
 function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, interactiveChromesManager,
                               animationsConfig) {
 
@@ -31,7 +31,7 @@ function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, in
     scope: {
       inputModel: '=ngModel'
     },
-    controller: function($scope, $element, $attrs) {
+    controller: /*@ngInject*/ function($scope, $element, $attrs) {
 
       directivesRegistryHelper.install(this, searchInputsRegistry, 'name', $scope, $attrs);
 

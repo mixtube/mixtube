@@ -3,6 +3,7 @@
 var pull = require('lodash/array/pull'),
   has = require('lodash/object/has');
 
+// @ngInject
 function pointerManagerFactory($rootScope, $timeout, $document) {
 
   var MOVE_THRESHOLD = 5;

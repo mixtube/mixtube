@@ -4,6 +4,7 @@ var velocity = require('velocity-animate'),
   defaults = require('lodash/object/defaults'),
   has = require('lodash/object/has');
 
+// @ngInject
 function slideAnimation(animationsConfig) {
 
   function emptyAnimation(element, done) {

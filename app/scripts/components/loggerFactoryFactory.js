@@ -5,6 +5,7 @@ var buildTimeString = require('../commons').buildTimeString,
   isUndefined = require('lodash/lang/isUndefined'),
   has = require('lodash/object/has');
 
+// @ngInject
 function loggerFactoryFactory($log) {
 
   /** @type {Object.<string, Object>} */

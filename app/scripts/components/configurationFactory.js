@@ -4,6 +4,7 @@ var has = require('lodash/object/has'),
   isUndefined = require('lodash/lang/isUndefined'),
   constant = require('lodash/utility/constant');
 
+// @ngInject
 function configurationFactory($location) {
 
   var locationSearch = $location.search();

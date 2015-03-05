@@ -1,5 +1,6 @@
 'use strict';
 
+// @ngInject
 function asyncRegistryFactoryFactory($cacheFactory, $q) {
 
   function locateDeferred(cache, key) {

@@ -6,6 +6,7 @@ var angular = require('angular'),
   uniqueId = require('lodash/utility/uniqueId'),
   has = require('lodash/object/has');
 
+// @ngInject
 function queueManagerFactory($q, youtubeClient, loggerFactory) {
 
   var logger = loggerFactory('queueManager');

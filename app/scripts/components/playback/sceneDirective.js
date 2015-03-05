@@ -2,10 +2,11 @@
 
 var angular = require('angular');
 
+// @ngInject
 function sceneDirective(scenesRegistry, directivesRegistryHelper) {
   return {
     restrict: 'A',
-    controller: function($scope, $element, $attrs) {
+    controller: /*@ngInject*/ function($scope, $element, $attrs) {
       directivesRegistryHelper.install(this, scenesRegistry, 'mtScene', $scope, $attrs);
 
       var sceneElement = $element;

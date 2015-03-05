@@ -3,6 +3,7 @@
 var defaults = require('lodash/object/defaults'),
   velocity = require('velocity-animate');
 
+// @ngInject
 function slideSizeAnimationBuilderFactory(animationsConfig) {
 
   var BASE_VELOCITY_ANIM_CONF = {

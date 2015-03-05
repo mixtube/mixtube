@@ -1,5 +1,6 @@
 'use strict';
 
+// @ngInject
 function smartImgDirective($rootScope, $document, $animate) {
 
   return {

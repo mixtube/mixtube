@@ -5,13 +5,14 @@ var pull = require('lodash/array/pull');
 // brfs requires this to be on its own line
 var fs = require('fs');
 
+// @ngInject
 function notificationCenterDirective(notificationCentersRegistry, directivesRegistryHelper) {
 
   return {
     restrict: 'E',
     template: fs.readFileSync(__dirname + '/notification.html', 'utf8'),
     controllerAs: 'notificationCenterCtrl',
-    controller: function($scope, $element, $attrs) {
+    controller: /*@ngInject*/ function($scope, $element, $attrs) {
 
       function close(notification) {
         pull(notificationCenterCtrl.notifications, notification);

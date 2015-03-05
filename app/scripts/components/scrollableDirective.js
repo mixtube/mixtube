@@ -14,6 +14,7 @@ var velocity = require('velocity-animate'),
  * when calling {@link mtScrollable.mtScrollableController#putAnchorInViewPort(string)} to scroll until the child element
  * is visible.
  */
+// @ngInject
 function scrollableDirective($timeout, animationsConfig) {
 
   /**
@@ -29,7 +30,7 @@ function scrollableDirective($timeout, animationsConfig) {
 
   return {
     restrict: 'A',
-    controller: function($scope, $element) {
+    controller: /*@ngInject*/ function($scope, $element) {
 
       var scrollable = $element;
 

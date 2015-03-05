@@ -5,6 +5,7 @@ var angular = require('angular'),
   has = require('lodash/object/has'),
   pluck = require('lodash/collection/pluck');
 
+// @ngInject
 function youtubeClientFactory($http, $q, configuration) {
 
   /**
