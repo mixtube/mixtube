@@ -12,6 +12,7 @@
     }
   ],
   "devDependencies": {
+    "Ionicons": "git://github.com/jraoult/ionicons#npm",
     "autoprefixer-core": "^5.1.7",
     "brfs": "^1.4.0",
     "browser-sync": "^2.2.1",

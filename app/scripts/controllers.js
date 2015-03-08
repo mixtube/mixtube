@@ -8,7 +8,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  pointerManager, capabilities, searchCtrlHelper) {
+                  pointerManager, capabilities, searchCtrlHelper, configuration) {
 
   var rootCtrl = this;
 
@@ -65,7 +65,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function shouldIdleChrome() {
-    return !userInteractionManager.userInteracting;
+    return !configuration.forceChrome && !userInteractionManager.userInteracting;
   }
 
   function isMouseDetected() {

@@ -1,8 +1,7 @@
 'use strict';
 
 var has = require('lodash/object/has'),
-  isUndefined = require('lodash/lang/isUndefined'),
-  constant = require('lodash/utility/constant');
+  isUndefined = require('lodash/lang/isUndefined');
 
 // @ngInject
 function configurationFactory($location) {
@@ -40,6 +39,13 @@ function configurationFactory($location) {
      */
     get videoAutoplay() {
       return undefinedToNullOrValue(debugParams.videoAutoplay);
+    },
+
+    /**
+     * @returns {boolean}
+     */
+    get forceChrome() {
+      return !!debugParams.forceChrome;
     }
   };
 

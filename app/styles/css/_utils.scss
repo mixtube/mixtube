@@ -58,11 +58,17 @@
   }
 
   .mt-svg-icon {
-    height: 100%;
-    width: 100%;
+    display: inline-block;
+    height: 40rem/$baseFontSizeUnitless;
+    width: 40rem/$baseFontSizeUnitless;
 
     fill: currentColor;
     stroke: currentColor;
+
+    &.small {
+      height: 32rem/$baseFontSizeUnitless;
+      width: 32rem/$baseFontSizeUnitless;
+    }
   }
 
   .mt-animation-enter-leave__fade {

@@ -105,20 +105,17 @@
   }
 
   .mt-queue__entry__commands {
-    align-self: stretch;
-
     display: flex;
     align-items: center;
   }
 
   .mt-queue__entry__remove-button {
-    @include mt-click-reaction;
-
+    @include mt-click-reaction();
     padding-right: .5rem;
-    height: 2.2rem;
-    width: 2.2rem;
+    opacity: .2;
 
-    opacity: .3;
+    // center the icon
+    display: flex;
 
     .mt-mouse-based-interaction &:hover {
       opacity: 1;

@@ -44,23 +44,41 @@ function watchifiedSrc(src, pipelineFn) {
   return doBundle();
 }
 
+// do the work on svg assets, just need to be piped out
+function doSvg() {
+  return gulp.src([
+    'node_modules/Ionicons/src/ios-search.svg',
+    'node_modules/Ionicons/src/ios-close.svg',
+    'node_modules/Ionicons/src/ios-close-empty.svg',
+    'node_modules/Ionicons/src/ios-videocam.svg',
+    'app/images/mt-plus-corner.svg',
+    'app/images/mt-play-circle.svg',
+    'app/images/mt-pause-circle.svg'
+  ])
+    .pipe(svgSprite({
+      dest: 'build/images',
+      svg: {
+        dest: '.',
+        xmlDeclaration: false,
+        doctypeDeclaration: false
+      },
+      mode: {
+        symbol: {
+          dest: '.',
+          sprite: 'sprite.svg'
+        }
+      }
+    }));
+}
+
 gulp.task('jshint', function() {
   return gulp.src('app/scripts/**/*.js')
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('svg', function() {
-  gulp.src('app/images/*.svg')
-    .pipe(svgSprite({
-      svg: {
-        xmlDeclaration: false,
-        doctypeDeclaration: false
-      },
-      mode: {
-        symbol: true
-      }
-    }))
+gulp.task('svg:dev', function() {
+  doSvg()
     .pipe(gulp.dest('build/images'));
 });
 
@@ -87,7 +105,7 @@ gulp.task('js:dev', function() {
   });
 });
 
-gulp.task('serve', ['jshint', 'css:dev', 'js:dev'], function() {
+gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'svg:dev'], function() {
 
   gulp.watch('app/scripts/**/*.js', ['jshint']);
   gulp.watch('app/styles/**/*.scss', ['css:dev']);
@@ -103,6 +121,11 @@ gulp.task('serve', ['jshint', 'css:dev', 'js:dev'], function() {
 gulp.task('copy:dist', function() {
   return gulp.src('app/index.html', {base: 'app'})
     .pipe(gulp.dest('dist'));
+});
+
+gulp.task('svg:dist', function() {
+  doSvg()
+    .pipe(gulp.dest('dist/images'));
 });
 
 gulp.task('css:dist', function() {
@@ -128,7 +151,7 @@ gulp.task('js:dist', function() {
     .pipe(gulp.dest('dist/scripts'));
 });
 
-gulp.task('dist', ['js:dist', 'css:dist', 'copy:dist']);
+gulp.task('dist', ['js:dist', 'css:dist', 'copy:dist', 'svg:dist']);
 
 gulp.task('serve:dist', ['dist'], function() {
   browserSync({

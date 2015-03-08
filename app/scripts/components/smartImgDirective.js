@@ -25,9 +25,9 @@ function smartImgDirective($rootScope, $document, $animate) {
         if (source) {
           loader.src = source;
           loader.onload = function() {
-            //$animate.addClass(indicatorContainer, 'ng-hide');
-            //$animate.removeClass(image, 'mt-loading');
-            //$rootScope.$digest();
+            $animate.addClass(indicatorContainer, 'ng-hide');
+            $animate.removeClass(image, 'mt-loading');
+            $rootScope.$digest();
           };
 
           $animate.removeClass(indicatorContainer, 'ng-hide');
