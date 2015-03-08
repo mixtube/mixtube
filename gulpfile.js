@@ -17,7 +17,9 @@ var path = require('path'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer-core'),
   csswring = require('csswring'),
-  svgSprite = require('gulp-svg-sprite');
+  svgSprite = require('gulp-svg-sprite'),
+  replace = require('gulp-replace'),
+  ghPages = require('gulp-gh-pages');
 
 function browserifiedSrc(src) {
   var b = browserify(src);
@@ -160,4 +162,15 @@ gulp.task('serve:dist', ['dist'], function() {
     server: 'dist',
     https: true
   });
+});
+
+gulp.task('dist:gh', ['js:dist', 'css:dist', 'copy:dist', 'svg:dist'], function() {
+  return gulp.src('dist/index.html')
+    .pipe(replace('<base href="/">', '<base href="/mixtube/">'))
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('deploy:gh', ['dist:gh'], function() {
+  return gulp.src('dist/**/*')
+    .pipe(ghPages());
 });
