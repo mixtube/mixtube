@@ -92,8 +92,8 @@ body {
   }
 }
 
+$headerHeight: 4rem;
 @mixin tiles {
-  $headerHeight: 4rem;
 
   .mt-main-tile {
     height: 100%;
@@ -124,7 +124,7 @@ body {
       padding-top: 56.25%; /* 16/9eme*/
     }
 
-    @include mt-horizontal-screen {
+    @include mt-horizontal-screen() {
       // in horizontal mode we move the scene underneath the header
       @include position(absolute, -$headerHeight 0px 0px 0px);
 
@@ -155,7 +155,7 @@ body {
     position: relative;
     flex: 1;
 
-    @include mt-horizontal-screen {
+    @include mt-horizontal-screen() {
       position: absolute;
       width: 25%;
       height: 100%;
@@ -174,7 +174,7 @@ body {
   .mt-search-tile {
     @include position(absolute, 0px 0px 0px 0px);
 
-    @include mt-horizontal-screen {
+    @include mt-horizontal-screen() {
       width: 75%;
       left: auto;
     }
@@ -199,15 +199,15 @@ body {
   }
 }
 
-@include queue-loading;
-@include tiles;
+@include queue-loading();
+@include tiles();
 
 // includes imported modules styles
-@include utils;
-@include modals;
-@include notifications;
-@include coming-next;
-@include header;
-@include scene;
-@include queue;
-@include search;
+@include utils();
+@include modals();
+@include notifications();
+@include coming-next();
+@include header();
+@include scene();
+@include queue();
+@include search();

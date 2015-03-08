@@ -51,11 +51,11 @@
   }
 
   .mt-results {
-    @include clearfix;
+    @include clearfix();
   }
 
   .mt-results__page {
-    @include clearfix;
+    @include clearfix();
     overflow: hidden;
   }
 
@@ -67,7 +67,7 @@
     width: 100%;
 
     // more than 1 item per line when more horizontal space is available
-    @include mt-horizontal-screen {
+    @include mt-horizontal-screen() {
       $resultsPromotedColumnsCount: 3;
       $resultsColumnsCount: 4;
 
@@ -92,27 +92,20 @@
     position: absolute;
     top: 0;
     right: 0;
-    overflow: visible;
-    @include triangle(3rem, rgba($baseBgColor, $overlayOpacity), up-right);
     z-index: 1;
 
-    &:before {
-      position: absolute;
-      content: '\e803';
-      bottom: .80rem;
-      right: .5rem;
+    color: $lightTextColor;
+    opacity: $overlayOpacity;
 
-      color: $lightTextColor;
-      opacity: .8;
-      font-size: 1.5rem;
-      font-family: fontello;
+    .mt-svg-icon {
+      // forces the background (triangle) color
+      fill: $baseBgColor;
     }
 
     // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
     // state remains after a tap until the next tap)
-    .mt-mouse-based-interaction .mt-result__container:hover &:before {
+    .mt-mouse-based-interaction .mt-result__container:hover & {
       color: $contrastedColor;
-      opacity: 1;
     }
   }
 
@@ -147,7 +140,6 @@
       justify-content: center;
 
       color: $darkestBgColor;
-      font-size: 4rem;
     }
   }
 
@@ -174,7 +166,7 @@
 
       // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
       // is made of 5 columns which doesn't give much place to the message
-      @include mt-horizontal-screen {
+      @include mt-horizontal-screen() {
 
         font-size: (14rem/$baseFontSizeUnitless);
 

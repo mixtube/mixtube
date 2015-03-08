@@ -5,7 +5,6 @@
   <!--hopefully triggers GPU Rasterization on Chrome-->
   <meta name="viewport" content="width=device-width, minimum-scale=1.0,  initial-scale=1.0, user-scalable=yes">
   <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
-  <link rel="stylesheet" href="styles/vendor/fontello/fontello.css" type="text/css">
   <link rel="stylesheet" href="styles/main.css" type="text/css">
   <link href="//fonts.googleapis.com/css?family=Open+Sans:300,600" rel="stylesheet" type="text/css">
   <link href="//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M" rel="stylesheet" type="text/css">
@@ -37,29 +36,36 @@
         <div class="center">
           <mt-button class="mt-header__playback-button" ng-click="rootCtrl.togglePlayback()"
                      ng-show="rootCtrl.shouldShowPlaybackControls()">
-            <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
-                  data-mt-icon="&#xe805">
-              <span class="mt-replaced-text">Play</span>
-            </span>
-            <span class="facet facet__animation-toggle" ng-show="rootCtrl.isPlaying()"
-                  data-mt-icon="&#xe804">
-              <span class="mt-replaced-text">Pause</span>
-            </span>
+            <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isPlaying()}">
+              <svg class="mt-svg-icon" role="img" title="Play">
+                <use xlink:href="images/sprite.svg#mt-play-circle"></use>
+              </svg>
+            </div>
+            <div class="facet facet__animation-toggle" ng-class="{toggle: rootCtrl.isPlaying()}">
+              <svg class="mt-svg-icon" role="img" title="Pause">
+                <use xlink:href="images/sprite.svg#mt-pause-circle"></use>
+              </svg>
+            </div>
           </mt-button>
         </div>
         <div class="end">
           <!--just padding container to ensure proper centering of header-center -->
         </div>
+        <div class="floating">
+          <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
+            <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isSearchShown()}">
+              <svg class="mt-svg-icon" role="img" title="Open search">
+                <use xlink:href="images/sprite.svg#ios-search"></use>
+              </svg>
+            </div>
+            <div class="facet facet__animation-toggle" ng-class="{toggle: rootCtrl.isSearchShown()}">
+              <svg class="mt-svg-icon" role="img" title="Close search">
+                <use xlink:href="images/sprite.svg#ios-close-empty"></use>
+              </svg>
+            </div>
+          </mt-button>
+        </div>
       </div>
-
-      <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
-      <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isSearchShown()" data-mt-icon="&#xe800">
-        <span class="mt-replaced-text">Open search</span>
-      </span>
-      <span class="facet close facet__animation-toggle" ng-show="rootCtrl.isSearchShown()" data-mt-icon="&#xe802">
-        <span class="mt-replaced-text">Close search</span>
-      </span>
-      </mt-button>
 
       <mt-search-input name="search" ng-model="rootCtrl.searchTerm"></mt-search-input>
     </div>
@@ -98,10 +104,11 @@
               </p>
 
               <div class="mt-queue__entry__commands">
-                <mt-button class="mt-queue__entry__remove-button"
-                           data-mt-icon="&#xe801" ng-click="queueCtrl.removeQueueEntry(entry)"
+                <mt-button class="mt-queue__entry__remove-button" ng-click="queueCtrl.removeQueueEntry(entry)"
                            mt-click-active-class="ng-click-active">
-                  <span class="mt-replaced-text">Remove</span>
+                  <svg class="mt-svg-icon small" role="img" title="Remove">
+                    <use xlink:href="images/sprite.svg#ios-close"></use>
+                  </svg>
                 </mt-button>
               </div>
             </div>
@@ -131,15 +138,20 @@
                    ng-controller="SearchResultCtrl as searchResultCtrl">
                 <mt-button class="mt-result__container"
                            ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
-                  <div class="mt-result__add-affordance"></div>
+                  <div class="mt-result__add-affordance">
+                    <svg class="mt-svg-icon" role="img" title="Add">
+                      <use xlink:href="images/sprite.svg#mt-plus-corner"></use>
+                    </svg>
+                  </div>
 
                   <div class="mt-result__thumbnail">
                     <mt-smart-img source="{{searchResult.thumbnailUrl}}"
                                   class="mt-result__thumbnail__img fill-crop">
                       <div class="loading-indicator">
-                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()"
-                              data-mt-icon="&#xe806">
-                            <span class="mt-replaced-text">Loading video thumbnail</span>
+                        <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()">
+                           <svg class="mt-svg-icon"  role="img" title="Loading video thumbnail">
+                             <use xlink:href="images/sprite.svg#ios-videocam"></use>
+                           </svg>
                         </span>
                       </div>
                     </mt-smart-img>
