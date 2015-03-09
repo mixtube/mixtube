@@ -1,7 +1,6 @@
 'use strict';
 
 var angular = require('angular'),
-  isNumber = require('lodash/lang/isNumber'),
   difference = require('lodash/array/difference'),
   includes = require('lodash/collection/includes'),
   mixtubePlayback = require('mixtube-playback');
@@ -92,7 +91,7 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
         }
       };
 
-      if (isNumber(configuration.mediaDuration)) {
+      if (isFinite(configuration.mediaDuration)) {
         playbackConfig.debug = {
           mediaDuration: configuration.mediaDuration,
           mediaQuality: 'low'
