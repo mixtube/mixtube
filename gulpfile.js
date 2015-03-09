@@ -102,7 +102,9 @@ gulp.task('js:dev', function() {
   // generates the bundle and watches changes
   return watchifiedSrc('./app/scripts/app.js', function(pipeline) {
     return pipeline
+      .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(ngAnnotate())
+      .pipe(sourcemaps.write())
       .pipe(gulp.dest('build/scripts'));
   });
 });
