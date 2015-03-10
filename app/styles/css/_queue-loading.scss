@@ -1,0 +1,15 @@
+@import 'variables';
+@import 'utils';
+
+@mixin queue-loading {
+  .mt-queue-loading__message {
+    margin-bottom: $unitVerticalPadding;
+  }
+
+  .mt-queue-loading__progress {
+    progress {
+      @extend %mt-chromeless-progress;
+      @include mt-spinner(4rem, $contrastedColor);
+    }
+  }
+}

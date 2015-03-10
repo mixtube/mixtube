@@ -17,6 +17,7 @@ var path = require('path'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer-core'),
   csswring = require('csswring'),
+  htmlreplace = require('gulp-html-replace'),
   svgSprite = require('gulp-svg-sprite'),
   replace = require('gulp-replace'),
   ghPages = require('gulp-gh-pages');
@@ -109,10 +110,40 @@ gulp.task('js:dev', function() {
   });
 });
 
-gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'svg:dev'], function() {
+// inject CSS to inline into the index page
+gulp.task('html:dev', function(done) {
+  gulp.src('app/styles/css/inline.scss')
+    .pipe(sass({
+      errLogToConsole: true
+    }))
+    .pipe(postcss([
+      autoprefixer({browsers: ['last 1 version']})
+    ]))
+    .pipe(buffer())
+    .pipe(gutil.buffer(function(err, files) {
+      var cssCode = files[0].contents.toString();
+
+      gulp.src('app/index.html', {base: 'app'})
+        .pipe(htmlreplace({
+          cssInline: {
+            src: cssCode,
+            tpl: '<style>%s</style>'
+          }
+        }))
+        .pipe(gulp.dest('build'))
+        .pipe(gutil.buffer(function() {
+          done();
+        }));
+    }));
+});
+
+gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
 
   gulp.watch('app/scripts/**/*.js', ['jshint']);
   gulp.watch('app/styles/**/*.scss', ['css:dev']);
+  // changing inline CSS requires to rebuild the html
+  gulp.watch('app/styles/css/inline.scss', ['html:dev']);
+  gulp.watch('app/index.html', ['html:dev']);
 
   browserSync({
     open: false,
@@ -120,11 +151,6 @@ gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'svg:dev'], function() {
     server: ['build', 'app'],
     https: true
   });
-});
-
-gulp.task('copy:dist', function() {
-  return gulp.src('app/index.html', {base: 'app'})
-    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('svg:dist', function() {
@@ -155,7 +181,35 @@ gulp.task('js:dist', function() {
     .pipe(gulp.dest('dist/scripts'));
 });
 
-gulp.task('dist', ['js:dist', 'css:dist', 'copy:dist', 'svg:dist']);
+// inject CSS to inline into the index page
+gulp.task('html:dist', function(done) {
+  gulp.src('app/styles/css/inline.scss')
+    .pipe(sass({
+      errLogToConsole: true
+    }))
+    .pipe(postcss([
+      autoprefixer({browsers: ['last 1 version']}),
+      csswring
+    ]))
+    .pipe(buffer())
+    .pipe(gutil.buffer(function(err, files) {
+      var cssCode = files[0].contents.toString();
+
+      gulp.src('app/index.html', {base: 'app'})
+        .pipe(htmlreplace({
+          cssInline: {
+            src: cssCode,
+            tpl: '<style>%s</style>'
+          }
+        }))
+        .pipe(gulp.dest('dist'))
+        .pipe(gutil.buffer(function() {
+          done();
+        }));
+    }));
+});
+
+gulp.task('dist', ['js:dist', 'css:dist', 'html:dist', 'svg:dist']);
 
 gulp.task('serve:dist', ['dist'], function() {
   browserSync({
@@ -166,7 +220,7 @@ gulp.task('serve:dist', ['dist'], function() {
   });
 });
 
-gulp.task('dist:gh', ['js:dist', 'css:dist', 'copy:dist', 'svg:dist'], function() {
+gulp.task('dist:gh', ['dist'], function() {
   return gulp.src('dist/index.html')
     .pipe(replace('<base href="/">', '<base href="/mixtube/">'))
     .pipe(gulp.dest('dist'));
