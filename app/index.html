@@ -61,7 +61,6 @@
 
     loadCSS('styles/main.css');
     loadCSS('//fonts.googleapis.com/css?family=Open+Sans:300,600');
-    loadCSS('//fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps:400&text=M');
   </script>
 
   <!-- build:cssInline -->
@@ -89,7 +88,10 @@
       <div class="mt-header__container">
         <div class="start">
           <h1 class="mt-header__app-title">
-            <span class="logo">M</span><span class="remaining">ixtube</span>
+            <svg class="mt-svg-icon" role="img" title="M">
+              <use xlink:href="images/sprite.svg#mt-logo"></use>
+            </svg>
+            <span class="remaining">ixtube</span>
           </h1>
         </div>
         <div class="center">

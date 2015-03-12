@@ -56,7 +56,8 @@ function doSvg() {
     'node_modules/Ionicons/src/ios-videocam.svg',
     'app/images/mt-plus-corner.svg',
     'app/images/mt-play-circle.svg',
-    'app/images/mt-pause-circle.svg'
+    'app/images/mt-pause-circle.svg',
+    'app/images/mt-logo.svg'
   ])
     .pipe(svgSprite({
       dest: 'build/images',
@@ -65,6 +66,8 @@ function doSvg() {
         xmlDeclaration: false,
         doctypeDeclaration: false
       },
+      // don't optimize SVG, if they have to it should be done upfront
+      transform: [],
       mode: {
         symbol: {
           dest: '.',
@@ -140,6 +143,7 @@ gulp.task('html:dev', function(done) {
 gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
 
   gulp.watch('app/scripts/**/*.js', ['jshint']);
+  gulp.watch('app/images/*.svg', ['svg:dev']);
   gulp.watch('app/styles/**/*.scss', ['css:dev']);
   // changing inline CSS requires to rebuild the html
   gulp.watch('app/styles/css/inline.scss', ['html:dev']);

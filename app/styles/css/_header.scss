@@ -73,12 +73,6 @@
 
     text-shadow: $textShadow;
 
-    > .logo {
-      color: $contrastedColor;
-      font-family: 'Oleo Script Swash Caps', cursive;
-      font-size: (40rem/$baseFontSizeUnitless);
-    }
-
     > .remaining {
       display: none;
 
