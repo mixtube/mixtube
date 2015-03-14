@@ -66,8 +66,14 @@ function doSvg() {
         xmlDeclaration: false,
         doctypeDeclaration: false
       },
-      // don't optimize SVG, if they have to it should be done upfront
-      transform: [],
+      // make sure the svgo phase is not breaking the SVG (removeUnknownsAndDefaults breaks the logo)
+      transform: [{
+        svgo: {
+          plugins: [{
+            removeUnknownsAndDefaults: false
+          }]
+        }
+      }],
       mode: {
         symbol: {
           dest: '.',
