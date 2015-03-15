@@ -83,6 +83,50 @@ function doSvg() {
     }));
 }
 
+// inject CSS to inline into the index page
+function doHtml(opts) {
+  var cssCodePromise = new Promise(
+    function(resolve, reject) {
+      var postCssFilters = [
+        autoprefixer({browsers: ['last 1 version']})
+      ];
+      if(opts && opts.minify) {
+        postCssFilters.push(csswring());
+      }
+
+      gulp.src('app/styles/css/inline.scss')
+        .pipe(sass({
+          errLogToConsole: true
+        }))
+        .pipe(postcss(postCssFilters))
+        .pipe(buffer())
+        .pipe(gutil.buffer(function(err, cssFiles) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(cssFiles.reduce(function(previous, cssFile) {
+              return previous + cssFile.contents.toString() + '\n';
+            }, ''));
+          }
+        }));
+    });
+
+  // we are going to return this stream straight to act like a promise
+  var passStream = gutil.noop();
+  cssCodePromise.then(function(cssCode) {
+    gulp.src('app/index.html', {base: 'app'})
+      .pipe(htmlreplace({
+        cssInline: {
+          src: cssCode,
+          tpl: '<style>%s</style>'
+        }
+      }))
+      .pipe(passStream);
+  });
+
+  return passStream;
+}
+
 gulp.task('jshint', function() {
   return gulp.src('app/scripts/**/*.js')
     .pipe(jshint())
@@ -90,7 +134,7 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('svg:dev', function() {
-  doSvg()
+  return doSvg()
     .pipe(gulp.dest('build/images'));
 });
 
@@ -119,31 +163,9 @@ gulp.task('js:dev', function() {
   });
 });
 
-// inject CSS to inline into the index page
-gulp.task('html:dev', function(done) {
-  gulp.src('app/styles/css/inline.scss')
-    .pipe(sass({
-      errLogToConsole: true
-    }))
-    .pipe(postcss([
-      autoprefixer({browsers: ['last 1 version']})
-    ]))
-    .pipe(buffer())
-    .pipe(gutil.buffer(function(err, files) {
-      var cssCode = files[0].contents.toString();
-
-      gulp.src('app/index.html', {base: 'app'})
-        .pipe(htmlreplace({
-          cssInline: {
-            src: cssCode,
-            tpl: '<style>%s</style>'
-          }
-        }))
-        .pipe(gulp.dest('build'))
-        .pipe(gutil.buffer(function() {
-          done();
-        }));
-    }));
+gulp.task('html:dev', function() {
+  return doHtml()
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
@@ -164,7 +186,7 @@ gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'html:dev', 'svg:dev'], funct
 });
 
 gulp.task('svg:dist', function() {
-  doSvg()
+  return doSvg()
     .pipe(gulp.dest('dist/images'));
 });
 
@@ -191,32 +213,9 @@ gulp.task('js:dist', function() {
     .pipe(gulp.dest('dist/scripts'));
 });
 
-// inject CSS to inline into the index page
-gulp.task('html:dist', function(done) {
-  gulp.src('app/styles/css/inline.scss')
-    .pipe(sass({
-      errLogToConsole: true
-    }))
-    .pipe(postcss([
-      autoprefixer({browsers: ['last 1 version']}),
-      csswring
-    ]))
-    .pipe(buffer())
-    .pipe(gutil.buffer(function(err, files) {
-      var cssCode = files[0].contents.toString();
-
-      gulp.src('app/index.html', {base: 'app'})
-        .pipe(htmlreplace({
-          cssInline: {
-            src: cssCode,
-            tpl: '<style>%s</style>'
-          }
-        }))
-        .pipe(gulp.dest('dist'))
-        .pipe(gutil.buffer(function() {
-          done();
-        }));
-    }));
+gulp.task('html:dist', function() {
+  return doHtml({minify: true})
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('dist', ['js:dist', 'css:dist', 'html:dist', 'svg:dist']);
