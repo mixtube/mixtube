@@ -3,10 +3,13 @@
 var path = require('path'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
+  del = require('del'),
+  runSequence = require('run-sequence'),
   buffer = require('vinyl-buffer'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify'),
   browserify = require('browserify'),
+  collapse = require('bundle-collapser/plugin'),
   sourcemaps = require('gulp-sourcemaps'),
   browserSync = require('browser-sync'),
   reload = browserSync.reload,
@@ -23,11 +26,12 @@ var path = require('path'),
   ghPages = require('gulp-gh-pages');
 
 function browserifiedSrc(src) {
-  var b = browserify(src);
+  var b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
+  // convert bundle paths to IDS to save bytes in browserify bundles
+  b.plugin(collapse);
   b.on('log', gutil.log);
   return b.bundle()
-    .pipe(source(path.basename(src)))
-    .pipe(buffer());
+    .pipe(source(path.basename(src)));
 }
 
 function watchifiedSrc(src, pipelineFn) {
@@ -37,7 +41,6 @@ function watchifiedSrc(src, pipelineFn) {
     return pipelineFn(
       b.bundle()
         .pipe(source(path.basename(src)))
-        .pipe(buffer())
     );
   }
 
@@ -90,7 +93,7 @@ function doHtml(opts) {
       var postCssFilters = [
         autoprefixer({browsers: ['last 1 version']})
       ];
-      if(opts && opts.minify) {
+      if (opts && opts.minify) {
         postCssFilters.push(csswring());
       }
 
@@ -156,6 +159,7 @@ gulp.task('js:dev', function() {
   // generates the bundle and watches changes
   return watchifiedSrc('./app/scripts/app.js', function(pipeline) {
     return pipeline
+      .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(ngAnnotate())
       .pipe(sourcemaps.write())
@@ -168,20 +172,27 @@ gulp.task('html:dev', function() {
     .pipe(gulp.dest('build'));
 });
 
-gulp.task('serve', ['jshint', 'css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
+gulp.task('clean:dev', function() {
+  del('build');
+});
 
-  gulp.watch('app/scripts/**/*.js', ['jshint']);
-  gulp.watch('app/images/*.svg', ['svg:dev']);
-  gulp.watch('app/styles/**/*.scss', ['css:dev']);
-  // changing inline CSS requires to rebuild the html
-  gulp.watch('app/styles/css/inline.scss', ['html:dev']);
-  gulp.watch('app/index.html', ['html:dev']);
+gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
+  runSequence(['css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
+    gulp.watch('app/scripts/**/*.js', ['jshint']);
+    gulp.watch('app/images/*.svg', ['svg:dev']);
+    gulp.watch('app/styles/**/*.scss', ['css:dev']);
+    // changing inline CSS requires to rebuild the html
+    gulp.watch('app/styles/css/inline.scss', ['html:dev']);
+    gulp.watch('app/index.html', ['html:dev']);
 
-  browserSync({
-    open: false,
-    notify: false,
-    server: ['build', 'app'],
-    https: true
+    browserSync({
+      open: false,
+      notify: false,
+      server: ['build', 'app'],
+      https: true
+    });
+
+    done();
   });
 });
 
@@ -206,6 +217,7 @@ gulp.task('css:dist', function() {
 
 gulp.task('js:dist', function() {
   return browserifiedSrc('./app/scripts/app.js')
+    .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(ngAnnotate())
     .pipe(uglify())
@@ -218,7 +230,13 @@ gulp.task('html:dist', function() {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('dist', ['js:dist', 'css:dist', 'html:dist', 'svg:dist']);
+gulp.task('clean:dist', function() {
+  del('dist');
+});
+
+gulp.task('dist', ['clean:dist', 'jshint'], function(done) {
+  runSequence(['js:dist', 'css:dist', 'html:dist', 'svg:dist'], done);
+});
 
 gulp.task('serve:dist', ['dist'], function() {
   browserSync({
