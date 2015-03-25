@@ -64,24 +64,11 @@
   }
 
   .mt-header__app-title {
-    position: relative;
-    top: (4rem/$baseFontSizeUnitless);
+    // make sure the default line height doesn't make the container to high
+    line-height: 0;
     margin-left: .5rem;
     margin-right: 1rem;
-
     overflow: hidden;
-
-    text-shadow: $textShadow;
-
-    > .remaining {
-      display: none;
-
-      font-size: (28rem/$baseFontSizeUnitless);
-
-      @include mt-horizontal-screen() {
-        display: inline;
-      }
-    }
   }
 
   .mt-header__playback-button {
