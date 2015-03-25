@@ -23,7 +23,11 @@ var path = require('path'),
   htmlreplace = require('gulp-html-replace'),
   svgSprite = require('gulp-svg-sprite'),
   replace = require('gulp-replace'),
-  ghPages = require('gulp-gh-pages');
+  svg2png = require('gulp-svg2png'),
+  favicons = require('gulp-favicons'),
+  ghPages = require('gulp-gh-pages'),
+  appVersion = require('./package').version,
+  appConfig = require('./package').config.application;
 
 function browserifiedSrc(src) {
   var b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
@@ -86,9 +90,8 @@ function doSvg() {
     }));
 }
 
-// inject CSS to inline into the index page
-function doHtml(opts) {
-  var cssCodePromise = new Promise(
+function buildInlineCss(opts) {
+  return new Promise(
     function(resolve, reject) {
       var postCssFilters = [
         autoprefixer({browsers: ['last 1 version']})
@@ -113,21 +116,47 @@ function doHtml(opts) {
           }
         }));
     });
+}
 
-  // we are going to return this stream straight to act like a promise
-  var passStream = gutil.noop();
-  cssCodePromise.then(function(cssCode) {
-    gulp.src('app/index.html', {base: 'app'})
-      .pipe(htmlreplace({
-        cssInline: {
-          src: cssCode,
-          tpl: '<style>%s</style>'
+function doHtml(opts) {
+  return gulp.src('app/index.html', {base: 'app'})
+    .pipe(htmlreplace({
+      cssInline: {
+        src: opts.inlineCssCode || '',
+        tpl: '<style>%s</style>'
+      },
+      favicons: opts.faviconsCode || ''
+    }));
+}
+
+function doFavicons(htmlCodeCb) {
+  return gulp.src('app/images/mt-logo.svg')
+    .pipe(svg2png())
+    .pipe(favicons({
+      settings: {
+        appName: appConfig.name,
+        vinylMode: true,
+        version: 1,
+        background: appConfig.color
+      },
+      icons: {
+        android: true,
+        appleIcon: true,
+        appleStartup: false,
+        coast: false,
+        favicons: true,
+        firefox: false,
+        opengraph: false,
+        windows: false,
+        yandex: false
+      },
+      favicon_generation: {
+        versioning: {
+          param_name: 'v',
+          param_value: appVersion
         }
-      }))
-      .pipe(passStream);
-  });
-
-  return passStream;
+      }
+    }, htmlCodeCb));
 }
 
 gulp.task('jshint', function() {
@@ -168,8 +197,16 @@ gulp.task('js:dev', function() {
 });
 
 gulp.task('html:dev', function() {
-  return doHtml()
-    .pipe(gulp.dest('build'));
+  var doHtmlStream = gutil.noop();
+
+  buildInlineCss({minify: false})
+    .then(function(cssCode) {
+      doHtml({inlineCssCode: cssCode})
+        .pipe(gulp.dest('build'))
+        .pipe(doHtmlStream);
+    });
+
+  return doHtmlStream;
 });
 
 gulp.task('clean:dev', function() {
@@ -189,7 +226,8 @@ gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
       open: false,
       notify: false,
       server: ['build', 'app'],
-      https: true
+      https: true,
+      ghostMode: false
     });
 
     done();
@@ -226,8 +264,22 @@ gulp.task('js:dist', function() {
 });
 
 gulp.task('html:dist', function() {
-  return doHtml({minify: true})
-    .pipe(gulp.dest('dist'));
+  var doHtmlStream = gutil.noop();
+
+  Promise.all([
+    buildInlineCss({minify: true}),
+    new Promise(function(resolve) {
+      doFavicons(function(htmlCode) {
+        resolve(htmlCode);
+      }).pipe(gulp.dest('dist'));
+    })])
+    .then(function(codes) {
+      doHtml({inlineCssCode: codes[0], faviconsCode: codes[1]})
+        .pipe(gulp.dest('dist'))
+        .pipe(doHtmlStream);
+    });
+
+  return doHtmlStream;
 });
 
 gulp.task('clean:dist', function() {
@@ -243,7 +295,8 @@ gulp.task('serve:dist', ['dist'], function() {
     open: false,
     notify: false,
     server: 'dist',
-    https: true
+    https: true,
+    ghostMode: false
   });
 });
 
