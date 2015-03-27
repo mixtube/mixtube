@@ -8,8 +8,7 @@ For now, the only way to try Mixtube is to clone the GitHub repo and visit the i
 The grunt script can help you with that. You need NodeJS grunt and bower installed on your machine. Then execute:
 ```
 npm install
-bower install
-grunt server
+gulp serve
 ```
 
-The server should be running by now and you can access MixTube at http://localhost:8080
+The server should be running by now and you can access MixTube at http://localhost:3000
