@@ -151,6 +151,9 @@ function doFavicons(htmlCodeCb) {
         windows: false,
         yandex: false
       },
+      files: {
+        iconsPath: './'
+      },
       favicon_generation: {
         versioning: {
           param_name: 'v',
