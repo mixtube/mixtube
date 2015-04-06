@@ -3,6 +3,7 @@
 var path = require('path'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
+  merge = require('merge-stream'),
   del = require('del'),
   runSequence = require('run-sequence'),
   buffer = require('vinyl-buffer'),
@@ -264,14 +265,17 @@ gulp.task('js:dist', function() {
 });
 
 gulp.task('html:dist', function() {
-  var doHtmlStream = gutil.noop();
+  var doHtmlStream = gutil.noop(),
+    doFaviconsStream = gutil.noop();
 
   Promise.all([
     buildInlineCss({minify: true}),
     new Promise(function(resolve) {
       doFavicons(function(htmlCode) {
         resolve(htmlCode);
-      }).pipe(gulp.dest('dist'));
+      })
+        .pipe(gulp.dest('dist'))
+        .pipe(doFaviconsStream);
     })])
     .then(function(codes) {
       doHtml({inlineCssCode: codes[0], faviconsCode: codes[1]})
@@ -279,7 +283,7 @@ gulp.task('html:dist', function() {
         .pipe(doHtmlStream);
     });
 
-  return doHtmlStream;
+  return merge(doHtmlStream, doFaviconsStream);
 });
 
 gulp.task('clean:dist', function() {
