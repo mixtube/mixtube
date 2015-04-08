@@ -99,10 +99,10 @@
       fill: $baseBgColor;
     }
 
-    // activate ":hover" styles only on mouse based interactions device because they don't behave well on mobile (the hover
-    // state remains after a tap until the next tap)
-    .mt-mouse-based-interaction .mt-result__container:hover & {
-      color: $contrastedColor;
+    @media (any-hover: hover) {
+      .mt-result__container:hover & {
+        color: $contrastedColor;
+      }
     }
   }
 
@@ -253,8 +253,10 @@
     display: flex;
     justify-content: center;
 
-    .mt-mouse-based-interaction &:hover .text {
-      color: $contrastedColor;
+    @media (any-hover: hover) {
+      &:hover .text {
+        color: $contrastedColor;
+      }
     }
   }
 

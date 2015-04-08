@@ -4,7 +4,7 @@ var pull = require('lodash/array/pull'),
   has = require('lodash/object/has');
 
 // @ngInject
-function pointerManagerFactory($rootScope, $timeout, $document) {
+function pointerManagerFactory($timeout, $document) {
 
   var MOVE_THRESHOLD = 5;
   var MOVE_DELAY = 200;
@@ -15,11 +15,7 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
 
   var handlers = [];
 
-  var mouseDetected = false;
-
-
   activate();
-
 
   function bindMove(handler) {
     handlers.push(handler);
@@ -61,28 +57,6 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
 
   function activate() {
 
-    (function mouseDetection() {
-      var mouseMoveCount = 0;
-
-      function down() {
-        mouseMoveCount = 0;
-      }
-
-      $document
-        .on('mousedown', down)
-        .on('mousemove', function move() {
-          if (++mouseMoveCount > 1) {
-            $document
-              .off('mousedown', down)
-              .off('mousemove', move);
-            $rootScope.$apply(function() {
-              mouseDetected = true;
-            });
-          }
-        });
-    })();
-
-
     $document
       .on('mouseout', function() {
         pointerPosition.x = pointerPosition.y = null;
@@ -104,19 +78,6 @@ function pointerManagerFactory($rootScope, $timeout, $document) {
    * @name pointerManager
    */
   var pointerManager = {
-
-    /**
-     * Is a mouse based interaction detected.
-     *
-     * The detection mechanism is inspired by https://github.com/stucox/Modernizr/blob/hover/feature-detects/device/hover.js
-     * where we try to detect two consecutive "mousemove" events without an intervening "mousedown" event. This sequence
-     * is not possible with a touch (only) interaction based device.
-     *
-     * @returns {boolean}
-     */
-    get mouseDetected() {
-      return mouseDetected;
-    },
 
     isPointerInRect: isPointerInRect,
 

@@ -28,7 +28,6 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   rootCtrl.getLoadingQueueEntry = getLoadingQueueEntry;
   rootCtrl.isPlaying = isPlaying;
   rootCtrl.shouldIdleChrome = shouldIdleChrome;
-  rootCtrl.isMouseDetected = isMouseDetected;
   rootCtrl.shouldShowScene = shouldShowScene;
   rootCtrl.shouldShowPlaybackControls = shouldShowPlaybackControls;
   rootCtrl.toggleSearch = searchCtrlHelper.toggleSearch;
@@ -66,10 +65,6 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
 
   function shouldIdleChrome() {
     return !configuration.forceChrome && !userInteractionManager.userInteracting;
-  }
-
-  function isMouseDetected() {
-    return pointerManager.mouseDetected;
   }
 
   function shouldShowScene() {

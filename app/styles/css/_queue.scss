@@ -118,8 +118,10 @@
     // center the icon
     display: flex;
 
-    .mt-mouse-based-interaction &:hover {
-      opacity: 1;
+    @media (any-hover: hover) {
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 }
