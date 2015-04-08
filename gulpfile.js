@@ -62,6 +62,7 @@ function doSvg() {
     'node_modules/Ionicons/src/ios-close.svg',
     'node_modules/Ionicons/src/ios-close-empty.svg',
     'node_modules/Ionicons/src/ios-videocam.svg',
+    'node_modules/Ionicons/src/load-c.svg',
     'app/images/mt-plus-corner.svg',
     'app/images/mt-play-circle.svg',
     'app/images/mt-pause-circle.svg',
@@ -200,31 +201,15 @@ gulp.task('js:dev', function() {
   });
 });
 
-gulp.task('html:dev', function() {
-  var doHtmlStream = gutil.noop();
-
-  buildInlineCss({minify: false})
-    .then(function(cssCode) {
-      doHtml({inlineCssCode: cssCode})
-        .pipe(gulp.dest('build'))
-        .pipe(doHtmlStream);
-    });
-
-  return doHtmlStream;
-});
-
 gulp.task('clean:dev', function() {
   del('build');
 });
 
 gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
-  runSequence(['css:dev', 'js:dev', 'html:dev', 'svg:dev'], function() {
+  runSequence(['css:dev', 'js:dev', 'svg:dev'], function() {
     gulp.watch('app/scripts/**/*.js', ['jshint']);
     gulp.watch('app/images/*.svg', ['svg:dev']);
     gulp.watch('app/styles/**/*.scss', ['css:dev']);
-    // changing inline CSS requires to rebuild the html
-    gulp.watch('app/styles/css/inline.scss', ['html:dev']);
-    gulp.watch('app/index.html', ['html:dev']);
 
     browserSync({
       open: false,

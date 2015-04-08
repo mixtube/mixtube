@@ -2,19 +2,6 @@
 
 @mixin utils {
 
-  html {
-    box-sizing: border-box;
-  }
-
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: inherit;
-  }
-
   mt-button {
     display: block;
   }
@@ -69,6 +56,15 @@
       height: 32rem/$baseFontSizeUnitless;
       width: 32rem/$baseFontSizeUnitless;
     }
+  }
+
+  .mt-progress-spinner {
+    display: block;
+
+    fill: currentColor;
+    stroke: currentColor;
+
+    animation: mt-spinner-rotation 500ms infinite linear;
   }
 
   .mt-animation-enter-leave__fade {

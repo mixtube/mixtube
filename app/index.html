@@ -188,11 +188,12 @@
       <div class="mt-search">
         <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
           <div class="mt-search__provider__header">
-            <h3 class="title">{{pLabel}}</h3>
+            <h3>{{pLabel}}</h3>
 
-            <div class="progress" ng-show="searchResultsCtrl.pending[pId]">
-              <progress></progress>
-            </div>
+            <svg class="mt-search__provider__header__progress-spinner" role="img" title="Loading"
+                 ng-show="searchResultsCtrl.pending[pId]">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="images/sprite.svg#load-c"></use>
+            </svg>
           </div>
 
           <div class="mt-results">
@@ -268,10 +269,12 @@
           <div class="mt-search__show-more" ng-show="searchResultsCtrl.nextPageId[pId]">
             <mt-button class="mt-search__show-more__button"
                        ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
-              <div class="label">
-                Show more
-                <div class="progress" ng-show="searchResultsCtrl.pendingMore[pId]">
-                  <progress></progress>
+              <div class="mt-search__show-more__button__label">
+                <div class="text">Show more</div>
+                <div class="loader" ng-show="searchResultsCtrl.pendingMore[pId]">
+                  <svg class="mt-search__show-more__progress-spinner" role="img" title="Loading">
+                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="images/sprite.svg#load-c"></use>
+                  </svg>
                 </div>
               </div>
             </mt-button>

@@ -21,24 +21,21 @@
   }
 
   .mt-search__provider__header {
-
-    margin-bottom: $unitVerticalPadding / 2;
     padding: 0 $resultsPadding;
+    margin-bottom: .5rem;
 
-    > .title {
-      display: inline-block;
+    font-size: $headerFontSize;
 
-      font-size: $headerFontSize;
-    }
+    display: flex;
+    align-items: center;
+  }
 
-    .progress {
-      display: inline-block;
-
-      progress {
-        @extend %mt-chromeless-progress;
-        @include mt-spinner($headerFontSize, $lightTextColor);
-      }
-    }
+  .mt-search__provider__header__progress-spinner {
+    @extend .mt-progress-spinner;
+    display: inline-block;
+    height: 1rem;
+    width: 1rem;
+    margin-left: .5rem;
   }
 
   .mt-search__message {
@@ -243,7 +240,6 @@
 
   .mt-search__show-more {
     padding: 0 .5rem;
-    overflow: hidden; // makes sure nothing overflows
   }
 
   .mt-search__show-more__button {
@@ -254,24 +250,31 @@
     padding: 1em;
     border-radius: $baseBorderRadius;
 
-    .mt-mouse-based-interaction &:hover {
+    display: flex;
+    justify-content: center;
+
+    .mt-mouse-based-interaction &:hover .text {
       color: $contrastedColor;
     }
+  }
 
-    .label {
-      display: inline-block;
-      position: relative;
+  .mt-search__show-more__button__label {
+    overflow: visible;
+    height: 1rem;
+
+    display: flex;
+    align-items: center;
+
+    .loader {
+      width: 0;
+      overflow: visible;
     }
+  }
 
-    .progress {
-      position: absolute;
-      right: -1.5em;
-      top: 0;
-
-      progress {
-        @extend %mt-chromeless-progress;
-        @include mt-spinner(1em, $lightTextColor);
-      }
-    }
+  .mt-search__show-more__progress-spinner {
+    @extend .mt-progress-spinner;
+    width: 1rem;
+    height: 1rem;
+    margin-left: .5em;
   }
 }
