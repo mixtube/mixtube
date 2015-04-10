@@ -138,7 +138,9 @@
 }
 
 @mixin mt-horizontal-screen {
-  @media screen and (min-aspect-ratio: 8/9) and (min-width: 500px) {
+  $videoThumbnailOriginalSize = 320 px;
+
+  @media screen and (min-width: 2 * $videoThumbnailOriginalSize) {
     @content;
   }
 }
