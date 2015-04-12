@@ -6,10 +6,9 @@
     margin-bottom: $unitVerticalPadding;
   }
 
-  .mt-queue-loading__progress {
-    progress {
-      @extend %mt-chromeless-progress;
-      @include mt-spinner(4rem, $contrastedColor);
-    }
+  .mt-queue-loading__spinner {
+    width: 80rem/$baseFontSizeUnitless;
+
+    color: $contrastedColor;
   }
 }

@@ -30,8 +30,7 @@
     align-items: center;
   }
 
-  .mt-search__provider__header__progress-spinner {
-    @extend .mt-progress-spinner;
+  .mt-search__provider__header__spinner {
     display: inline-block;
     height: 1rem;
     width: 1rem;
@@ -273,8 +272,7 @@
     }
   }
 
-  .mt-search__show-more__progress-spinner {
-    @extend .mt-progress-spinner;
+  .mt-search__show-more__spinner {
     width: 1rem;
     height: 1rem;
     margin-left: .5em;

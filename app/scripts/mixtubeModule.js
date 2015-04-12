@@ -37,6 +37,7 @@ mixtube.factory('loggerFactory', require('./components/loggerFactoryFactory'));
 mixtube.directive('mtScrollable', require('./components/scrollableDirective'));
 mixtube.animation('.mt-js-animation__slide', require('./components/slideAnimation'));
 mixtube.directive('mtSmartImg', require('./components/smartImgDirective'));
+mixtube.directive('mtSpinner', require('./components/spinner/spinnerDirective'));
 mixtube.factory('youtubeClient', require('./components/youtubeClientFactory'));
 
 mixtube.controller('RootCtrl', require('./controllers').RootCtrl);

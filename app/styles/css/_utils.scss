@@ -44,6 +44,18 @@
     bottom: 0;
   }
 
+  mt-spinner {
+    display: block;
+  }
+
+  .mt-spinner__svg {
+    display: block;
+
+    fill: currentColor;
+
+    animation: mt-spinner-rotation 500ms infinite linear;
+  }
+
   .mt-svg-icon {
     display: inline-block;
     height: 40rem/$baseFontSizeUnitless;
@@ -56,15 +68,6 @@
       height: 32rem/$baseFontSizeUnitless;
       width: 32rem/$baseFontSizeUnitless;
     }
-  }
-
-  .mt-progress-spinner {
-    display: block;
-
-    fill: currentColor;
-    stroke: currentColor;
-
-    animation: mt-spinner-rotation 500ms infinite linear;
   }
 
   .mt-animation-enter-leave__fade {
@@ -92,20 +95,6 @@
   outline: none;
 }
 
-%mt-chromeless-progress {
-  appearance: none;
-  background: none;
-  color: transparent; // IE needs that to remove the bar
-
-  // keep those selectors separated otherwise they are not interpreted (weird)
-  &::-webkit-progress-bar {
-    background: none;
-  }
-  &::-moz-progress-bar {
-    background: none;
-  }
-}
-
 @mixin mt-click-reaction {
   &.ng-click-active {
     transform: scale(.9);
@@ -126,19 +115,8 @@
   padding-top: $heightRatio * 100%;
 }
 
-@mixin mt-spinner($size, $color) {
-  width: $size;
-  height: $size;
-  border-radius: 50%;
-  border: (4rem/$baseFontSizeUnitless) solid transparent;
-  border-top-color: $color;
-
-  // this animation key frames are defined in the module main mixin (see above)
-  animation: mt-spinner-rotation 500ms infinite linear;
-}
-
 @mixin mt-horizontal-screen {
-  $videoThumbnailOriginalSize = 320 px;
+  $videoThumbnailOriginalSize: 320px;
 
   @media screen and (min-width: 2 * $videoThumbnailOriginalSize) {
     @content;

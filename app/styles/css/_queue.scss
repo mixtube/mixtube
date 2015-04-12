@@ -66,17 +66,18 @@
     }
   }
 
-  .mt-queue__entry__progress {
+  .mt-queue__entry__spinner-container {
     @include position(absolute, 0px 0px 0px 0px);
 
     display: flex;
     align-items: center;
     justify-content: center;
+  }
 
-    progress {
-      @extend %mt-chromeless-progress;
-      @include mt-spinner(3rem, $contrastedColor);
-    }
+  .mt-queue__entry__spinner {
+    width: 60rem/$baseFontSizeUnitless;
+
+    color: $contrastedColor;
   }
 
   .mt-queue__entry__data {
