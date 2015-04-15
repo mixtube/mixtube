@@ -30,7 +30,7 @@
   html {
     height: 100%;
 
-    font-size: $baseFontSizeUnitless * 1px;
+    font-size: $baseFontSize;
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     color: $lightTextColor;
@@ -41,7 +41,7 @@
 
     background-color: $black;
 
-    line-height: $lineHeight;
+    line-height: $baseLineHeight;
 
     &.idle {
       cursor: none;

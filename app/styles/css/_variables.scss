@@ -1,7 +1,9 @@
-$baseFontSizeUnitless: 16;
+$baseFontSize: 16px;
+$biggerFontSize: 26px;
+$smallerFontSize: 12px;
+$baseLineHeight: 24px;
 $baseBorderRadius: 2px;
-$lineHeight: 1.6;
-$unitVerticalPadding: $lineHeight * 1em;
+$unitVerticalPadding: $baseLineHeight;
 
 $baseTransitionDuration: 200ms;
 $overlayOpacity: .85;

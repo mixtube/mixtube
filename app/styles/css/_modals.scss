@@ -5,10 +5,11 @@
 
 @mixin modals {
 
-  $modalMaxWidth: 500rem/16;
+  $modalMaxWidth: 500px;
+  // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
+  $modalPadding: $baseLineHeight / 2;
 
   .mt-modal__container {
-    padding: $unitVerticalPadding / 2 .5rem;
     max-width: $modalMaxWidth;
 
     // propagate the "flexibility"
@@ -30,10 +31,12 @@
 
   .mt-modal__title {
     flex: none;
-    padding: $unitVerticalPadding / 2 1rem;
+    margin: $baseLineHeight 0;
+    padding: 0 $modalPadding;
 
     color: $baseBgColor;
-    font-size: 1.25rem;
+    font-size: $biggerFontSize;
+    line-height: $baseLineHeight * 2;
     font-weight: 700;
     text-align: center;
   }
@@ -41,7 +44,7 @@
   .mt-modal__content {
     // use the initial value for flex (0 1 auto)
     // will shrink to match the available height or expand to give enough place to the content
-    padding: 0 1rem;
+    padding: 0 $modalPadding;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
@@ -49,16 +52,17 @@
   }
 
   .mt-modal__paragraph {
-    margin-bottom: 1rem;
+    margin-bottom: $baseLineHeight;
   }
 
   .mt-modal__sub-paragraph {
-    font-size: (12rem/16);
+    margin-bottom: $baseLineHeight;
+    font-size: $smallerFontSize;
   }
 
   .mt-modal__commands {
     flex: none;
-    padding: 1rem;
+    padding: 0 $modalPadding;
 
     display: flex;
   }
@@ -66,8 +70,8 @@
   .mt-modal__button {
     @include mt-click-reaction();
     flex: 1;
-    padding: $unitVerticalPadding/4 0;
-    margin: 0 .5rem;
+    padding: $baseLineHeight / 2 0;
+    margin: $baseLineHeight / 2 $baseFontSize / 2;
 
     background-color: $contrastedColor;
     border-radius: $baseBorderRadius;

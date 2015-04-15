@@ -5,7 +5,7 @@
 @mixin header {
 
   $searchInputPadding: 0 3rem 0 .5rem;
-  $textShadowSize: 8rem / $baseFontSizeUnitless;
+  $textShadowSize: 8px;
   $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
 
   .mt-header {

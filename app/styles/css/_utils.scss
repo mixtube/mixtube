@@ -58,15 +58,17 @@
 
   .mt-svg-icon {
     display: inline-block;
-    height: 40rem/$baseFontSizeUnitless;
-    width: 40rem/$baseFontSizeUnitless;
+    height: $baseLineHeight * 2;
+    width: $baseLineHeight * 2;
 
     fill: currentColor;
     stroke: currentColor;
 
     &.small {
-      height: 32rem/$baseFontSizeUnitless;
-      width: 32rem/$baseFontSizeUnitless;
+      height: $baseLineHeight * 1.6;
+      width: $baseLineHeight * 1.6;
+      margin-top: $baseLineHeight * 0.4;
+      margin-bottom: $baseLineHeight * 0.4;
     }
   }
 

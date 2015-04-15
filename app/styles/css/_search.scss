@@ -164,7 +164,7 @@
       // is made of 5 columns which doesn't give much place to the message
       @include mt-horizontal-screen() {
 
-        font-size: (14rem/$baseFontSizeUnitless);
+        font-size: 14px;
 
         &:before {
           content: attr(mt-short-text);

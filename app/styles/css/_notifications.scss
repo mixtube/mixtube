@@ -7,12 +7,10 @@
   }
 
   .mt-notifications-center__container__padding {
-    padding: $unitVerticalPadding / 2 .5rem 0 .5rem;
+    padding: $baseLineHeight / 4 .5rem;
   }
 
   .mt-notification {
-    line-height: $lineHeight;
-
     background-color: $lightTextColor;
     color: $secondaryBgColor;
     border-radius: $baseBorderRadius;
@@ -33,7 +31,7 @@
 
     > .text {
       flex: 2;
-      padding: $unitVerticalPadding / 2 1rem;
+      padding: $baseLineHeight / 1.5 $baseFontSize;
     }
 
     > .thumbnail {

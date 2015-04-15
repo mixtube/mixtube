@@ -3,11 +3,11 @@
 
 @mixin queue-loading {
   .mt-queue-loading__message {
-    margin-bottom: $unitVerticalPadding;
+    margin-bottom: $baseLineHeight;
   }
 
   .mt-queue-loading__spinner {
-    width: 80rem/$baseFontSizeUnitless;
+    height: $baseLineHeight * 4;
 
     color: $contrastedColor;
   }
