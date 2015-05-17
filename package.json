@@ -22,6 +22,7 @@
     "browser-sync": "^2.2.1",
     "browserify": "^9.0.3",
     "bundle-collapser": "^1.1.4",
+    "compression": "^1.4.4",
     "csswring": "^3.0.1",
     "del": "^1.1.1",
     "gulp": "^3.8.10",
