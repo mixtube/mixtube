@@ -1,18 +1,30 @@
 'use strict';
 
-var Modernizr = require('./customModernizr');
-
 // @ngInject
-function capabilitiesFactory($rootScope, configuration) {
+function capabilitiesFactory($rootScope, $document, configuration) {
 
   var videoAutoplay;
 
-  // todo CommonJSify Modernizr
-  Modernizr.on('videoautoplay', function(result) {
-    $rootScope.$apply(function() {
-      videoAutoplay = result;
+  function loadScript(src) {
+    var script = $document[0].createElement('script');
+    script.src = src;
+    script.async = true;
+    $document[0].body.appendChild(script);
+  }
+
+  function activate() {
+    loadScript('scripts/components/capabilities/videoAutoPlayTest.js');
+  }
+
+  global.onMtVideoAutoPlayTestReady = function(videoAutoPlayPromise) {
+    videoAutoPlayPromise.then(function(result) {
+      $rootScope.$apply(function() {
+        videoAutoplay = result;
+      });
     });
-  });
+  };
+
+  activate();
 
   /**
    * @name capabilities

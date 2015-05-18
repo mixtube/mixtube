@@ -4,5 +4,6 @@
   "nonew": true,
   "forin": true,
   "devel": true,
-  "indent": 2
+  "indent": 2,
+  "esnext": true
 }

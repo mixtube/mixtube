@@ -14,6 +14,7 @@ var path = require('path'),
   sourcemaps = require('gulp-sourcemaps'),
   browserSync = require('browser-sync'),
   reload = browserSync.reload,
+  compression = require("compression"),
   jshint = require('gulp-jshint'),
   uglify = require('gulp-uglify'),
   ngAnnotate = require('gulp-ng-annotate'),
@@ -30,22 +31,22 @@ var path = require('path'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
-function browserifiedSrc(src) {
+function browserifiedSrc(src, baseDir) {
   var b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
   // convert bundle paths to IDS to save bytes in browserify bundles
   b.plugin(collapse);
   b.on('log', gutil.log);
   return b.bundle()
-    .pipe(source(path.basename(src)));
+    .pipe(source(path.relative(baseDir, src)));
 }
 
-function watchifiedSrc(src, pipelineFn) {
+function watchifiedSrc(src, baseDir, pipelineFn) {
   var b = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
 
   function doBundle() {
     return pipelineFn(
       b.bundle()
-        .pipe(source(path.basename(src)))
+        .pipe(source(path.relative(baseDir, src)))
     );
   }
 
@@ -190,15 +191,19 @@ gulp.task('css:dev', function() {
 });
 
 gulp.task('js:dev', function() {
-  // generates the bundle and watches changes
-  return watchifiedSrc('./app/scripts/app.js', function(pipeline) {
+  function pipelineFn(pipeline) {
     return pipeline
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(ngAnnotate())
       .pipe(sourcemaps.write())
       .pipe(gulp.dest('build/scripts'));
-  });
+  }
+
+  // generates the bundle and watches changes
+  return merge(
+    watchifiedSrc('./app/scripts/app.js', './app/scripts/', pipelineFn),
+    watchifiedSrc('./app/scripts/components/capabilities/videoAutoPlayTest.js', './app/scripts/', pipelineFn));
 });
 
 gulp.task('clean:dev', function() {
@@ -243,7 +248,9 @@ gulp.task('css:dist', function() {
 });
 
 gulp.task('js:dist', function() {
-  return browserifiedSrc('./app/scripts/app.js')
+  return merge(
+    browserifiedSrc('./app/scripts/app.js', './app/scripts/'),
+    browserifiedSrc('./app/scripts/components/capabilities/videoAutoPlayTest.js', './app/scripts/'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(ngAnnotate())
@@ -286,7 +293,10 @@ gulp.task('serve:dist', ['dist'], function() {
   browserSync({
     open: false,
     notify: false,
-    server: 'dist',
+    server: {
+      baseDir: 'dist',
+      middleware: compression()
+    },
     https: true,
     ghostMode: false
   });
