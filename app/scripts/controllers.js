@@ -405,18 +405,33 @@ function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCente
 
   activate();
 
-  function notification(message) {
+  function notifyError(message) {
     notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
       notificationCenter.error(message);
+    });
+  }
+
+  function notifyComingNext(message) {
+    notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+      notificationCenter.comingNext({
+        current: 'Current Song',
+        next: 'Next Song',
+        imageUrl: 'https://i.ytimg.com/vi/095Jdku7wo8/mqdefault.jpg'
+      });
     });
   }
 
   function activate() {
     if (configuration.debug) {
       // register the global space shortcut
-      keyboardShortcutManager.register('ctrl+n', function(evt) {
+      keyboardShortcutManager.register('ctrl+e', function(evt) {
         evt.preventDefault();
-        notification('Debugging: Test notification');
+        notifyError('Debugging: Test notification');
+      });
+
+      keyboardShortcutManager.register('ctrl+c', function(evt) {
+        evt.preventDefault();
+        notifyComingNext('Debugging: Test notification');
       });
     }
   }

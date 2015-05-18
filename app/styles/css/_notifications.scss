@@ -7,7 +7,7 @@
   }
 
   .mt-notifications-center__container__padding {
-    padding: $baseLineHeight / 4 .5rem;
+    padding: $baseLineHeight / 4;
   }
 
   .mt-notification {
@@ -30,12 +30,11 @@
     display: flex;
 
     > .text {
-      flex: 2;
-      padding: $baseLineHeight / 1.5 $baseFontSize;
-    }
+      // made of natural padding plus the rest of the quarter padding of the container
+      $verticalPadding: $baseLineHeight / 2  + $baseLineHeight / 4;
 
-    > .thumbnail {
-      flex: 1;
+      flex: 2;
+      padding: $verticalPadding $baseFontSize;
     }
   }
 

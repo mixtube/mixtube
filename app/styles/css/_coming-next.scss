@@ -2,25 +2,34 @@
 
 @mixin coming-next {
 
-  .mt-coming-next__group {
-    padding-bottom: $unitVerticalPadding / 2;
+  $notificationContentHeight: $baseLineHeight * 6 + $baseLineHeight / 2;
 
+  .mt-coming-next__group {
     &.next {
       font-weight: 600;
     }
 
+    &:first-child {
+      padding-bottom: $baseLineHeight / 2;
+    }
+
     &:last-child {
-      padding-bottom: 0;
+      padding-top: $baseLineHeight / 2;
     }
   }
 
   .mt-coming-next__header {
-    font-size: 0.875rem;
+    font-size: $smallerFontSize;
   }
 
   .mt-coming-next__title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .thumbnail {
+    width: $notificationContentHeight;
+    min-height: $notificationContentHeight;
   }
 }
