@@ -11,13 +11,14 @@
   <!-- endbuild -->
 
   <script>
+    'use strict';
+
     /*!
      loadCSS: load a CSS file asynchronously.
      [c]2014 @scottjehl, Filament Group, Inc.
      Licensed MIT
      */
     function loadCSS(href, before, media, callback) {
-      "use strict";
       // Arguments explained:
       // `href` is the URL for your CSS file.
       // `before` optionally defines the element we'll use as a reference for injecting our <link>
@@ -63,8 +64,11 @@
       return ss;
     }
 
-    loadCSS('styles/main.css');
-    loadCSS('//fonts.googleapis.com/css?family=Open+Sans:300,600');
+    // make sure cached CSS don't get processed straight and then block first paint
+    window.requestAnimationFrame(function() {
+      loadCSS('styles/main.css');
+      loadCSS('//fonts.googleapis.com/css?family=Open+Sans:300,600');
+    });
   </script>
 
   <!-- build:cssInline -->
