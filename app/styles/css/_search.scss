@@ -4,9 +4,6 @@
 
 @mixin search {
 
-  $headerFontSize: 1.25rem;
-  $resultsPadding: .5rem;
-
   .mt-search {
     @include position(absolute, 0px 0px 0px 0px);
 
@@ -17,14 +14,13 @@
   }
 
   .mt-search__provider {
-    margin: 1rem;
+    margin: 2 * $baseHorizontalSpacing 2 * $baseVerticalGridHeight;
   }
 
   .mt-search__provider__header {
-    padding: 0 $resultsPadding;
-    margin-bottom: .5rem;
+    padding: 0 $baseHorizontalSpacing;
+    margin-bottom: 2 * $baseVerticalGridHeight;
 
-    font-size: $headerFontSize;
 
     display: flex;
     align-items: center;
@@ -32,18 +28,18 @@
 
   .mt-search__provider__header__spinner {
     display: inline-block;
-    height: 1rem;
-    width: 1rem;
-    margin-left: .5rem;
+    height: $baseFontSize;
+    width: $baseFontSize;
+    margin-left: $baseHorizontalSpacing;
   }
 
   .mt-search__message {
     overflow: hidden;
-    padding: 0 $resultsPadding;
+    padding: 0 $baseHorizontalSpacing;
   }
 
   .mt-search__message__padding {
-    padding-bottom: $resultsPadding * 2;
+    padding-bottom: $baseVerticalGridHeight * 2;
   }
 
   .mt-results {
@@ -57,7 +53,7 @@
 
   .mt-result {
     float: left;
-    padding: 0 $resultsPadding $resultsPadding * 2 $resultsPadding;
+    padding: 0 $baseHorizontalSpacing $baseVerticalGridHeight * 2 $baseHorizontalSpacing;
     vertical-align: top;
 
     width: 100%;
@@ -156,7 +152,7 @@
     justify-content: center;
 
     > .text {
-      padding: .25rem;
+      padding: $baseVerticalGridHeight;
       text-align: center;
       overflow: hidden;
 
@@ -164,7 +160,7 @@
       // is made of 5 columns which doesn't give much place to the message
       @include mt-horizontal-screen() {
 
-        font-size: 14px;
+        font-size: $smallerFontSize;
 
         &:before {
           content: attr(mt-short-text);
@@ -200,7 +196,7 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    padding: $unitVerticalPadding/4 .5rem;
+    padding: $baseVerticalGridHeight;
 
     color: $lightTextColor;
     background: rgba(0, 0, 0, .3);
@@ -223,30 +219,28 @@
 
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: (14rem/16);
+    font-size: $smallerFontSize;
     font-weight: 600;
   }
 
   .mt-result__data__publisher {
-    font-size: (13rem/16);
+    font-size: $smallerFontSize;
   }
 
   .mt-result__data__duration {
-    width: 4em; // based on the idea that the widest value would be 000:00
-    font-size: (12rem/16);
+    width: 6ch; // based on the idea that the widest value would be 000:00
+    font-size: $smallerFontSize;
     text-align: right;
   }
 
   .mt-search__show-more {
-    padding: 0 .5rem;
+    padding: 0 $baseVerticalGridHeight;
   }
 
   .mt-search__show-more__button {
     background-color: $baseBgColor;
     text-align: center;
-    font-size: (14rem/16);
-    line-height: 1;
-    padding: 1em;
+    padding:  $baseVerticalGridHeight;
     border-radius: $baseBorderRadius;
 
     display: flex;
@@ -261,7 +255,6 @@
 
   .mt-search__show-more__button__label {
     overflow: visible;
-    height: 1rem;
 
     display: flex;
     align-items: center;
@@ -273,8 +266,8 @@
   }
 
   .mt-search__show-more__spinner {
-    width: 1rem;
-    height: 1rem;
-    margin-left: .5em;
+    width: $baseFontSize;
+    height: $baseFontSize;
+    margin-left: $baseHorizontalSpacing;
   }
 }

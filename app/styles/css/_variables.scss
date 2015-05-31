@@ -1,10 +1,14 @@
+$baseVerticalGridHeight: 6px;
+
+$baseHorizontalSpacing: $baseVerticalGridHeight;
+
+$baseLineHeight: 4 * $baseVerticalGridHeight;
+
 $baseFontSize: 16px;
-$baseHorizontalSpacing: 8px;
-$biggerFontSize: 26px;
 $smallerFontSize: 12px;
-$baseLineHeight: 24px;
+$biggerFontSize: 26px;
+
 $baseBorderRadius: 2px;
-$unitVerticalPadding: $baseLineHeight;
 
 $baseTransitionDuration: 200ms;
 $overlayOpacity: .85;
