@@ -4,9 +4,7 @@
 
 @mixin header {
 
-  $searchInputPadding: 0 3rem 0 .5rem;
-  $textShadowSize: 8px;
-  $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
+  $searchInputPadding: 0 6 * $baseHorizontalSpacing 0 $baseHorizontalSpacing;
 
   .mt-header {
     @include position(absolute, 0px 0px 0px 0px);
@@ -66,8 +64,8 @@
   .mt-header__app-title {
     // make sure the default line height doesn't make the container to high
     line-height: 0;
-    margin-left: .5rem;
-    margin-right: 1rem;
+    margin-left: $baseHorizontalSpacing;
+    margin-right: 2 * $baseHorizontalSpacing;
     overflow: hidden;
   }
 
@@ -149,11 +147,11 @@
   .mt-search-input {
     @include position(absolute, 0px 0px 0px auto);
 
-    max-width: 30rem;
+    max-width: 480px;
     padding: $searchInputPadding;
     overflow: hidden;
 
-    font-size: 1.5rem;
+    font-size: $biggerFontSize;
     color: $lightTextColor;
 
     display: flex;
@@ -176,6 +174,11 @@
     // overrides placeholder to be sure that it is coherent with the fake field pseudo placeholder
     &::placeholder {
       @include mt-placeholder();
+    }
+
+    // needed only for webkit based browsers
+    &::-webkit-input-placeholder {
+      line-height: normal;
     }
   }
 
