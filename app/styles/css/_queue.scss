@@ -1,13 +1,12 @@
 @import '../vendor/bourbon/addons/position';
 @import '../vendor/bourbon/addons/triangle';
-
 @import 'utils';
 
 @mixin queue-item-color($bgColor) {
   background-color: $bgColor;
 
   .mt-queue__entry__data:before {
-    @include triangle(1.25rem, $bgColor, up);
+    @include triangle($baseLineHeight, $bgColor, up);
   }
 }
 
@@ -75,7 +74,7 @@
   }
 
   .mt-queue__entry__spinner {
-    width: 60px;
+    width: 2 * $baseLineHeight;
 
     color: $contrastedColor;
   }
@@ -91,9 +90,9 @@
       content: '';
       position: absolute;
       bottom: 100%;
-      left: 2rem;
+      left: 4 * $baseHorizontalSpacing;
 
-      @include triangle(1.25rem, $baseBgColor, up);
+      @include triangle($baseLineHeight, $baseBgColor, up);
     }
   }
 
@@ -103,7 +102,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: $unitVerticalPadding/2 .5rem;
+    padding: $baseLineHeight / 2 $baseHorizontalSpacing;
   }
 
   .mt-queue__entry__commands {
@@ -113,8 +112,10 @@
 
   .mt-queue__entry__remove-button {
     @include mt-click-reaction();
-    padding-right: .5rem;
+    padding-right: $baseHorizontalSpacing;
     opacity: .2;
+    // fixes a Chrome bug where opacity gets stuck to 1 after hover
+    will-change: opacity;
 
     // center the icon
     display: flex;
@@ -122,6 +123,7 @@
     @media (any-hover: hover) {
       &:hover {
         opacity: 1;
+        //outline: 1px solid red;
       }
     }
   }

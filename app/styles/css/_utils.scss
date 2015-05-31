@@ -56,6 +56,7 @@
     animation: mt-spinner-rotation 500ms infinite linear;
   }
 
+  //todo need to revisit this SVG thing
   .mt-svg-icon {
     display: inline-block;
     height: $baseLineHeight * 2;
@@ -67,8 +68,6 @@
     &.small {
       height: $baseLineHeight * 1.6;
       width: $baseLineHeight * 1.6;
-      margin-top: $baseLineHeight * 0.4;
-      margin-bottom: $baseLineHeight * 0.4;
     }
   }
 
