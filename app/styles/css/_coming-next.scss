@@ -2,24 +2,25 @@
 
 @mixin coming-next {
 
-  $notificationContentHeight: $baseLineHeight * 6 + $baseLineHeight / 2;
+  $height-notification-content: 22 * $grid-size;
 
   .mt-coming-next__group {
     &.next {
-      font-weight: 600;
+      font-weight: bold;
     }
 
     &:first-child {
-      padding-bottom: $baseLineHeight / 2;
+      padding-bottom: $grid-size;
     }
 
     &:last-child {
-      padding-top: $baseLineHeight / 2;
+      padding-top: $grid-size;
     }
   }
 
   .mt-coming-next__header {
-    font-size: $smallerFontSize;
+    font-size: $font-size-smaller;
+    color: $color-text-black-secondary;
   }
 
   .mt-coming-next__title {
@@ -29,7 +30,7 @@
   }
 
   .thumbnail {
-    width: $notificationContentHeight;
-    min-height: $notificationContentHeight;
+    width: $height-notification-content;
+    min-height: $height-notification-content;
   }
 }

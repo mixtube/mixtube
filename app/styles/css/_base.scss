@@ -30,18 +30,18 @@
   html {
     height: 100%;
 
-    font-size: $baseFontSize;
+    font-size: $font-size;
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
-    color: $lightTextColor;
+    color: $color-text;
   }
 
   body {
     height: 100%;
 
-    background-color: $black;
+    background-color: $color-primary-1000;
 
-    line-height: $baseLineHeight;
+    line-height: $line-height;
 
     &.idle {
       cursor: none;

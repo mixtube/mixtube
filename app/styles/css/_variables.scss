@@ -1,26 +1,30 @@
-$baseVerticalGridHeight: 6px;
+$grid-size: 6px;
 
-$baseHorizontalSpacing: $baseVerticalGridHeight;
+$baseHorizontalSpacing: $grid-size;
 
-$baseLineHeight: 4 * $baseVerticalGridHeight;
+$line-height: 4 * $grid-size;
 
-$baseFontSize: 16px;
-$smallerFontSize: 12px;
-$biggerFontSize: 26px;
+$font-size: 16px;
+$font-size-smaller: 12px;
+$font-size-bigger: 26px;
 
-$baseBorderRadius: 2px;
+$border-radius: 2px;
 
-$baseTransitionDuration: 200ms;
-$overlayOpacity: .85;
+$transition-duration: 200ms;
+$timing-function-ease-in-out: cubic-bezier(.8, 0, .2, 1);
 
-$black: #0d0d0d;
-$darkestBgColor: #262626;
-$baseBgColor: #2D2D2E;
-$secondaryBgColor: #636466;
-$contrastedColor: #8EC447;
-$lightTextColor: #ffffff;
-$infoBgColor: #5F7BCE;
-$errorBgColor: #BA3B26;
-$backdropBackgroundColor: rgba(0, 0, 0, $overlayOpacity);
+$opacity-ratio-overlay: .85;
 
-$easeInOut: cubic-bezier(.8, 0, .2, 1);
+$color-primary-1000: hsl(0, 0%, 6%);
+$color-primary-900: hsl(0, 0%, 12%);
+$color-primary-800: hsl(0, 0%, 25%);
+$color-primary-700: hsl(0, 0%, 38%);
+$color-primary-50: hsl(0, 0%, 98%);
+
+$color-accent: hsl(85, 51%, 52%);
+$color-accent-error: hsl(8, 66%, 43%);
+
+$color-text: hsla(0, 0%, 100%, .87);
+$color-text-secondary: hsla(0, 0%, 100%, .54);
+$color-text-black-text: hsl(0, 0%, 0%);
+$color-text-black-secondary: hsla(0, 0%, 0%, .7);

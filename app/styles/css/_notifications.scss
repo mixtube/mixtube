@@ -7,22 +7,17 @@
   }
 
   .mt-notifications-center__container__padding {
-    padding: $baseLineHeight / 4;
+    padding: $grid-size;
   }
 
   .mt-notification {
-    background-color: $lightTextColor;
-    color: $secondaryBgColor;
-    border-radius: $baseBorderRadius;
-
-    &.info {
-      background-color: $infoBgColor;
-      color: $lightTextColor;
-    }
+    background-color: rgba($color-primary-50, $opacity-ratio-overlay);
+    color: $color-text-black-text;
+    border-radius: $border-radius;
 
     &.error {
-      background-color: $errorBgColor;
-      color: $lightTextColor;
+      background-color: rgba($color-accent-error, $opacity-ratio-overlay);
+      color: $color-text;
     }
   }
 
@@ -31,10 +26,9 @@
 
     > .text {
       // made of natural padding plus the rest of the quarter padding of the container
-      $verticalPadding: $baseLineHeight / 2  + $baseLineHeight / 4;
 
       flex: 2;
-      padding: $verticalPadding $baseFontSize;
+      padding: 2 * $grid-size;
     }
   }
 

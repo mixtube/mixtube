@@ -5,12 +5,12 @@
 
 @mixin modals {
 
-  $modalMaxWidth: 500px;
+  $width-max-modal: 500px;
   // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
-  $modalPadding: $baseLineHeight / 2;
+  $padding-modal: 3 * $grid-size;
 
   .mt-modal__container {
-    max-width: $modalMaxWidth;
+    max-width: $width-max-modal;
 
     // propagate the "flexibility"
     display: flex;
@@ -19,10 +19,11 @@
 
   .mt-modal__frame {
     overflow: hidden;
+    padding: $padding-modal;
 
-    background-color: $lightTextColor;
-    border-radius: $baseBorderRadius;
-    color: $secondaryBgColor;
+    background-color: $color-primary-50;
+    border-radius: $border-radius;
+    color: $color-text-black-text;
 
     // propagate the "flexibility"
     display: flex;
@@ -31,12 +32,11 @@
 
   .mt-modal__title {
     flex: none;
-    margin: $baseLineHeight 0;
-    padding: 0 $modalPadding;
+    margin-bottom: 4 * $grid-size;
 
-    color: $baseBgColor;
-    font-size: $biggerFontSize;
-    line-height: $baseLineHeight * 2;
+    color: $color-primary-800;
+    font-size: $font-size-bigger;
+    line-height: 2 * $line-height;
     font-weight: 700;
     text-align: center;
   }
@@ -44,7 +44,6 @@
   .mt-modal__content {
     // use the initial value for flex (0 1 auto)
     // will shrink to match the available height or expand to give enough place to the content
-    padding: 0 $modalPadding;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
@@ -52,17 +51,16 @@
   }
 
   .mt-modal__paragraph {
-    margin-bottom: $baseLineHeight;
+    margin-bottom: 4 * $grid-size;
   }
 
   .mt-modal__sub-paragraph {
-    margin-bottom: $baseLineHeight;
-    font-size: $smallerFontSize;
+    margin-bottom: 4 * $grid-size;
+    font-size: $font-size-smaller;
   }
 
   .mt-modal__commands {
     flex: none;
-    padding: 0 $modalPadding;
 
     display: flex;
   }
@@ -70,16 +68,17 @@
   .mt-modal__button {
     @include mt-click-reaction();
     flex: 1;
-    padding: $baseLineHeight / 2 0;
-    margin: $baseLineHeight / 2 $baseFontSize / 2;
+    padding: 2 * $grid-size 0;
+    margin: 2 * $grid-size 2 * $grid-size 0 2 * $grid-size;
 
-    background-color: $contrastedColor;
-    border-radius: $baseBorderRadius;
+    color: $color-text;
     font-weight: 700;
     text-align: center;
+    background-color: $color-accent;
+    border-radius: $border-radius;
 
     &.secondary {
-      border: 1px solid $contrastedColor;
+      border: 1px solid $color-accent;
       background-color: transparent;
     }
 

@@ -2,13 +2,14 @@
 @import 'utils';
 
 @mixin queue-loading {
+
   .mt-queue-loading__message {
-    margin-bottom: $baseLineHeight;
+    margin-bottom: 3 * $grid-size;
   }
 
   .mt-queue-loading__spinner {
-    height: $baseLineHeight * 4;
+    height: 4 * $line-height;
 
-    color: $contrastedColor;
+    color: $color-accent;
   }
 }

@@ -4,7 +4,7 @@
 
 @mixin header {
 
-  $searchInputPadding: 0 6 * $baseHorizontalSpacing 0 $baseHorizontalSpacing;
+  $padding-search-input: 0 6 * $grid-size 0 $grid-size;
 
   .mt-header {
     @include position(absolute, 0px 0px 0px 0px);
@@ -16,13 +16,13 @@
   .mt-header__bg {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: $baseBgColor;
+    background-color: $color-primary-800;
 
     @include mt-horizontal-screen() {
 
       transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.idle {
         opacity: 0;
@@ -64,8 +64,8 @@
   .mt-header__app-title {
     // make sure the default line height doesn't make the container to high
     line-height: 0;
-    margin-left: $baseHorizontalSpacing;
-    margin-right: 2 * $baseHorizontalSpacing;
+    margin-left: $grid-size;
+    margin-right: 2 * $grid-size;
     overflow: hidden;
   }
 
@@ -87,9 +87,9 @@
       transform: scale(.5);
       opacity: 0;
 
-      transition-duration: $baseTransitionDuration;
+      transition-duration: $transition-duration;
       transition-property: transform, opacity;
-      transition-timing-function: $easeInOut, linear;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.toggle {
         transform: scale(1);
@@ -132,9 +132,9 @@
       transform: scale(.5);
       opacity: 0;
 
-      transition-duration: $baseTransitionDuration;
+      transition-duration: $transition-duration;
       transition-property: transform, opacity;
-      transition-timing-function: $easeInOut, linear;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.toggle {
         transform: scale(1);
@@ -148,11 +148,11 @@
     @include position(absolute, 0px 0px 0px auto);
 
     max-width: 480px;
-    padding: $searchInputPadding;
+    padding: $padding-search-input;
     overflow: hidden;
 
-    font-size: $biggerFontSize;
-    color: $lightTextColor;
+    font-size: $font-size-bigger;
+    color: $color-text;
 
     display: flex;
     align-items: center;
@@ -167,7 +167,7 @@
     padding: 0;
     z-index: 1;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-primary-700;
     font: inherit;
     color: inherit;
 
@@ -185,9 +185,9 @@
   // the animated fake field gives the illusion that the real input is moving
   .mt-search-input__fake-field {
     @include position(absolute, 0px 0px 0px 0px);
-    padding: $searchInputPadding;
+    padding: $padding-search-input;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-primary-700;
 
     // for fake placeholder alignment
     display: flex;

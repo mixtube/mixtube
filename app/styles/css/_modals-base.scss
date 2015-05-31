@@ -12,7 +12,7 @@
 
     z-index: $modalZIndex - 1;
 
-    background-color: $backdropBackgroundColor;
+    background-color: rgba($color-primary-1000, $opacity-ratio-overlay);
   }
 
   .mt-modal {
@@ -32,8 +32,8 @@
     // shows the overlay
     &.ng-enter, &.ng-leave {
       transition-property: opacity, transform;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: linear, $easeInOut;
+      transition-duration: $transition-duration;
+      transition-timing-function: linear, $timing-function-ease-in-out;
     }
 
     &.ng-enter {

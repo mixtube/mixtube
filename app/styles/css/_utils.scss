@@ -59,22 +59,17 @@
   //todo need to revisit this SVG thing
   .mt-svg-icon {
     display: inline-block;
-    height: $baseLineHeight * 2;
-    width: $baseLineHeight * 2;
+    height: 6 * $grid-size;
+    width: 6 * $grid-size;
 
     fill: currentColor;
     stroke: currentColor;
-
-    &.small {
-      height: $baseLineHeight * 1.6;
-      width: $baseLineHeight * 1.6;
-    }
   }
 
   .mt-animation-enter-leave__fade {
 
     &.ng-enter, &.ng-leave {
-      transition: opacity $baseTransitionDuration linear;
+      transition: opacity $transition-duration linear;
     }
 
     &.ng-enter,

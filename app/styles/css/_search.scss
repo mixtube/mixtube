@@ -7,19 +7,19 @@
   .mt-search {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: rgba($secondaryBgColor, .8);
+    background-color: rgba($color-primary-700, .8);
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .mt-search__provider {
-    margin: 2 * $baseHorizontalSpacing 2 * $baseVerticalGridHeight;
+    margin: 2 * $grid-size;
   }
 
   .mt-search__provider__header {
-    padding: 0 $baseHorizontalSpacing;
-    margin-bottom: 2 * $baseVerticalGridHeight;
+    padding: 0 $grid-size;
+    margin-bottom: 2 * $grid-size;
 
 
     display: flex;
@@ -28,18 +28,18 @@
 
   .mt-search__provider__header__spinner {
     display: inline-block;
-    height: $baseFontSize;
-    width: $baseFontSize;
-    margin-left: $baseHorizontalSpacing;
+    height: $font-size;
+    width: $font-size;
+    margin-left: $grid-size;
   }
 
   .mt-search__message {
     overflow: hidden;
-    padding: 0 $baseHorizontalSpacing;
+    padding: 0 $grid-size;
   }
 
   .mt-search__message__padding {
-    padding-bottom: $baseVerticalGridHeight * 2;
+    padding-bottom: 2 * $grid-size;
   }
 
   .mt-results {
@@ -53,7 +53,7 @@
 
   .mt-result {
     float: left;
-    padding: 0 $baseHorizontalSpacing $baseVerticalGridHeight * 2 $baseHorizontalSpacing;
+    padding: 0 $grid-size 2 * $grid-size $grid-size;
     vertical-align: top;
 
     width: 100%;
@@ -76,7 +76,7 @@
     position: relative;
 
     text-align: inherit;
-    border-radius: $baseBorderRadius;
+    border-radius: $border-radius;
     overflow: hidden;
   }
 
@@ -86,17 +86,16 @@
     right: 0;
     z-index: 1;
 
-    color: $lightTextColor;
-    opacity: $overlayOpacity;
+    opacity: $opacity-ratio-overlay;
 
     .mt-svg-icon {
       // forces the background (triangle) color
-      fill: $baseBgColor;
+      fill: $color-primary-800;
     }
 
     @media (any-hover: hover) {
       .mt-result__container:hover & {
-        color: $contrastedColor;
+        color: $color-accent;
       }
     }
   }
@@ -105,7 +104,7 @@
     position: relative;
     overflow: hidden;
 
-    background-color: $baseBgColor;
+    background-color: $color-primary-800;
   }
 
   .mt-result__thumbnail__img {
@@ -121,7 +120,7 @@
 
       &.mt-loading-remove {
         transition-property: opacity, filter;
-        transition-duration: $baseTransitionDuration * 5, $baseTransitionDuration * 10;
+        transition-duration: $transition-duration * 5, $transition-duration * 10;
       }
     }
 
@@ -131,7 +130,7 @@
       align-items: center;
       justify-content: center;
 
-      color: $darkestBgColor;
+      color: red;
     }
   }
 
@@ -143,8 +142,8 @@
     z-index: 2;
     transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
 
-    background-color: $baseBgColor;
-    border-radius: $baseBorderRadius $baseBorderRadius 0 0;
+    background-color: $color-primary-800;
+    border-radius: $border-radius $border-radius 0 0;
 
     // vertically center the text
     display: flex;
@@ -152,7 +151,7 @@
     justify-content: center;
 
     > .text {
-      padding: $baseVerticalGridHeight;
+      padding: $grid-size;
       text-align: center;
       overflow: hidden;
 
@@ -160,7 +159,7 @@
       // is made of 5 columns which doesn't give much place to the message
       @include mt-horizontal-screen() {
 
-        font-size: $smallerFontSize;
+        font-size: $font-size-smaller;
 
         &:before {
           content: attr(mt-short-text);
@@ -176,8 +175,8 @@
 
       &.ng-enter, &.ng-leave {
         transition-property: transform, opacity;
-        transition-duration: $baseTransitionDuration;
-        transition-timing-function: $easeInOut, linear;
+        transition-duration: $transition-duration;
+        transition-timing-function: $timing-function-ease-in-out, linear;
       }
 
       &.ng-enter, &.ng-leave.ng-leave-active {
@@ -196,10 +195,9 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    padding: $baseVerticalGridHeight;
+    padding: $grid-size;
 
-    color: $lightTextColor;
-    background: rgba(0, 0, 0, .3);
+    background: rgba($color-primary-1000, .3);
   }
 
   .mt-result__data__item {
@@ -219,36 +217,36 @@
 
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $smallerFontSize;
+    font-size: $font-size-smaller;
     font-weight: 600;
   }
 
   .mt-result__data__publisher {
-    font-size: $smallerFontSize;
+    font-size: $font-size-smaller;
   }
 
   .mt-result__data__duration {
     width: 6ch; // based on the idea that the widest value would be 000:00
-    font-size: $smallerFontSize;
+    font-size: $font-size-smaller;
     text-align: right;
   }
 
   .mt-search__show-more {
-    padding: 0 $baseVerticalGridHeight;
+    padding: 0 $grid-size;
   }
 
   .mt-search__show-more__button {
-    background-color: $baseBgColor;
+    background-color: $color-primary-800;
     text-align: center;
-    padding:  $baseVerticalGridHeight;
-    border-radius: $baseBorderRadius;
+    padding: $grid-size;
+    border-radius: $border-radius;
 
     display: flex;
     justify-content: center;
 
     @media (any-hover: hover) {
       &:hover .text {
-        color: $contrastedColor;
+        color: $color-accent;
       }
     }
   }
@@ -266,8 +264,8 @@
   }
 
   .mt-search__show-more__spinner {
-    width: $baseFontSize;
-    height: $baseFontSize;
-    margin-left: $baseHorizontalSpacing;
+    width: $font-size;
+    height: $font-size;
+    margin-left: $grid-size;
   }
 }

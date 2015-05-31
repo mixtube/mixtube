@@ -2,11 +2,11 @@
 @import '../vendor/bourbon/addons/triangle';
 @import 'utils';
 
-@mixin queue-item-color($bgColor) {
-  background-color: $bgColor;
+@mixin queue-item-color($color-background) {
+  background-color: $color-background;
 
   .mt-queue__entry__data:before {
-    @include triangle($baseLineHeight, $bgColor, up);
+    @include triangle(4 * $grid-size, $color-background, up);
   }
 }
 
@@ -19,19 +19,19 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
-    background-color: $darkestBgColor;
+    background-color: $color-primary-900;
   }
 
   .mt-queue__entry {
-    @include queue-item-color($baseBgColor);
+    @include queue-item-color($color-primary-800);
     overflow: hidden;
 
     &.active {
-      @include queue-item-color($contrastedColor);
+      @include queue-item-color($color-accent);
     }
 
     &.broken {
-      @include queue-item-color($errorBgColor);
+      @include queue-item-color($color-accent-error);
     }
   }
 
@@ -58,7 +58,7 @@
     justify-content: center;
     text-align: center;
 
-    background-color: rgba($errorBgColor, $overlayOpacity);
+    background-color: rgba($color-accent-error, $opacity-ratio-overlay);
 
     .mt-queue__entry.broken & {
       display: flex;
@@ -74,9 +74,9 @@
   }
 
   .mt-queue__entry__spinner {
-    width: 2 * $baseLineHeight;
+    width: 4 * $grid-size;
 
-    color: $contrastedColor;
+    color: $color-accent;
   }
 
   .mt-queue__entry__data {
@@ -90,9 +90,9 @@
       content: '';
       position: absolute;
       bottom: 100%;
-      left: 4 * $baseHorizontalSpacing;
+      left: 4 * $grid-size;
 
-      @include triangle($baseLineHeight, $baseBgColor, up);
+      @include triangle(4 * $grid-size, $color-primary-800, up);
     }
   }
 
@@ -102,7 +102,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: $baseLineHeight / 2 $baseHorizontalSpacing;
+    padding: 2 * $grid-size $grid-size;
   }
 
   .mt-queue__entry__commands {
@@ -112,7 +112,7 @@
 
   .mt-queue__entry__remove-button {
     @include mt-click-reaction();
-    padding-right: $baseHorizontalSpacing;
+    padding-right: $grid-size;
     opacity: .2;
     // fixes a Chrome bug where opacity gets stuck to 1 after hover
     will-change: opacity;

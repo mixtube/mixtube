@@ -14,8 +14,8 @@
 
 @mixin tiles {
 
-  $headerHeight: $baseLineHeight * 3;
-  $notificationsNominalWidth: 480px;
+  $height-header: 10 * $grid-size;
+  $width-nominal-notifications: 480px;
 
   .mt-main-tile {
     height: 100%;
@@ -26,7 +26,7 @@
 
   .mt-header-tile {
     position: relative;
-    height: $headerHeight;
+    height: $height-header;
   }
 
   .mt-body-tile {
@@ -48,7 +48,7 @@
 
     @include mt-horizontal-screen() {
       // in horizontal mode we move the scene underneath the header
-      @include position(absolute, -$headerHeight 0px 0px 0px);
+      @include position(absolute, -$height-header 0px 0px 0px);
 
       &:before {
         display: none;
@@ -59,7 +59,7 @@
   .mt-notification-center-tile {
     @include position(absolute, 0px 0px auto auto);
     width: 100%;
-    max-width: $notificationsNominalWidth;
+    max-width: $width-nominal-notifications;
     max-height: 100%;
     overflow: hidden;
 
@@ -81,8 +81,8 @@
       height: 100%;
 
       transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.idle {
         opacity: 0;
@@ -103,9 +103,9 @@
 
       &.ng-hide-add, &.ng-hide-remove {
         transition-property: transform, opacity;
-        transition-duration: $baseTransitionDuration;
+        transition-duration: $transition-duration;
 
-        transition-timing-function: $easeInOut, linear;
+        transition-timing-function: $timing-function-ease-in-out, linear;
 
         // don't hide it straight: wait for the end of the animation
         display: block !important;
