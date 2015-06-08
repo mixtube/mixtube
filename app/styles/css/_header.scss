@@ -64,8 +64,7 @@
   .mt-header__app-title {
     // make sure the default line height doesn't make the container to high
     line-height: 0;
-    margin-left: $grid-size;
-    margin-right: 2 * $grid-size;
+    padding: 0 2 * $grid-size;
     overflow: hidden;
   }
 
@@ -113,6 +112,8 @@
 
   .mt-search-input__button {
     position: relative;
+
+    margin-right: 2 * $grid-size;
 
     z-index: 1;
 
@@ -193,5 +194,10 @@
 
       @include mt-placeholder();
     }
+  }
+
+  // make sure the fake filed doesn't overflow
+  .mt-search-input__fake-field__text {
+    display: inline-block;
   }
 }

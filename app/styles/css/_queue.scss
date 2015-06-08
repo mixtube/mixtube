@@ -6,7 +6,12 @@
   background-color: $color-background;
 
   .mt-queue__entry__data:before {
-    @include triangle(4 * $grid-size, $color-background, up);
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 2 * $grid-size;
+
+    @include triangle(3 * $grid-size, $color-background, up);
   }
 }
 
@@ -84,16 +89,6 @@
     overflow: visible; // rollback the global overflow hidden
 
     display: flex;
-
-    // decorative up arrow
-    &:before {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 4 * $grid-size;
-
-      @include triangle(4 * $grid-size, $color-primary, up);
-    }
   }
 
   .mt-queue__entry__title {
@@ -102,7 +97,8 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: $grid-size;
+    padding: 0 2 * $grid-size;
+    margin: 1.5 * $grid-size 0;
   }
 
   .mt-queue__entry__commands {
@@ -123,7 +119,6 @@
     @media (any-hover: hover) {
       &:hover {
         opacity: 1;
-        //outline: 1px solid red;
       }
     }
   }
