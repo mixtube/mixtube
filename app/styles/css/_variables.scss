@@ -4,11 +4,10 @@ $grid-size: 8px;
 $width-thumbnail-original: 320px;
 $width-media-query-breakpoint: 2 * $width-thumbnail-original;
 
-$line-height: 3 * $grid-size;
-
-$font-size: 16px;
-$font-size-smaller: 12px;
-$font-size-bigger: 26px;
+$font-family: 'Open Sans', sans-serif;
+$font-body: 16px/24px $font-family;
+$font-smaller: 13px/20px $font-family;
+$font-bigger: 24px/32px $font-family;
 
 $border-radius: 2px;
 

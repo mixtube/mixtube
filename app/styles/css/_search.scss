@@ -28,8 +28,8 @@
 
   .mt-search__provider__header__spinner {
     display: inline-block;
-    height: $font-size;
-    width: $font-size;
+    height: 2 * $grid-size;
+    width: 2 * $grid-size;
     margin-left: $grid-size;
   }
 
@@ -159,7 +159,7 @@
       // is made of 5 columns which doesn't give much place to the message
       @include mt-horizontal-screen() {
 
-        font-size: $font-size-smaller;
+        font: $font-smaller;
 
         &:before {
           content: attr(mt-short-text);
@@ -217,17 +217,17 @@
 
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $font-size-smaller;
+    font: $font-smaller;
     font-weight: 600;
   }
 
   .mt-result__data__publisher {
-    font-size: $font-size-smaller;
+    font: $font-smaller;
   }
 
   .mt-result__data__duration {
     width: 6ch; // based on the idea that the widest value would be 000:00
-    font-size: $font-size-smaller;
+    font: $font-smaller;
     text-align: right;
   }
 
@@ -264,8 +264,8 @@
   }
 
   .mt-search__show-more__spinner {
-    width: $font-size;
-    height: $font-size;
+    width: 2 * $grid-size;
+    height: 2 * $grid-size;
     margin-left: $grid-size;
   }
 }

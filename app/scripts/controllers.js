@@ -8,7 +8,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  pointerManager, capabilities, searchCtrlHelper, configuration) {
+                  capabilities, searchCtrlHelper, configuration) {
 
   var rootCtrl = this;
 
@@ -401,7 +401,7 @@ function QueueCtrl(orchestrator, queueManager) {
 }
 
 // @ngInject
-function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry) {
+function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry, modalManager) {
 
   activate();
 
@@ -432,6 +432,15 @@ function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCente
       keyboardShortcutManager.register('ctrl+c', function(evt) {
         evt.preventDefault();
         notifyComingNext('Debugging: Test notification');
+      });
+
+      keyboardShortcutManager.register('ctrl+m', function(evt) {
+        evt.preventDefault();
+        modalManager.open({
+          title: 'This a a testing modal',
+          contentTemplateUrl: 'noPlaybackModalContent',
+          commands: [{label: 'OK', primary: true}]
+        });
       });
     }
   }

@@ -6,10 +6,11 @@
 @mixin modals {
 
   // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
-  $padding-modal: 3 * $grid-size;
+  //$padding-modal: 3 * $grid-size;
 
   .mt-modal__container {
     max-width: $width-media-query-breakpoint;
+    padding: $grid-size;
 
     // propagate the "flexibility"
     display: flex;
@@ -18,7 +19,6 @@
 
   .mt-modal__frame {
     overflow: hidden;
-    padding: $padding-modal;
 
     background-color: $color-contrast;
     border-radius: $border-radius;
@@ -31,11 +31,11 @@
 
   .mt-modal__title {
     flex: none;
-    margin-bottom: 4 * $grid-size;
+    padding: 0 3 * $grid-size;
+    margin: 3 * $grid-size 0;
 
     color: $color-primary;
-    font-size: $font-size-bigger;
-    line-height: 2 * $line-height;
+    font: $font-bigger;
     font-weight: 700;
     text-align: center;
   }
@@ -50,25 +50,31 @@
   }
 
   .mt-modal__paragraph {
-    margin-bottom: 4 * $grid-size;
+    padding: 0 3 * $grid-size;
+    margin-bottom: 3 * $grid-size;
   }
 
   .mt-modal__sub-paragraph {
-    margin-bottom: 4 * $grid-size;
-    font-size: $font-size-smaller;
+    padding: 0 3 * $grid-size;
+    margin-bottom: 3 * $grid-size;
+    font: $font-smaller;
   }
 
   .mt-modal__commands {
     flex: none;
 
     display: flex;
+    justify-content: flex-end;
   }
 
   .mt-modal__button {
     @include mt-click-reaction();
-    flex: 1;
-    padding: 2 * $grid-size 0;
-    margin: 2 * $grid-size 2 * $grid-size 0 2 * $grid-size;
+
+    margin: $grid-size;
+
+    line-height: 5 * $grid-size;
+    min-width: 8 * $grid-size;
+    padding: 0 $grid-size;
 
     color: $color-text;
     font-weight: 700;
@@ -82,11 +88,11 @@
     }
 
     &:first-child {
-      margin-left: 0;
+      //margin-left: 0;
     }
 
     &:last-child {
-      margin-right: 0;
+      //margin-right: 0;
     }
   }
 }
