@@ -12,7 +12,7 @@
 
     z-index: $modalZIndex - 1;
 
-    background-color: rgba($color-primary-1000, $opacity-ratio-overlay);
+    background-color: rgba($color-background, $opacity-ratio-overlay);
   }
 
   .mt-modal {

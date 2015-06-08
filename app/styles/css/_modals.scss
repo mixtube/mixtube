@@ -5,12 +5,11 @@
 
 @mixin modals {
 
-  $width-max-modal: 500px;
   // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
   $padding-modal: 3 * $grid-size;
 
   .mt-modal__container {
-    max-width: $width-max-modal;
+    max-width: $width-media-query-breakpoint;
 
     // propagate the "flexibility"
     display: flex;
@@ -21,7 +20,7 @@
     overflow: hidden;
     padding: $padding-modal;
 
-    background-color: $color-accent;
+    background-color: $color-contrast;
     border-radius: $border-radius;
     color: $color-text-black-text;
 
@@ -34,7 +33,7 @@
     flex: none;
     margin-bottom: 4 * $grid-size;
 
-    color: $color-primary-800;
+    color: $color-primary;
     font-size: $font-size-bigger;
     line-height: 2 * $line-height;
     font-weight: 700;

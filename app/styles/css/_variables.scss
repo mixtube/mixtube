@@ -1,8 +1,10 @@
-$grid-size: 6px;
+$grid-size: 8px;
 
-$baseHorizontalSpacing: $grid-size;
+// based on YT default thumbnail width
+$width-thumbnail-original: 320px;
+$width-media-query-breakpoint: 2 * $width-thumbnail-original;
 
-$line-height: 4 * $grid-size;
+$line-height: 3 * $grid-size;
 
 $font-size: 16px;
 $font-size-smaller: 12px;
@@ -15,11 +17,11 @@ $timing-function-ease-in-out: cubic-bezier(.8, 0, .2, 1);
 
 $opacity-ratio-overlay: .85;
 
-$color-primary-1000: hsl(240, 3%, 5%);
-$color-primary-900: hsl(240, 3%, 10%);
-$color-primary-800: hsl(240, 3%, 15%);
-$color-primary-700: hsl(240, 3%, 25%);
-$color-primary-50: hsl(240, 3%, 98%);
+$color-background: hsl(240, 3%, 5%);
+$color-darker: hsl(240, 3%, 10%);
+$color-primary: hsl(240, 3%, 20%);
+$color-lighter: hsl(240, 3%, 30%);
+$color-contrast: hsl(240, 3%, 98%);
 
 $color-accent: hsl(85, 51%, 52%);
 $color-accent-error: hsl(8, 66%, 43%);

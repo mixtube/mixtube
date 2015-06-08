@@ -19,11 +19,11 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
-    background-color: $color-primary-900;
+    background-color: $color-darker;
   }
 
   .mt-queue__entry {
-    @include queue-item-color($color-primary-800);
+    @include queue-item-color($color-primary);
     overflow: hidden;
 
     &.active {
@@ -92,7 +92,7 @@
       bottom: 100%;
       left: 4 * $grid-size;
 
-      @include triangle(4 * $grid-size, $color-primary-800, up);
+      @include triangle(4 * $grid-size, $color-primary, up);
     }
   }
 
@@ -102,7 +102,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: 2 * $grid-size $grid-size;
+    padding: $grid-size;
   }
 
   .mt-queue__entry__commands {

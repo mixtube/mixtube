@@ -7,7 +7,7 @@
   .mt-search {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: rgba($color-primary-700, .8);
+    background-color: rgba($color-lighter, .8);
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -90,7 +90,7 @@
 
     .mt-svg-icon {
       // forces the background (triangle) color
-      fill: $color-primary-800;
+      fill: $color-primary;
     }
 
     @media (any-hover: hover) {
@@ -104,7 +104,7 @@
     position: relative;
     overflow: hidden;
 
-    background-color: $color-primary-800;
+    background-color: $color-primary;
   }
 
   .mt-result__thumbnail__img {
@@ -142,7 +142,7 @@
     z-index: 2;
     transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
 
-    background-color: $color-primary-800;
+    background-color: $color-primary;
     border-radius: $border-radius $border-radius 0 0;
 
     // vertically center the text
@@ -197,7 +197,7 @@
     width: 100%;
     padding: $grid-size;
 
-    background: rgba($color-primary-1000, .3);
+    background: rgba($color-background, .3);
   }
 
   .mt-result__data__item {
@@ -236,7 +236,7 @@
   }
 
   .mt-search__show-more__button {
-    background-color: $color-primary-800;
+    background-color: $color-primary;
     text-align: center;
     padding: $grid-size;
     border-radius: $border-radius;

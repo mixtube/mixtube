@@ -16,7 +16,7 @@
   .mt-header__bg {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: $color-primary-800;
+    background-color: $color-primary;
 
     @include mt-horizontal-screen() {
 
@@ -147,11 +147,10 @@
   .mt-search-input {
     @include position(absolute, 0px 0px 0px auto);
 
-    max-width: 480px;
+    max-width: $width-media-query-breakpoint;
     padding: $padding-search-input;
     overflow: hidden;
 
-    font-size: $font-size-bigger;
     color: $color-text;
 
     display: flex;
@@ -167,18 +166,13 @@
     padding: 0;
     z-index: 1;
 
-    background-color: $color-primary-700;
+    background-color: $color-lighter;
     font: inherit;
     color: inherit;
 
     // overrides placeholder to be sure that it is coherent with the fake field pseudo placeholder
     &::placeholder {
       @include mt-placeholder();
-    }
-
-    // needed only for webkit based browsers
-    &::-webkit-input-placeholder {
-      line-height: normal;
     }
   }
 
@@ -187,7 +181,7 @@
     @include position(absolute, 0px 0px 0px 0px);
     padding: $padding-search-input;
 
-    background-color: $color-primary-700;
+    background-color: $color-lighter;
 
     // for fake placeholder alignment
     display: flex;
