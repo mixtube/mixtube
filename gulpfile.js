@@ -70,11 +70,9 @@ function doSvg() {
     'app/images/mt-logo.svg'
   ])
     .pipe(svgSprite({
-      dest: 'build/images',
       svg: {
-        dest: '.',
-        xmlDeclaration: false,
-        doctypeDeclaration: false
+        xmlDeclaration: ' ', //work around until svg-sprites handle false value properly
+        doctypeDeclaration: ' '
       },
       // make sure the svgo phase is not breaking the SVG (removeUnknownsAndDefaults breaks the logo)
       transform: [{
