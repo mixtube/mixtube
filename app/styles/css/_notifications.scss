@@ -7,7 +7,8 @@
   }
 
   .mt-notifications-center__container__padding {
-    padding: $grid-size;
+    padding: 0 $grid-size;
+    margin-top: $grid-size;
   }
 
   .mt-notification {
@@ -22,19 +23,16 @@
   }
 
   .mt-notification__content {
+    position: relative;
     display: flex;
 
+    font: $font-smaller;
+
     > .text {
-      // made of natural padding plus the rest of the quarter padding of the container
+      padding: 0 2 * $grid-size;
+      margin: 2 * $grid-size 0;
 
       flex: 2;
-      padding: 2 * $grid-size;
     }
-  }
-
-  .mt-notification__image {
-    width: 100%;
-
-    @include mt-fluid-image(1);
   }
 }

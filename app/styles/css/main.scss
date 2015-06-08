@@ -59,7 +59,7 @@
   .mt-notification-center-tile {
     @include position(absolute, 0px 0px auto auto);
     width: 100%;
-    max-width: $width-nominal-notifications;
+    max-width: 50 * $grid-size;
     max-height: 100%;
     overflow: hidden;
 

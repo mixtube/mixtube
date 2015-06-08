@@ -416,7 +416,7 @@ function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCente
       notificationCenter.comingNext({
         current: 'Current Song',
         next: 'Next Song',
-        imageUrl: 'https://i.ytimg.com/vi/095Jdku7wo8/mqdefault.jpg'
+        imageUrl: 'https://i.ytimg.com/vi/69WltTXlmHs/mqdefault.jpg'
       });
     });
   }
