@@ -44,7 +44,10 @@
     position: relative;
 
     > .image {
-      @include mt-fluid-image(.4);
+      height: 16 * $grid-size;
+
+      background-size: cover;
+      background-position: center;
       filter: saturate(5%);
     }
 
