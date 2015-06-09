@@ -23,19 +23,4 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .mt-notification__thumbnail {
-    position: absolute;
-    top: 2 * $grid-size;
-    right: 2 * $grid-size;
-  }
-
-
-  .mt-notification__image {
-    width: 80px;
-    height: 80px;
-
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
 }

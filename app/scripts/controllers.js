@@ -411,11 +411,11 @@ function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCente
     });
   }
 
-  function notifyComingNext(message) {
+  function notifyComingNext() {
     notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
       notificationCenter.comingNext({
-        current: 'Current Song',
-        next: 'Next Song',
+        current: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce venenatis finibus pulvinar.',
+        next: 'Pellentesque mollis eget velit ut eleifend. Nulla efficitur, mi non viverra semper, enim quam porttitor libero',
         imageUrl: 'https://i.ytimg.com/vi/69WltTXlmHs/mqdefault.jpg'
       });
     });
@@ -431,7 +431,7 @@ function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCente
 
       keyboardShortcutManager.register('ctrl+c', function(evt) {
         evt.preventDefault();
-        notifyComingNext('Debugging: Test notification');
+        notifyComingNext();
       });
 
       keyboardShortcutManager.register('ctrl+m', function(evt) {

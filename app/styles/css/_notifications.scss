@@ -27,12 +27,25 @@
     display: flex;
 
     font: $font-smaller;
+  }
 
-    > .text {
-      padding: 0 2 * $grid-size;
-      margin: 2 * $grid-size 0;
+  .mt-notification__text {
+    padding: 0 2 * $grid-size;
+    margin: 2 * $grid-size 0;
 
-      flex: 2;
-    }
+    flex: 1;
+  }
+
+  .mt-notification__thumbnail {
+    padding-right: $grid-size;
+    margin-top: $grid-size;
+  }
+
+  .mt-notification__image {
+    width: 80px;
+    height: 80px;
+
+    background-size: cover;
+    background-repeat: no-repeat;
   }
 }
