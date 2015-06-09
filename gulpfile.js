@@ -64,7 +64,6 @@ function doSvg() {
     'node_modules/Ionicons/src/ios-close-empty.svg',
     'node_modules/Ionicons/src/ios-videocam.svg',
     'node_modules/Ionicons/src/load-c.svg',
-    'app/images/mt-plus-corner.svg',
     'app/images/mt-play-circle.svg',
     'app/images/mt-pause-circle.svg',
     'app/images/mt-logo.svg'

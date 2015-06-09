@@ -214,11 +214,6 @@
                    ng-controller="SearchResultCtrl as searchResultCtrl">
                 <mt-button class="mt-result__container"
                            ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
-                  <div class="mt-result__add-affordance">
-                    <svg class="mt-svg-icon" role="img" title="Add">
-                      <use xlink:href="images/sprite.svg#mt-plus-corner"></use>
-                    </svg>
-                  </div>
 
                   <div class="mt-result__thumbnail">
                     <mt-smart-img source="{{searchResult.thumbnailUrl}}"

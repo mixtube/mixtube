@@ -80,26 +80,6 @@
     overflow: hidden;
   }
 
-  .mt-result__add-affordance {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1;
-
-    opacity: $opacity-ratio-overlay;
-
-    .mt-svg-icon {
-      // forces the background (triangle) color
-      fill: $color-primary;
-    }
-
-    @media (any-hover: hover) {
-      .mt-result__container:hover & {
-        color: $color-accent;
-      }
-    }
-  }
-
   .mt-result__thumbnail {
     position: relative;
     overflow: hidden;
