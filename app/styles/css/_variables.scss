@@ -2,7 +2,8 @@ $grid-size: 8px;
 
 // based on YT default thumbnail width
 $width-thumbnail-original: 320px;
-$width-media-query-breakpoint: 2 * $width-thumbnail-original;
+$height-thumbnail-original: 180px;
+$width-media-query-breakpoint: 600px;
 
 $font-family: 'Open Sans', sans-serif;
 $font-body: 16px/24px $font-family;

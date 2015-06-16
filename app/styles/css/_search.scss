@@ -13,14 +13,9 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .mt-search__provider {
-    margin: 2 * $grid-size;
-  }
-
   .mt-search__provider__header {
     padding: 0 $grid-size;
-    margin-bottom: 2 * $grid-size;
-
+    margin: 2 * $grid-size 0;
 
     display: flex;
     align-items: center;
@@ -43,52 +38,127 @@
   }
 
   .mt-results {
-    @include clearfix();
-  }
-
-  .mt-results__page {
-    @include clearfix();
-    overflow: hidden;
+    padding-left: $grid-size;
   }
 
   .mt-result {
     float: left;
-    padding: 0 $grid-size 2 * $grid-size $grid-size;
+    margin-bottom: $grid-size;
+    padding-right: $grid-size;
     vertical-align: top;
 
     width: 100%;
 
     // more than 1 item per line when more horizontal space is available
     @include mt-horizontal-screen() {
-      $resultsPromotedColumnsCount: 3;
-      $resultsColumnsCount: 4;
+      //$resultsPromotedColumnsCount: 3;
+      //$resultsColumnsCount: 4;
 
-      width: 100% / $resultsColumnsCount;
+      //width: 100% / $resultsColumnsCount;
+      //
+      //// the first three children of the first page are "promoted"
+      //.mt-results__page:first-child &:nth-child(-n+3) {
+      //  width: 100% /  $resultsPromotedColumnsCount;
+      //}
+
+      .mt-result__container {
+        max-width: $width-thumbnail-original;
+      }
+
+      .mt-result__thumbnail {
+        height: $height-thumbnail-original;
+        padding-top: 0;
+      }
+    }
+
+    @media screen and (min-width: 656px) {
+      $count: 2;
+      $promoted-count: 1;
+
+      width: 100% / $count;
 
       // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n+3) {
-        width: 100% /  $resultsPromotedColumnsCount;
+      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
+      }
+    }
+
+    @media screen and (min-width: 960px) {
+      $count: 3;
+      $promoted-count: 2;
+
+      width: 100% / $count;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
+      }
+    }
+
+    @media screen and (min-width: 984px) {
+      $count: 4;
+      $promoted-count: 3;
+
+      width: 100% / $count;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
+      }
+    }
+
+    @media screen and (min-width: 1312px) {
+      $count: 6;
+      $promoted-count: 4;
+
+      width: 100% / $count;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
+      }
+    }
+
+    @media screen and (min-width: 1640px) {
+      $count: 7;
+      $promoted-count: 5;
+
+      width: 100% / $count;
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
       }
     }
   }
 
   .mt-result__container {
     position: relative;
+    margin: 0 auto;
 
     text-align: inherit;
-    border-radius: $border-radius;
-    overflow: hidden;
   }
 
   .mt-result__thumbnail {
     position: relative;
-    overflow: hidden;
+
+    padding-top: 56.25%;
 
     background-color: $color-primary;
+
+    // text protection
+    &:after {
+      content: '';
+      display: block;
+      @include position(absolute, $height-thumbnail-original / 4 0px 0px 0px);
+
+      background: linear-gradient(to bottom, hsla(0, 0%, 0%, 0) 0%, hsla(0, 0%, 0%, 0.7) 70%, hsla(0, 0%, 0%, 0.7) 100%);
+    }
   }
 
   .mt-result__thumbnail__img {
-    padding-top: 56.25%; // fluid height
+
+    @include position(absolute, 0px 0px 0px 0px);
 
     .mt-smart-img__image {
       filter: saturate(100%);
@@ -123,7 +193,6 @@
     transform: translate3d(0, 0, 0); // u e 3D here to avoid animation flickering in webkit
 
     background-color: $color-primary;
-    border-radius: $border-radius $border-radius 0 0;
 
     // vertically center the text
     display: flex;
@@ -175,9 +244,9 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    padding: $grid-size;
+    padding: 2 * $grid-size;
 
-    background: rgba($color-background, .3);
+    //background: rgba($color-background, .3);
   }
 
   .mt-result__data__item {
@@ -213,16 +282,30 @@
 
   .mt-search__show-more {
     padding: 0 $grid-size;
+    margin-bottom: $grid-size;
+
+    display: flex;
+
+    @include mt-horizontal-screen() {
+      justify-content: flex-end;
+    }
   }
 
   .mt-search__show-more__button {
-    background-color: $color-primary;
+    width: 100%;
+    background-color: $color-darker;
     text-align: center;
-    padding: $grid-size;
+    padding: 0 $grid-size;
+    line-height: 5 * $grid-size;
+
     border-radius: $border-radius;
 
     display: flex;
     justify-content: center;
+
+    @include mt-horizontal-screen() {
+      width: auto;
+    }
 
     @media (any-hover: hover) {
       &:hover .text {
@@ -233,6 +316,7 @@
 
   .mt-search__show-more__button__label {
     overflow: visible;
+    padding: 0 3 * $grid-size;
 
     display: flex;
     align-items: center;

@@ -23,8 +23,10 @@
     display: block;
     position: relative;
 
-    background-repeat: no-repeat;
-    background-position: center;
+    .mt-smart-img__image {
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
     &.fill-crop .mt-smart-img__image {
       position: absolute;

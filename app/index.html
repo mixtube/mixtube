@@ -201,7 +201,7 @@
       <div class="mt-search">
         <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
           <div class="mt-search__provider__header">
-            <h3>{{pLabel}}</h3>
+            <h3>Results from {{pLabel}}:</h3>
 
             <mt-spinner class="mt-search__provider__header__spinner"
                         ng-show="searchResultsCtrl.pending[pId]"></mt-spinner>
