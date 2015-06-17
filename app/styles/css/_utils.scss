@@ -106,15 +106,8 @@
   white-space: nowrap;
 }
 
-@mixin mt-fluid-image($heightRatio) {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  padding-top: $heightRatio * 100%;
-}
-
 @mixin mt-horizontal-screen {
-  @media screen and (min-width: $width-media-query-breakpoint) {
+  @media screen and (min-width: $width-breakpoint-single-column-layout) {
     @content;
   }
 }

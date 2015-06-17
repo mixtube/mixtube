@@ -9,7 +9,7 @@
   //$padding-modal: 3 * $grid-size;
 
   .mt-modal__container {
-    max-width: $width-media-query-breakpoint;
+    max-width: $width-breakpoint-single-column-layout;
     padding: $grid-size;
 
     // propagate the "flexibility"

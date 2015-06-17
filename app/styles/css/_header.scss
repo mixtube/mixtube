@@ -148,7 +148,7 @@
   .mt-search-input {
     @include position(absolute, 0px 0px 0px auto);
 
-    max-width: $width-media-query-breakpoint;
+    max-width: $width-breakpoint-single-column-layout;
     padding: $padding-search-input;
     overflow: hidden;
 

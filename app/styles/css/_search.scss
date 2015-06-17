@@ -48,88 +48,6 @@
     vertical-align: top;
 
     width: 100%;
-
-    // more than 1 item per line when more horizontal space is available
-    @include mt-horizontal-screen() {
-      //$resultsPromotedColumnsCount: 3;
-      //$resultsColumnsCount: 4;
-
-      //width: 100% / $resultsColumnsCount;
-      //
-      //// the first three children of the first page are "promoted"
-      //.mt-results__page:first-child &:nth-child(-n+3) {
-      //  width: 100% /  $resultsPromotedColumnsCount;
-      //}
-
-      .mt-result__container {
-        max-width: $width-thumbnail-original;
-      }
-
-      .mt-result__thumbnail {
-        height: $height-thumbnail-original;
-        padding-top: 0;
-      }
-    }
-
-    @media screen and (min-width: 656px) {
-      $count: 2;
-      $promoted-count: 1;
-
-      width: 100% / $count;
-
-      // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
-        width: 100% /  $promoted-count;
-      }
-    }
-
-    @media screen and (min-width: 960px) {
-      $count: 3;
-      $promoted-count: 2;
-
-      width: 100% / $count;
-
-      // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
-        width: 100% /  $promoted-count;
-      }
-    }
-
-    @media screen and (min-width: 984px) {
-      $count: 4;
-      $promoted-count: 3;
-
-      width: 100% / $count;
-
-      // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
-        width: 100% /  $promoted-count;
-      }
-    }
-
-    @media screen and (min-width: 1312px) {
-      $count: 6;
-      $promoted-count: 4;
-
-      width: 100% / $count;
-
-      // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
-        width: 100% /  $promoted-count;
-      }
-    }
-
-    @media screen and (min-width: 1640px) {
-      $count: 7;
-      $promoted-count: 5;
-
-      width: 100% / $count;
-
-      // the first three children of the first page are "promoted"
-      .mt-results__page:first-child &:nth-child(-n + #{$promoted-count}) {
-        width: 100% /  $promoted-count;
-      }
-    }
   }
 
   .mt-result__container {
@@ -139,10 +57,45 @@
     text-align: inherit;
   }
 
+  // helper to set the media queries breakpoints to have a nice results grid
+  // ideally we would have element query on the result panel but it doesn't exist yet so we need to "statically"
+  // calculate the remaining space
+  @mixin mt-result-breakpoint($promoted-count, $regular-count, $width-offset) {
+
+    // the idea is to make sure we never expand the gutter between the promoted result
+    $width-breakpoint: $width-offset + $promoted-count * $grid-size + ($promoted-count - 1) * $width-thumbnail-original;
+
+    @media screen and (min-width: max($width-breakpoint, $width-breakpoint-single-column-layout)) {
+      .mt-result {
+        width: 100% / $regular-count;
+      }
+
+      .mt-result__container {
+        max-width: $width-thumbnail-original;
+      }
+
+      .mt-result__thumbnail {
+        height: $height-thumbnail-original;
+        padding-top: 0; // stops the fluid height behavior of the thumbnail
+      }
+
+      // the first three children of the first page are "promoted"
+      .mt-results__page:first-child .mt-result:nth-child(-n + #{$promoted-count}) {
+        width: 100% /  $promoted-count;
+      }
+    }
+  }
+
+  @include mt-result-breakpoint(1, 1, $width-queue-tile);
+  @include mt-result-breakpoint(2, 3, $width-queue-tile);
+  @include mt-result-breakpoint(3, 4, $width-queue-tile);
+  @include mt-result-breakpoint(4, 6, $width-queue-tile);
+  @include mt-result-breakpoint(5, 7, $width-queue-tile);
+
   .mt-result__thumbnail {
     position: relative;
 
-    padding-top: 56.25%;
+    padding-top: $ratio-thumbnail;
 
     background-color: $color-primary;
 

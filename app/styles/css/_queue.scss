@@ -44,11 +44,20 @@
     position: relative;
 
     > .image {
-      height: 16 * $grid-size;
+      $height-entries-thumbnails-fixed: 16 * $grid-size;
+      // keep the ratio of the fixed mode even in flexible mode
+      $ratio-entries-thumbnails: 100%  * $height-entries-thumbnails-fixed / $width-thumbnail-original;
+
+      padding-top: $ratio-entries-thumbnails;
 
       background-size: cover;
       background-position: center;
       filter: saturate(5%);
+
+      @include mt-horizontal-screen() {
+        padding-top: 0;
+        height: $height-entries-thumbnails-fixed;
+      }
     }
 
     .mt-queue__entry.active & {
