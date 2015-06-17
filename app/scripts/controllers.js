@@ -245,20 +245,29 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
   function searchYoutube(term, nextPageId) {
     var first = !nextPageId;
 
-    var startSearchRequestCount = searchRequestCount;
+    var pageSize,
+      startSearchRequestCount = searchRequestCount,
+      resultsLayoutInfo = searchCtrlHelper.resultsLayoutInfo;
 
     if (first) {
+      pageSize = Math.max(11, resultsLayoutInfo.promotedCount + resultsLayoutInfo.regularCount * 3);
+
       searchResultsCtrl.pending.youtube = true;
 
       // reset the results list and the next page token since we are starting a new search
       searchResultsCtrl.results.youtube = [];
       searchResultsCtrl.nextPageId.youtube = null;
     } else {
+      pageSize = Math.max(12, resultsLayoutInfo.regularCount * 4);
+
       searchResultsCtrl.pendingMore.youtube = true;
     }
 
-    return youtubeClient.searchVideosByQuery(term,
-      {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
+    // safety check on requested page size
+    var boundedPageSize = Math.min(pageSize, youtubeClient.maxResultsLimit);
+
+    return youtubeClient.searchVideosByQuery(term, {pageSize: boundedPageSize, pageId: nextPageId})
+      .then(function doneCb() {
         if (searchRequestCount === startSearchRequestCount) {
           if (first) {
             searchResultsCtrl.pending.youtube = false;
@@ -275,7 +284,8 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
             searchResultsCtrl.noneFound.youtube = true;
           }
         }
-      }).catch(function catchCb() {
+      })
+      .catch(function catchCb() {
         if (searchRequestCount === startSearchRequestCount) {
           searchResultsCtrl.error.youtube = true;
           if (first) {

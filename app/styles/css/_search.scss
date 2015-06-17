@@ -41,6 +41,13 @@
     padding-left: $grid-size;
   }
 
+  // we fill the content of an hidden element with the layout information
+  // it will be read on the JS side to query the proper amount of items
+  .mt-js-results:before {
+    display: none;
+    content: '{"promotedCount": 1, "regularCount": 1}';
+  }
+
   .mt-result {
     float: left;
     margin-bottom: $grid-size;
@@ -66,6 +73,11 @@
     $width-breakpoint: $width-offset + $promoted-count * $grid-size + ($promoted-count - 1) * $width-thumbnail-original;
 
     @media screen and (min-width: max($width-breakpoint, $width-breakpoint-single-column-layout)) {
+
+      .mt-js-results:before {
+        content: '{"promotedCount": #{$promoted-count}, "regularCount": #{$regular-count}}';
+      }
+
       .mt-result {
         width: 100% / $regular-count;
       }

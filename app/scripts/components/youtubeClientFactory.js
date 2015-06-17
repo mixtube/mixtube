@@ -23,7 +23,7 @@ function youtubeClientFactory($http, $q, configuration) {
    * @const
    * @type {number}
    */
-  var MAX_RESULT_LIMIT = 50;
+  var MAX_RESULTS_LIMIT = 50;
 
   /**
    * Allow to parse "exotic" time format from Youtube data API.
@@ -48,8 +48,8 @@ function youtubeClientFactory($http, $q, configuration) {
   }
 
   function extendVideosWithDetails(videos) {
-    if (videos.length > MAX_RESULT_LIMIT) {
-      throw new Error('YouTube API can not list more than ' + MAX_RESULT_LIMIT + ' videos. Please reduce the videos ids list.');
+    if (videos.length > MAX_RESULTS_LIMIT) {
+      throw new Error('YouTube API can not list more than ' + MAX_RESULTS_LIMIT + ' videos. Please reduce the videos ids list.');
     }
 
     var videosIds = pluck(videos, 'id');
@@ -105,11 +105,11 @@ function youtubeClientFactory($http, $q, configuration) {
 
     var pagesPromises = [];
 
-    var pagesCount = videos.length / MAX_RESULT_LIMIT;
+    var pagesCount = videos.length / MAX_RESULTS_LIMIT;
     for (var pageIdx = 0; pageIdx < pagesCount; pageIdx++) {
 
-      var pageStart = pageIdx * MAX_RESULT_LIMIT;
-      var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULT_LIMIT, videos.length));
+      var pageStart = pageIdx * MAX_RESULTS_LIMIT;
+      var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULTS_LIMIT, videos.length));
       pagesPromises.push(extendVideosWithDetails(videosPaged));
     }
 
@@ -120,7 +120,7 @@ function youtubeClientFactory($http, $q, configuration) {
 
   function searchVideosByQuery(queryString, pageSpec) {
 
-    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: configuration.maxSearchResults});
+    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: MAX_RESULTS_LIMIT});
 
     var deferred = $q.defer();
 
@@ -179,6 +179,10 @@ function youtubeClientFactory($http, $q, configuration) {
   var youtubeClient = {
     get shortName() {
       return SHORT_NAME;
+    },
+
+    get maxResultsLimit() {
+      return MAX_RESULTS_LIMIT;
     },
 
     /**
