@@ -27,11 +27,15 @@
   .mt-header-tile {
     position: relative;
     height: $height-header;
+    overflow: visible;
+
+    z-index: 10 * $depth-header;
   }
 
   .mt-body-tile {
     position: relative;
     flex: 1;
+    overflow: visible; // lets show the video under the header in horizontal mode
 
     display: flex;
     flex-direction: column;
@@ -39,6 +43,9 @@
 
   .mt-scene-tile {
     position: relative;
+    overflow: visible;
+
+    z-index: 10 * $depth-scene;
 
     &:before {
       content: '';
@@ -49,6 +56,8 @@
     @include mt-horizontal-screen() {
       // in horizontal mode we move the scene underneath the header
       @include position(absolute, -$height-header 0px 0px 0px);
+
+      z-index: 10 * $depth-scene-horizontal;
 
       &:before {
         display: none;
@@ -61,9 +70,9 @@
     width: 100%;
     max-width: 50 * $grid-size;
     max-height: 100%;
-    overflow: hidden;
+    overflow: visible;
 
-    z-index: 3;
+    z-index: 10 * $depth-notifications;
 
     mt-notification-center {
       // reverts the behaviour to make notifications clickable
@@ -73,12 +82,16 @@
 
   .mt-queue-tile {
     position: relative;
+    overflow: visible; // lets show the shadow of the queue
     flex: 1;
+
+    z-index: 10 * $depth-queue;
 
     @include mt-horizontal-screen() {
       position: absolute;
       width: $width-queue-tile;
       height: 100%;
+      z-index: 10 * $depth-queue-horizontal;
 
       transition-property: transform, opacity;
       transition-duration: $transition-duration;
@@ -94,21 +107,20 @@
   .mt-search-tile {
     @include position(absolute, 0px 0px 0px 0px);
 
+    z-index: 10 * $depth-search;
+
     @include mt-horizontal-screen() {
       width: calc(100% - #{$width-queue-tile});
       left: auto;
+      z-index: 10 * $depth-search-horizontal;
     }
 
     &.animation-show-hide {
-
-      &.ng-hide-add, &.ng-hide-remove {
+      &.ng-hide-add-active,
+      &.ng-hide-remove-active {
+        transition-duration: $transition-duration * 10;
         transition-property: transform, opacity;
-        transition-duration: $transition-duration;
-
         transition-timing-function: $timing-function-ease-in-out, linear;
-
-        // don't hide it straight: wait for the end of the animation
-        display: block !important;
       }
 
       &.ng-hide {

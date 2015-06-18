@@ -3,18 +3,20 @@
 @mixin notifications {
 
   .mt-notifications-center__container {
-    overflow: hidden;
+    overflow: visible; // lets show the shadow
   }
 
   .mt-notifications-center__container__padding {
     padding: 0 $grid-size;
     margin-top: $grid-size;
+    overflow: visible;
   }
 
   .mt-notification {
     background-color: rgba($color-contrast, $opacity-ratio-overlay);
     color: $color-text-black-text;
     border-radius: $border-radius;
+    @include z-depth(5);
 
     &.error {
       background-color: rgba($color-accent-error, $opacity-ratio-overlay);

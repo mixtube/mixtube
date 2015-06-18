@@ -25,11 +25,15 @@
     -webkit-overflow-scrolling: touch;
 
     background-color: $color-darker;
+    @include z-depth($depth-queue);
+
+    @include mt-horizontal-screen() {
+      @include z-depth($depth-queue-horizontal);
+    }
   }
 
   .mt-queue__entry {
     @include queue-item-color($color-primary);
-    overflow: hidden;
 
     &.active {
       @include queue-item-color($color-accent);
@@ -108,7 +112,6 @@
     align-self: center;
     white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden;
     padding: 0 2 * $grid-size;
     margin: 1.5 * $grid-size 0;
   }

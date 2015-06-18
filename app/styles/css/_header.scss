@@ -2,14 +2,14 @@
 @import 'variables';
 @import 'utils';
 
-@mixin header {
+@mixin header() {
 
   $padding-search-input: 0 6 * $grid-size 0 $grid-size;
 
   .mt-header {
     @include position(absolute, 0px 0px 0px 0px);
     z-index: 1;
-    overflow: hidden; // hide overflowing search field
+    overflow: visible; // lets show the header shadow
   }
 
   //fake background so that we can animate the header background color by using opacity
@@ -17,9 +17,9 @@
     @include position(absolute, 0px 0px 0px 0px);
 
     background-color: $color-primary;
+    @include z-depth($depth-header);
 
     @include mt-horizontal-screen() {
-
       transition-property: transform, opacity;
       transition-duration: $transition-duration;
       transition-timing-function: $timing-function-ease-in-out, linear;
@@ -43,7 +43,6 @@
 
     > .start {
       flex: 1;
-      overflow: hidden;
 
       display: flex;
     }
@@ -65,7 +64,6 @@
     // make sure the default line height doesn't make the container to high
     line-height: 0;
     padding: 0 2 * $grid-size;
-    overflow: hidden;
   }
 
   .mt-header__playback-button {
@@ -150,7 +148,6 @@
 
     max-width: $width-breakpoint-single-column-layout;
     padding: $padding-search-input;
-    overflow: hidden;
 
     color: $color-text;
 

@@ -3,6 +3,7 @@
 var path = require('path'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
+  plumber = require('gulp-plumber'),
   merge = require('merge-stream'),
   del = require('del'),
   runSequence = require('run-sequence'),
@@ -101,9 +102,8 @@ function buildInlineCss(opts) {
       }
 
       gulp.src('app/styles/css/inline.scss')
-        .pipe(sass({
-          errLogToConsole: true
-        }))
+        .pipe(plumber())
+        .pipe(sass())
         .pipe(postcss(postCssFilters))
         .pipe(buffer())
         .pipe(gutil.buffer(function(err, cssFiles) {
@@ -175,10 +175,9 @@ gulp.task('svg:dev', function() {
 
 gulp.task('css:dev', function() {
   return gulp.src('app/styles/css/main.scss')
+    .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass({
-      errLogToConsole: true
-    }))
+    .pipe(sass())
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']})
     ]))
@@ -232,10 +231,9 @@ gulp.task('svg:dist', function() {
 
 gulp.task('css:dist', function() {
   return gulp.src('app/styles/css/main.scss')
+    .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass({
-      errLogToConsole: true
-    }))
+    .pipe(sass())
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']}),
       csswring

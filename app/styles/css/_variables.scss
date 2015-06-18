@@ -1,24 +1,31 @@
 $grid-size: 8px;
 
+
 // based on YT default thumbnail width
 $width-thumbnail-original: 320px;
 $height-thumbnail-original: 180px;
 $ratio-thumbnail: 100% * $height-thumbnail-original / $width-thumbnail-original;
 
+
 $width-breakpoint-single-column-layout: 550px;
 $width-queue-tile: $width-thumbnail-original;
+
 
 $font-family: 'Open Sans', sans-serif;
 $font-body: 16px/24px $font-family;
 $font-smaller: 13px/20px $font-family;
 $font-bigger: 24px/32px $font-family;
 
+
 $border-radius: 2px;
+
 
 $transition-duration: 200ms;
 $timing-function-ease-in-out: cubic-bezier(.8, 0, .2, 1);
 
+
 $opacity-ratio-overlay: .85;
+
 
 $color-background: hsl(240, 3%, 5%);
 $color-darker: hsl(240, 3%, 10%);
@@ -33,3 +40,17 @@ $color-text: hsla(0, 0%, 100%, .87);
 $color-text-secondary: hsla(0, 0%, 100%, .54);
 $color-text-black-text: hsl(0, 0%, 0%);
 $color-text-black-secondary: hsla(0, 0%, 0%, .7);
+
+$color-shadow: black;
+
+
+$depth-dialog: 5;
+$depth-header: 3;
+$depth-notifications: 3;
+$depth-search: 2;
+$depth-scene: 1;
+$depth-queue: 0;
+
+$depth-queue-horizontal: 2;
+$depth-search-horizontal: 1;
+$depth-scene-horizontal: 0;

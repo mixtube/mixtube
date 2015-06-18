@@ -29,7 +29,6 @@
   }
 
   .mt-search__message {
-    overflow: hidden;
     padding: 0 $grid-size;
   }
 
@@ -167,7 +166,6 @@
     > .text {
       padding: $grid-size;
       text-align: center;
-      overflow: hidden;
 
       // a very "cheap" element query to display a shorter confirmation message on larger screen when the search result screen
       // is made of 5 columns which doesn't give much place to the message
@@ -215,8 +213,6 @@
   }
 
   .mt-result__data__item {
-    overflow: hidden;
-
     white-space: nowrap;
     text-overflow: ellipsis;
 
@@ -229,7 +225,6 @@
   .mt-result__data__title {
     flex: 1;
 
-    overflow: hidden;
     text-overflow: ellipsis;
     font: $font-smaller;
     font-weight: 600;
