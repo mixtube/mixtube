@@ -3,24 +3,23 @@
 @mixin coming-next {
 
   .mt-coming-next__group {
-    padding-bottom: $unitVerticalPadding / 2;
-
     &.next {
-      font-weight: 600;
+      font-weight: bold;
     }
 
-    &:last-child {
-      padding-bottom: 0;
+    &:first-child {
+      margin-top: $grid-size;
+      padding-bottom: 2 * $grid-size;
     }
   }
 
   .mt-coming-next__header {
-    font-size: 0.875rem;
+    font: $font-smaller;
+    color: $color-text-black-secondary;
   }
 
   .mt-coming-next__title {
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
   }
 }

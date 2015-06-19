@@ -3,10 +3,13 @@
 var isUndefined = require('lodash/lang/isUndefined');
 
 // @ngInject
-function searchCtrlHelperFactory(keyboardShortcutManager, searchInputsRegistry) {
+function searchCtrlHelperFactory($window, $document, keyboardShortcutManager, searchInputsRegistry) {
 
   var searchShown = false;
   var searchTerm = null;
+
+  // copied from https://css-tricks.com/making-sass-talk-to-javascript-with-json/
+  var REGEXP_CSS_CONTENT_QUOTES = /^['"]+|\s+|\\|(;\s?})+|['"]$/g;
 
   /**
    * @param {boolean=} showOrHide if not given it will toggle the visibility
@@ -42,6 +45,13 @@ function searchCtrlHelperFactory(keyboardShortcutManager, searchInputsRegistry) 
 
     set searchTerm(value) {
       searchTerm = value;
+    },
+
+    get resultsLayoutInfo() {
+      var contentValue = $window.getComputedStyle(
+        $document[0].querySelector('.mt-js-results'), ':before').getPropertyValue('content');
+
+      return JSON.parse(contentValue.replace(REGEXP_CSS_CONTENT_QUOTES, ''));
     },
 
     toggleSearch: toggleSearch

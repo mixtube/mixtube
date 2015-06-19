@@ -5,20 +5,20 @@
 
 @mixin modals-base {
 
-  $modalZIndex: 500;
+  $z-index: 10 * $depth-dialog;
 
   .mt-backdrop {
     @include position(absolute, 0px 0px 0px 0px);
 
-    z-index: $modalZIndex - 1;
+    z-index: $z-index - 1;
 
-    background-color: $backdropBackgroundColor;
+    background-color: rgba($color-background, $opacity-ratio-overlay);
   }
 
   .mt-modal {
     @include position(absolute, 0px 0px 0px 0px);
 
-    z-index: $modalZIndex;
+    z-index: $z-index;
 
     // safety net for IE11 that can't properly manage nested flex containers
     // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
@@ -32,8 +32,8 @@
     // shows the overlay
     &.ng-enter, &.ng-leave {
       transition-property: opacity, transform;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: linear, $easeInOut;
+      transition-duration: $transition-duration;
+      transition-timing-function: linear, $timing-function-ease-in-out;
     }
 
     &.ng-enter {

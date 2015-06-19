@@ -8,7 +8,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  pointerManager, capabilities, searchCtrlHelper, configuration) {
+                  capabilities, searchCtrlHelper, configuration) {
 
   var rootCtrl = this;
 
@@ -245,20 +245,29 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
   function searchYoutube(term, nextPageId) {
     var first = !nextPageId;
 
-    var startSearchRequestCount = searchRequestCount;
+    var pageSize,
+      startSearchRequestCount = searchRequestCount,
+      resultsLayoutInfo = searchCtrlHelper.resultsLayoutInfo;
 
     if (first) {
+      pageSize = Math.max(11, resultsLayoutInfo.promotedCount + resultsLayoutInfo.regularCount * 3);
+
       searchResultsCtrl.pending.youtube = true;
 
       // reset the results list and the next page token since we are starting a new search
       searchResultsCtrl.results.youtube = [];
       searchResultsCtrl.nextPageId.youtube = null;
     } else {
+      pageSize = Math.max(12, resultsLayoutInfo.regularCount * 4);
+
       searchResultsCtrl.pendingMore.youtube = true;
     }
 
-    return youtubeClient.searchVideosByQuery(term,
-      {pageSize: first ? 11 : 12, pageId: nextPageId}).then(function doneCb() {
+    // safety check on requested page size
+    var boundedPageSize = Math.min(pageSize, youtubeClient.maxResultsLimit);
+
+    return youtubeClient.searchVideosByQuery(term, {pageSize: boundedPageSize, pageId: nextPageId})
+      .then(function doneCb() {
         if (searchRequestCount === startSearchRequestCount) {
           if (first) {
             searchResultsCtrl.pending.youtube = false;
@@ -275,7 +284,8 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
             searchResultsCtrl.noneFound.youtube = true;
           }
         }
-      }).catch(function catchCb() {
+      })
+      .catch(function catchCb() {
         if (searchRequestCount === startSearchRequestCount) {
           searchResultsCtrl.error.youtube = true;
           if (first) {
@@ -311,7 +321,11 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
           $timeout.cancel(instantSearchPromise);
           instantSearchPromise = $timeout(function search() {
             searchResultsCtrl.inSearch = true;
-            searchYoutube(newSearchTerm);
+
+            // we need to delay the actual search in order for the search panel show animation to work
+            $timeout(function() {
+              searchYoutube(newSearchTerm);
+            }, 0);
           }, INSTANT_SEARCH_DELAY);
         }
       }
@@ -401,22 +415,46 @@ function QueueCtrl(orchestrator, queueManager) {
 }
 
 // @ngInject
-function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry) {
+function DebuggingCtrl(configuration, keyboardShortcutManager, notificationCentersRegistry, modalManager) {
 
   activate();
 
-  function notification(message) {
+  function notifyError(message) {
     notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
       notificationCenter.error(message);
+    });
+  }
+
+  function notifyComingNext() {
+    notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+      notificationCenter.comingNext({
+        current: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce venenatis finibus pulvinar.',
+        next: 'Pellentesque mollis eget velit ut eleifend. Nulla efficitur, mi non viverra semper, enim quam porttitor libero',
+        imageUrl: 'https://i.ytimg.com/vi/69WltTXlmHs/mqdefault.jpg'
+      });
     });
   }
 
   function activate() {
     if (configuration.debug) {
       // register the global space shortcut
-      keyboardShortcutManager.register('ctrl+n', function(evt) {
+      keyboardShortcutManager.register('ctrl+e', function(evt) {
         evt.preventDefault();
-        notification('Debugging: Test notification');
+        notifyError('Debugging: Test notification');
+      });
+
+      keyboardShortcutManager.register('ctrl+c', function(evt) {
+        evt.preventDefault();
+        notifyComingNext();
+      });
+
+      keyboardShortcutManager.register('ctrl+m', function(evt) {
+        evt.preventDefault();
+        modalManager.open({
+          title: 'This a a testing modal',
+          contentTemplateUrl: 'noPlaybackModalContent',
+          commands: [{label: 'OK', primary: true}]
+        });
       });
     }
   }

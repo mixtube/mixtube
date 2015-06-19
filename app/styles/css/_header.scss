@@ -2,29 +2,27 @@
 @import 'variables';
 @import 'utils';
 
-@mixin header {
+@mixin header() {
 
-  $searchInputPadding: 0 3rem 0 .5rem;
-  $textShadowSize: 8rem / $baseFontSizeUnitless;
-  $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
+  $padding-search-input: 0 6 * $grid-size 0 $grid-size;
 
   .mt-header {
     @include position(absolute, 0px 0px 0px 0px);
     z-index: 1;
-    overflow: hidden; // hide overflowing search field
+    overflow: visible; // lets show the header shadow
   }
 
   //fake background so that we can animate the header background color by using opacity
   .mt-header__bg {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: $baseBgColor;
+    background-color: $color-primary;
+    @include z-depth($depth-header);
 
     @include mt-horizontal-screen() {
-
       transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.idle {
         opacity: 0;
@@ -45,7 +43,6 @@
 
     > .start {
       flex: 1;
-      overflow: hidden;
 
       display: flex;
     }
@@ -66,9 +63,7 @@
   .mt-header__app-title {
     // make sure the default line height doesn't make the container to high
     line-height: 0;
-    margin-left: .5rem;
-    margin-right: 1rem;
-    overflow: hidden;
+    padding: 0 2 * $grid-size;
   }
 
   .mt-header__playback-button {
@@ -89,9 +84,9 @@
       transform: scale(.5);
       opacity: 0;
 
-      transition-duration: $baseTransitionDuration;
+      transition-duration: $transition-duration;
       transition-property: transform, opacity;
-      transition-timing-function: $easeInOut, linear;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.toggle {
         transform: scale(1);
@@ -116,6 +111,8 @@
   .mt-search-input__button {
     position: relative;
 
+    margin-right: 2 * $grid-size;
+
     z-index: 1;
 
     .facet {
@@ -134,9 +131,9 @@
       transform: scale(.5);
       opacity: 0;
 
-      transition-duration: $baseTransitionDuration;
+      transition-duration: $transition-duration;
       transition-property: transform, opacity;
-      transition-timing-function: $easeInOut, linear;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.toggle {
         transform: scale(1);
@@ -149,12 +146,10 @@
   .mt-search-input {
     @include position(absolute, 0px 0px 0px auto);
 
-    max-width: 30rem;
-    padding: $searchInputPadding;
-    overflow: hidden;
+    max-width: $width-breakpoint-single-column-layout;
+    padding: $padding-search-input;
 
-    font-size: 1.5rem;
-    color: $lightTextColor;
+    color: $color-text;
 
     display: flex;
     align-items: center;
@@ -169,7 +164,7 @@
     padding: 0;
     z-index: 1;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-lighter;
     font: inherit;
     color: inherit;
 
@@ -182,9 +177,9 @@
   // the animated fake field gives the illusion that the real input is moving
   .mt-search-input__fake-field {
     @include position(absolute, 0px 0px 0px 0px);
-    padding: $searchInputPadding;
+    padding: $padding-search-input;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-lighter;
 
     // for fake placeholder alignment
     display: flex;
@@ -196,5 +191,10 @@
 
       @include mt-placeholder();
     }
+  }
+
+  // make sure the fake filed doesn't overflow
+  .mt-search-input__fake-field__text {
+    display: inline-block;
   }
 }

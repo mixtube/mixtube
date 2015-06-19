@@ -183,7 +183,7 @@
               <div class="mt-queue__entry__commands">
                 <mt-button class="mt-queue__entry__remove-button" ng-click="queueCtrl.removeQueueEntry(entry)"
                            mt-click-active-class="ng-click-active">
-                  <svg class="mt-svg-icon small" role="img" title="Remove">
+                  <svg class="mt-svg-icon" role="img" title="Remove">
                     <use xlink:href="images/sprite.svg#ios-close"></use>
                   </svg>
                 </mt-button>
@@ -201,24 +201,19 @@
       <div class="mt-search">
         <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
           <div class="mt-search__provider__header">
-            <h3>{{pLabel}}</h3>
+            <h3>Results from {{pLabel}}:</h3>
 
             <mt-spinner class="mt-search__provider__header__spinner"
                         ng-show="searchResultsCtrl.pending[pId]"></mt-spinner>
           </div>
 
-          <div class="mt-results">
+          <div class="mt-results mt-js-results">
             <div class="mt-results__page mt-js-animation__slide"
                  ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
               <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
                    ng-controller="SearchResultCtrl as searchResultCtrl">
                 <mt-button class="mt-result__container"
                            ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
-                  <div class="mt-result__add-affordance">
-                    <svg class="mt-svg-icon" role="img" title="Add">
-                      <use xlink:href="images/sprite.svg#mt-plus-corner"></use>
-                    </svg>
-                  </div>
 
                   <div class="mt-result__thumbnail">
                     <mt-smart-img source="{{searchResult.thumbnailUrl}}"

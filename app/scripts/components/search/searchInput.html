@@ -3,11 +3,11 @@
   <!-- we could use search input type but we actually don't want the "services" brought by it (cancel button...) -->
   <input ng-model="inputModel"
          class="mt-search-input__field mt-js-search-input__field"
-         placeholder="Search video" size="30" autocomplete="off" autocorrect="off" autocapitalize="off"
+         placeholder="Search video" size="40" autocomplete="off" autocorrect="off" autocapitalize="off"
          spellcheck="false">
 
   <div class="mt-search-input__fake-field mt-js-search-input__fake-field" data-mt-placeholder="Search video"
        ng-class="{empty: !inputModel}">
-    {{inputModel}}
+    <div class="mt-search-input__fake-field__text">{{inputModel}}</div>
   </div>
 </form>

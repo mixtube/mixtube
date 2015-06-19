@@ -3,6 +3,7 @@
 var path = require('path'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
+  plumber = require('gulp-plumber'),
   merge = require('merge-stream'),
   del = require('del'),
   runSequence = require('run-sequence'),
@@ -64,17 +65,14 @@ function doSvg() {
     'node_modules/Ionicons/src/ios-close-empty.svg',
     'node_modules/Ionicons/src/ios-videocam.svg',
     'node_modules/Ionicons/src/load-c.svg',
-    'app/images/mt-plus-corner.svg',
     'app/images/mt-play-circle.svg',
     'app/images/mt-pause-circle.svg',
     'app/images/mt-logo.svg'
   ])
     .pipe(svgSprite({
-      dest: 'build/images',
       svg: {
-        dest: '.',
-        xmlDeclaration: false,
-        doctypeDeclaration: false
+        xmlDeclaration: ' ', //work around until svg-sprites handle false value properly
+        doctypeDeclaration: ' '
       },
       // make sure the svgo phase is not breaking the SVG (removeUnknownsAndDefaults breaks the logo)
       transform: [{
@@ -104,9 +102,8 @@ function buildInlineCss(opts) {
       }
 
       gulp.src('app/styles/css/inline.scss')
-        .pipe(sass({
-          errLogToConsole: true
-        }))
+        .pipe(plumber())
+        .pipe(sass())
         .pipe(postcss(postCssFilters))
         .pipe(buffer())
         .pipe(gutil.buffer(function(err, cssFiles) {
@@ -178,10 +175,9 @@ gulp.task('svg:dev', function() {
 
 gulp.task('css:dev', function() {
   return gulp.src('app/styles/css/main.scss')
+    .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass({
-      errLogToConsole: true
-    }))
+    .pipe(sass())
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']})
     ]))
@@ -235,10 +231,9 @@ gulp.task('svg:dist', function() {
 
 gulp.task('css:dist', function() {
   return gulp.src('app/styles/css/main.scss')
+    .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass({
-      errLogToConsole: true
-    }))
+    .pipe(sass())
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']}),
       csswring

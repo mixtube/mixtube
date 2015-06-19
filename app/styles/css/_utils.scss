@@ -23,8 +23,10 @@
     display: block;
     position: relative;
 
-    background-repeat: no-repeat;
-    background-position: center;
+    .mt-smart-img__image {
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
     &.fill-crop .mt-smart-img__image {
       position: absolute;
@@ -56,24 +58,20 @@
     animation: mt-spinner-rotation 500ms infinite linear;
   }
 
+  //todo need to revisit this SVG thing
   .mt-svg-icon {
     display: inline-block;
-    height: 40rem/$baseFontSizeUnitless;
-    width: 40rem/$baseFontSizeUnitless;
+    height: 4 * $grid-size;
+    width: 4 * $grid-size;
 
     fill: currentColor;
     stroke: currentColor;
-
-    &.small {
-      height: 32rem/$baseFontSizeUnitless;
-      width: 32rem/$baseFontSizeUnitless;
-    }
   }
 
   .mt-animation-enter-leave__fade {
 
     &.ng-enter, &.ng-leave {
-      transition: opacity $baseTransitionDuration linear;
+      transition: opacity $transition-duration linear;
     }
 
     &.ng-enter,
@@ -108,17 +106,48 @@
   white-space: nowrap;
 }
 
-@mixin mt-fluid-image($heightRatio) {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  padding-top: $heightRatio * 100%;
+@mixin mt-horizontal-screen {
+  @media screen and (min-width: $width-breakpoint-single-column-layout) {
+    @content;
+  }
 }
 
-@mixin mt-horizontal-screen {
-  $videoThumbnailOriginalSize: 320px;
+// shadow generation
+// copied and adapted from https://github.com/mrmlnc/material-shadows
+@function z-depth-top($depth: 1) {
+  $color:    .12, .19, .19, .21, .22;
+  $offset-y: 2px, 6px, 17px, 25px, 40px;
+  $blur:     10px, 20px, 50px, 55px, 77px;
 
-  @media screen and (min-width: 2 * $videoThumbnailOriginalSize) {
-    @content;
+  @return 0 nth($offset-y, $depth) nth($blur, $depth) rgba($color-shadow, nth($color, $depth));
+}
+
+@mixin z-depth-top($depth: 1) {
+  box-shadow: z-depth-top($depth);
+}
+
+@function z-depth-bottom($depth: 1) {
+  $color:    .16, .2, .24, .22, .2;
+  $offset-y: 2px, 8px, 12px, 16px, 27px;
+  $blur:     5px, 17px, 15px, 28px, 24px;
+
+  @return 0 nth($offset-y, $depth) nth($blur, $depth) rgba($color-shadow, nth($color, $depth));
+}
+
+@mixin z-depth-bottom($depth: 1) {
+  @if $depth == 0 {
+    box-shadow: none;
+  }
+  @else {
+    box-shadow: z-depth-bottom($depth);
+  }
+}
+
+@mixin z-depth($depth: 1) {
+  @if $depth == 0 {
+    box-shadow: none;
+  }
+  @else {
+    box-shadow: z-depth-bottom($depth), z-depth-top($depth);
   }
 }

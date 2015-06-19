@@ -30,18 +30,17 @@
   html {
     height: 100%;
 
-    font-size: $baseFontSizeUnitless * 1px;
-    font-family: 'Open Sans', sans-serif;
+    font: $font-body;
     font-weight: 300;
-    color: $lightTextColor;
+    color: $color-text;
   }
 
   body {
     height: 100%;
 
-    background-color: $black;
+    background-color: $color-background;
 
-    line-height: $lineHeight;
+    line-height: 3 * $grid-size;
 
     &.idle {
       cursor: none;
