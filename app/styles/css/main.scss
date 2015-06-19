@@ -118,7 +118,7 @@
     &.animation-show-hide {
       &.ng-hide-add-active,
       &.ng-hide-remove-active {
-        transition-duration: $transition-duration * 10;
+        transition-duration: $transition-duration;
         transition-property: transform, opacity;
         transition-timing-function: $timing-function-ease-in-out, linear;
       }

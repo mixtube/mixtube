@@ -321,7 +321,11 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
           $timeout.cancel(instantSearchPromise);
           instantSearchPromise = $timeout(function search() {
             searchResultsCtrl.inSearch = true;
-            searchYoutube(newSearchTerm);
+
+            // we need to delay the actual search in order for the search panel show animation to work
+            $timeout(function() {
+              searchYoutube(newSearchTerm);
+            }, 0);
           }, INSTANT_SEARCH_DELAY);
         }
       }
