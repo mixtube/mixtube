@@ -7,12 +7,6 @@
   .mt-scene {
     @include position(absolute, 0px 0px 0px 0px);
 
-    @include z-depth($depth-scene);
-
-    @include mt-horizontal-screen() {
-      @include z-depth($depth-scene-horizontal);
-    }
-
     // a glass pane to prevent any pointer event to reach the video elements (dbclick -> full screen)
     &:after {
       @include position(absolute, 0px 0px 0px 0px);

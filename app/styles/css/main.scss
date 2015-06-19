@@ -46,6 +46,7 @@
     overflow: visible;
 
     z-index: 10 * $depth-scene;
+    @include z-depth($depth-scene);
 
     &:before {
       content: '';
@@ -58,6 +59,7 @@
       @include position(absolute, -$height-header 0px 0px 0px);
 
       z-index: 10 * $depth-scene-horizontal;
+      @include z-depth($depth-scene-horizontal);
 
       &:before {
         display: none;
@@ -86,12 +88,15 @@
     flex: 1;
 
     z-index: 10 * $depth-queue;
+    @include z-depth($depth-queue);
 
     @include mt-horizontal-screen() {
       position: absolute;
       width: $width-queue-tile;
       height: 100%;
+
       z-index: 10 * $depth-queue-horizontal;
+      @include z-depth($depth-queue-horizontal);
 
       transition-property: transform, opacity;
       transition-duration: $transition-duration;

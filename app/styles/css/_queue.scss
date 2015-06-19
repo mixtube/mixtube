@@ -25,11 +25,6 @@
     -webkit-overflow-scrolling: touch;
 
     background-color: $color-darker;
-    @include z-depth($depth-queue);
-
-    @include mt-horizontal-screen() {
-      @include z-depth($depth-queue-horizontal);
-    }
   }
 
   .mt-queue__entry {
