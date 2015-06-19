@@ -2,29 +2,27 @@
 @import 'variables';
 @import 'utils';
 
-@mixin header {
+@mixin header() {
 
-  $searchInputPadding: 0 3rem 0 .5rem;
-  $textShadowSize: 8rem / $baseFontSizeUnitless;
-  $textShadow: 0 0 $textShadowSize rgba($baseBgColor, .3);
+  $padding-search-input: 0 6 * $grid-size 0 $grid-size;
 
   .mt-header {
     @include position(absolute, 0px 0px 0px 0px);
     z-index: 1;
-    overflow: hidden; // hide overflowing search field
+    overflow: visible; // lets show the header shadow
   }
 
   //fake background so that we can animate the header background color by using opacity
   .mt-header__bg {
     @include position(absolute, 0px 0px 0px 0px);
 
-    background-color: $baseBgColor;
+    background-color: $color-primary;
+    @include z-depth($depth-header);
 
-    @include mt-horizontal-screen {
-
+    @include mt-horizontal-screen() {
       transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.idle {
         opacity: 0;
@@ -45,79 +43,54 @@
 
     > .start {
       flex: 1;
-      overflow: hidden;
 
       display: flex;
-    }
-
-    > .center {
-      height: 100%;
     }
 
     > .end {
       flex: 1;
     }
+
+    // a container that is positioned at the right of the header
+    > .floating {
+      @include position(absolute, 0px 0px 0px auto);
+
+      display: flex;
+      align-items: center;
+    }
   }
 
   .mt-header__app-title {
-    position: relative;
-    top: (4rem/$baseFontSizeUnitless);
-    margin-left: .5rem;
-    margin-right: 1rem;
-
-    overflow: hidden;
-
-    text-shadow: $textShadow;
-
-    > .logo {
-      color: $contrastedColor;
-      font-family: 'Oleo Script Swash Caps', cursive;
-      font-size: (40rem/$baseFontSizeUnitless);
-    }
-
-    > .remaining {
-      display: none;
-
-      font-size: (28rem/$baseFontSizeUnitless);
-
-      @include mt-horizontal-screen {
-        display: inline;
-      }
-    }
+    // make sure the default line height doesn't make the container to high
+    line-height: 0;
+    padding: 0 2 * $grid-size;
   }
 
   .mt-header__playback-button {
-    $width: 49rem / $baseFontSizeUnitless;
-
     position: relative;
-    height: 100%;
-    width: $width + 2 * $textShadowSize; // leave some space for proper rendering of shadow (IE)
-
-    font-size: $width;
-    text-shadow: $textShadow;
 
     .facet {
-      // facets stacks but only one is visible at the time
-      @include position(absolute, 0px 0px 0px 0px);
-
       // center the icon
       display: flex;
-      justify-content: center;
-      align-items: center;
+
+      // facets stacks but only one is visible at the time
+      &:not(:first-child) {
+        position: absolute;
+        top: 0;
+      }
     }
 
     .facet__animation-toggle {
+      transform: scale(.5);
+      opacity: 0;
 
-      &.ng-hide-add, &.ng-hide-remove {
-        transition-duration: $baseTransitionDuration;
-        transition-property: transform, opacity;
-        transition-timing-function: $easeInOut, linear;
-        display: flex !important;
-      }
+      transition-duration: $transition-duration;
+      transition-property: transform, opacity;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
-      &.ng-hide {
-        transform: scale(.5);
-        opacity: 0;
+      &.toggle {
+        transform: scale(1);
+        opacity: 1;
       }
     }
   }
@@ -136,40 +109,35 @@
   //  - at the end of the fake input animation we make the real one visible (opacity: 1)
 
   .mt-search-input__button {
-    @include position(absolute, 0px 0px 0px auto);
+    position: relative;
+
+    margin-right: 2 * $grid-size;
 
     z-index: 1;
-    width: 2.5rem + 2 * .5rem; // we need to fix the size here because the content is absolutely positioned
-
-    font-size: 2.5rem;
-    text-shadow: $textShadow;
 
     .facet {
-      // facets stacks but only one is visible at the time
-      @include position(absolute, 0px 0px 0px 0px);
-
       // center the icon
       display: flex;
-      justify-content: center;
-      align-items: center;
 
-      &.close {
-        font-size: 1.7rem; // the close icon is a little bit larger so we need to adjust the size
+      // facets stacks but only one is visible at the time
+      &:not(:first-child) {
+        position: absolute;
+        top: 0;
+        right: 0;
       }
     }
 
     .facet__animation-toggle {
+      transform: scale(.5);
+      opacity: 0;
 
-      &.ng-hide-add, &.ng-hide-remove {
-        transition-duration: $baseTransitionDuration;
-        transition-property: transform, opacity;
-        transition-timing-function: $easeInOut, linear;
-        display: flex !important;
-      }
+      transition-duration: $transition-duration;
+      transition-property: transform, opacity;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
-      &.ng-hide {
-        transform: scale(.5);
-        opacity: 0;
+      &.toggle {
+        transform: scale(1);
+        opacity: 1;
       }
     }
   }
@@ -178,12 +146,10 @@
   .mt-search-input {
     @include position(absolute, 0px 0px 0px auto);
 
-    max-width: 30rem;
-    padding: $searchInputPadding;
-    overflow: hidden;
+    max-width: $width-breakpoint-single-column-layout;
+    padding: $padding-search-input;
 
-    font-size: 1.5rem;
-    color: $lightTextColor;
+    color: $color-text;
 
     display: flex;
     align-items: center;
@@ -198,22 +164,22 @@
     padding: 0;
     z-index: 1;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-lighter;
     font: inherit;
     color: inherit;
 
     // overrides placeholder to be sure that it is coherent with the fake field pseudo placeholder
     &::placeholder {
-      @include mt-placeholder;
+      @include mt-placeholder();
     }
   }
 
   // the animated fake field gives the illusion that the real input is moving
   .mt-search-input__fake-field {
     @include position(absolute, 0px 0px 0px 0px);
-    padding: $searchInputPadding;
+    padding: $padding-search-input;
 
-    background-color: $secondaryBgColor;
+    background-color: $color-lighter;
 
     // for fake placeholder alignment
     display: flex;
@@ -223,7 +189,12 @@
     &.empty:before {
       content: attr(data-mt-placeholder);
 
-      @include mt-placeholder;
+      @include mt-placeholder();
     }
+  }
+
+  // make sure the fake filed doesn't overflow
+  .mt-search-input__fake-field__text {
+    display: inline-block;
   }
 }

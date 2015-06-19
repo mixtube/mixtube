@@ -3,47 +3,51 @@
 @mixin notifications {
 
   .mt-notifications-center__container {
-    overflow: hidden;
+    overflow: visible; // lets show the shadow
   }
 
   .mt-notifications-center__container__padding {
-    padding: $unitVerticalPadding / 2 .5rem 0 .5rem;
+    padding: 0 $grid-size;
+    margin-top: $grid-size;
+    overflow: visible;
   }
 
   .mt-notification {
-    line-height: $lineHeight;
-
-    background-color: $lightTextColor;
-    color: $secondaryBgColor;
-    border-radius: $baseBorderRadius;
-
-    &.info {
-      background-color: $infoBgColor;
-      color: $lightTextColor;
-    }
+    background-color: rgba($color-contrast, $opacity-ratio-overlay);
+    color: $color-text-black-text;
+    border-radius: $border-radius;
+    @include z-depth(5);
 
     &.error {
-      background-color: $errorBgColor;
-      color: $lightTextColor;
+      background-color: rgba($color-accent-error, $opacity-ratio-overlay);
+      color: $color-text;
     }
   }
 
   .mt-notification__content {
+    position: relative;
     display: flex;
 
-    > .text {
-      flex: 2;
-      padding: $unitVerticalPadding / 2 1rem;
-    }
+    font: $font-smaller;
+  }
 
-    > .thumbnail {
-      flex: 1;
-    }
+  .mt-notification__text {
+    padding: 0 2 * $grid-size;
+    margin: 2 * $grid-size 0;
+
+    flex: 1;
+  }
+
+  .mt-notification__thumbnail {
+    padding-right: $grid-size;
+    margin-top: $grid-size;
   }
 
   .mt-notification__image {
-    width: 100%;
+    width: 80px;
+    height: 80px;
 
-    @include mt-fluid-image(1);
+    background-size: cover;
+    background-repeat: no-repeat;
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "mixtube",
-  "version": "0.0.0-snapshot",
+  "version": "1.0.0-alpha.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/jraoult/mixtube.git"
@@ -11,19 +11,63 @@
       "url": "https://github.com/jraoult/mixtube/blob/master/LICENSE"
     }
   ],
+  "engines": {
+    "node": ">= 0.12",
+    "npm": ">= 2.7"
+  },
   "devDependencies": {
-    "grunt": "latest",
-    "grunt-contrib-clean": "latest",
-    "grunt-contrib-concat": "latest",
-    "grunt-contrib-connect": "latest",
-    "grunt-contrib-copy": "latest",
-    "grunt-contrib-sass": "latest",
-    "grunt-contrib-watch": "latest",
-    "grunt-gh-pages": "^0.9.1",
-    "grunt-inline-angular-templates": "^0.1.5",
-    "grunt-pleeease": "^0.0.5",
-    "grunt-replace": "^0.7.9",
-    "grunt-rev": "latest",
-    "grunt-usemin": "latest"
+    "Ionicons": "git://github.com/jraoult/ionicons#npm",
+    "autoprefixer-core": "^5.1.7",
+    "brfs": "^1.4.0",
+    "browser-sync": "^2.2.1",
+    "browserify": "^10.2.4",
+    "bundle-collapser": "^1.1.4",
+    "compression": "^1.4.4",
+    "csswring": "^3.0.1",
+    "del": "^1.1.1",
+    "gulp": "^3.8.10",
+    "gulp-favicons": "^1.0.9",
+    "gulp-gh-pages": "^0.5.2",
+    "gulp-html-replace": "^1.4.4",
+    "gulp-jshint": "^1.9.2",
+    "gulp-ng-annotate": "^1.0.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-postcss": "^5.1.8",
+    "gulp-replace": "^0.5.3",
+    "gulp-sass": "^2.0.1",
+    "gulp-sourcemaps": "^1.5.0",
+    "gulp-svg-sprite": "^1.2.2",
+    "gulp-svg2png": "^0.3.0",
+    "gulp-uglify": "^1.1.0",
+    "gulp-util": "^3.0.2",
+    "jshint-stylish": "^2.0.0",
+    "merge-stream": "^0.1.7",
+    "run-sequence": "^1.0.2",
+    "vinyl": "^0.4.6",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.0.0",
+    "watchify": "^3.2.2"
+  },
+  "dependencies": {
+    "angular": "^1.4.0-beta.6",
+    "angular-animate": "^1.4.0-beta.6",
+    "keymaster": "^1.6.2",
+    "lodash": "^3.0.1",
+    "mixtube-playback": "git+ssh://git@github.com:jraoult/mixtube-playback#v1.0.0-alpha.8",
+    "velocity-animate": "^1.2.1"
+  },
+  "browserify": {
+    "transform": [
+      "brfs"
+    ]
+  },
+  "config": {
+    "application": {
+      "name": "MixTube",
+      "color": "#8EC447"
+    }
+  },
+  "scripts": {
+    "serve": "gulp serve"
   }
 }

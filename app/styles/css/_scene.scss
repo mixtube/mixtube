@@ -1,10 +1,11 @@
 @import '../vendor/bourbon/addons/position';
+@import 'variables';
+@import 'utils';
 
 @mixin scene {
 
   .mt-scene {
     @include position(absolute, 0px 0px 0px 0px);
-    overflow: hidden;
 
     // a glass pane to prevent any pointer event to reach the video elements (dbclick -> full screen)
     &:after {

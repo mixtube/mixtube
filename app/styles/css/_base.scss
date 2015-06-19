@@ -1,0 +1,49 @@
+@import 'variables';
+
+@mixin base {
+
+  html {
+    box-sizing: border-box;
+  }
+
+  *, *:before, *:after {
+    box-sizing: inherit;
+
+    overflow: hidden;
+  }
+
+  body, p, ul, li {
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3 {
+    margin: 0;
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  html {
+    height: 100%;
+
+    font: $font-body;
+    font-weight: 300;
+    color: $color-text;
+  }
+
+  body {
+    height: 100%;
+
+    background-color: $color-background;
+
+    line-height: 3 * $grid-size;
+
+    &.idle {
+      cursor: none;
+    }
+  }
+}

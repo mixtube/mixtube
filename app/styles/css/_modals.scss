@@ -5,62 +5,13 @@
 
 @mixin modals {
 
-  $modalMaxWidth: 500rem/16;
-  $modalZIndex: 500;
-
-  .mt-backdrop {
-    @include position(absolute, 0px 0px 0px 0px);
-
-    z-index: $modalZIndex - 1;
-
-    background-color: $backdropBackgroundColor;
-  }
-
-  .mt-modal {
-    @include position(absolute, 0px 0px 0px 0px);
-
-    z-index: $modalZIndex;
-
-    // safety net for IE11 that can't properly manage nested flex containers
-    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
-    overflow: auto;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    // shows the overlay
-    &.ng-enter, &.ng-leave {
-      transition-property: opacity, transform;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: linear, $easeInOut;
-    }
-
-    &.ng-enter {
-      opacity: 0;
-      transform: translateY(-25%);
-    }
-
-    &.ng-enter.ng-enter-active {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    &.ng-leave {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    &.ng-leave.ng-leave-active {
-      opacity: 0;
-      transform: translateY(-25%);
-    }
-  }
+  // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
+  //$padding-modal: 3 * $grid-size;
 
   .mt-modal__container {
-    padding: $unitVerticalPadding / 2 .5rem;
-    max-width: $modalMaxWidth;
+    max-width: $width-breakpoint-single-column-layout;
+    padding: $grid-size;
+    overflow: visible;
 
     // propagate the "flexibility"
     display: flex;
@@ -68,11 +19,10 @@
   }
 
   .mt-modal__frame {
-    overflow: hidden;
-
-    background-color: $lightTextColor;
-    border-radius: $baseBorderRadius;
-    color: $secondaryBgColor;
+    background-color: $color-contrast;
+    border-radius: $border-radius;
+    color: $color-text-black-text;
+    @include z-depth($depth-dialog);
 
     // propagate the "flexibility"
     display: flex;
@@ -81,10 +31,11 @@
 
   .mt-modal__title {
     flex: none;
-    padding: $unitVerticalPadding / 2 1rem;
+    padding: 0 3 * $grid-size;
+    margin: 3 * $grid-size 0;
 
-    color: $baseBgColor;
-    font-size: 1.25rem;
+    color: $color-primary;
+    font: $font-bigger;
     font-weight: 700;
     text-align: center;
   }
@@ -92,7 +43,6 @@
   .mt-modal__content {
     // use the initial value for flex (0 1 auto)
     // will shrink to match the available height or expand to give enough place to the content
-    padding: 0 1rem;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
@@ -100,42 +50,49 @@
   }
 
   .mt-modal__paragraph {
-    margin-bottom: 1rem;
+    padding: 0 3 * $grid-size;
+    margin-bottom: 3 * $grid-size;
   }
 
   .mt-modal__sub-paragraph {
-    font-size: (12rem/16);
+    padding: 0 3 * $grid-size;
+    margin-bottom: 3 * $grid-size;
+    font: $font-smaller;
   }
 
   .mt-modal__commands {
     flex: none;
-    padding: 1rem;
 
     display: flex;
+    justify-content: flex-end;
   }
 
   .mt-modal__button {
-    @include mt-click-reaction;
-    flex: 1;
-    padding: $unitVerticalPadding/4 0;
-    margin: 0 .5rem;
+    @include mt-click-reaction();
 
-    background-color: $contrastedColor;
-    border-radius: $baseBorderRadius;
+    margin: $grid-size;
+
+    line-height: 5 * $grid-size;
+    min-width: 8 * $grid-size;
+    padding: 0 $grid-size;
+
+    color: $color-text;
     font-weight: 700;
     text-align: center;
+    background-color: $color-accent;
+    border-radius: $border-radius;
 
     &.secondary {
-      border: 1px solid $contrastedColor;
+      border: 1px solid $color-accent;
       background-color: transparent;
     }
 
     &:first-child {
-      margin-left: 0;
+      //margin-left: 0;
     }
 
     &:last-child {
-      margin-right: 0;
+      //margin-right: 0;
     }
   }
 }

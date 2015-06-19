@@ -1,13 +1,17 @@
 @import '../vendor/bourbon/addons/position';
 @import '../vendor/bourbon/addons/triangle';
-
 @import 'utils';
 
-@mixin queue-item-color($bgColor) {
-  background-color: $bgColor;
+@mixin queue-item-color($color-background) {
+  background-color: $color-background;
 
   .mt-queue__entry__data:before {
-    @include triangle(1.25rem, $bgColor, up);
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 2 * $grid-size;
+
+    @include triangle(3 * $grid-size, $color-background, up);
   }
 }
 
@@ -20,19 +24,18 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
-    background-color: $darkestBgColor;
+    background-color: $color-darker;
   }
 
   .mt-queue__entry {
-    @include queue-item-color($baseBgColor);
-    overflow: hidden;
+    @include queue-item-color($color-primary);
 
     &.active {
-      @include queue-item-color($contrastedColor);
+      @include queue-item-color($color-accent);
     }
 
     &.broken {
-      @include queue-item-color($errorBgColor);
+      @include queue-item-color($color-accent-error);
     }
   }
 
@@ -40,8 +43,20 @@
     position: relative;
 
     > .image {
-      @include mt-fluid-image(.4);
+      $height-entries-thumbnails-fixed: 16 * $grid-size;
+      // keep the ratio of the fixed mode even in flexible mode
+      $ratio-entries-thumbnails: 100%  * $height-entries-thumbnails-fixed / $width-thumbnail-original;
+
+      padding-top: $ratio-entries-thumbnails;
+
+      background-size: cover;
+      background-position: center;
       filter: saturate(5%);
+
+      @include mt-horizontal-screen() {
+        padding-top: 0;
+        height: $height-entries-thumbnails-fixed;
+      }
     }
 
     .mt-queue__entry.active & {
@@ -59,40 +74,32 @@
     justify-content: center;
     text-align: center;
 
-    background-color: rgba($errorBgColor, $overlayOpacity);
+    background-color: rgba($color-accent-error, $opacity-ratio-overlay);
 
     .mt-queue__entry.broken & {
       display: flex;
     }
   }
 
-  .mt-queue__entry__progress {
+  .mt-queue__entry__spinner-container {
     @include position(absolute, 0px 0px 0px 0px);
 
     display: flex;
     align-items: center;
     justify-content: center;
+  }
 
-    progress {
-      @extend %mt-chromeless-progress;
-      @include mt-spinner(3rem, $contrastedColor);
-    }
+  .mt-queue__entry__spinner {
+    width: 8 * $grid-size;
+
+    color: $color-accent;
   }
 
   .mt-queue__entry__data {
     position: relative;
+    overflow: visible; // rollback the global overflow hidden
 
     display: flex;
-
-    // decorative up arrow
-    &:before {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 2rem;
-
-      @include triangle(1.25rem, $baseBgColor, up);
-    }
   }
 
   .mt-queue__entry__title {
@@ -100,26 +107,29 @@
     align-self: center;
     white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden;
-    padding: $unitVerticalPadding/2 .5rem;
+    padding: 0 2 * $grid-size;
+    margin: 1.5 * $grid-size 0;
   }
 
   .mt-queue__entry__commands {
-    align-self: stretch;
-
     display: flex;
     align-items: center;
   }
 
   .mt-queue__entry__remove-button {
-    @include mt-click-reaction;
-    padding: 0 .5rem;
+    @include mt-click-reaction();
+    padding-right: $grid-size;
+    opacity: .2;
+    // fixes a Chrome bug where opacity gets stuck to 1 after hover
+    will-change: opacity;
 
-    opacity: .1;
-    font-size: 2.5rem;
+    // center the icon
+    display: flex;
 
-    .mt-mouse-based-interaction &:hover {
-      opacity: 1;
+    @media (any-hover: hover) {
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 }

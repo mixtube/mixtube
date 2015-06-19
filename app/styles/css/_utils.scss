@@ -2,19 +2,6 @@
 
 @mixin utils {
 
-  html {
-    box-sizing: border-box;
-  }
-
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: inherit;
-  }
-
   mt-button {
     display: block;
   }
@@ -36,8 +23,10 @@
     display: block;
     position: relative;
 
-    background-repeat: no-repeat;
-    background-position: center;
+    .mt-smart-img__image {
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
     &.fill-crop .mt-smart-img__image {
       position: absolute;
@@ -57,32 +46,32 @@
     bottom: 0;
   }
 
-  [data-mt-icon] {
-    overflow: hidden;
-    line-height: 1;
+  mt-spinner {
+    display: block;
+  }
 
-    &:before {
-      content: attr(data-mt-icon);
-      font-family: fontello;
-    }
+  .mt-spinner__svg {
+    display: block;
 
-    > .mt-replaced-text {
-      // taken from HTML5 Boilerplate's .visuallyhidden
-      border: 0;
-      clip: rect(0 0 0 0);
-      height: 1px;
-      margin: -1px;
-      overflow: hidden;
-      padding: 0;
-      position: absolute;
-      width: 1px;
-    }
+    fill: currentColor;
+
+    animation: mt-spinner-rotation 500ms infinite linear;
+  }
+
+  //todo need to revisit this SVG thing
+  .mt-svg-icon {
+    display: inline-block;
+    height: 4 * $grid-size;
+    width: 4 * $grid-size;
+
+    fill: currentColor;
+    stroke: currentColor;
   }
 
   .mt-animation-enter-leave__fade {
 
     &.ng-enter, &.ng-leave {
-      transition: opacity $baseTransitionDuration linear;
+      transition: opacity $transition-duration linear;
     }
 
     &.ng-enter,
@@ -104,20 +93,6 @@
   outline: none;
 }
 
-%mt-chromeless-progress {
-  appearance: none;
-  background: none;
-  color: transparent; // IE needs that to remove the bar
-
-  // keep those selectors separated otherwise they are not interpreted (weird)
-  &::-webkit-progress-bar {
-    background: none;
-  }
-  &::-moz-progress-bar {
-    background: none;
-  }
-}
-
 @mixin mt-click-reaction {
   &.ng-click-active {
     transform: scale(.9);
@@ -131,26 +106,48 @@
   white-space: nowrap;
 }
 
-@mixin mt-fluid-image($heightRatio) {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  padding-top: $heightRatio * 100%;
-}
-
-@mixin mt-spinner($size, $color) {
-  width: $size;
-  height: $size;
-  border-radius: 50%;
-  border: (4rem/$baseFontSizeUnitless) solid transparent;
-  border-top-color: $color;
-
-  // this animation key frames are defined in the module main mixin (see above)
-  animation: mt-spinner-rotation 500ms infinite linear;
-}
-
 @mixin mt-horizontal-screen {
-  @media screen and (min-aspect-ratio: 8/9) and (min-width: 500px) {
+  @media screen and (min-width: $width-breakpoint-single-column-layout) {
     @content;
+  }
+}
+
+// shadow generation
+// copied and adapted from https://github.com/mrmlnc/material-shadows
+@function z-depth-top($depth: 1) {
+  $color:    .12, .19, .19, .21, .22;
+  $offset-y: 2px, 6px, 17px, 25px, 40px;
+  $blur:     10px, 20px, 50px, 55px, 77px;
+
+  @return 0 nth($offset-y, $depth) nth($blur, $depth) rgba($color-shadow, nth($color, $depth));
+}
+
+@mixin z-depth-top($depth: 1) {
+  box-shadow: z-depth-top($depth);
+}
+
+@function z-depth-bottom($depth: 1) {
+  $color:    .16, .2, .24, .22, .2;
+  $offset-y: 2px, 8px, 12px, 16px, 27px;
+  $blur:     5px, 17px, 15px, 28px, 24px;
+
+  @return 0 nth($offset-y, $depth) nth($blur, $depth) rgba($color-shadow, nth($color, $depth));
+}
+
+@mixin z-depth-bottom($depth: 1) {
+  @if $depth == 0 {
+    box-shadow: none;
+  }
+  @else {
+    box-shadow: z-depth-bottom($depth);
+  }
+}
+
+@mixin z-depth($depth: 1) {
+  @if $depth == 0 {
+    box-shadow: none;
+  }
+  @else {
+    box-shadow: z-depth-bottom($depth), z-depth-top($depth);
   }
 }

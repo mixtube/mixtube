@@ -1,6 +1,9 @@
 @import '../vendor/bourbon/bourbon';
 @import 'variables';
 @import 'utils';
+@import 'base';
+@import 'queue-loading';
+@import 'modals-base';
 @import 'modals';
 @import 'notifications';
 @import 'coming-next';
@@ -9,42 +12,10 @@
 @import 'queue';
 @import 'search';
 
-html {
-  height: 100%;
-
-  font-size: $baseFontSizeUnitless * 1px;
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 300;
-  color: $lightTextColor;
-}
-
-body {
-  height: 100%;
-
-  background-color: $black;
-
-  line-height: $lineHeight;
-
-  &.idle {
-    cursor: none;
-  }
-}
-
-@mixin queue-loading {
-  .mt-queue-loading__message {
-    margin-bottom: $unitVerticalPadding;
-  }
-
-  .mt-queue-loading__progress {
-    progress {
-      @extend %mt-chromeless-progress;
-      @include mt-spinner(4rem, $contrastedColor);
-    }
-  }
-}
-
 @mixin tiles {
-  $headerHeight: 4rem;
+
+  $height-header: 7 * $grid-size;
+  $width-nominal-notifications: 480px;
 
   .mt-main-tile {
     height: 100%;
@@ -55,12 +26,16 @@ body {
 
   .mt-header-tile {
     position: relative;
-    height: 4rem;
+    height: $height-header;
+    overflow: visible;
+
+    z-index: 10 * $depth-header;
   }
 
   .mt-body-tile {
     position: relative;
     flex: 1;
+    overflow: visible; // lets show the video under the header in horizontal mode
 
     display: flex;
     flex-direction: column;
@@ -68,6 +43,10 @@ body {
 
   .mt-scene-tile {
     position: relative;
+    overflow: visible;
+
+    z-index: 10 * $depth-scene;
+    @include z-depth($depth-scene);
 
     &:before {
       content: '';
@@ -75,9 +54,12 @@ body {
       padding-top: 56.25%; /* 16/9eme*/
     }
 
-    @include mt-horizontal-screen {
+    @include mt-horizontal-screen() {
       // in horizontal mode we move the scene underneath the header
-      @include position(absolute, -$headerHeight 0px 0px 0px);
+      @include position(absolute, -$height-header 0px 0px 0px);
+
+      z-index: 10 * $depth-scene-horizontal;
+      @include z-depth($depth-scene-horizontal);
 
       &:before {
         display: none;
@@ -86,15 +68,13 @@ body {
   }
 
   .mt-notification-center-tile {
-    $notificationsNominalWidth: 30rem;
-
     @include position(absolute, 0px 0px auto auto);
     width: 100%;
-    max-width: $notificationsNominalWidth;
+    max-width: 50 * $grid-size;
     max-height: 100%;
-    overflow: hidden;
+    overflow: visible;
 
-    z-index: 3;
+    z-index: 10 * $depth-notifications;
 
     mt-notification-center {
       // reverts the behaviour to make notifications clickable
@@ -104,16 +84,23 @@ body {
 
   .mt-queue-tile {
     position: relative;
+    overflow: visible; // lets show the shadow of the queue
     flex: 1;
 
-    @include mt-horizontal-screen {
+    z-index: 10 * $depth-queue;
+    @include z-depth($depth-queue);
+
+    @include mt-horizontal-screen() {
       position: absolute;
-      width: 25%;
+      width: $width-queue-tile;
       height: 100%;
 
+      z-index: 10 * $depth-queue-horizontal;
+      @include z-depth($depth-queue-horizontal);
+
       transition-property: transform, opacity;
-      transition-duration: $baseTransitionDuration;
-      transition-timing-function: $easeInOut, linear;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
 
       &.idle {
         opacity: 0;
@@ -125,21 +112,20 @@ body {
   .mt-search-tile {
     @include position(absolute, 0px 0px 0px 0px);
 
-    @include mt-horizontal-screen {
-      width: 75%;
+    z-index: 10 * $depth-search;
+
+    @include mt-horizontal-screen() {
+      width: calc(100% - #{$width-queue-tile});
       left: auto;
+      z-index: 10 * $depth-search-horizontal;
     }
 
     &.animation-show-hide {
-
-      &.ng-hide-add, &.ng-hide-remove {
+      &.ng-hide-add-active,
+      &.ng-hide-remove-active {
+        transition-duration: $transition-duration;
         transition-property: transform, opacity;
-        transition-duration: $baseTransitionDuration;
-
-        transition-timing-function: $easeInOut, linear;
-
-        // don't hide it straight: wait for the end of the animation
-        display: block !important;
+        transition-timing-function: $timing-function-ease-in-out, linear;
       }
 
       &.ng-hide {
@@ -150,15 +136,18 @@ body {
   }
 }
 
-@include queue-loading;
-@include tiles;
+@include base();
+@include queue-loading();
+@include tiles();
 
 // includes imported modules styles
-@include utils;
-@include modals;
-@include notifications;
-@include coming-next;
-@include header;
-@include scene;
-@include queue;
-@include search;
+@include utils();
+@include modals-base();
+@include modals();
+@include queue-loading();
+@include notifications();
+@include coming-next();
+@include header();
+@include scene();
+@include queue();
+@include search();

@@ -1,0 +1,59 @@
+@import '../vendor/bourbon/bourbon';
+
+@import 'variables';
+@import 'utils';
+
+@mixin modals-base {
+
+  $z-index: 10 * $depth-dialog;
+
+  .mt-backdrop {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    z-index: $z-index - 1;
+
+    background-color: rgba($color-background, $opacity-ratio-overlay);
+  }
+
+  .mt-modal {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    z-index: $z-index;
+
+    // safety net for IE11 that can't properly manage nested flex containers
+    // see http://connect.microsoft.com/IE/feedback/details/802625/min-height-and-flexbox-flex-direction-column-dont-work-together-in-ie-10-11-preview
+    overflow: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    // shows the overlay
+    &.ng-enter, &.ng-leave {
+      transition-property: opacity, transform;
+      transition-duration: $transition-duration;
+      transition-timing-function: linear, $timing-function-ease-in-out;
+    }
+
+    &.ng-enter {
+      opacity: 0;
+      transform: translateY(-25%);
+    }
+
+    &.ng-enter.ng-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    &.ng-leave {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    &.ng-leave.ng-leave-active {
+      opacity: 0;
+      transform: translateY(-25%);
+    }
+  }
+}
