@@ -5,10 +5,10 @@ Mixtube is a web application that let you create queues of videos and automatica
 ## Getting started
 For now, the only way to try Mixtube is to clone the GitHub repo and visit the index page through a web server.
 
-The grunt script can help you with that. You need NodeJS grunt and bower installed on your machine. Then execute:
+You need npm installed on your machine. Then execute:
 ```
 npm install
-gulp serve
+npm run serve
 ```
 
-The server should be running by now and you can access MixTube at http://localhost:3000
+The server should be running by now and you can access MixTube at https://localhost:3000
