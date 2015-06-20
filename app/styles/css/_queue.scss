@@ -97,7 +97,7 @@
 
   .mt-queue__entry__data {
     position: relative;
-    overflow: visible; // rollback the global overflow hidden
+    overflow: visible; // lets show the triangle
 
     display: flex;
   }

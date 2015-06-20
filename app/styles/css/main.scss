@@ -43,7 +43,6 @@
 
   .mt-scene-tile {
     position: relative;
-    overflow: visible;
 
     z-index: 10 * $depth-scene;
     @include z-depth($depth-scene);
@@ -84,7 +83,6 @@
 
   .mt-queue-tile {
     position: relative;
-    overflow: visible; // lets show the shadow of the queue
     flex: 1;
 
     z-index: 10 * $depth-queue;
