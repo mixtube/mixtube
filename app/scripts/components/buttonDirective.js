@@ -1,63 +1,26 @@
 'use strict';
 
-var toArray = require('lodash/lang/toArray'),
-  has = require('lodash/object/has');
-
-// unbind and rebind click event handlers by removing and re adding event listener at the DOM level
-function ClickEventsGate(element) {
-  var aelClickCallsArgs = [];
-
-  var rElement = element[0];
-  var origAddEventListener = rElement.addEventListener;
-  var origRemoveEventListener = rElement.removeEventListener;
-
-  rElement.addEventListener = function addEventListenerInterceptor(type) {
-    if (type === 'click') {
-      aelClickCallsArgs.push(toArray(arguments));
-    }
-    origAddEventListener.apply(rElement, arguments);
-  };
-
-  function hold() {
-    for (var idx = 0; idx < aelClickCallsArgs.length; idx++) {
-      origRemoveEventListener.apply(rElement, aelClickCallsArgs[idx]);
-    }
-  }
-
-  function release() {
-    for (var idx = 0; idx < aelClickCallsArgs.length; idx++) {
-      origAddEventListener.apply(rElement, aelClickCallsArgs[idx]);
-    }
-  }
-
-  this.hold = hold;
-  this.release = release;
-}
+var has = require('lodash/object/has');
 
 function buttonDirective() {
   return {
     restrict: 'E',
-    controller: /*@ngInject*/ function($element, $attrs) {
+    compile: function(tElement, tAttrs) {
 
-      // we need to do this in a controller since we want to replace addEventListener before the
-      // ngClick binds its listeners in the link phase
-      var clickEventsGate = new ClickEventsGate($element);
+      tAttrs.$set('role', 'button');
 
-      // provide a default value if the attribute is not available to trigger $observe anyway
-      if (!has($attrs, 'disabled')) {
-        $attrs.disabled = false;
-      }
+      return function link(scope, iElement, iAttrs) {
 
-      $attrs.$observe('disabled', function(disabled) {
-        $attrs.$set('role', disabled ? null : 'button');
-        $attrs.$set('tabindex', disabled ? null : '0');
-
-        if (disabled) {
-          clickEventsGate.hold();
-        } else {
-          clickEventsGate.release();
+        // provide a default value if the attribute is not available to trigger $observe anyway
+        if (!has(iAttrs, 'disabled')) {
+          iAttrs.$set('disabled', false);
         }
-      });
+
+        iAttrs.$observe('disabled', function(disabled) {
+          iAttrs.$set('aria-disabled', disabled ? 'true' : 'false');
+          iAttrs.$set('tabindex', disabled ? null : '0');
+        });
+      };
     }
   };
 }

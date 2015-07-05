@@ -11,6 +11,11 @@
     outline: none;
     user-select: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+
+    &[aria-disabled=true] {
+      cursor: none;
+      pointer-events: none;
+    }
   }
 
   @keyframes mt-spinner-rotation {
