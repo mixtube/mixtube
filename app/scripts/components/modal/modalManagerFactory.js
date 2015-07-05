@@ -15,29 +15,27 @@ function modalManagerFactory($document, $compile, $q, $animate, $rootScope) {
   var open = function(options) {
     $animate.enter(backdropElement, body);
 
-    function leave(modalElement, done) {
-      $animate.leave(backdropElement);
-      $animate.leave(modalElement).then(function() {
-        $rootScope.$apply(done);
-      });
+    function leave(modalElement) {
+      return $q.all([
+        $animate.leave(backdropElement),
+        $animate.leave(modalElement)
+      ]);
     }
 
     var scope = angular.extend($rootScope.$new(true), options);
 
-    var modalResult = $q.defer();
+    return $q(function(resolve) {
+      modalLinkFn(scope, function(modalElement) {
 
-    modalLinkFn(scope, function(modalElement) {
+        scope.close = function(command) {
+          leave(modalElement).then(function() {
+            resolve(command);
+          });
+        };
 
-      scope.close = function(command) {
-        leave(modalElement, function() {
-          modalResult.resolve(command);
-        });
-      };
-
-      $animate.enter(modalElement, body);
+        $animate.enter(modalElement, body);
+      });
     });
-
-    return modalResult.promise;
   };
 
   /**
