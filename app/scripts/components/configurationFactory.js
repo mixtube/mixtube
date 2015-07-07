@@ -4,7 +4,7 @@ var has = require('lodash/object/has'),
   isUndefined = require('lodash/lang/isUndefined');
 
 // @ngInject
-function configurationFactory($location) {
+function configurationFactory($location, environment) {
 
   var locationSearch = $location.search();
   var debug = has(locationSearch, 'debug') && locationSearch.debug.trim().length > 0;
@@ -19,7 +19,7 @@ function configurationFactory($location) {
    */
   var configuration = {
     get youtubeAPIKey() {
-      return 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg';
+      return environment.youtubeAPIKey;
     },
     get maxSearchResults() {
       return 20;
