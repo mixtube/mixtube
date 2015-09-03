@@ -123,7 +123,7 @@ function doHtml() {
   return gulp.src('app/index.html', {base: 'app'})
     .pipe(preprocess({
       context: {
-        YOUTUBE_API_KEY: 'AIzaSyBg_Es1M1hmXUTXIj_FbjFu2MIOqpJFzZg'
+        YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
       }
     }));
 }
@@ -283,7 +283,6 @@ gulp.task('html:dist', function() {
         }))
         .pipe(gulp.dest('dist'))
         .pipe(doHtmlStream);
-      remove_the_hard_coded_yt_api_key_from_the_configuration
     });
 
   return merge(doHtmlStream, doFaviconsStream);
