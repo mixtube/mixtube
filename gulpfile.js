@@ -24,6 +24,7 @@ var path = require('path'),
   autoprefixer = require('autoprefixer-core'),
   csswring = require('csswring'),
   htmlreplace = require('gulp-html-replace'),
+  preprocess = require('gulp-preprocess'),
   svgSprite = require('gulp-svg-sprite'),
   replace = require('gulp-replace'),
   svg2png = require('gulp-svg2png'),
@@ -118,14 +119,12 @@ function buildInlineCss(opts) {
     });
 }
 
-function doHtml(opts) {
+function doHtml() {
   return gulp.src('app/index.html', {base: 'app'})
-    .pipe(htmlreplace({
-      cssInline: {
-        src: opts.inlineCssCode || '',
-        tpl: '<style>%s</style>'
-      },
-      favicons: opts.faviconsCode || ''
+    .pipe(preprocess({
+      context: {
+        YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
+      }
     }));
 }
 
@@ -202,13 +201,19 @@ gulp.task('js:dev', function() {
     watchifiedSrc('./app/scripts/components/capabilities/videoAutoPlayTest.js', './app/scripts/', pipelineFn));
 });
 
+gulp.task('html:dev', function() {
+  return doHtml()
+    .pipe(gulp.dest('build'));
+});
+
 gulp.task('clean:dev', function() {
   del('build');
 });
 
 gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
-  runSequence(['css:dev', 'js:dev', 'svg:dev'], function() {
+  runSequence(['css:dev', 'js:dev', 'svg:dev', 'html:dev'], function() {
     gulp.watch('app/scripts/**/*.js', ['jshint']);
+    gulp.watch('app/index.html', ['html:dev']);
     gulp.watch('app/images/*.svg', ['svg:dev']);
     gulp.watch('app/styles/**/*.scss', ['css:dev']);
 
@@ -268,7 +273,14 @@ gulp.task('html:dist', function() {
         .pipe(doFaviconsStream);
     })])
     .then(function(codes) {
-      doHtml({inlineCssCode: codes[0], faviconsCode: codes[1]})
+      doHtml()
+        .pipe(htmlreplace({
+          cssInline: {
+            src: codes[0],
+            tpl: '<style>%s</style>'
+          },
+          favicons: codes[1]
+        }))
         .pipe(gulp.dest('dist'))
         .pipe(doHtmlStream);
     });
