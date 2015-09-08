@@ -266,22 +266,28 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
     // safety check on requested page size
     var boundedPageSize = Math.min(pageSize, youtubeClient.maxResultsLimit);
 
-    return youtubeClient.searchVideosByQuery(term, {pageSize: boundedPageSize, pageId: nextPageId})
-      .then(function doneCb() {
-        if (searchRequestCount === startSearchRequestCount) {
-          if (first) {
-            searchResultsCtrl.pending.youtube = false;
-          } else {
-            searchResultsCtrl.pendingMore.youtube = false;
-          }
-        }
-      }, null, function progressCb(results) {
+    return youtubeClient.searchVideosByQuery(
+      term,
+      {
+        pageSize: boundedPageSize,
+        pageId: nextPageId
+      },
+      function progressCb(results) {
         if (searchRequestCount === startSearchRequestCount) {
           if (results.videos.length) {
             searchResultsCtrl.results.youtube.push(results.videos);
             searchResultsCtrl.nextPageId.youtube = results.nextPageId;
           } else {
             searchResultsCtrl.noneFound.youtube = true;
+          }
+        }
+      })
+      .then(function doneCb() {
+        if (searchRequestCount === startSearchRequestCount) {
+          if (first) {
+            searchResultsCtrl.pending.youtube = false;
+          } else {
+            searchResultsCtrl.pendingMore.youtube = false;
           }
         }
       })

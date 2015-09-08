@@ -66,14 +66,19 @@ function youtubeClientFactory($http, $q, configuration) {
         callback: 'JSON_CALLBACK',
         key: configuration.youtubeAPIKey
       }
-    }).then(function(response) {
-      var data = response.data;
+    })
+      .then(function(response) {
+        var data = response.data;
 
-      if (has(data, 'error')) {
-        // youtube API does not return an error HTTP status in case of error but a success with a
-        // special error object in the response
-        return $q.reject(data.error.errors);
-      } else {
+        if (has(data, 'error')) {
+          // youtube API does not return an error HTTP status in case of error but a success with a
+          // special error object in the response
+          return $q.reject(data.error.errors);
+        } else {
+          return data;
+        }
+      })
+      .then(function(data) {
         var videoDetailsById = {};
         data.items.forEach(function(item) {
           videoDetailsById[item.id] = {
@@ -87,14 +92,16 @@ function youtubeClientFactory($http, $q, configuration) {
           };
         });
 
+        return videoDetailsById;
+      })
+      .then(function(videoDetailsById) {
         // extend the video with the details
         videos.forEach(function(video) {
           angular.extend(video, videoDetailsById[video.id]);
         });
 
         return videos;
-      }
-    });
+      });
   }
 
   function listVideosByIds(ids) {
@@ -113,18 +120,17 @@ function youtubeClientFactory($http, $q, configuration) {
       pagesPromises.push(extendVideosWithDetails(videosPaged));
     }
 
-    return $q.all(pagesPromises).then(function() {
-      return videos;
-    });
+    return $q.all(pagesPromises)
+      .then(function() {
+        return videos;
+      });
   }
 
-  function searchVideosByQuery(queryString, pageSpec) {
+  function searchVideosByQuery(queryString, pageSpec, notifyCb) {
 
     pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: MAX_RESULTS_LIMIT});
 
-    var deferred = $q.defer();
-
-    $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
+    return $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
       params: {
         q: queryString,
         type: 'video',
@@ -135,15 +141,20 @@ function youtubeClientFactory($http, $q, configuration) {
         callback: 'JSON_CALLBACK',
         key: configuration.youtubeAPIKey
       }
-    }).then(function(response) {
+    })
+      .then(function(response) {
 
-      var data = response.data;
+        var data = response.data;
 
-      if (has(data, 'error')) {
-        // youtube API does not return an error HTTP status in case of error but a success with a
-        // special error object in the response
-        return deferred.reject(data.error.errors);
-      } else {
+        if (has(data, 'error')) {
+          // youtube API does not return an error HTTP status in case of error but a success with a
+          // special error object in the response
+          return $q.reject(data.error.errors);
+        } else {
+          return data;
+        }
+      })
+      .then(function(data) {
         var videos = data.items.map(function(item) {
           return {
             id: item.id.videoId,
@@ -158,18 +169,16 @@ function youtubeClientFactory($http, $q, configuration) {
         });
 
         // first batch of results just notify (will call the progress handler)
-        deferred.notify({videos: videos, nextPageId: data.nextPageToken});
+        notifyCb({videos: videos, nextPageId: data.nextPageToken});
 
-        // second batch that will resolve (or reject) the promise
-        extendVideosWithDetails(videos)
+        return {videos: videos, nextPageToken: data.nextPageToken};
+      })
+      .then(function(param) {
+        return extendVideosWithDetails(param.videos)
           .then(function(videos) {
-            deferred.resolve({videos: videos, nextPageId: data.nextPageToken});
-          })
-          .catch(deferred.reject);
-      }
-    }).catch(deferred.reject);
-
-    return deferred.promise;
+            return {videos: videos, nextPageId: param.nextPageToken};
+          });
+      });
   }
 
 
