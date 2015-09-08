@@ -124,7 +124,7 @@
           </h1>
         </div>
         <div class="center">
-          <mt-button class="mt-header__playback-button" ng-click="rootCtrl.togglePlayback()"
+          <div class="mt-header__playback-button" ng-click="rootCtrl.togglePlayback()"
                      ng-show="rootCtrl.shouldShowPlaybackControls()">
             <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isPlaying()}">
               <svg class="mt-svg-icon" role="img" title="Play">
@@ -136,13 +136,13 @@
                 <use xlink:href="images/sprite.svg#mt-pause-circle"></use>
               </svg>
             </div>
-          </mt-button>
+          </div>
         </div>
         <div class="end">
           <!--just padding container to ensure proper centering of header-center -->
         </div>
         <div class="floating">
-          <mt-button class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
+          <div class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
             <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isSearchShown()}">
               <svg class="mt-svg-icon" role="img" title="Open search">
                 <use xlink:href="images/sprite.svg#ios-search"></use>
@@ -153,7 +153,7 @@
                 <use xlink:href="images/sprite.svg#ios-close-empty"></use>
               </svg>
             </div>
-          </mt-button>
+          </div>
         </div>
       </div>
 
@@ -178,7 +178,7 @@
                ng-repeat="entry in rootCtrl.getQueue().entries"
                ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
                mt-anchor="{{entry.id}}">
-            <mt-button class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
+            <div class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
                        ng-disabled="!rootCtrl.shouldShowPlaybackControls()">
               <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                    class="image"></div>
@@ -189,19 +189,19 @@
                             ng-show="entry === rootCtrl.getLoadingQueueEntry()"></mt-spinner>
               </div>
 
-            </mt-button>
+            </div>
             <div class="mt-queue__entry__data">
               <p class="mt-queue__entry__title" title="{{entry.video.title}}">
                 {{entry.video.title}}
               </p>
 
               <div class="mt-queue__entry__commands">
-                <mt-button class="mt-queue__entry__remove-button" ng-click="queueCtrl.removeQueueEntry(entry)"
+                <div class="mt-queue__entry__remove-button" ng-click="queueCtrl.removeQueueEntry(entry)"
                            mt-click-active-class="ng-click-active">
                   <svg class="mt-svg-icon" role="img" title="Remove">
                     <use xlink:href="images/sprite.svg#ios-close"></use>
                   </svg>
-                </mt-button>
+                </div>
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@
                  ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
               <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
                    ng-controller="SearchResultCtrl as searchResultCtrl">
-                <mt-button class="mt-result__container"
+                <div class="mt-result__container"
                            ng-click="searchResultCtrl.appendResultToQueue(searchResult)">
 
                   <div class="mt-result__thumbnail">
@@ -264,7 +264,7 @@
                       by {{searchResult.publisherName}}
                     </li>
                   </ul>
-                </mt-button>
+                </div>
               </div>
             </div>
           </div>
@@ -288,7 +288,7 @@
 
           <!-- show the button only when the first page of results is fetched -->
           <div class="mt-search__show-more" ng-show="searchResultsCtrl.nextPageId[pId]">
-            <mt-button class="mt-search__show-more__button"
+            <div class="mt-search__show-more__button"
                        ng-click="searchResultsCtrl.showMore(pId, searchResultsCtrl.nextPageId[pId])">
               <div class="mt-search__show-more__button__label">
                 <div class="text">Show more</div>
@@ -296,7 +296,7 @@
                   <mt-spinner class="mt-search__show-more__spinner"></mt-spinner>
                 </div>
               </div>
-            </mt-button>
+            </div>
           </div>
         </div>
       </div>

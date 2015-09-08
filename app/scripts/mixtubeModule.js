@@ -1,9 +1,10 @@
 'use strict';
 
 var angular = require('angular'),
-  angularAnimate = require('angular-animate');
+  angularAnimate = require('angular-animate'),
+  angularAria = require('angular-aria');
 
-var mixtube = angular.module('mixtube', [angularAnimate]);
+var mixtube = angular.module('mixtube', [angularAnimate, angularAria]);
 
 mixtube.factory('capabilities', require('./components/capabilities/capabilitiesFactory'));
 mixtube.factory('asyncRegistryFactory', require('./components/directives-registry/asyncRegistryFactoryFactory'));
@@ -28,7 +29,6 @@ mixtube.factory('interactiveChromesManager', require('./components/user-interact
 mixtube.factory('pointerManager', require('./components/user-interaction/pointerManagerFactory'));
 mixtube.factory('userInteractionManager', require('./components/user-interaction/userInteractionManagerFactory'));
 mixtube.constant('animationsConfig', require('./components/animationsConfig'));
-mixtube.directive('mtButton', require('./components/buttonDirective'));
 mixtube.directive('mtClickActiveClass', require('./components/clickActiveClassDirective'));
 mixtube.factory('configuration', require('./components/configurationFactory'));
 mixtube.filter('mtDuration', require('./components/durationFilter'));

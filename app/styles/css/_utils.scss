@@ -2,10 +2,6 @@
 
 @mixin utils {
 
-  mt-button {
-    display: block;
-  }
-
   [role=button] {
     cursor: pointer;
     outline: none;
