@@ -1,7 +1,11 @@
 'use strict';
 
+// add delay before executing the video testing script to avoid false negative that can happen when the event loop is busy
+// also it leaves time to the user before showing a modal
+var VIDEO_AUTO_PLAY_TEST_DELAY = 2000;
+
 // @ngInject
-function capabilitiesFactory($rootScope, $document, configuration) {
+function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
 
   var videoAutoplay;
 
@@ -16,12 +20,16 @@ function capabilitiesFactory($rootScope, $document, configuration) {
     loadScript('scripts/components/capabilities/videoAutoPlayTest.js');
   }
 
-  global.onMtVideoAutoPlayTestReady = function(videoAutoPlayPromise) {
-    videoAutoPlayPromise.then(function(result) {
-      $rootScope.$apply(function() {
-        videoAutoplay = result;
+  // the video auto play test expects this property to be defined
+  // the function is executed when the test script is loaded and ready to be executed
+  global.onMtVideoAutoPlayTestReady = function(testVideoAutoPlayFn) {
+    $timeout(function() {
+      testVideoAutoPlayFn().then(function(result) {
+        $rootScope.$apply(function() {
+          videoAutoplay = !result;
+        });
       });
-    });
+    }, VIDEO_AUTO_PLAY_TEST_DELAY);
   };
 
   activate();
