@@ -26,7 +26,7 @@ function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
     $timeout(function() {
       testVideoAutoPlayFn().then(function(result) {
         $rootScope.$apply(function() {
-          videoAutoplay = !result;
+          videoAutoplay = result;
         });
       });
     }, VIDEO_AUTO_PLAY_TEST_DELAY);
