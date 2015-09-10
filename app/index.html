@@ -223,7 +223,7 @@
           </div>
 
           <div class="mt-results mt-js-results">
-            <div class="mt-results__page mt-js-animation__slide"
+            <div class="mt-results__page mt-js-animation__fold"
                  ng-repeat="searchResultsPage in searchResultsCtrl.results[pId]">
               <div class="mt-result" ng-repeat="searchResult in searchResultsPage"
                    ng-controller="SearchResultCtrl as searchResultCtrl">
@@ -270,14 +270,14 @@
           </div>
 
 
-          <div class="mt-search__message mt-js-animation__slide" ng-if="searchResultsCtrl.error[pId]">
+          <div class="mt-search__message mt-js-animation__fold" ng-if="searchResultsCtrl.error[pId]">
             <p class="mt-search__message__padding">
               Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
               connection or try again later.
             </p>
           </div>
 
-          <div class="mt-search__message mt-js-animation__slide"
+          <div class="mt-search__message mt-js-animation__fold"
                ng-if="searchResultsCtrl.noneFound[pId]">
             <p class="mt-search__message__padding">
               Sorry, no video found on {{pLabel}} for "{{searchResultsCtrl.getSearchTerm()}}". Please try
