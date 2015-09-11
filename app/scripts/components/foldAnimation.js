@@ -3,28 +3,30 @@
 // @ngInject
 function foldAnimation($animateCss, animationsConfig) {
 
-  function fold(element, unfold, doneCb) {
+  function fold(element, unfold) {
     var height = element[0].getBoundingClientRect().height;
 
-    $animateCss(element, {
+    var runner = $animateCss(element, {
       from: {height: (unfold ? '0' : height) + 'px'},
       to: {height: (!unfold ? '0' : height) + 'px'},
       easing: 'cubic-bezier(' + animationsConfig.easeInOutBezierPoints.join(', ') + ')',
       duration: animationsConfig.transitionDuration / 1000
-    })
-      .start()
+    }).start();
+
+    runner
       .done(function() {
         element[0].style.height = '';
-        doneCb();
       });
+
+    return runner;
   }
 
-  function enter(element, doneCb) {
-    fold(element, true, doneCb);
+  function enter(element) {
+    return fold(element, true);
   }
 
-  function leave(element, doneCb) {
-    fold(element, false, doneCb);
+  function leave(element) {
+    return fold(element, false);
   }
 
   return {
