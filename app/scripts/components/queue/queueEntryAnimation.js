@@ -23,7 +23,6 @@ function queueEntryAnimation(slideAnimationBuilder, foldAnimationBuilder) {
         scope.$emit('mtQueueEntryAnimation::foldDone', scope.entry, {
           waitUntil: function(promiseWaited) {
             promiseWaited.then(function() {
-              console.log(element[0].getAttribute('mt-anchor'));
               slideAnimationBuilder({from: '-100%', to: '0%'})
                 .enter(element)
                 .done(doneFn);
