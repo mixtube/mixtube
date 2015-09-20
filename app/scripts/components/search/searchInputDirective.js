@@ -1,8 +1,6 @@
 'use strict';
 
-var querySelector = require('../../commons').querySelector,
-  velocity = require('velocity-animate'),
-  defaults = require('lodash/object/defaults');
+var querySelector = require('../../commons').querySelector;
 
 // brfs requires this to be on its own line
 var fs = require('fs');
@@ -22,7 +20,7 @@ var fs = require('fs');
  */
 // @ngInject
 function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, interactiveChromesManager,
-                              animationsConfig) {
+                              slideAnimationBuilder) {
 
   return {
     restrict: 'E',
@@ -39,9 +37,6 @@ function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, in
       var field = querySelector($element, '.mt-js-search-input__field');
       var fakeField = querySelector($element, '.mt-js-search-input__fake-field');
 
-      // helps to differentiate first rendering from next ones
-      var init = true;
-
       var _show = null;
       var animationRunning = false;
 
@@ -49,40 +44,24 @@ function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, in
         animationRunning = true;
         field.css({opacity: 0});
 
-        var baseAnimConf = {
-          // in init phase we don't want to animate
-          duration: init ? 0 : animationsConfig.transitionDuration,
-          easing: animationsConfig.easeInOutBezierPoints
-        };
-
         if (_show) {
-          form.css({display: ''});
-          velocity(
-            fakeField,
-            {translateX: ['0', '100%']},
-            defaults({
-              complete: function() {
-                field.css({opacity: ''});
-                animationRunning = false;
-              }
-            }, baseAnimConf)
-          );
-        } else {
-          velocity(
-            fakeField,
-            {translateX: ['100%', '0']},
-            defaults({
-              complete: function() {
-                form.css({display: 'none'});
-                field.css({opacity: ''});
-                animationRunning = false;
-              }
-            }, baseAnimConf)
-          );
-        }
 
-        if (init) {
-          init = false;
+          form.css({display: ''});
+
+          slideAnimationBuilder({from: '100%', to: 0})
+            .enter(fakeField)
+            .done(function() {
+              field.css({opacity: ''});
+              animationRunning = false;
+            });
+        } else {
+          slideAnimationBuilder({from: 0, to: '100%'})
+            .leave(fakeField)
+            .done(function() {
+              form.css({display: 'none'});
+              field.css({opacity: ''});
+              animationRunning = false;
+            });
         }
 
         field[0][_show ? 'focus' : 'blur']();

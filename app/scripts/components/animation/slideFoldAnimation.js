@@ -6,7 +6,7 @@ function slideFoldAnimation(slideAnimationBuilder, foldAnimationBuilder) {
   var foldAnimation = foldAnimationBuilder();
 
   function buildFromTo(slideIn, leftToRight) {
-    var fromTo = {from: '0%', to: '0%'};
+    var fromTo = {from: 0, to: 0};
     if (slideIn) {
       fromTo.from = leftToRight ? -100 : 100 + '%';
     } else {

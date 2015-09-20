@@ -23,7 +23,7 @@ function queueEntryAnimation(slideAnimationBuilder, foldAnimationBuilder) {
         scope.$emit('mtQueueEntryAnimation::foldDone', scope.entry, {
           waitUntil: function(promiseWaited) {
             promiseWaited.then(function() {
-              slideAnimationBuilder({from: '-100%', to: '0%'})
+              slideAnimationBuilder({from: '-100%', to: 0})
                 .enter(element)
                 .done(doneFn);
             });
@@ -33,7 +33,7 @@ function queueEntryAnimation(slideAnimationBuilder, foldAnimationBuilder) {
   }
 
   function leave(element, doneFn) {
-    slideAnimationBuilder({from: '0%', to: '-100%'})
+    slideAnimationBuilder({from: 0, to: '-100%'})
       .leave(element)
       .done(function() {
         foldAnimation
