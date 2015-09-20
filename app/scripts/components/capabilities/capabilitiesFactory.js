@@ -2,7 +2,7 @@
 
 // add delay before executing the video testing script to avoid false negative that can happen when the event loop is busy
 // also it leaves time to the user before showing a modal
-var VIDEO_AUTO_PLAY_TEST_DELAY = 2000;
+var VIDEO_AUTO_PLAY_TEST_DELAY = 500;
 
 // @ngInject
 function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
