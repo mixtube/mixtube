@@ -7,9 +7,7 @@ var angular = require('angular'),
   has = require('lodash/object/has');
 
 // @ngInject
-function queueManagerFactory($q, youtubeClient, loggerFactory) {
-
-  var logger = loggerFactory('queueManager');
+function queueManagerFactory($q, youtubeClient, logger) {
 
   // initialize queue
   var queue = new Queue();

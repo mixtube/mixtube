@@ -7,10 +7,9 @@ var angular = require('angular'),
 
 // @ngInject
 function orchestratorFactory($rootScope, $timeout, queueManager, notificationCentersRegistry, scenesRegistry,
-                             configuration, loggerFactory) {
+                             configuration, logger) {
 
-  var _logger = loggerFactory('orchestrator'),
-    _playback,
+  var _playback,
     _playbackState,
     _playingEntry,
     _loadingEntry;
@@ -85,8 +84,8 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
         loadFailed: function(entry, error) {
           $rootScope.$evalAsync(function() {
             entry.skippedAtRuntime = true;
-            _logger.warn('Error while loading a entry: "%s". See stack trace bellow:', error.message);
-            _logger.warn(error.stack);
+            logger.warn('Error while loading a entry: "%s". See stack trace bellow:', error.message);
+            logger.warn(error.stack);
           });
         }
       };

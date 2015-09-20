@@ -31,7 +31,7 @@ mixtube.directive('mtClickActiveClass', require('./components/clickActiveClassDi
 mixtube.factory('configuration', require('./components/configurationFactory'));
 mixtube.filter('mtDuration', require('./components/durationFilter'));
 mixtube.factory('keyboardShortcutManager', require('./components/keyboardShortcutManagerFactory'));
-mixtube.factory('loggerFactory', require('./components/loggerFactoryFactory'));
+mixtube.constant('logger', console);
 mixtube.directive('mtScrollable', require('./components/scrollableDirective'));
 mixtube.factory('foldAnimationBuilder', require('./components/animation/foldAnimationBuilderFactory'));
 mixtube.factory('slideAnimationBuilder', require('./components/animation/slideAnimationBuilderFactory'));
