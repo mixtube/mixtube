@@ -1,7 +1,7 @@
 'use strict';
 
 // @ngInject
-function queueDirective($timeout, directivesRegistryHelper, queuesRegistry) {
+function queueDirective($timeout, $q, $animate, directivesRegistryHelper, queuesRegistry) {
   return {
     restrict: 'A',
     require: ['mtQueue', 'mtScrollable'],
@@ -13,33 +13,37 @@ function queueDirective($timeout, directivesRegistryHelper, queuesRegistry) {
       var scrollable = ctrls[1];
       var lastFocusedEntry = null;
 
-      scope.$on('mtQueueEntryAnimation::started', function(evt, entry) {
-        // this event should not bubble further up
-        evt.stopPropagation();
+      function onAnimate(element, phase) {
+        if (phase === 'start') {
 
-        if (entry === lastFocusedEntry) {
-
-          // an animation concerning the last focused entry started
-          //  1. clear the lastFocusedEntry variable to prevent the any other animation of it (see focusEntry method)
-          //  2. listen to the sizing done event to suspend the entry animation
-          //  3. scroll to the newly inserted entry
-          //  4. continue the entry insertion animation
-
-          lastFocusedEntry = null;
-
-          var deregisterFn = scope.$on('mtQueueEntryAnimation::sizingDone', function(evt, entry, continuation) {
+          var deregisterFn = element.scope().$on('mtQueueEntryAnimation::foldDone', function(evt, entry, extEvent) {
 
             evt.stopPropagation();
             deregisterFn();
 
-            // suspend the entry animation until the scroll operation is finished then resume it
-            continuation.suspend();
-            scrollable.putAnchorInViewPort(entry.id, function() {
-              continuation.continue();
-            });
+            if (entry !== lastFocusedEntry) {
+              extEvent.waitUntil($q.resolve());
+            } else {
+
+              // an animation concerning the last focused entry started
+              //  1. clear the lastFocusedEntry variable to prevent the any other animation of it (see focusEntry method)
+              //  2. listen to the sizing done event to suspend the entry animation
+              //  3. scroll to the newly inserted entry
+              //  4. continue the entry insertion animation
+
+              lastFocusedEntry = null;
+
+              // suspend the entry animation until the scroll operation is finished then resume it
+              extEvent.waitUntil($q(function(resolve) {
+                scrollable.putAnchorInViewPort(entry.id, resolve);
+              }));
+            }
           });
         }
-      });
+      }
+
+      $animate.on('enter', iElement, onAnimate);
+      $animate.on('leave', iElement, onAnimate);
 
       controller.focusEntry = function(entry) {
         lastFocusedEntry = entry;

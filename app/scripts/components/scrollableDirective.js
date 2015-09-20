@@ -1,6 +1,6 @@
 'use strict';
 
-var velocity = require('velocity-animate'),
+var scrollIntoView = require('scroll-into-view'),
   querySelector = require('../commons').querySelector;
 
 /**
@@ -43,17 +43,12 @@ function scrollableDirective($timeout, animationsConfig) {
       function putAnchorInViewPort(anchor, done) {
         var target = querySelector(scrollable, '[mt-anchor="' + anchor + '"]');
         if (target.length > 0 && !containsY(scrollable, target)) {
-          // the target needs to be animated to reveal the item
-          velocity(
-            target[0],
-            'scroll',
-            {
-              container: scrollable[0],
-              duration: animationsConfig.transitionDuration,
-              easing: animationsConfig.easeInOutBezierPoints,
-              complete: done
+          scrollIntoView(target[0], {
+            time: animationsConfig.transitionDuration,
+            validTarget: function(parent) {
+              return scrollable[0] === parent;
             }
-          );
+          }, done);
         } else if (done) {
           // no animation required but call the callback asynchronously if given
           $timeout(done, 0, false);
