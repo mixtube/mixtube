@@ -198,7 +198,7 @@ gulp.task('js:dev', function() {
   // generates the bundle and watches changes
   return merge(
     watchifiedSrc('./app/scripts/app.js', './app/scripts/', pipelineFn),
-    watchifiedSrc('./app/scripts/components/capabilities/videoAutoPlayTest.js', './app/scripts/', pipelineFn));
+    watchifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/', pipelineFn));
 });
 
 gulp.task('html:dev', function() {
@@ -250,7 +250,7 @@ gulp.task('css:dist', function() {
 gulp.task('js:dist', function() {
   return merge(
     browserifiedSrc('./app/scripts/app.js', './app/scripts/'),
-    browserifiedSrc('./app/scripts/components/capabilities/videoAutoPlayTest.js', './app/scripts/'))
+    browserifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(ngAnnotate())

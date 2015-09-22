@@ -2,12 +2,12 @@
 
 // add delay before executing the video testing script to avoid false negative that can happen when the event loop is busy
 // also it leaves time to the user before showing a modal
-var VIDEO_AUTO_PLAY_TEST_DELAY = 500;
+var VIDEO_CALL_PLAY_TEST_DELAY = 500;
 
 // @ngInject
 function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
 
-  var videoAutoplay;
+  var videoCallPlay;
 
   function loadScript(src) {
     var script = $document[0].createElement('script');
@@ -17,19 +17,19 @@ function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
   }
 
   function activate() {
-    loadScript('scripts/components/capabilities/videoAutoPlayTest.js');
+    loadScript('scripts/components/capabilities/videoCallPlayTest.js');
   }
 
   // the video auto play test expects this property to be defined
   // the function is executed when the test script is loaded and ready to be executed
-  global.onMtVideoAutoPlayTestReady = function(testVideoAutoPlayFn) {
+  global.onMtVideoCallPlayTestReady = function(testVideoCallPlayFn) {
     $timeout(function() {
-      testVideoAutoPlayFn().then(function(result) {
+      testVideoCallPlayFn().then(function(result) {
         $rootScope.$apply(function() {
-          videoAutoplay = result;
+          videoCallPlay = result;
         });
       });
-    }, VIDEO_AUTO_PLAY_TEST_DELAY);
+    }, VIDEO_CALL_PLAY_TEST_DELAY);
   };
 
   activate();
@@ -41,12 +41,12 @@ function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
     /**
      * Is the current platform capable of acting as a playback device.
      *
-     * This property is a combinations of multiple rules but the main one is "being able to auto play video".
+     * This property is a combinations of rules but the main one is "being able to play video without user intervention".
      *
      * @returns {boolean|undefined}
      */
     get playback() {
-      return configuration.videoAutoplay !== null ? configuration.videoAutoplay : videoAutoplay;
+      return configuration.videoAutoplay !== null ? configuration.videoAutoplay : videoCallPlay;
     },
 
     /**
