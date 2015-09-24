@@ -49,14 +49,15 @@
     text-align: justify;
   }
 
-  .mt-modal__paragraph {
+  .mt-modal__content__wrapper {
     padding: 0 3 * $grid-size;
+  }
+
+  .mt-modal__content__paragraph {
     margin-bottom: 3 * $grid-size;
   }
 
-  .mt-modal__sub-paragraph {
-    padding: 0 3 * $grid-size;
-    margin-bottom: 3 * $grid-size;
+  .mt-modal__content__sub {
     font: $font-smaller;
   }
 
@@ -94,5 +95,9 @@
     &:last-child {
       //margin-right: 0;
     }
+  }
+
+  .mt-modal__link {
+    text-decoration: underline;
   }
 }

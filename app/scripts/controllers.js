@@ -20,6 +20,12 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
    */
   var serializedQueue;
 
+  // a combination of detected capability and user override
+  var playbackCapable = true;
+
+  // we need to track if the modal is open to make sure we don't "idle" the chrome
+  var modalOpen = false;
+
   rootCtrl.queueLoading = false;
 
   rootCtrl.isSearchShown = isSearchShown;
@@ -64,15 +70,15 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function shouldIdleChrome() {
-    return !configuration.forceChrome && !userInteractionManager.userInteracting;
+    return !configuration.forceChrome && !userInteractionManager.userInteracting && !modalOpen;
   }
 
   function shouldShowScene() {
-    return capabilities.playback;
+    return playbackCapable;
   }
 
   function shouldShowPlaybackControls() {
-    return capabilities.playback || capabilities.remoteControl;
+    return playbackCapable || capabilities.remoteControl;
   }
 
   function togglePlayback() {
@@ -152,11 +158,18 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
       return capabilities.playback;
     }, function(playback) {
       if (playback === false) {
+        modalOpen = true;
         modalManager.open({
-          title: 'MixTube won\'t work on your device',
-          contentTemplateUrl: 'noPlaybackModalContent',
-          commands: [{label: 'OK', primary: true}]
-        });
+            title: 'MixTube won\'t work on your device',
+            contentTemplateUrl: 'noPlaybackModalContent',
+            commands: [{label: 'OK', primary: true, name: 'ok'}]
+          })
+          .then(function(command) {
+            playbackCapable = command.name === 'try';
+          })
+          .finally(function() {
+            modalOpen = false;
+          });
       }
     });
   }
