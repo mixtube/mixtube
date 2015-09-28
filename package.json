@@ -5,15 +5,10 @@
     "type": "git",
     "url": "https://github.com/jraoult/mixtube.git"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/jraoult/mixtube/blob/master/LICENSE"
-    }
-  ],
+  "license": "MIT",
   "engines": {
-    "node": ">= 0.12",
-    "npm": ">= 2.7"
+    "node": ">= 4",
+    "npm": ">= 3"
   },
   "devDependencies": {
     "Ionicons": "git://github.com/jraoult/ionicons#npm",
@@ -44,7 +39,6 @@
     "jshint-stylish": "^2.0.0",
     "merge-stream": "^1.0.0",
     "run-sequence": "^1.0.2",
-    "vinyl": "^0.5.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.2.2"
@@ -55,7 +49,7 @@
     "angular-aria": "^1.4.5",
     "keymaster": "^1.6.2",
     "lodash": "^3.0.1",
-    "mixtube-playback": "git+ssh://git@github.com:jraoult/mixtube-playback#v1.0.0-alpha.8",
+    "mixtube-playback": "git+ssh://git@github.com:jraoult/mixtube-playback#v1.0.0",
     "scroll-into-view": "^1.5.0"
   },
   "browserify": {
