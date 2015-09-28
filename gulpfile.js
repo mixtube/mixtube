@@ -30,6 +30,7 @@ var path = require('path'),
   svg2png = require('gulp-svg2png'),
   favicons = require('gulp-favicons'),
   ghPages = require('gulp-gh-pages'),
+  minimist = require('minimist'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
@@ -61,15 +62,15 @@ function watchifiedSrc(src, baseDir, pipelineFn) {
 // do the work on svg assets, just need to be piped out
 function doSvg() {
   return gulp.src([
-    'node_modules/Ionicons/src/ios-search.svg',
-    'node_modules/Ionicons/src/ios-close.svg',
-    'node_modules/Ionicons/src/ios-close-empty.svg',
-    'node_modules/Ionicons/src/ios-videocam.svg',
-    'node_modules/Ionicons/src/load-c.svg',
-    'app/images/mt-play-circle.svg',
-    'app/images/mt-pause-circle.svg',
-    'app/images/mt-logo.svg'
-  ])
+      'node_modules/Ionicons/src/ios-search.svg',
+      'node_modules/Ionicons/src/ios-close.svg',
+      'node_modules/Ionicons/src/ios-close-empty.svg',
+      'node_modules/Ionicons/src/ios-videocam.svg',
+      'node_modules/Ionicons/src/load-c.svg',
+      'app/images/mt-play-circle.svg',
+      'app/images/mt-pause-circle.svg',
+      'app/images/mt-logo.svg'
+    ])
     .pipe(svgSprite({
       svg: {
         xmlDeclaration: ' ', //work around until svg-sprites handle false value properly
@@ -161,6 +162,11 @@ function doFavicons(htmlCodeCb) {
     }, htmlCodeCb));
 }
 
+var options = minimist(process.argv.slice(2), {
+  boolean: 'no-tls',
+  default: {tls: true}
+});
+
 gulp.task('jshint', function() {
   return gulp.src('app/scripts/**/*.js')
     .pipe(jshint())
@@ -221,7 +227,7 @@ gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
       open: false,
       notify: false,
       server: ['build', 'app'],
-      https: true,
+      https: options.tls,
       ghostMode: false
     });
 
@@ -264,14 +270,14 @@ gulp.task('html:dist', function() {
     doFaviconsStream = gutil.noop();
 
   Promise.all([
-    buildInlineCss({minify: true}),
-    new Promise(function(resolve) {
-      doFavicons(function(htmlCode) {
-        resolve(htmlCode);
-      })
-        .pipe(gulp.dest('dist'))
-        .pipe(doFaviconsStream);
-    })])
+      buildInlineCss({minify: true}),
+      new Promise(function(resolve) {
+        doFavicons(function(htmlCode) {
+          resolve(htmlCode);
+        })
+          .pipe(gulp.dest('dist'))
+          .pipe(doFaviconsStream);
+      })])
     .then(function(codes) {
       doHtml()
         .pipe(htmlreplace({
@@ -304,7 +310,7 @@ gulp.task('serve:dist', ['dist'], function() {
       baseDir: 'dist',
       middleware: compression()
     },
-    https: true,
+    https: options.tls,
     ghostMode: false
   });
 });
