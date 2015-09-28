@@ -37,8 +37,17 @@ function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, in
       var field = querySelector($element, '.mt-js-search-input__field');
       var fakeField = querySelector($element, '.mt-js-search-input__fake-field');
 
+      // helps to differentiate first rendering from next ones
+      var init = true;
+
       var _show = null;
       var animationRunning = false;
+
+      function doneHide() {
+        form.css({display: 'none'});
+        field.css({opacity: ''});
+        animationRunning = false;
+      }
 
       function sync() {
         animationRunning = true;
@@ -55,13 +64,18 @@ function searchInputDirective(searchInputsRegistry, directivesRegistryHelper, in
               animationRunning = false;
             });
         } else {
-          slideAnimationBuilder({from: 0, to: '100%'})
-            .leave(fakeField)
-            .done(function() {
-              form.css({display: 'none'});
-              field.css({opacity: ''});
-              animationRunning = false;
-            });
+          if (init) {
+            fakeField.css('transform', 'translateX(100%)');
+            doneHide();
+          } else {
+            slideAnimationBuilder({from: 0, to: '100%'})
+              .leave(fakeField)
+              .done(doneHide);
+          }
+        }
+
+        if (init) {
+          init = false;
         }
 
         field[0][_show ? 'focus' : 'blur']();
