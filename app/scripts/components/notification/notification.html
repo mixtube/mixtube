@@ -6,7 +6,7 @@
     <div role="button" tabindex="0" class="mt-notification" ng-switch on="notification.type"
          ng-class="{error: notification.type === 'error'}" ng-click="notificationCenterCtrl.close(notification)">
       <div class="mt-notification__content" ng-switch-when="error">
-        <div class="text">
+        <div class="mt-notification__text">
           {{notification.data.message}}
         </div>
       </div>
