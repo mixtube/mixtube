@@ -5,10 +5,8 @@
 
 @mixin modals {
 
-  // padding based on base line to have a consistent gutter around the content (vertical + horizontal)
-  //$padding-modal: 3 * $grid-size;
-
   .mt-modal__container {
+    max-height: 100%;
     max-width: $width-breakpoint-single-column-layout;
     padding: $grid-size;
     overflow: visible;
