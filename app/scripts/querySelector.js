@@ -20,20 +20,4 @@ function querySelector(context, selector) {
   return angular.element(context.querySelectorAll(selector));
 }
 
-function buildTimeString(date) {
-  var dateParts = [date.getHours(), date.getMinutes(), date.getSeconds()];
-  var dateStringBuffer = [];
-
-  for (var idx = 0; idx < dateParts.length; idx++) {
-    var dateStringPart = dateParts[idx].toString();
-    if (dateStringPart.length < 2) {
-      dateStringPart = '0' + dateStringPart;
-    }
-    dateStringBuffer.push(dateStringPart);
-  }
-
-  return dateStringBuffer.join(':');
-}
-
-exports.querySelector = querySelector;
-exports.buildTimeString = buildTimeString;
+module.exports = querySelector;

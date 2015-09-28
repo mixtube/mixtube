@@ -1,6 +1,6 @@
 'use strict';
 
-var querySelector = require('../../commons').querySelector;
+var querySelector = require('../../querySelector');
 
 // brfs requires this to be on its own line
 var fs = require('fs');

@@ -1,7 +1,7 @@
 'use strict';
 
 var scrollIntoView = require('scroll-into-view'),
-  querySelector = require('../commons').querySelector;
+  querySelector = require('../querySelector');
 
 /**
  * @ngdoc directive
