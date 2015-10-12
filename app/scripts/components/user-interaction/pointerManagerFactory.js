@@ -57,20 +57,36 @@ function pointerManagerFactory($timeout, $document) {
 
   function activate() {
 
-    $document
-      .on('mouseout', function() {
-        pointerPosition.x = pointerPosition.y = null;
+    // allows to detect if mousemove is an actual pointer events or just emulation
+    // the idea is that if touchstart is triggered then the next mousemove is an emulation therefore we filter it out
+    // we probably discard some legit mousemove event but it is not to bad since there are usually triggered in burst
+    var touched = false;
 
-        mouseMoved();
-      })
-      .on('mousemove', function(evt) {
-        var moved = Math.abs(evt.clientX - pointerPosition.x) > MOVE_THRESHOLD ||
-          Math.abs(evt.clientY - pointerPosition.y) > MOVE_THRESHOLD;
-        pointerPosition.x = evt.clientX;
-        pointerPosition.y = evt.clientY;
-        if (moved) {
+    $document
+      // mouseout is used only to detect when the pointer is leaving the window
+      .on('mouseout', function(evt) {
+        if(evt.relatedTarget === null) {
+          // relatedTarget to null means the pointer left the window
+          pointerPosition.x = pointerPosition.y = null;
+
           mouseMoved();
         }
+      })
+      .on('mousemove', function(evt) {
+        if(!touched) {
+          var moved = Math.abs(evt.clientX - pointerPosition.x) > MOVE_THRESHOLD ||
+            Math.abs(evt.clientY - pointerPosition.y) > MOVE_THRESHOLD;
+          pointerPosition.x = evt.clientX;
+          pointerPosition.y = evt.clientY;
+          if (moved) {
+            mouseMoved();
+          }
+        }
+        touched = false;
+      })
+      .on('touchstart', function() {
+        touched = true;
+        mouseMoved();
       });
   }
 
