@@ -50,7 +50,7 @@
     "angular-aria": "^1.4.5",
     "keymaster": "^1.6.2",
     "lodash": "^3.0.1",
-    "mixtube-playback": "git+ssh://git@github.com:jraoult/mixtube-playback#v1.0.0",
+    "mixtube-playback": "git+ssh://git@github.com:jraoult/mixtube-playback#v1.0.1",
     "scroll-into-view": "^1.5.0"
   },
   "browserify": {
