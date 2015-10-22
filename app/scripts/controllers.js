@@ -70,7 +70,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function shouldIdleChrome() {
-    return !configuration.forceChrome && !userInteractionManager.userInteracting && !modalOpen;
+    return !configuration.forceChrome && !userInteractionManager.userInteracting && !modalOpen && orchestrator.playing;
   }
 
   function shouldShowScene() {
