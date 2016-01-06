@@ -28,7 +28,7 @@ var path = require('path'),
   svgSprite = require('gulp-svg-sprite'),
   replace = require('gulp-replace'),
   svg2png = require('gulp-svg2png'),
-  favicons = require('gulp-favicons'),
+  favicons = require('favicons').stream,
   ghPages = require('gulp-gh-pages'),
   minimist = require('minimist'),
   appVersion = require('./package').version,
@@ -93,31 +93,18 @@ function doSvg() {
     }));
 }
 
-function buildInlineCss(opts) {
-  return new Promise(
-    function(resolve, reject) {
-      var postCssFilters = [
-        autoprefixer({browsers: ['last 1 version']})
-      ];
-      if (opts && opts.minify) {
-        postCssFilters.push(csswring());
-      }
+function doInlineCss(opts) {
+  var postCssFilters = [
+    autoprefixer({browsers: ['last 1 version']})
+  ];
+  if (opts && opts.minify) {
+    postCssFilters.push(csswring());
+  }
 
-      gulp.src('app/styles/css/inline.scss')
-        .pipe(plumber())
-        .pipe(sass())
-        .pipe(postcss(postCssFilters))
-        .pipe(buffer())
-        .pipe(gutil.buffer(function(err, cssFiles) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(cssFiles.reduce(function(previous, cssFile) {
-              return previous + cssFile.contents.toString() + '\n';
-            }, ''));
-          }
-        }));
-    });
+  return gulp.src('app/styles/css/inline.scss')
+    .pipe(plumber())
+    .pipe(sass())
+    .pipe(postcss(postCssFilters));
 }
 
 function doHtml() {
@@ -269,23 +256,24 @@ gulp.task('html:dist', function() {
   var doHtmlStream = gutil.noop(),
     doFaviconsStream = gutil.noop();
 
-  Promise.all([
-      buildInlineCss({minify: true}),
-      new Promise(function(resolve) {
-        doFavicons(function(htmlCode) {
-          resolve(htmlCode);
-        })
-          .pipe(gulp.dest('dist'))
-          .pipe(doFaviconsStream);
-      })])
-    .then(function(codes) {
+  var doFaviconsPromise = new Promise(function(resolve) {
+    doFavicons(function(htmlCode) {
+      resolve(htmlCode);
+    })
+      .pipe(gulp.dest('dist'))
+      .pipe(doFaviconsStream);
+  });
+
+  doFaviconsPromise
+    .then(function(htmlCode) {
+
       doHtml()
         .pipe(htmlreplace({
           cssInline: {
-            src: codes[0],
+            src: doInlineCss({minify: true}),
             tpl: '<style>%s</style>'
           },
-          favicons: codes[1]
+          favicons: htmlCode
         }))
         .pipe(gulp.dest('dist'))
         .pipe(doHtmlStream);
