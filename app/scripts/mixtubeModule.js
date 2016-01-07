@@ -2,9 +2,13 @@
 
 var angular = require('angular'),
   angularAnimate = require('angular-animate'),
-  angularAria = require('angular-aria');
+  angularAria = require('angular-aria'),
+  noop = require('lodash/utility/noop');
 
 var mixtube = angular.module('mixtube', [angularAnimate, angularAria]);
+
+// can be overridden
+mixtube.value('analytics', noop);
 
 mixtube.factory('capabilities', require('./components/capabilities/capabilitiesFactory'));
 mixtube.factory('asyncRegistryFactory', require('./components/directives-registry/asyncRegistryFactoryFactory'));
