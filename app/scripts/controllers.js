@@ -8,7 +8,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  capabilities, searchCtrlHelper, configuration) {
+                  capabilities, searchCtrlHelper, configuration, analytics) {
 
   var rootCtrl = this;
 
@@ -82,6 +82,8 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function togglePlayback() {
+    analytics.track('Playback toggled', {currentlyPlaying: orchestrator.playing});
+
     orchestrator.togglePlayback();
   }
 
@@ -95,7 +97,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
     // register the global space shortcut
     keyboardShortcutManager.register('space', function(evt) {
       evt.preventDefault();
-      orchestrator.togglePlayback();
+      togglePlayback();
     });
 
     keyboardShortcutManager.register('search', 'esc', function(evt) {
