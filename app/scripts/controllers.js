@@ -400,13 +400,14 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, 
   function appendResultToQueue(video) {
 
     var queueEntry = queueManager.appendVideo(video);
+    var countBeforePlayback = null;
 
     if (orchestrator.runningQueueEntry) {
       var entries = queueManager.queue.entries;
-      searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(orchestrator.runningQueueEntry);
-    } else {
-      searchResultCtrl.countBeforePlayback = null;
+      countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(orchestrator.runningQueueEntry);
     }
+
+    searchResultCtrl.countBeforePlayback = countBeforePlayback;
 
     queuesRegistry('queue').ready(function(queue) {
       queue.focusEntry(queueEntry);
@@ -418,7 +419,10 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, 
       searchResultCtrl.shouldShowConfirmation = false;
     }, CONFIRMATION_DURATION);
 
-    analytics.track('Appended video to queue', {queueLength: queueManager.queue.entries.length});
+    analytics.track('Appended video to queue', {
+      queueLength: queueManager.queue.entries.length,
+      countBeforePlayback: countBeforePlayback
+    });
   }
 }
 
