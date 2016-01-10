@@ -167,20 +167,25 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
 
     $scope.$watch(function() {
       return capabilities.playback;
-    }, function(playback) {
-      if (playback === false) {
-        modalOpen = true;
-        modalManager.open({
-            title: 'MixTube won\'t work on your device',
-            contentTemplateUrl: 'noPlaybackModalContent',
-            commands: [{label: 'OK', primary: true, name: 'ok'}]
-          })
-          .then(function(command) {
-            playbackCapable = command.name === 'try';
-          })
-          .finally(function() {
-            modalOpen = false;
-          });
+    }, function(playback, oldValue) {
+      if (playback !== oldValue) {
+
+        analytics.track('Playback capability detected', {playbackCapable: playback});
+
+        if (playback === false) {
+          modalOpen = true;
+          modalManager.open({
+              title: 'MixTube won\'t work on your device',
+              contentTemplateUrl: 'noPlaybackModalContent',
+              commands: [{label: 'OK', primary: true, name: 'ok'}]
+            })
+            .then(function(command) {
+              playbackCapable = command.name === 'try';
+            })
+            .finally(function() {
+              modalOpen = false;
+            });
+        }
       }
     });
   }
