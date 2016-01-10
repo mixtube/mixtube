@@ -371,7 +371,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, an
 }
 
 // @ngInject
-function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) {
+function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, analytics) {
 
   var searchResultCtrl = this;
 
@@ -414,11 +414,13 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) 
     tmoPromise = $timeout(function() {
       searchResultCtrl.shouldShowConfirmation = false;
     }, CONFIRMATION_DURATION);
+
+    analytics.track('Appended video to queue', {queueLength: queueManager.queue.entries.length});
   }
 }
 
 // @ngInject
-function QueueCtrl(orchestrator, queueManager) {
+function QueueCtrl(orchestrator, queueManager, analytics) {
 
   var queueCtrl = this;
 
@@ -437,6 +439,8 @@ function QueueCtrl(orchestrator, queueManager) {
    */
   function removeQueueEntry(queueEntry) {
     queueManager.removeEntry(queueEntry);
+
+    analytics.track('Removed video from queue', {queueLength: queueManager.queue.entries.length});
   }
 }
 
