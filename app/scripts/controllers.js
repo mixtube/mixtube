@@ -352,6 +352,9 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, an
             $timeout(function() {
               searchYoutube(newSearchTerm);
             }, 0);
+
+            analytics.track('Search started');
+
           }, INSTANT_SEARCH_DELAY);
         }
       }
