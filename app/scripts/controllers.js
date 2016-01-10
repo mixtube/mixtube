@@ -176,7 +176,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
 }
 
 // @ngInject
-function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
+function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, analytics) {
 
   var searchResultsCtrl = this;
 
@@ -194,12 +194,14 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
   // the following variables will be initialized by the initSearch function.
 
+  // a tracking purpose only variable
+  var pageCurrentIdxByProvider = null;
+
   /**
    * The user already executed one search. Used to hide the results pane until there is something to show.
-   *
-   * @type {boolean}
    */
-  searchResultsCtrl.inSearch = null;
+  var inSearch = false;
+
   /**
    * A list of results pages.
    *
@@ -228,12 +230,15 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
   }
 
   function shouldShowSearchResultPanel() {
-    return searchCtrlHelper.searchShown && searchResultsCtrl.inSearch;
+    return searchCtrlHelper.searchShown && inSearch;
   }
 
   function initSearch() {
     instantSearchPromise = null;
-    searchResultsCtrl.inSearch = false;
+    inSearch = false;
+
+    pageCurrentIdxByProvider = {youtube: 0};
+
     searchResultsCtrl.results = {youtube: [[]]};
     searchResultsCtrl.pending = {youtube: false};
     searchResultsCtrl.pendingMore = {youtube: false};
@@ -248,6 +253,8 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
       searchResultsCtrl.error.youtube = false;
       searchYoutube(searchCtrlHelper.searchTerm, nextPageId);
     }
+
+    analytics.track('Clicked show more', {provider: pId, pageIndex: ++pageCurrentIdxByProvider[pId]});
   }
 
   /**
@@ -339,7 +346,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
           $timeout.cancel(instantSearchPromise);
           instantSearchPromise = $timeout(function search() {
-            searchResultsCtrl.inSearch = true;
+            inSearch = true;
 
             // we need to delay the actual search in order for the search panel show animation to work
             $timeout(function() {
