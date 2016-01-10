@@ -152,6 +152,15 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
       }
     });
 
+    // for analytics purposes only
+    $scope.$watch(function() {
+      return orchestrator.stopped;
+    }, function(stopped, oldVal) {
+      if (stopped !== oldVal) {
+        analytics.track('Playback stopped');
+      }
+    });
+
     // pre-fill the template cache with the content of the modal
     $templateCache.put('noPlaybackModalContent',
       fs.readFileSync(__dirname + '/components/capabilities/noPlaybackModalContent.html', 'utf8'));

@@ -177,6 +177,13 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
     },
 
     /**
+     * @returns {boolean}
+     */
+    get stopped() {
+      return _playbackState === mixtubePlayback.States.stopped;
+    },
+
+    /**
      * @param {number} queueIndex
      */
     skipTo: skipTo,
