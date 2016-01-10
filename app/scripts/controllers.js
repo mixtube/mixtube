@@ -455,6 +455,8 @@ function QueueCtrl(orchestrator, queueManager, analytics) {
    */
   function playQueueEntry(queueIndex) {
     orchestrator.skipTo(queueIndex);
+
+    analytics.track('User skipped to video');
   }
 
   /**
