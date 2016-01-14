@@ -7,8 +7,7 @@ var angular = require('angular'),
 
 var mixtube = angular.module('mixtube', [angularAnimate, angularAria]);
 
-// can be overridden
-mixtube.value('analytics', noop);
+// analyticsTracker and errorsTracker have to be provided otherwise Mixtube will no start
 
 mixtube.factory('capabilities', require('./components/capabilities/capabilitiesFactory'));
 mixtube.factory('asyncRegistryFactory', require('./components/directives-registry/asyncRegistryFactoryFactory'));

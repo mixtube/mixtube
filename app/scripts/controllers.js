@@ -1,6 +1,7 @@
 'use strict';
 
-var angular = require('angular');
+var angular = require('angular'),
+  DeserializationErrorCodes = require('./components/queue/deserializationErrorCodes');
 
 // brfs requires this to be on its own line
 var fs = require('fs');
@@ -8,7 +9,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  capabilities, searchCtrlHelper, configuration, analytics) {
+                  capabilities, searchCtrlHelper, configuration, analyticsTracker, errorsTracker) {
 
   var rootCtrl = this;
 
@@ -82,9 +83,29 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function togglePlayback() {
-    analytics.track('Playback toggled', {currentlyPlaying: orchestrator.playing});
+    analyticsTracker.track('Playback toggled', {currentlyPlaying: orchestrator.playing});
 
     orchestrator.togglePlayback();
+  }
+
+  function handleDeserializationError(error) {
+
+    var userMessage;
+    if('code' in error) {
+      if(error.code === DeserializationErrorCodes.COULD_NOT_PARSE) {
+        userMessage = 'Sorry we are unable to load your queue. Seems that the link you used is not valid.';
+      } else if(error.code === DeserializationErrorCodes.PROVIDER_NOT_FOUND) {
+        userMessage = 'Sorry we are unable to load your queue because of an internal error.';
+      } else if(error.code === DeserializationErrorCodes.PROVIDER_LOADING_FAILURE) {
+        userMessage = 'Sorry we were unable to access some videos while loading your queue. May be you should try later.';
+      }
+
+      errorsTracker.track(error);
+    }
+
+    notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+      notificationCenter.error(userMessage);
+    });
   }
 
   // we need to wait for the loading phase to be done to avoid race problems (loading for ever)
@@ -132,13 +153,12 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
         serializedQueue = newSerializedQueue;
         // change initiated by user (back / forward etc.), need to be deserialized
         rootCtrl.queueLoading = true;
-        queueManager.deserialize(serializedQueue).catch(function(message) {
-          notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
-            notificationCenter.error(message);
+
+        queueManager.deserialize(serializedQueue)
+          .catch(handleDeserializationError)
+          .finally(function() {
+            rootCtrl.queueLoading = false;
           });
-        }).finally(function() {
-          rootCtrl.queueLoading = false;
-        });
       }
     });
 
@@ -157,7 +177,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
       return orchestrator.stopped;
     }, function(stopped, oldVal) {
       if (stopped !== oldVal) {
-        analytics.track('Playback stopped');
+        analyticsTracker.track('Playback stopped');
       }
     });
 
@@ -170,7 +190,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
     }, function(playback, oldValue) {
       if (playback !== oldValue) {
 
-        analytics.track('Playback capability detected', {playbackCapable: playback});
+        analyticsTracker.track('Playback capability detected', {playbackCapable: playback});
 
         if (playback === false) {
           modalOpen = true;
@@ -192,7 +212,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
 }
 
 // @ngInject
-function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, analytics) {
+function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, analyticsTracker) {
 
   var searchResultsCtrl = this;
 
@@ -270,7 +290,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, an
       searchYoutube(searchCtrlHelper.searchTerm, nextPageId);
     }
 
-    analytics.track('Clicked show more', {provider: pId, pageIndex: ++pageCurrentIdxByProvider[pId]});
+    analyticsTracker.track('Clicked show more', {provider: pId, pageIndex: ++pageCurrentIdxByProvider[pId]});
   }
 
   /**
@@ -369,7 +389,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, an
               searchYoutube(newSearchTerm);
             }, 0);
 
-            analytics.track('Search started');
+            analyticsTracker.track('Search started');
 
           }, INSTANT_SEARCH_DELAY);
         }
@@ -390,7 +410,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, an
 }
 
 // @ngInject
-function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, analytics) {
+function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, analyticsTracker) {
 
   var searchResultCtrl = this;
 
@@ -435,7 +455,7 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, 
       searchResultCtrl.shouldShowConfirmation = false;
     }, CONFIRMATION_DURATION);
 
-    analytics.track('Appended video to queue', {
+    analyticsTracker.track('Appended video to queue', {
       queueLength: queueManager.queue.entries.length,
       countBeforePlayback: countBeforePlayback
     });
@@ -443,7 +463,7 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, 
 }
 
 // @ngInject
-function QueueCtrl(orchestrator, queueManager, analytics) {
+function QueueCtrl(orchestrator, queueManager, analyticsTracker) {
 
   var queueCtrl = this;
 
@@ -456,7 +476,7 @@ function QueueCtrl(orchestrator, queueManager, analytics) {
   function playQueueEntry(queueIndex) {
     orchestrator.skipTo(queueIndex);
 
-    analytics.track('User skipped to video');
+    analyticsTracker.track('User skipped to video');
   }
 
   /**
@@ -465,7 +485,7 @@ function QueueCtrl(orchestrator, queueManager, analytics) {
   function removeQueueEntry(queueEntry) {
     queueManager.removeEntry(queueEntry);
 
-    analytics.track('Removed video from queue', {queueLength: queueManager.queue.entries.length});
+    analyticsTracker.track('Removed video from queue', {queueLength: queueManager.queue.entries.length});
   }
 }
 

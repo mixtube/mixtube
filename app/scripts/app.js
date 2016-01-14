@@ -8,27 +8,29 @@ var angular = require('angular'),
 /**
  * @param {{youtubeAPIKey: string}} environment a set of properties required for Mixtube to work
  * @param {Object=} delegates a collection of optional delegates to use as extension point
- * @param {{track: function(event: string, data:= Object)}} [delegates.analytics]
- * @param {function(Error)} [delegates.error]
+ * @param {{track: function(event: string, data:= Object)}} [delegates.analyticsTracker]
+ * @param {{track: function(error: Error)}} [delegates.errorsTracker]
  */
 function initMixtube(environment, delegates) {
 
   var _delegates = defaults({}, delegates, {
-    analytics: {track: noop},
-    error: noop
+    analyticsTracker: {track: noop},
+    // log collected exception to the browser console by default
+    errorsTracker: {track: console.error.bind(console)}
   });
 
   angular
     .module('mixtubeApp', [mixtubeModule])
     .constant('environment', environment)
-    .value('analytics', _delegates.analytics)
+    .value('analyticsTracker', _delegates.analyticsTracker)
+    .value('errorsTracker', _delegates.errorsTracker)
     .config(function($locationProvider) {
       $locationProvider.html5Mode(true);
     })
     .config(function($provide) {
       $provide.decorator('$exceptionHandler', function($delegate) {
         return function exceptionHandlerDecorator(exception, cause) {
-          _delegates.error(exception);
+          _delegates.errorsTracker.track(exception);
           $delegate(exception, cause);
         };
       });

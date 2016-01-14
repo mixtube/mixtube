@@ -3,11 +3,12 @@
 var angular = require('angular'),
   Queue = require('./queueModel').Queue,
   QueueEntry = require('./queueModel').QueueEntry,
+  DeserializationErrorCodes = require('./deserializationErrorCodes'),
   uniqueId = require('lodash/utility/uniqueId'),
   has = require('lodash/object/has');
 
 // @ngInject
-function queueManagerFactory($q, youtubeClient, logger) {
+function queueManagerFactory($q, youtubeClient) {
 
   // initialize queue
   var queue = new Queue();
@@ -25,14 +26,23 @@ function queueManagerFactory($q, youtubeClient, logger) {
     return jsonString.substr(1, jsonString.length - 2);
   }
 
+  /**
+   * @param {string} input the serialized form of the queue
+   * @returns {Promise} resolve an empty value or reject with an Error object where message is an error code. It may
+   * contains some additional properties depending of the reason of failure
+   */
   function deserialize(input) {
+    var error;
+
     // add removed array delimiters
     var buffer;
     try {
       buffer = JSON.parse('[' + input + ']');
     } catch (e) {
-      logger.debug('Unable to parse a serialized queue because of an exception %s', e);
-      return $q.reject('Sorry we are unable to load your queue. Seems that the link you used is not valid.');
+      error = new Error('Unable to parse a serialized queue because of an exception');
+      error.code = DeserializationErrorCodes.COULD_NOT_PARSE;
+      error.cause = e;
+      return $q.reject(error);
     }
 
     var newQueue = new Queue();
@@ -45,8 +55,10 @@ function queueManagerFactory($q, youtubeClient, logger) {
       if (serializedEntry.indexOf(youtubeClient.shortName) === 0) {
         youtubeVideosIds.push(serializedEntry.substring(youtubeClient.shortName.length));
       } else {
-        logger.debug('Unable to find a provider for serialized entry %s', serializedEntry);
-        return $q.reject('Sorry we are unable to load your queue because of an internal error.');
+        error = new Error('Unable to find a provider for serialized entry');
+        error.code = DeserializationErrorCodes.PROVIDER_NOT_FOUND;
+        error.serializedEntry = serializedEntry;
+        return $q.reject(error);
       }
     }
 
@@ -68,9 +80,11 @@ function queueManagerFactory($q, youtubeClient, logger) {
         // by extending the object it allows it to detect the changes
         angular.extend(queue, newQueue);
       })
-      .catch(function() {
-        return $q.reject('Sorry we are unable to load videos from YouTube while loading your queue. ' +
-        'May be you should try later.');
+      .catch(function(ytError) {
+        error = new Error('Unable to load a queue because of an Youtube error');
+        error.code = DeserializationErrorCodes.PROVIDER_LOADING_FAILURE;
+        error.nativeError = ytError;
+        return $q.reject(error);
       });
   }
 
