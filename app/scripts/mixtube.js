@@ -11,7 +11,7 @@ var angular = require('angular'),
  * @param {{track: function(event: string, data:= Object)}} [delegates.analyticsTracker]
  * @param {{track: function(error: Error)}} [delegates.errorsTracker]
  */
-function initMixtube(environment, delegates) {
+function mixtube(environment, delegates) {
 
   var _delegates = defaults({}, delegates, {
     analyticsTracker: {track: noop},
@@ -51,4 +51,4 @@ function initMixtube(environment, delegates) {
   });
 }
 
-global.initMixtube = initMixtube;
+module.exports = mixtube;
