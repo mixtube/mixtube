@@ -7,7 +7,7 @@ var angular = require('angular'),
 
 // @ngInject
 function orchestratorFactory($rootScope, $timeout, queueManager, notificationCentersRegistry, scenesRegistry,
-                             configuration, logger) {
+                             configuration, errorsTracker) {
 
   var _playback,
     _playbackState,
@@ -84,8 +84,7 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
         loadFailed: function(entry, error) {
           $rootScope.$evalAsync(function() {
             entry.skippedAtRuntime = true;
-            logger.warn('Error while loading a entry: "%s". See stack trace bellow:', error.message);
-            logger.warn(error.stack);
+            errorsTracker.track(error);
           });
         }
       };
@@ -174,6 +173,13 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
      */
     get playing() {
       return _playbackState === mixtubePlayback.States.playing;
+    },
+
+    /**
+     * @returns {boolean}
+     */
+    get stopped() {
+      return _playbackState === mixtubePlayback.States.stopped;
     },
 
     /**

@@ -1,6 +1,7 @@
 'use strict';
 
-var angular = require('angular');
+var angular = require('angular'),
+  DeserializationErrorCodes = require('./components/queue/deserializationErrorCodes');
 
 // brfs requires this to be on its own line
 var fs = require('fs');
@@ -8,7 +9,7 @@ var fs = require('fs');
 // @ngInject
 function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutManager, queueManager,
                   notificationCentersRegistry, orchestrator, userInteractionManager, queuesRegistry, modalManager,
-                  capabilities, searchCtrlHelper, configuration) {
+                  capabilities, searchCtrlHelper, configuration, analyticsTracker, errorsTracker) {
 
   var rootCtrl = this;
 
@@ -82,7 +83,29 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   }
 
   function togglePlayback() {
+    analyticsTracker.track('Playback toggled', {currentlyPlaying: orchestrator.playing});
+
     orchestrator.togglePlayback();
+  }
+
+  function handleDeserializationError(error) {
+
+    var userMessage;
+    if('code' in error) {
+      if(error.code === DeserializationErrorCodes.COULD_NOT_PARSE) {
+        userMessage = 'Sorry we are unable to load your queue. Seems that the link you used is not valid.';
+      } else if(error.code === DeserializationErrorCodes.PROVIDER_NOT_FOUND) {
+        userMessage = 'Sorry we are unable to load your queue because of an internal error.';
+      } else if(error.code === DeserializationErrorCodes.PROVIDER_LOADING_FAILURE) {
+        userMessage = 'Sorry we were unable to access some videos while loading your queue. May be you should try later.';
+      }
+
+      errorsTracker.track(error);
+    }
+
+    notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
+      notificationCenter.error(userMessage);
+    });
   }
 
   // we need to wait for the loading phase to be done to avoid race problems (loading for ever)
@@ -95,7 +118,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
     // register the global space shortcut
     keyboardShortcutManager.register('space', function(evt) {
       evt.preventDefault();
-      orchestrator.togglePlayback();
+      togglePlayback();
     });
 
     keyboardShortcutManager.register('search', 'esc', function(evt) {
@@ -130,13 +153,12 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
         serializedQueue = newSerializedQueue;
         // change initiated by user (back / forward etc.), need to be deserialized
         rootCtrl.queueLoading = true;
-        queueManager.deserialize(serializedQueue).catch(function(message) {
-          notificationCentersRegistry('notificationCenter').ready(function(notificationCenter) {
-            notificationCenter.error(message);
+
+        queueManager.deserialize(serializedQueue)
+          .catch(handleDeserializationError)
+          .finally(function() {
+            rootCtrl.queueLoading = false;
           });
-        }).finally(function() {
-          rootCtrl.queueLoading = false;
-        });
       }
     });
 
@@ -150,33 +172,47 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
       }
     });
 
+    // for analytics purposes only
+    $scope.$watch(function() {
+      return orchestrator.stopped;
+    }, function(stopped, oldVal) {
+      if (stopped !== oldVal) {
+        analyticsTracker.track('Playback stopped');
+      }
+    });
+
     // pre-fill the template cache with the content of the modal
     $templateCache.put('noPlaybackModalContent',
       fs.readFileSync(__dirname + '/components/capabilities/noPlaybackModalContent.html', 'utf8'));
 
     $scope.$watch(function() {
       return capabilities.playback;
-    }, function(playback) {
-      if (playback === false) {
-        modalOpen = true;
-        modalManager.open({
-            title: 'MixTube won\'t work on your device',
-            contentTemplateUrl: 'noPlaybackModalContent',
-            commands: [{label: 'OK', primary: true, name: 'ok'}]
-          })
-          .then(function(command) {
-            playbackCapable = command.name === 'try';
-          })
-          .finally(function() {
-            modalOpen = false;
-          });
+    }, function(playback, oldValue) {
+      if (playback !== oldValue) {
+
+        analyticsTracker.track('Playback capability detected', {playbackCapable: playback});
+
+        if (playback === false) {
+          modalOpen = true;
+          modalManager.open({
+              title: 'MixTube won\'t work on your device',
+              contentTemplateUrl: 'noPlaybackModalContent',
+              commands: [{label: 'OK', primary: true, name: 'ok'}]
+            })
+            .then(function(command) {
+              playbackCapable = command.name === 'try';
+            })
+            .finally(function() {
+              modalOpen = false;
+            });
+        }
       }
     });
   }
 }
 
 // @ngInject
-function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
+function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper, analyticsTracker) {
 
   var searchResultsCtrl = this;
 
@@ -194,12 +230,14 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
   // the following variables will be initialized by the initSearch function.
 
+  // a tracking purpose only variable
+  var pageCurrentIdxByProvider = null;
+
   /**
    * The user already executed one search. Used to hide the results pane until there is something to show.
-   *
-   * @type {boolean}
    */
-  searchResultsCtrl.inSearch = null;
+  var inSearch = false;
+
   /**
    * A list of results pages.
    *
@@ -228,12 +266,15 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
   }
 
   function shouldShowSearchResultPanel() {
-    return searchCtrlHelper.searchShown && searchResultsCtrl.inSearch;
+    return searchCtrlHelper.searchShown && inSearch;
   }
 
   function initSearch() {
     instantSearchPromise = null;
-    searchResultsCtrl.inSearch = false;
+    inSearch = false;
+
+    pageCurrentIdxByProvider = {youtube: 0};
+
     searchResultsCtrl.results = {youtube: [[]]};
     searchResultsCtrl.pending = {youtube: false};
     searchResultsCtrl.pendingMore = {youtube: false};
@@ -248,6 +289,8 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
       searchResultsCtrl.error.youtube = false;
       searchYoutube(searchCtrlHelper.searchTerm, nextPageId);
     }
+
+    analyticsTracker.track('Clicked show more', {provider: pId, pageIndex: ++pageCurrentIdxByProvider[pId]});
   }
 
   /**
@@ -339,12 +382,15 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 
           $timeout.cancel(instantSearchPromise);
           instantSearchPromise = $timeout(function search() {
-            searchResultsCtrl.inSearch = true;
+            inSearch = true;
 
             // we need to delay the actual search in order for the search panel show animation to work
             $timeout(function() {
               searchYoutube(newSearchTerm);
             }, 0);
+
+            analyticsTracker.track('Search started');
+
           }, INSTANT_SEARCH_DELAY);
         }
       }
@@ -364,7 +410,7 @@ function SearchResultsCtrl($scope, $timeout, youtubeClient, searchCtrlHelper) {
 }
 
 // @ngInject
-function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) {
+function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator, analyticsTracker) {
 
   var searchResultCtrl = this;
 
@@ -390,13 +436,14 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) 
   function appendResultToQueue(video) {
 
     var queueEntry = queueManager.appendVideo(video);
+    var countBeforePlayback = null;
 
     if (orchestrator.runningQueueEntry) {
       var entries = queueManager.queue.entries;
-      searchResultCtrl.countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(orchestrator.runningQueueEntry);
-    } else {
-      searchResultCtrl.countBeforePlayback = null;
+      countBeforePlayback = entries.indexOf(queueEntry) - entries.indexOf(orchestrator.runningQueueEntry);
     }
+
+    searchResultCtrl.countBeforePlayback = countBeforePlayback;
 
     queuesRegistry('queue').ready(function(queue) {
       queue.focusEntry(queueEntry);
@@ -407,11 +454,16 @@ function SearchResultCtrl($timeout, queueManager, queuesRegistry, orchestrator) 
     tmoPromise = $timeout(function() {
       searchResultCtrl.shouldShowConfirmation = false;
     }, CONFIRMATION_DURATION);
+
+    analyticsTracker.track('Appended video to queue', {
+      queueLength: queueManager.queue.entries.length,
+      countBeforePlayback: countBeforePlayback
+    });
   }
 }
 
 // @ngInject
-function QueueCtrl(orchestrator, queueManager) {
+function QueueCtrl(orchestrator, queueManager, analyticsTracker) {
 
   var queueCtrl = this;
 
@@ -423,6 +475,8 @@ function QueueCtrl(orchestrator, queueManager) {
    */
   function playQueueEntry(queueIndex) {
     orchestrator.skipTo(queueIndex);
+
+    analyticsTracker.track('User skipped to video');
   }
 
   /**
@@ -430,6 +484,8 @@ function QueueCtrl(orchestrator, queueManager) {
    */
   function removeQueueEntry(queueEntry) {
     queueManager.removeEntry(queueEntry);
+
+    analyticsTracker.track('Removed video from queue', {queueLength: queueManager.queue.entries.length});
   }
 }
 
