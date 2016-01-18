@@ -24,7 +24,6 @@ var path = require('path'),
   autoprefixer = require('autoprefixer'),
   csswring = require('csswring'),
   htmlreplace = require('gulp-html-replace'),
-  preprocess = require('gulp-preprocess'),
   svgSprite = require('gulp-svg-sprite'),
   replace = require('gulp-replace'),
   svg2png = require('gulp-svg2png'),
@@ -49,6 +48,7 @@ function watchifiedSrc(src, baseDir, pipelineFn) {
   function doBundle() {
     return pipelineFn(
       b.bundle()
+        .on('error', gutil.log.bind(gutil, 'Browserify Error'))
         .pipe(source(path.relative(baseDir, src)))
     );
   }
@@ -108,12 +108,7 @@ function doInlineCss(opts) {
 }
 
 function doHtml() {
-  return gulp.src('app/index.html', {base: 'app'})
-    .pipe(preprocess({
-      context: {
-        YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
-      }
-    }));
+  return gulp.src('app/index.html', {base: 'app'});
 }
 
 function doFavicons(htmlCodeCb) {
@@ -190,7 +185,7 @@ gulp.task('js:dev', function() {
 
   // generates the bundle and watches changes
   return merge(
-    watchifiedSrc('./app/scripts/app.js', './app/scripts/', pipelineFn),
+    watchifiedSrc('./app/scripts/main.js', './app/scripts/', pipelineFn),
     watchifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/', pipelineFn));
 });
 
@@ -242,7 +237,7 @@ gulp.task('css:dist', function() {
 
 gulp.task('js:dist', function() {
   return merge(
-    browserifiedSrc('./app/scripts/app.js', './app/scripts/'),
+    browserifiedSrc('./app/scripts/main.js', './app/scripts/'),
     browserifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
