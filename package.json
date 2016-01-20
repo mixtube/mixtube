@@ -20,9 +20,8 @@
     "compression": "^1.4.4",
     "csswring": "^4.0.0",
     "del": "^2.0.1",
-    "envify": "^3.4.0",
     "favicons": "jraoult/favicons#add_html_callback_to_stream_api",
-    "gulp": "^3.8.10",
+    "gulp": "github:gulpjs/gulp#4.0",
     "gulp-gh-pages": "^0.5.2",
     "gulp-html-replace": "jraoult/gulp-html-replace#vinyl_files_stream_as_input",
     "gulp-jshint": "^2.0.0",
@@ -30,18 +29,17 @@
     "gulp-plumber": "^1.0.1",
     "gulp-postcss": "^6.0.0",
     "gulp-preprocess": "^2.0.0",
-    "gulp-replace": "^0.5.3",
     "gulp-sass": "^2.0.1",
     "gulp-sourcemaps": "^1.5.0",
     "gulp-svg-sprite": "^1.2.2",
     "gulp-svg2png": "^0.3.0",
+    "gulp-template": "^3.1.0",
     "gulp-uglify": "^1.1.0",
     "gulp-util": "^3.0.2",
     "jshint": "^2.9.1-rc1",
     "jshint-stylish": "^2.0.0",
     "merge-stream": "^1.0.0",
     "minimist": "^1.2.0",
-    "run-sequence": "^1.0.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.2.2"
@@ -57,8 +55,7 @@
   },
   "browserify": {
     "transform": [
-      "brfs",
-      "envify"
+      "brfs"
     ]
   },
   "config": {
@@ -68,6 +65,7 @@
     }
   },
   "scripts": {
-    "serve": "gulp serve"
+    "start": "gulp serve",
+    "gulp": "gulp"
   }
 }
