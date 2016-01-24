@@ -1,12 +1,11 @@
 'use strict';
 
-var path = require('path'),
+const path = require('path'),
   gulp = require('gulp'),
   gutil = require('gulp-util'),
   plumber = require('gulp-plumber'),
   merge = require('merge-stream'),
   del = require('del'),
-  runSequence = require('run-sequence'),
   buffer = require('vinyl-buffer'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify'),
@@ -25,16 +24,28 @@ var path = require('path'),
   csswring = require('csswring'),
   htmlreplace = require('gulp-html-replace'),
   svgSprite = require('gulp-svg-sprite'),
-  replace = require('gulp-replace'),
   svg2png = require('gulp-svg2png'),
   favicons = require('favicons').stream,
+  template = require('gulp-template'),
   ghPages = require('gulp-gh-pages'),
   minimist = require('minimist'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
+const cmdOptions = minimist(process.argv.slice(2), {
+  string: 'baseUrl',
+  boolean: 'notls',
+  default: {
+    baseUrl: '/'
+  }
+});
+
+const options = Object.assign({}, cmdOptions, {
+  youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
+});
+
 function browserifiedSrc(src, baseDir) {
-  var b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
+  const b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
   // convert bundle paths to IDS to save bytes in browserify bundles
   b.plugin(collapse);
   b.on('log', gutil.log);
@@ -43,7 +54,7 @@ function browserifiedSrc(src, baseDir) {
 }
 
 function watchifiedSrc(src, baseDir, pipelineFn) {
-  var b = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
+  const b = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
 
   function doBundle() {
     return pipelineFn(
@@ -94,7 +105,7 @@ function doSvg() {
 }
 
 function doInlineCss(opts) {
-  var postCssFilters = [
+  const postCssFilters = [
     autoprefixer({browsers: ['last 1 version']})
   ];
   if (opts && opts.minify) {
@@ -108,7 +119,11 @@ function doInlineCss(opts) {
 }
 
 function doHtml() {
-  return gulp.src('app/index.html', {base: 'app'});
+  return gulp.src('app/index.html', {base: 'app'})
+    .pipe(template({
+      baseUrl: options.baseUrl,
+      youtubeApiKey: options.youtubeApiKey
+    }));
 }
 
 function doFavicons(htmlCodeCb) {
@@ -144,23 +159,18 @@ function doFavicons(htmlCodeCb) {
     }, htmlCodeCb));
 }
 
-var options = minimist(process.argv.slice(2), {
-  boolean: 'no-tls',
-  default: {tls: true}
-});
-
-gulp.task('jshint', function() {
+function jsHint() {
   return gulp.src('app/scripts/**/*.js')
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'));
-});
+}
 
-gulp.task('svg:dev', function() {
+function svgDev() {
   return doSvg()
     .pipe(gulp.dest('build/images'));
-});
+}
 
-gulp.task('css:dev', function() {
+function cssDev() {
   return gulp.src('app/styles/css/main.scss')
     .pipe(plumber())
     .pipe(sourcemaps.init())
@@ -171,9 +181,9 @@ gulp.task('css:dev', function() {
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('build/styles'))
     .pipe(reload({stream: true}));
-});
+}
 
-gulp.task('js:dev', function() {
+function jsDev() {
   function pipelineFn(pipeline) {
     return pipeline
       .pipe(buffer())
@@ -187,42 +197,54 @@ gulp.task('js:dev', function() {
   return merge(
     watchifiedSrc('./app/scripts/main.js', './app/scripts/', pipelineFn),
     watchifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/', pipelineFn));
-});
+}
 
-gulp.task('html:dev', function() {
+function htmlDev() {
   return doHtml()
     .pipe(gulp.dest('build'));
-});
+}
 
-gulp.task('clean:dev', function() {
-  del('build');
-});
+function cleanDev() {
+  return del('build');
+}
 
-gulp.task('serve', ['clean:dev', 'jshint'], function(done) {
-  runSequence(['css:dev', 'js:dev', 'svg:dev', 'html:dev'], function() {
-    gulp.watch('app/scripts/**/*.js', ['jshint']);
-    gulp.watch('app/index.html', ['html:dev']);
-    gulp.watch('app/images/*.svg', ['svg:dev']);
-    gulp.watch('app/styles/**/*.scss', ['css:dev']);
+function watchDev(done) {
+  gulp.watch('app/scripts/**/*.js', jsHint);
+  gulp.watch('app/index.html', htmlDev);
+  gulp.watch('app/images/*.svg', svgDev);
+  gulp.watch('app/styles/**/*.scss', cssDev);
+
+  done();
+}
+
+const serve = gulp.series(
+  // prepare
+  gulp.parallel(cleanDev, jsHint),
+
+  // pre build assets
+  gulp.parallel(cssDev, jsDev, svgDev, htmlDev),
+
+  watchDev,
+
+  function serverDev(done) {
 
     browserSync({
       open: false,
       notify: false,
       server: ['build', 'app'],
-      https: options.tls,
+      https: !options.notls,
       ghostMode: false
     });
 
     done();
   });
-});
 
-gulp.task('svg:dist', function() {
+function svgDist() {
   return doSvg()
     .pipe(gulp.dest('dist/images'));
-});
+}
 
-gulp.task('css:dist', function() {
+function cssDist() {
   return gulp.src('app/styles/css/main.scss')
     .pipe(plumber())
     .pipe(sourcemaps.init())
@@ -233,9 +255,9 @@ gulp.task('css:dist', function() {
     ]))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/styles'));
-});
+}
 
-gulp.task('js:dist', function() {
+function jsDist() {
   return merge(
     browserifiedSrc('./app/scripts/main.js', './app/scripts/'),
     browserifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/'))
@@ -245,14 +267,13 @@ gulp.task('js:dist', function() {
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('dist/scripts'));
-});
+}
 
-gulp.task('html:dist', function() {
-  var doHtmlStream = gutil.noop(),
-    doFaviconsStream = gutil.noop();
+function htmlDist() {
+  const doHtmlStream = gutil.noop(), doFaviconsStream = gutil.noop();
 
-  var doFaviconsPromise = new Promise(function(resolve) {
-    doFavicons(function(htmlCode) {
+  const doFaviconsPromise = new Promise(function(resolve) {
+    doFavicons(htmlCode => {
       resolve(htmlCode);
     })
       .pipe(gulp.dest('dist'))
@@ -260,7 +281,7 @@ gulp.task('html:dist', function() {
   });
 
   doFaviconsPromise
-    .then(function(htmlCode) {
+    .then(htmlCode => {
 
       doHtml()
         .pipe(htmlreplace({
@@ -275,36 +296,45 @@ gulp.task('html:dist', function() {
     });
 
   return merge(doHtmlStream, doFaviconsStream);
-});
+}
 
-gulp.task('clean:dist', function() {
-  del('dist');
-});
+function cleanDist() {
+  return del('dist');
+}
 
-gulp.task('dist', ['clean:dist', 'jshint'], function(done) {
-  runSequence(['js:dist', 'css:dist', 'html:dist', 'svg:dist'], done);
-});
+const dist = gulp.series(
+  gulp.parallel(cleanDist, jsHint),
 
-gulp.task('serve:dist', ['dist'], function() {
-  browserSync({
-    open: false,
-    notify: false,
-    server: {
-      baseDir: 'dist',
-      middleware: compression()
-    },
-    https: options.tls,
-    ghostMode: false
+  gulp.parallel(jsDist, cssDist, htmlDist, svgDist)
+);
+
+const serveDist = gulp.series(
+  dist,
+
+  function server() {
+    browserSync({
+      open: false,
+      notify: false,
+      server: {
+        baseDir: 'dist',
+        middleware: compression()
+      },
+      https: !options.notls,
+      ghostMode: false
+    });
   });
-});
 
-gulp.task('dist:gh', ['dist'], function() {
-  return gulp.src('dist/index.html')
-    .pipe(replace('<base href="/">', '<base href="/mixtube/">'))
-    .pipe(gulp.dest('dist'));
-});
-
-gulp.task('deploy:gh', ['dist:gh'], function() {
+function pushGhPagesDist() {
   return gulp.src('dist/**/*')
     .pipe(ghPages());
-});
+}
+
+const deployGh = gulp.series(
+  dist,
+  pushGhPagesDist
+);
+
+gulp.task('serve', serve);
+gulp.task('dist', dist);
+gulp.task('serve:dist', serveDist);
+gulp.task('deploy:gh', deployGh);
