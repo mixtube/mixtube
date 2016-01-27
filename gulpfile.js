@@ -19,6 +19,7 @@ const path = require('path'),
   uglify = require('gulp-uglify'),
   ngAnnotate = require('gulp-ng-annotate'),
   sass = require('gulp-sass'),
+  bourbon = require('node-bourbon'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer'),
   csswring = require('csswring'),
@@ -114,7 +115,7 @@ function doInlineCss(opts) {
 
   return gulp.src('app/styles/css/inline.scss')
     .pipe(plumber())
-    .pipe(sass())
+    .pipe(sass({includePaths: bourbon.includePaths}))
     .pipe(postcss(postCssFilters));
 }
 
@@ -174,7 +175,7 @@ function cssDev() {
   return gulp.src('app/styles/css/main.scss')
     .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass())
+    .pipe(sass({includePaths: bourbon.includePaths}))
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']})
     ]))
@@ -248,7 +249,7 @@ function cssDist() {
   return gulp.src('app/styles/css/main.scss')
     .pipe(plumber())
     .pipe(sourcemaps.init())
-    .pipe(sass())
+    .pipe(sass({includePaths: bourbon.includePaths}))
     .pipe(postcss([
       autoprefixer({browsers: ['last 1 version']}),
       csswring

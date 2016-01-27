@@ -1,5 +1,6 @@
-@import '../vendor/bourbon/addons/position';
-@import '../vendor/bourbon/addons/triangle';
+@import 'addons/triangle';
+@import 'addons/position';
+
 @import 'utils';
 
 @mixin queue-item-color($color-background) {

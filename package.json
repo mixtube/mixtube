@@ -40,6 +40,7 @@
     "jshint-stylish": "^2.0.0",
     "merge-stream": "^1.0.0",
     "minimist": "^1.2.0",
+    "node-bourbon": "^4.2.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.2.2"
