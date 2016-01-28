@@ -29,7 +29,7 @@ mixtube.directive('mtInteractiveChrome', require('./components/user-interaction/
 mixtube.factory('interactiveChromesManager', require('./components/user-interaction/interactiveChromesManagerFactory'));
 mixtube.factory('pointerManager', require('./components/user-interaction/pointerManagerFactory'));
 mixtube.factory('userInteractionManager', require('./components/user-interaction/userInteractionManagerFactory'));
-mixtube.constant('animationsConfig', require('./components/animationsConfig'));
+mixtube.constant('animationsConfig', require('./components/AnimationsConfig'));
 mixtube.directive('mtClickActiveClass', require('./components/clickActiveClassDirective'));
 mixtube.factory('configuration', require('./components/configurationFactory'));
 mixtube.filter('mtDuration', require('./components/durationFilter'));
