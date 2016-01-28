@@ -1,3 +1,6 @@
 'use strict';
 
-global.mixtube = require('./mixtube');
+var mixtube = require('./mixtube');
+mixtube({
+  youtubeAPIKey: process.env.YOUTUBE_API_KEY
+});

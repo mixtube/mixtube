@@ -10,6 +10,7 @@ const path = require('path'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify'),
   browserify = require('browserify'),
+  envify = require('envify/custom'),
   collapse = require('bundle-collapser/plugin'),
   sourcemaps = require('gulp-sourcemaps'),
   browserSync = require('browser-sync'),
@@ -33,35 +34,45 @@ const path = require('path'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
-const cmdOptions = minimist(process.argv.slice(2), {
-  string: 'baseUrl',
+const videoCallPlayTestPath = './app/scripts/components/capabilities/videoCallPlayTest.js';
+
+const cmdArguments = minimist(process.argv.slice(2), {
+  string: ['baseUrl', 'mainjs', 'output'],
   boolean: 'notls',
   default: {
-    baseUrl: '/'
+    baseUrl: '/',
+    mainjs: './app/scripts/main.js'
   }
 });
 
-const options = Object.assign({}, cmdOptions, {
+const buildConfig = Object.assign({}, {
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
+}, cmdArguments);
+
+const envifyTransform = envify({
+  YOUTUBE_API_KEY: buildConfig.youtubeApiKey
 });
 
-function browserifiedSrc(src, baseDir) {
-  const b = browserify(src, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
+function browserifiedSrc(inputPath, outputPath) {
+  const b = browserify(inputPath, {cache: {}, packageCache: {}, fullPaths: false, debug: true});
+  b.transform(envifyTransform);
+
   // convert bundle paths to IDS to save bytes in browserify bundles
   b.plugin(collapse);
   b.on('log', gutil.log);
   return b.bundle()
-    .pipe(source(path.relative(baseDir, src)));
+    .pipe(source(outputPath));
 }
 
-function watchifiedSrc(src, baseDir, pipelineFn) {
-  const b = watchify(browserify(src, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
+function watchifiedSrc(inputPath, outputPath, pipelineFn) {
+  const b = watchify(browserify(inputPath, {cache: {}, packageCache: {}, fullPaths: true, debug: true}));
+  b.transform(envifyTransform);
 
   function doBundle() {
     return pipelineFn(
       b.bundle()
         .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-        .pipe(source(path.relative(baseDir, src)))
+        .pipe(source(outputPath))
     );
   }
 
@@ -122,8 +133,8 @@ function doInlineCss(opts) {
 function doHtml() {
   return gulp.src('app/index.html', {base: 'app'})
     .pipe(template({
-      baseUrl: options.baseUrl,
-      youtubeApiKey: options.youtubeApiKey
+      baseUrl: buildConfig.baseUrl,
+      youtubeApiKey: buildConfig.youtubeApiKey
     }));
 }
 
@@ -195,9 +206,10 @@ function jsDev() {
   }
 
   // generates the bundle and watches changes
+
   return merge(
-    watchifiedSrc('./app/scripts/main.js', './app/scripts/', pipelineFn),
-    watchifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/', pipelineFn));
+    watchifiedSrc(buildConfig.mainjs, 'main.js', pipelineFn),
+    watchifiedSrc(videoCallPlayTestPath, path.relative('./app/scripts/', videoCallPlayTestPath), pipelineFn));
 }
 
 function htmlDev() {
@@ -233,7 +245,7 @@ const serve = gulp.series(
       open: false,
       notify: false,
       server: ['build', 'app'],
-      https: !options.notls,
+      https: !buildConfig.notls,
       ghostMode: false
     });
 
@@ -260,8 +272,8 @@ function cssDist() {
 
 function jsDist() {
   return merge(
-    browserifiedSrc('./app/scripts/main.js', './app/scripts/'),
-    browserifiedSrc('./app/scripts/components/capabilities/videoCallPlayTest.js', './app/scripts/'))
+    browserifiedSrc(buildConfig.mainjs, 'main.js'),
+    browserifiedSrc(videoCallPlayTestPath, path.relative('./app/scripts/', videoCallPlayTestPath)))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(ngAnnotate())
@@ -320,7 +332,7 @@ const serveDist = gulp.series(
         baseDir: 'dist',
         middleware: compression()
       },
-      https: !options.notls,
+      https: !buildConfig.notls,
       ghostMode: false
     });
   });
@@ -336,6 +348,9 @@ const deployGh = gulp.series(
 );
 
 gulp.task('serve', serve);
-gulp.task('dist', dist);
 gulp.task('serve:dist', serveDist);
 gulp.task('deploy:gh', deployGh);
+
+gulp.task('build:release', gulp.series(dist, function() {
+  return gulp.src('dist/**/*').pipe(gulp.dest(buildConfig.output));
+}));
