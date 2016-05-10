@@ -1,27 +1,14 @@
 'use strict';
 
-const path = require('path'),
-  gulp = require('gulp'),
-  gutil = require('gulp-util'),
-  plumber = require('gulp-plumber'),
-  merge = require('merge-stream'),
-  multistream = require('multistream'),
-  del = require('del'),
-  buffer = require('vinyl-buffer'),
-  sourcemaps = require('gulp-sourcemaps'),
-  browserSync = require('browser-sync'),
-  reload = browserSync.reload,
-  compression = require("compression"),
-  sass = require('gulp-sass'),
-  bourbon = require('node-bourbon'),
-  postcss = require('gulp-postcss'),
-  htmlreplace = require('gulp-html-replace'),
-  svg2png = require('gulp-svg2png'),
-  favicons = require('favicons').stream,
-  template = require('gulp-template'),
-  ghPages = require('gulp-gh-pages'),
+const gulp = require('gulp'),
   minimist = require('minimist'),
-  Observable = require('rx').Observable,
+  checkJS = require('./src/checkJs'),
+  buildJs = require('./src/buildJs'),
+  buildCss = require('./src/buildCss'),
+  buildSvg = require('./src/buildSvg'),
+  buildHtml = require('./src/buildHtml'),
+  buildInlineCss = require('./src/buildInlineCss'),
+  buildFavicons = require('./src/buildFavicons'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
@@ -29,17 +16,32 @@ const cmdArguments = minimist(process.argv.slice(2), {
   boolean: ['production', 'watch']
 });
 
-const noop = () => {
+var config = {
+  appDirPath: '../app',
+  publicDirPath: 'public',
+  htmlBaseUrl: '/',
+  appName: appConfig.name,
+  appColor: appConfig.color,
+  appVersion: appVersion,
+  watch: cmdArguments.watch,
+  production: cmdArguments.production,
+  environment: {
+    YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
+  }
 };
 
-const appDirPath = '../app';
-const publicDirPath = 'public';
-const htmlBaseUrl = '/';
 
-gulp.task('build', gulp.parallel(checkJs, makeBuildJs({
-  YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
-}), makeBuildCss(), buildSvg, buildHtml));
+gulp.task('build',
+  gulp.series(
+    checkJS(config),
+    gulp.parallel(
+      buildJs(config),
+      buildCss(config),
+      buildSvg(config),
+      buildHtml(config, () => buildInlineCss(config), () => buildFavicons(config))
+    )));
 
-gulp.task('html', buildHtml);
+// gulp.task('html', buildHtml);
+
 
 

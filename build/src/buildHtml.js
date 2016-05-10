@@ -1,10 +1,18 @@
 'use strict';
 
-const buildInlineCss = require('./buildInlineCss'),
-  buildFavicons = require('./buildFavicons');
+const gulp = require('gulp'),
+  htmlReplace = require('gulp-html-replace'),
+  template = require('gulp-template'),
+  Observable = require('rx').Observable;
 
-
-module.exports = function makeBuildHtml(config) {
+/**
+ *
+ * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, watch: boolean, production: boolean}} config
+ * @param {function} buildInlineCssFactory
+ * @param {function} buildFaviconsFactory
+ * @returns {function}
+ */
+module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFaviconsFactory) {
 
   const htmlSource = `${config.appDirPath}/src/index.html`;
 
@@ -12,41 +20,45 @@ module.exports = function makeBuildHtml(config) {
 
     const combinedObs = [];
 
-    const htmlObs = Observable.create(observer => {
-      if (config.watch) {
-        gulp.watch(htmlSource, () => observer.onNext());
-      }
-
-      observer.onNext();
-    });
-
-    combinedObs.push(htmlObs);
-
     if (config.production) {
-      combinedObs.push(buildInlineCss(config)(), buildFavicons(config)());
+      combinedObs.push(buildInlineCssFactory(), buildFaviconsFactory());
     }
 
-    Observable.combineLatest(combinedObs).subscribe(values => {
-      let htmlStream = gulp.src(htmlSource)
-        .pipe(template({
-          baseUrl: htmlBaseUrl
+    // just serves as a "trigger" when the html file changes
+    combinedObs.push(
+      Observable
+        .create(observer => {
+          if (config.watch) {
+            gulp.watch(htmlSource, () => observer.onNext());
+          }
+
+          observer.onNext();
         }));
 
-      if (values.length > 1) {
-        htmlStream = htmlStream
-          .pipe(htmlreplace({
-            cssInline: {
-              src: values[1],
-              tpl: '<style>%s</style>'
-            },
-            favicons: values[2]
+    Observable
+      .combineLatest(combinedObs)
+      .subscribe(([inlineCss, faviconsMetas]) => {
+        let htmlStream = gulp.src(htmlSource)
+          .pipe(template({
+            baseUrl: config.htmlBaseUrl
           }));
-      }
 
-      htmlStream
-        .pipe(gulp.dest(publicDirPath))
-        .on('end', doneBuildHtml)
-        .on('error', doneBuildHtml);
-    });
+        if (typeof inlineCss !== 'undefined' && typeof faviconsMetas !== 'undefined') {
+          htmlStream = htmlStream
+            .pipe(htmlReplace({
+              cssInline: {
+                src: inlineCss,
+                tpl: '<style>%s</style>'
+              },
+              favicons: faviconsMetas
+            }));
+        }
+
+        htmlStream
+          .pipe(gulp.dest(config.publicDirPath))
+          // this will work only for the first call but we are fine with that
+          .on('end', doneBuildHtml)
+          .on('error', doneBuildHtml);
+      });
   };
 };

@@ -6,7 +6,8 @@ const gulp = require('gulp'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer'),
   csswring = require('csswring'),
-  bourbon = require('node-bourbon');
+  bourbon = require('node-bourbon'),
+  plumber = require('gulp-plumber');
 
 /**
  * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean}} config

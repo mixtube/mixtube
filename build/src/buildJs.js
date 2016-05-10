@@ -1,17 +1,18 @@
 'use strict';
 
-const merge = require('merge-stream'),
+const gulp = require('gulp'),
+  gutil = require('gulp-util'),
+  merge = require('merge-stream'),
   buffer = require('vinyl-buffer'),
   sourcemaps = require('gulp-sourcemaps'),
-  gulp = require('gulp'),
-  gutil = require('gulp-util'),
   source = require('vinyl-source-stream'),
   watchify = require('watchify'),
   browserify = require('browserify'),
   envify = require('envify/custom'),
   collapse = require('bundle-collapser/plugin'),
   uglify = require('gulp-uglify'),
-  ngAnnotate = require('gulp-ng-annotate');
+  ngAnnotate = require('gulp-ng-annotate'),
+  noop = require('lodash.noop');
 
 /**
  * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, environment: Object}} config
@@ -76,7 +77,7 @@ function runBrowserify(inputPath, outputPath, options, environment) {
     bundle.on('update', doBundle);
   }
 
-  bundle.transform(envify(environment));
+  bundle.transform(envify(Object.assign({_: 'purge'}, environment)));
   options.configureBundle(bundle);
 
   bundle.on('log', gutil.log);
