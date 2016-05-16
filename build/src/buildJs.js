@@ -12,6 +12,7 @@ const gulp = require('gulp'),
   collapse = require('bundle-collapser/plugin'),
   uglify = require('gulp-uglify'),
   ngAnnotate = require('gulp-ng-annotate'),
+  brfs = require('brfs'),
   noop = require('lodash.noop');
 
 /**
@@ -77,6 +78,7 @@ function runBrowserify(inputPath, outputPath, options, environment) {
     bundle.on('update', doBundle);
   }
 
+  bundle.transform(brfs);
   bundle.transform(envify(Object.assign({_: 'purge'}, environment)));
   options.configureBundle(bundle);
 

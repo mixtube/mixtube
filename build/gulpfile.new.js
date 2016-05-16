@@ -9,14 +9,15 @@ const gulp = require('gulp'),
   buildHtml = require('./src/buildHtml'),
   buildInlineCss = require('./src/buildInlineCss'),
   buildFavicons = require('./src/buildFavicons'),
+  serve = require('./src/serve'),
   appVersion = require('./package').version,
   appConfig = require('./package').config.application;
 
 const cmdArguments = minimist(process.argv.slice(2), {
-  boolean: ['production', 'watch']
+  boolean: ['production', 'watch', 'serve']
 });
 
-var config = {
+const config = {
   appDirPath: '../app',
   publicDirPath: 'public',
   htmlBaseUrl: '/',
@@ -31,17 +32,18 @@ var config = {
 };
 
 
+const tasks = [
+  buildJs(config),
+  buildCss(config),
+  buildSvg(config),
+  buildHtml(config, () => buildInlineCss(config)(), () => buildFavicons(config)())
+];
+
+if (cmdArguments.serve) {
+  tasks.push(serve(config));
+}
+
 gulp.task('build',
   gulp.series(
     checkJS(config),
-    gulp.parallel(
-      buildJs(config),
-      buildCss(config),
-      buildSvg(config),
-      buildHtml(config, () => buildInlineCss(config), () => buildFavicons(config))
-    )));
-
-// gulp.task('html', buildHtml);
-
-
-
+    gulp.parallel(tasks)));

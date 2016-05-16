@@ -8,6 +8,7 @@ const gulp = require('gulp'),
   autoprefixer = require('autoprefixer'),
   csswring = require('csswring'),
   bourbon = require('node-bourbon'),
+  plumber = require('gulp-plumber'),
   ReplaySubject = require('rx').ReplaySubject;
 
 /**

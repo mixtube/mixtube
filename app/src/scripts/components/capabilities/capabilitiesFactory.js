@@ -17,7 +17,7 @@ function capabilitiesFactory($rootScope, $document, $timeout, configuration) {
   }
 
   function activate() {
-    loadScript('scripts/components/capabilities/videoCallPlayTest.js');
+    loadScript('components/capabilities/videoCallPlayTest.js');
   }
 
   // the video auto play test expects this property to be defined

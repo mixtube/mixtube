@@ -81,7 +81,7 @@
 
     // make sure cached CSS don't get processed straight and then block first paint
     window.requestAnimationFrame(function() {
-      loadCSS('styles/main.css');
+      loadCSS('main.css');
       loadCSS('//fonts.googleapis.com/css?family=Open+Sans:300,600');
     });
   </script>
@@ -119,7 +119,7 @@
         <div class="start">
           <h1 class="mt-header__app-title">
             <svg class="mt-svg-icon" role="img" title="MixTube">
-              <use xlink:href="images/sprite.svg#mt-logo"></use>
+              <use xlink:href="sprite.svg#mt-logo"></use>
             </svg>
           </h1>
         </div>
@@ -128,12 +128,12 @@
                ng-show="rootCtrl.shouldShowPlaybackControls()">
             <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isPlaying()}">
               <svg class="mt-svg-icon" role="img" title="Play">
-                <use xlink:href="images/sprite.svg#mt-play-circle"></use>
+                <use xlink:href="sprite.svg#mt-play-circle"></use>
               </svg>
             </div>
             <div class="facet facet__animation-toggle" ng-class="{toggle: rootCtrl.isPlaying()}">
               <svg class="mt-svg-icon" role="img" title="Pause">
-                <use xlink:href="images/sprite.svg#mt-pause-circle"></use>
+                <use xlink:href="sprite.svg#mt-pause-circle"></use>
               </svg>
             </div>
           </div>
@@ -145,12 +145,12 @@
           <div class="mt-search-input__button" ng-click="rootCtrl.toggleSearch()">
             <div class="facet facet__animation-toggle" ng-class="{toggle: !rootCtrl.isSearchShown()}">
               <svg class="mt-svg-icon" role="img" title="Open search">
-                <use xlink:href="images/sprite.svg#ios-search"></use>
+                <use xlink:href="sprite.svg#ios-search"></use>
               </svg>
             </div>
             <div class="facet facet__animation-toggle" ng-class="{toggle: rootCtrl.isSearchShown()}">
               <svg class="mt-svg-icon" role="img" title="Close search">
-                <use xlink:href="images/sprite.svg#ios-close-empty"></use>
+                <use xlink:href="sprite.svg#ios-close-empty"></use>
               </svg>
             </div>
           </div>
@@ -199,7 +199,7 @@
                 <div class="mt-queue__entry__remove-button" ng-click="queueCtrl.removeQueueEntry(entry)"
                      mt-click-active-class="ng-click-active">
                   <svg class="mt-svg-icon" role="img" title="Remove">
-                    <use xlink:href="images/sprite.svg#ios-close"></use>
+                    <use xlink:href="sprite.svg#ios-close"></use>
                   </svg>
                 </div>
               </div>
@@ -236,7 +236,7 @@
                       <div class="loading-indicator">
                         <span class="facet facet__animation-toggle" ng-hide="rootCtrl.isPlaying()">
                            <svg class="mt-svg-icon" role="img" title="Loading video thumbnail">
-                             <use xlink:href="images/sprite.svg#ios-videocam"></use>
+                             <use xlink:href="sprite.svg#ios-videocam"></use>
                            </svg>
                         </span>
                       </div>
@@ -304,7 +304,7 @@
   </div>
 </div>
 
-<script src="scripts/main.js"></script>
+<script src="main.js"></script>
 <script src="https://www.youtube.com/iframe_api" defer></script>
 
 </body>
