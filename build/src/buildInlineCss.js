@@ -36,7 +36,7 @@ module.exports = function makeBuildInlineCss(config) {
     return subject;
 
     function runInlineCssPipeline() {
-      gulp.src(inlineCssSource)
+      return gulp.src(inlineCssSource)
         .pipe(plumber())
         .pipe(sass({includePaths: bourbon.includePaths}))
         .pipe(postcss(cssPostproConf))

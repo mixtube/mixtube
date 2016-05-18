@@ -1,9 +1,11 @@
 'use strict';
 
 const gulp = require('gulp'),
+  gutil = require('gulp-util'),
   htmlReplace = require('gulp-html-replace'),
   template = require('gulp-template'),
-  Observable = require('rx').Observable;
+  Observable = require('rx').Observable,
+  Subject = require('rx').Subject;
 
 /**
  *
@@ -16,29 +18,23 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
 
   const htmlSource = `${config.appDirPath}/src/index.html`;
 
-  return function buildHtml(doneBuildHtml) {
+  return function buildHtml() {
 
-    const combinedObs = [];
+    let htmlStream;
 
+    // just serves as a "trigger" when the html file changes
+    const htmlSbjct = new Subject();
+
+    const combinedObs = [htmlSbjct];
     if (config.production) {
       combinedObs.push(buildInlineCssFactory(), buildFaviconsFactory());
     }
 
-    // just serves as a "trigger" when the html file changes
-    combinedObs.push(
-      Observable
-        .create(observer => {
-          if (config.watch) {
-            gulp.watch(htmlSource, () => observer.onNext());
-          }
+    const combinationObs = Observable.combineLatest(combinedObs);
 
-          observer.onNext();
-        }));
-
-    Observable
-      .combineLatest(combinedObs)
-      .subscribe(([inlineCss, faviconsMetas]) => {
-        let htmlStream = gulp.src(htmlSource)
+    combinationObs
+      .subscribe(([noop, inlineCss, faviconsMetas]) => {
+        htmlStream = gulp.src(htmlSource)
           .pipe(template({
             baseUrl: config.htmlBaseUrl
           }));
@@ -55,10 +51,19 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
         }
 
         htmlStream
-          .pipe(gulp.dest(config.publicDirPath))
-          // this will work only for the first call but we are fine with that
-          .on('end', doneBuildHtml)
-          .on('error', doneBuildHtml);
+          .pipe(gulp.dest(config.publicDirPath));
       });
+
+    if (config.watch) {
+      gulp.watch(htmlSource, runHtmlPipeline);
+    }
+
+    return runHtmlPipeline();
+
+    function runHtmlPipeline() {
+      htmlSbjct.onNext();
+
+      return stream;
+    }
   };
 };

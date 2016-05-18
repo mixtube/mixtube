@@ -14,13 +14,14 @@ const gulp = require('gulp'),
   appConfig = require('./package').config.application;
 
 const cmdArguments = minimist(process.argv.slice(2), {
-  boolean: ['production', 'watch', 'serve']
+  boolean: ['production', 'watch', 'serve'],
+  string: ['baseUrl']
 });
 
 const config = {
   appDirPath: '../app',
   publicDirPath: 'public',
-  htmlBaseUrl: '/',
+  htmlBaseUrl: cmdArguments.baseUrl || '/',
   appName: appConfig.name,
   appColor: appConfig.color,
   appVersion: appVersion,
@@ -33,10 +34,10 @@ const config = {
 
 
 const tasks = [
-  buildJs(config),
-  buildCss(config),
-  buildSvg(config),
-  buildHtml(config, () => buildInlineCss(config)(), () => buildFavicons(config)())
+  // buildJs(config),
+  // buildCss(config),
+  // buildSvg(config),
+  buildHtml(config, buildInlineCss(config), buildFavicons(config))
 ];
 
 if (cmdArguments.serve) {

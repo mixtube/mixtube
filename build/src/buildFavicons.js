@@ -45,12 +45,13 @@ module.exports = function makeBuildFavicons(config) {
   return function buildFavicons() {
 
     const subject = new ReplaySubject(1);
+    subject.onNext('toto')
 
     if (config.watch) {
-      gulp.watch(faviconSource, runFaviconsPipeline);
+      // gulp.watch(faviconSource, runFaviconsPipeline);
     }
 
-    runFaviconsPipeline();
+    // runFaviconsPipeline();
 
     return subject;
 

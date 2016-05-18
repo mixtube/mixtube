@@ -4,7 +4,7 @@ const browserSync = require('browser-sync'),
   compression = require('compression');
 
 /**
- * @param {{publicDirPath: string, htmlBaseUrl: string, watch: boolean, production: boolean}} config
+ * @param {{publicDirPath: string, htmlBaseUrl: string}} config
  * @returns {function}
  */
 module.exports = function makeServe(config) {
@@ -13,7 +13,17 @@ module.exports = function makeServe(config) {
 
     const server = browserSync.create();
     server.init({
-      server: config.publicDirPath,
+      server: {
+        // this empty array is needed for "routes" to work
+        baseDir: [],
+        routes: {
+          [config.htmlBaseUrl]: config.publicDirPath
+        }
+      },
+
+      // watch changes and inject
+      files: [`${config.publicDirPath}/*.css`],
+
       https: true,
       ghostMode: false,
       open: false,
