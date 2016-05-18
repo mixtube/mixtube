@@ -20,7 +20,8 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
 
   return function buildHtml() {
 
-    let htmlStream;
+    // completion stream is only required when "runHtmlPipeline" is executed directly by gulp
+    let completionStream;
 
     // just serves as a "trigger" when the html file changes
     const htmlSbjct = new Subject();
@@ -33,8 +34,8 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
     const combinationObs = Observable.combineLatest(combinedObs);
 
     combinationObs
-      .subscribe(([noop, inlineCss, faviconsMetas]) => {
-        htmlStream = gulp.src(htmlSource)
+      .subscribe(([empty, inlineCss, faviconsMetas]) => {
+        let htmlStream = gulp.src(htmlSource)
           .pipe(template({
             baseUrl: config.htmlBaseUrl
           }));
@@ -50,8 +51,12 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
             }));
         }
 
-        htmlStream
+        htmlStream = htmlStream
           .pipe(gulp.dest(config.publicDirPath));
+
+        if (completionStream) {
+          htmlStream.pipe(completionStream);
+        }
       });
 
     if (config.watch) {
@@ -61,9 +66,11 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
     return runHtmlPipeline();
 
     function runHtmlPipeline() {
-      htmlSbjct.onNext();
+      completionStream = gutil.noop();
+      completionStream.on('end', () => completionStream = null);
 
-      return stream;
+      htmlSbjct.onNext();
+      return completionStream;
     }
   };
 };
