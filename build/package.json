@@ -24,7 +24,7 @@
     "envify": "^3.4.0",
     "favicons": "^4.7.1",
     "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-gh-pages": "^0.5.2",
+    "gulp-gh-pages": "^0.5.4",
     "gulp-html-replace": "jraoult/gulp-html-replace#vinyl_files_stream_as_input",
     "gulp-jshint": "^2.0.0",
     "gulp-ng-annotate": "^2.0.0",
@@ -43,7 +43,6 @@
     "lodash.noop": "^3.0.1",
     "merge-stream": "^1.0.0",
     "minimist": "^1.2.0",
-    "multistream": "^2.0.2",
     "node-bourbon": "^4.2.3",
     "rx": "^4.0.7",
     "vinyl-buffer": "^1.0.0",
@@ -57,8 +56,8 @@
     }
   },
   "scripts": {
-    "build": "gulp --gulpfile gulpfile.new.js build",
-    "watch": "gulp watch",
-    "gulp": "gulp"
+    "build": "gulp build --production",
+    "debug": "gulp build --watch --serve",
+    "deploy:gh": "gulp deploy:gh --baseUrl /mixtube/ --production"
   }
 }

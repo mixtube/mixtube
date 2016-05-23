@@ -8,13 +8,11 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">= 4",
+    "node": ">= 6",
     "npm": ">= 3"
   },
   "scripts": {
-    "start": "gulp --cwd ./build serve"
+    "start": "cd build && npm run debug"
   },
-  "dependencies": {
-    "gulp": "github:gulpjs/gulp#4.0"
-  }
+  "dependencies": {}
 }
