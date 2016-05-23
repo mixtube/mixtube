@@ -4,6 +4,7 @@ const gulp = require('gulp'),
   gutil = require('gulp-util'),
   htmlReplace = require('gulp-html-replace'),
   template = require('gulp-template'),
+  eos = require('end-of-stream'),
   Observable = require('rx').Observable,
   Subject = require('rx').Subject;
 
@@ -31,33 +32,10 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
       combinedObs.push(buildInlineCssFactory(), buildFaviconsFactory());
     }
 
-    const combinationObs = Observable.combineLatest(combinedObs);
-
-    combinationObs
-      .subscribe(([empty, inlineCss, faviconsMetas]) => {
-        let htmlStream = gulp.src(htmlSource)
-          .pipe(template({
-            baseUrl: config.htmlBaseUrl
-          }));
-
-        if (typeof inlineCss !== 'undefined' && typeof faviconsMetas !== 'undefined') {
-          htmlStream = htmlStream
-            .pipe(htmlReplace({
-              cssInline: {
-                src: inlineCss,
-                tpl: '<style>%s</style>'
-              },
-              favicons: faviconsMetas
-            }));
-        }
-
-        htmlStream = htmlStream
-          .pipe(gulp.dest(config.publicDirPath));
-
-        if (completionStream) {
-          htmlStream.pipe(completionStream);
-        }
-      });
+    // for anything happening in either inline css, favicons or html source we recompute the html output
+    Observable
+      .combineLatest(combinedObs)
+      .subscribe(([empty, inlineCss, faviconsMetas]) => generateHtml(inlineCss, faviconsMetas, completionStream));
 
     if (config.watch) {
       gulp.watch(htmlSource, runHtmlPipeline);
@@ -66,11 +44,39 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
     return runHtmlPipeline();
 
     function runHtmlPipeline() {
+      // set the completionStream only in the case where the pipeline is called directly since gulp will wait for sign of completion
       completionStream = gutil.noop();
-      completionStream.on('end', () => completionStream = null);
+      // clear the completionStream once done to avoid reusing it when generateHtml is called because of an upstream change
+      eos(completionStream, () => completionStream = null);
 
       htmlSbjct.onNext();
       return completionStream;
     }
   };
+
+  function generateHtml(inlineCss, faviconsMetas, stream) {
+    let htmlStream = gulp.src(htmlSource)
+      .pipe(template({
+        baseUrl: config.htmlBaseUrl
+      }));
+
+    if (typeof inlineCss !== 'undefined' && typeof faviconsMetas !== 'undefined') {
+      htmlStream = htmlStream
+        .pipe(htmlReplace({
+          cssInline: {
+            src: inlineCss,
+            tpl: '<style>%s</style>'
+          },
+          favicons: faviconsMetas
+        }));
+    }
+
+    htmlStream = htmlStream
+      .pipe(gulp.dest(config.publicDirPath));
+
+    if (stream) {
+      htmlStream.pipe(stream);
+    }
+  }
 };
+

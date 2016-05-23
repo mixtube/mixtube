@@ -3,6 +3,7 @@
 const gulp = require('gulp'),
   svg2png = require('gulp-svg2png'),
   favicons = require('favicons').stream,
+  eos = require('end-of-stream'),
   ReplaySubject = require('rx').ReplaySubject;
 
 /**
@@ -12,12 +13,10 @@ const gulp = require('gulp'),
 module.exports = function makeBuildFavicons(config) {
 
   const faviconsConf = {
-    settings: {
-      appName: config.appName,
-      vinylMode: true,
-      version: 1,
-      background: config.appColor
-    },
+    appName: config.appName,
+    version: config.appVersion,
+    background: config.appColor,
+    path: './',
     icons: {
       android: true,
       appleIcon: true,
@@ -28,30 +27,23 @@ module.exports = function makeBuildFavicons(config) {
       opengraph: false,
       windows: false,
       yandex: false
-    },
-    files: {
-      iconsPath: './'
-    },
-    favicon_generation: {
-      versioning: {
-        param_name: 'v',
-        param_value: config.appVersion
-      }
     }
   };
 
   const faviconSource = `${config.appDirPath}/src/images/mt-logo.svg`;
 
+  /**
+   * @returns {Rx.Observable<string>} a replayable observable returning the favicons html metas
+   */
   return function buildFavicons() {
 
     const subject = new ReplaySubject(1);
-    subject.onNext('toto')
 
     if (config.watch) {
-      // gulp.watch(faviconSource, runFaviconsPipeline);
+      gulp.watch(faviconSource, runFaviconsPipeline);
     }
 
-    // runFaviconsPipeline();
+    runFaviconsPipeline();
 
     return subject;
 
@@ -61,15 +53,20 @@ module.exports = function makeBuildFavicons(config) {
         gulp.src(faviconSource)
           .pipe(svg2png())
           .pipe(favicons(faviconsConf, htmlString => {
-            faviconsPromise.then(() => {
-              subject.onNext(htmlString);
-            })
+            faviconsPromise.then(() => subject.onNext(htmlString))
           }))
           .pipe(gulp.dest(config.publicDirPath));
 
-      const faviconsPromise = new Promise((resolve, reject) => {
-        faviconsStream.on('end', resolve).on('error', reject);
-      });
+      const faviconsPromise = streamToPromise(faviconsStream);
+
+      // wait for the images and the html string to be generated to signal completion
+      return faviconsPromise;
     }
   };
 };
+
+function streamToPromise(stream) {
+  return new Promise((resolve, reject) => {
+    eos(stream, error => error ? reject(error) : resolve());
+  });
+}

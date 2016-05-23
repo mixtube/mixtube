@@ -23,6 +23,9 @@ module.exports = function makeBuildInlineCss(config) {
     cssPostproConf.push(csswring);
   }
 
+  /**
+   * @returns {Rx.Observable<string>} a replayable observable returning the css code to inline
+   */
   return function buildInlineCss() {
 
     const subject = new ReplaySubject(1);

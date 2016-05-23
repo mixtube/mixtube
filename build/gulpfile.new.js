@@ -34,9 +34,9 @@ const config = {
 
 
 const tasks = [
-  // buildJs(config),
-  // buildCss(config),
-  // buildSvg(config),
+  buildJs(config),
+  buildCss(config),
+  buildSvg(config),
   buildHtml(config, buildInlineCss(config), buildFavicons(config))
 ];
 

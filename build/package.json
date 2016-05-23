@@ -20,6 +20,7 @@
     "compression": "^1.4.4",
     "csswring": "^5.0.0",
     "del": "^2.0.1",
+    "end-of-stream": "^1.1.0",
     "envify": "^3.4.0",
     "favicons": "^4.7.1",
     "gulp": "github:gulpjs/gulp#4.0",
