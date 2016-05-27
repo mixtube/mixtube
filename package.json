@@ -13,7 +13,10 @@
     "npm": ">= 3"
   },
   "scripts": {
-    "start": "cd build && npm run debug"
-  },
-  "dependencies": {}
+    "preinstall": "(cd app && npm install) & (cd build && npm install)",
+    "start": "npm run debug",
+    "debug": "npm run gulp-build -- --watch --serve",
+    "deploy:gh": "npm run gulp-build -- deploy:gh --baseUrl /mixtube/ --production",
+    "gulp-build": "build/node_modules/.bin/gulp --cwd build build"
+  }
 }

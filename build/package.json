@@ -49,10 +49,5 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.2.2"
-  },
-  "scripts": {
-    "build": "gulp build --production",
-    "debug": "gulp build --watch --serve",
-    "deploy:gh": "gulp deploy:gh --baseUrl /mixtube/ --production"
   }
 }
