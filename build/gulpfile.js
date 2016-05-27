@@ -16,7 +16,7 @@ const gulp = require('gulp'),
 
 const cmdArguments = minimist(process.argv.slice(2), {
   boolean: ['production', 'watch', 'serve'],
-  string: ['baseUrl']
+  string: ['baseUrl', 'errorTrackerPath', 'analyticsTrackerPath']
 });
 
 const config = {
@@ -28,6 +28,8 @@ const config = {
   appVersion: appVersion,
   watch: cmdArguments.watch,
   production: cmdArguments.production,
+  errorTrackerPath: cmdArguments.errorTrackerPath,
+  analyticsTrackerPath: cmdArguments.analyticsTrackerPath,
   environment: {
     YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
   }

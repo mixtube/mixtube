@@ -10,13 +10,14 @@ const gulp = require('gulp'),
   browserify = require('browserify'),
   envify = require('envify/custom'),
   collapse = require('bundle-collapser/plugin'),
+  pathmodify = require('pathmodify'),
   uglify = require('gulp-uglify'),
   ngAnnotate = require('gulp-ng-annotate'),
   brfs = require('brfs'),
   noop = require('lodash.noop');
 
 /**
- * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, environment: Object}} config
+ * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, errorTrackerPath: ?string, analyticsTrackerPath: ?string, environment: Object}} config
  * @returns {function}
  */
 module.exports = function makeBuildJs(config) {
@@ -28,14 +29,25 @@ module.exports = function makeBuildJs(config) {
       watch: config.watch
     };
 
-    if (config.production) {
-      runBrowserifyOptions.configureBundle = (bundle) => {
+    runBrowserifyOptions.configureBundle = (bundle) => {
+      if (config.production) {
         // convert bundle paths to IDS to save bytes in browserify bundles
         bundle.plugin(collapse);
-      };
+      }
 
+      // overriding trackers path to custom factories file when specified
+      var mods = [];
+      if(config.errorTrackerPath) {
+        mods.push(pathmodify.mod.re(/.*delegates\/errorTracker(\.js)?$/, config.errorTrackerPath));
+      }
+      if(config.analyticsTrackerPath) {
+        mods.push(pathmodify.mod.re(/.*delegates\/analyticsTracker(\.js)?$/, config.analyticsTrackerPath))
+      }
+      bundle.plugin(pathmodify, {mods: mods});
+    };
+
+    if (config.production) {
       runBrowserifyOptions.pipelineFn = function prodPipelineFn(pipeline) {
-
         return pipeline
           .pipe(buffer())
           .pipe(sourcemaps.init({loadMaps: true}))

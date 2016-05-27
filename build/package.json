@@ -44,6 +44,7 @@
     "merge-stream": "^1.0.0",
     "minimist": "^1.2.0",
     "node-bourbon": "^4.2.3",
+    "pathmodify": "^0.5.0",
     "rx": "^4.0.7",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
