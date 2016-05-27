@@ -49,12 +49,6 @@
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^3.2.2"
   },
-  "config": {
-    "application": {
-      "name": "MixTube",
-      "color": "#8EC447"
-    }
-  },
   "scripts": {
     "build": "gulp build --production",
     "debug": "gulp build --watch --serve",

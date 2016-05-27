@@ -12,8 +12,7 @@ const gulp = require('gulp'),
   buildInlineCss = require('./src/buildInlineCss'),
   buildFavicons = require('./src/buildFavicons'),
   serve = require('./src/serve'),
-  appVersion = require('./package').version,
-  appConfig = require('./package').config.application;
+  appVersion = require('../package').version;
 
 const cmdArguments = minimist(process.argv.slice(2), {
   boolean: ['production', 'watch', 'serve'],
@@ -24,8 +23,8 @@ const config = {
   appDirPath: '../app',
   publicDirPath: 'public',
   htmlBaseUrl: cmdArguments.baseUrl || '/',
-  appName: appConfig.name,
-  appColor: appConfig.color,
+  appName: 'MixTube',
+  appColor: '#8EC447',
   appVersion: appVersion,
   watch: cmdArguments.watch,
   production: cmdArguments.production,
