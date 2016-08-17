@@ -1,7 +1,7 @@
 'use strict';
 
 const gulp = require('gulp'),
-  minimist = require('minimist'),
+  yargs = require('yargs'),
   clean = require('./src/clean'),
   pushGhPages = require('./src/pushGhPages'),
   checkJS = require('./src/checkJs'),
@@ -14,22 +14,51 @@ const gulp = require('gulp'),
   serve = require('./src/serve'),
   appVersion = require('../package').version;
 
-const cmdArguments = minimist(process.argv.slice(2), {
-  boolean: ['production', 'watch', 'serve'],
-  string: ['baseUrl', 'errorTrackerPath', 'analyticsTrackerPath']
-});
+const commandLine = yargs
+  .options({
+    'watch': {
+      default: false,
+      describe: 'watches for source changes and automatically rebuild',
+      type: 'boolean'
+    },
+    'serve': {
+      default: false,
+      describe: 'turns on the local server',
+      type: 'boolean'
+    },
+    'production': {
+      default: true,
+      describe: 'turns on minification and inlining of "critical path css"',
+      type: 'boolean'
+    },
+    'baseUrl': {
+      default: '/',
+      describe: 'specifies the base URL to use for all relative URLs',
+      type: 'string'
+    },
+    'errorTrackerPath': {
+      describe: 'overrides the default error tracker implementation',
+      type: 'string'
+    },
+    'analyticsTrackerPath': {
+      describe: 'overrides the default analytics tracker implementation',
+      type: 'string'
+    }
+  });
+
+const cmdArgumentsValues = commandLine.argv;
 
 const config = {
   appDirPath: '../app',
   publicDirPath: 'public',
-  htmlBaseUrl: cmdArguments.baseUrl || '/',
+  htmlBaseUrl: cmdArgumentsValues.baseUrl,
   appName: 'MixTube',
   appColor: '#8EC447',
   appVersion: appVersion,
-  watch: cmdArguments.watch,
-  production: cmdArguments.production,
-  errorTrackerPath: cmdArguments.errorTrackerPath,
-  analyticsTrackerPath: cmdArguments.analyticsTrackerPath,
+  watch: cmdArgumentsValues.watch,
+  production: cmdArgumentsValues.production,
+  errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
+  analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   environment: {
     YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
   }
@@ -42,7 +71,7 @@ const tasks = [
   buildHtml(config, buildInlineCss(config), buildFavicons(config))
 ];
 
-if (cmdArguments.serve) {
+if (cmdArgumentsValues.serve) {
   tasks.push(serve(config));
 }
 
@@ -54,6 +83,11 @@ const build = gulp.series(
 const deployGh = gulp.series(
   build,
   pushGhPages(config));
+
+gulp.task('help', (done) => {
+  commandLine.showHelp();
+  done();
+});
 
 gulp.task('build', build);
 

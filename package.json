@@ -17,6 +17,10 @@
     "start": "npm run debug",
     "debug": "npm run gulp-build -- --watch --serve",
     "deploy:gh": "npm run gulp-build -- deploy:gh --baseUrl /mixtube/ --production",
-    "gulp-build": "build/node_modules/.bin/gulp --cwd build build"
+    "gulp-build": "build/node_modules/.bin/gulp --cwd build build",
+    "help": "build/node_modules/.bin/gulp --cwd build help"
+  },
+  "dependencies": {
+    "yargs": "^5.0.0"
   }
 }
