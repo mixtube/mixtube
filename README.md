@@ -15,16 +15,24 @@ MIXTUBE_YOUTUBE_API_KEY=<your YouTube data api key> npm start
 
 The server should be running by now and you can access MixTube at https://localhost:3000
 
-## Building in details
+## Building
 
-The Mixtube project is split between the directories `app` and `build`. `app` contains only app specific sources and `build`
-only build specific sources. You don't have to think about that too much since the root of the project contains NPM scripts
-to help building MixTube for different scenarios.
+### Basics
 
-The low level build command is `gulp-build`. By default it will make a production ready build available
-in the `build/public` directory:
+The Mixtube project is split between the directories `app` and `build`. The `app` directory contains only app specific
+sources and `build` only build specific sources. You don't have to think about that too much since the root of the
+project contains NPM scripts to help getting started with MixTube for different scenarios:
+- `npm run debug` is an alias of `npm start` (more precisely, the other way around)
+- `deploy:gh` makes a production build and deploys it to the repository `origin`'s GitHub page.It assumes the
+repository is named `mixtube`
+
+### Advanced
+
+If you want to build with a better control over the settings the best is to invoke the gulp script directly:
+
 ```
-npm run gulp-build -- [--watch] [--serve] [--baseUrl <string>]
+cd build
+node_modules/.bin/gulp [--watch] [--serve] [--baseUrl <string>]
 ```
 
 You can provides different arguments to turn on / off certain behaviours:
@@ -33,11 +41,13 @@ You can provides different arguments to turn on / off certain behaviours:
 - **serve** turns on the local server (`boolean`, `false` by default)
 - **production** turns on minification and inlining of "critical path css" (`boolean`, `true` by default)
 - **baseUrl** specifies the base URL to use for all relative URLs (`string`, `/` by default)
-- **errorTrackerPath** overrides the default error tracker implementation (`string`)
-- **analyticsTrackerPath** overrides the default analytics tracker implementation (`string`)
+- **errorTrackerPath** overrides the default error tracker implementation (`string`). A console logging implementation
+will be use if the argument is not defined
+- **analyticsTrackerPath** overrides the default analytics tracker implementation (`string`). A noop default
+implementation will be use if the argument is not defined
 
 You can always get the descriptions of the build options by invoking:
 
 ```
-npm run help
+node_modules/.bin/gulp help
 ```
