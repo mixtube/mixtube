@@ -1,7 +1,7 @@
 'use strict';
 
-var has = require('lodash/object/has'),
-  isUndefined = require('lodash/lang/isUndefined');
+var has = require('lodash/has'),
+  isUndefined = require('lodash/isUndefined');
 
 // @ngInject
 function configurationFactory($location, environment) {

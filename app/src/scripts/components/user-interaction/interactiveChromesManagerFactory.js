@@ -1,6 +1,6 @@
 'use strict';
 
-var pull = require('lodash/array/pull');
+var pull = require('lodash/pull');
 
 function interactiveChromesManagerFactory() {
 

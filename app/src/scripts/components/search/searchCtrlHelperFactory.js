@@ -1,6 +1,6 @@
 'use strict';
 
-var isUndefined = require('lodash/lang/isUndefined');
+var isUndefined = require('lodash/isUndefined');
 
 // @ngInject
 function searchCtrlHelperFactory($window, $document, keyboardShortcutManager, searchInputsRegistry) {

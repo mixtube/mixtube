@@ -1,6 +1,6 @@
 'use strict';
 
-var noop = require('lodash/utility/noop');
+var noop = require('lodash/noop');
 
 module.exports = function analyticsTracker() {
   return {

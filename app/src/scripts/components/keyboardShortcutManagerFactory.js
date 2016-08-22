@@ -1,7 +1,7 @@
 'use strict';
 
 var keymaster = require('keymaster'),
-  isUndefined = require('lodash/lang/isUndefined');
+  isUndefined = require('lodash/isUndefined');
 
 // @ngInject
 function keyboardShortcutManagerFactory($rootScope) {

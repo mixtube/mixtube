@@ -1,6 +1,6 @@
 'use strict';
 
-var pull = require('lodash/array/pull');
+var pull = require('lodash/pull');
 
 // brfs requires this to be on its own line
 var fs = require('fs');

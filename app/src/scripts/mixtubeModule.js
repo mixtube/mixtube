@@ -3,7 +3,7 @@
 var angular = require('angular'),
   angularAnimate = require('angular-animate'),
   angularAria = require('angular-aria'),
-  noop = require('lodash/utility/noop');
+  noop = require('lodash/noop');
 
 var mixtube = angular.module('mixtube', [angularAnimate, angularAria]);
 

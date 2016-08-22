@@ -1,7 +1,7 @@
 'use strict';
 
-var pull = require('lodash/array/pull'),
-  has = require('lodash/object/has');
+var pull = require('lodash/pull'),
+  has = require('lodash/has');
 
 // @ngInject
 function pointerManagerFactory($timeout, $document) {

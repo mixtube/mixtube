@@ -1,8 +1,8 @@
 'use strict';
 
 var angular = require('angular'),
-  difference = require('lodash/array/difference'),
-  includes = require('lodash/collection/includes'),
+  difference = require('lodash/difference'),
+  includes = require('lodash/includes'),
   mixtubePlayback = require('mixtube-playback');
 
 // @ngInject

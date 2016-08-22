@@ -1,9 +1,9 @@
 'use strict';
 
 var angular = require('angular'),
-  defaults = require('lodash/object/defaults'),
-  has = require('lodash/object/has'),
-  pluck = require('lodash/collection/pluck');
+  defaults = require('lodash/defaults'),
+  has = require('lodash/has'),
+  map = require('lodash/map');
 
 // @ngInject
 function youtubeClientFactory($http, $q, configuration) {
@@ -52,7 +52,7 @@ function youtubeClientFactory($http, $q, configuration) {
       throw new Error('YouTube API can not list more than ' + MAX_RESULTS_LIMIT + ' videos. Please reduce the videos ids list.');
     }
 
-    var videosIds = pluck(videos, 'id');
+    var videosIds = map(videos, 'id');
 
     // We have to use JSONP here
     //  - IE11 manages CORS request if originating page and requested resource have the same protocol

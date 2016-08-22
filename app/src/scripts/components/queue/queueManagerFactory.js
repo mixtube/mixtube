@@ -4,8 +4,8 @@ var angular = require('angular'),
   Queue = require('./queueModel').Queue,
   QueueEntry = require('./queueModel').QueueEntry,
   DeserializationErrorCodes = require('./deserializationErrorCodes'),
-  uniqueId = require('lodash/utility/uniqueId'),
-  has = require('lodash/object/has');
+  uniqueId = require('lodash/uniqueId'),
+  has = require('lodash/has');
 
 // @ngInject
 function queueManagerFactory($q, youtubeClient) {

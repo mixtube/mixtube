@@ -1,6 +1,6 @@
 'use strict';
 
-var padLeft = require('lodash/string/padLeft');
+var padStart = require('lodash/padStart');
 
 // a duration formatter that takes a duration in milliseconds and returns a formatted duration like "h:mm"
 function durationFilter() {
@@ -20,7 +20,7 @@ function durationFilter() {
     singletonDate.setMilliseconds(time);
 
     return (singletonDate.getHours() * 60 + singletonDate.getMinutes()).toString(10) + ':'  +
-      padLeft(singletonDate.getSeconds().toString(10), 2, '0');
+      padStart(singletonDate.getSeconds().toString(10), 2, '0');
   };
 }
 
