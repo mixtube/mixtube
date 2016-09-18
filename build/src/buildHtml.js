@@ -63,15 +63,25 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
         baseUrl: config.htmlBaseUrl
       }));
 
-    if (typeof inlineCss !== 'undefined' && typeof faviconsMetas !== 'undefined') {
+    const hasInlineCss = typeof inlineCss !== 'undefined';
+    const hasFaviconsMetas = typeof faviconsMetas !== 'undefined';
+
+    if (hasInlineCss || hasFaviconsMetas) {
+      const htmlReplaceOptions = {};
+
+      if (hasInlineCss) {
+        htmlReplaceOptions.cssInline = {
+          src: inlineCss,
+          tpl: '<style>%s</style>'
+        };
+      }
+
+      if (hasFaviconsMetas) {
+        htmlReplaceOptions.favicons = faviconsMetas;
+      }
+
       htmlStream = htmlStream
-        .pipe(htmlReplace({
-          cssInline: {
-            src: inlineCss,
-            tpl: '<style>%s</style>'
-          },
-          favicons: faviconsMetas
-        }));
+        .pipe(htmlReplace(htmlReplaceOptions));
     }
 
     htmlStream = htmlStream
