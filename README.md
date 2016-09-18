@@ -39,7 +39,9 @@ You can provides different arguments to turn on / off certain behaviours:
 
 - **watch** watches for source changes and automatically rebuild (`boolean`, `false` by default)
 - **serve** turns on the local server (`boolean`, `false` by default)
-- **production** turns on minification and inlining of "critical path css" (`boolean`, `true` by default)
+- **production** turns on minification and inlining of "critical path css" (`boolean`, `false` by default)
+- **favicons** turns on the creation of favicons (`boolean`, `false` by default)
+- **publicDirPath** specifies the output directory for the build (`string`, `public` by default)
 - **baseUrl** specifies the base URL to use for all relative URLs (`string`, `/` by default)
 - **errorTrackerPath** overrides the default error tracker implementation (`string`). A console logging implementation
 will be use if the argument is not defined

@@ -29,7 +29,10 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
 
     const combinedObs = [htmlSbjct];
     if (config.production) {
-      combinedObs.push(buildInlineCssFactory(), buildFaviconsFactory());
+      combinedObs.push(buildInlineCssFactory());
+    }
+    if (config.favicons) {
+      combinedObs.push(buildFaviconsFactory());
     }
 
     // for anything happening in either inline css, favicons or html source we recompute the html output

@@ -27,13 +27,23 @@ const commandLine = yargs
       type: 'boolean'
     },
     'production': {
-      default: true,
+      default: false,
       describe: 'turns on minification and inlining of "critical path css"',
+      type: 'boolean'
+    },
+    'favicons': {
+      default: false,
+      describe: 'turns on the creation of favicons',
       type: 'boolean'
     },
     'baseUrl': {
       default: '/',
       describe: 'specifies the base URL to use for all relative URLs',
+      type: 'string'
+    },
+    'publicDirPath': {
+      default: 'public',
+      describe: 'specifies the output directory for the build',
       type: 'string'
     },
     'errorTrackerPath': {
@@ -50,13 +60,14 @@ const cmdArgumentsValues = commandLine.argv;
 
 const config = {
   appDirPath: '../app',
-  publicDirPath: 'public',
+  publicDirPath: cmdArgumentsValues.publicDirPath,
   htmlBaseUrl: cmdArgumentsValues.baseUrl,
   appName: 'MixTube',
   appColor: '#8EC447',
   appVersion: appVersion,
   watch: cmdArgumentsValues.watch,
   production: cmdArgumentsValues.production,
+  favicons: cmdArgumentsValues.favicons,
   errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   environment: {
