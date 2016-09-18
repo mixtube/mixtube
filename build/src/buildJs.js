@@ -26,7 +26,8 @@ module.exports = function makeBuildJs(config) {
     const runBrowserifyOptions = {
       configureBundle: noop,
       pipelineFn: noop,
-      watch: config.watch
+      watch: config.watch,
+      production: config.production
     };
 
     runBrowserifyOptions.configureBundle = (bundle) => {
@@ -78,12 +79,12 @@ module.exports = function makeBuildJs(config) {
 /**
  * @param {string} inputPath
  * @param {string} outputPath
- * @param {{configureBundle: function, pipelineFn: function, watch: boolean}} options
+ * @param {{configureBundle: function, pipelineFn: function, watch: boolean, production: boolean}} options
  * @param {Object} environment
  * @returns {Stream.Readable}
  */
 function runBrowserify(inputPath, outputPath, options, environment) {
-  let bundle = browserify(inputPath, {cache: {}, packageCache: {}, fullPaths: true, debug: true});
+  let bundle = browserify(inputPath, {cache: {}, packageCache: {}, fullPaths: !options.production, debug: true});
 
   if (options.watch) {
     bundle = watchify(bundle);
