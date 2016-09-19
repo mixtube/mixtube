@@ -22,7 +22,6 @@
     "del": "^2.0.1",
     "end-of-stream": "^1.1.0",
     "envify": "^3.4.0",
-    "favicons": "^4.7.1",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-gh-pages": "^0.5.4",
     "gulp-html-replace": "^1.6.1",

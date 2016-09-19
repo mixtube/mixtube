@@ -12,10 +12,9 @@ const gulp = require('gulp'),
  *
  * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, watch: boolean, production: boolean}} config
  * @param {function} buildInlineCssFactory
- * @param {function} buildFaviconsFactory
  * @returns {function}
  */
-module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFaviconsFactory) {
+module.exports = function makeBuildHtml(config, buildInlineCssFactory) {
 
   const htmlSource = `${config.appDirPath}/src/index.html`;
 
@@ -31,14 +30,11 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
     if (config.production) {
       combinedObs.push(buildInlineCssFactory());
     }
-    if (config.favicons) {
-      combinedObs.push(buildFaviconsFactory());
-    }
 
-    // for anything happening in either inline css, favicons or html source we recompute the html output
+    // for anything happening in either inline css or html source we recompute the html output
     Observable
       .combineLatest(combinedObs)
-      .subscribe(([empty, inlineCss, faviconsMetas]) => generateHtml(inlineCss, faviconsMetas, completionStream));
+      .subscribe(([empty, inlineCss]) => generateHtml(inlineCss, completionStream));
 
     if (config.watch) {
       gulp.watch(htmlSource, runHtmlPipeline);
@@ -57,28 +53,19 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory, buildFavi
     }
   };
 
-  function generateHtml(inlineCss, faviconsMetas, stream) {
+  function generateHtml(inlineCss, stream) {
     let htmlStream = gulp.src(htmlSource)
       .pipe(template({
         baseUrl: config.htmlBaseUrl
       }));
 
-    const hasInlineCss = typeof inlineCss !== 'undefined';
-    const hasFaviconsMetas = typeof faviconsMetas !== 'undefined';
-
-    if (hasInlineCss || hasFaviconsMetas) {
-      const htmlReplaceOptions = {};
-
-      if (hasInlineCss) {
-        htmlReplaceOptions.cssInline = {
+    if (typeof inlineCss !== 'undefined') {
+      const htmlReplaceOptions = {
+        cssInline: {
           src: inlineCss,
           tpl: '<style>%s</style>'
-        };
-      }
-
-      if (hasFaviconsMetas) {
-        htmlReplaceOptions.favicons = faviconsMetas;
-      }
+        }
+      };
 
       htmlStream = htmlStream
         .pipe(htmlReplace(htmlReplaceOptions));

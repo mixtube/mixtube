@@ -10,7 +10,6 @@ const gulp = require('gulp'),
   buildSvg = require('./src/buildSvg'),
   buildHtml = require('./src/buildHtml'),
   buildInlineCss = require('./src/buildInlineCss'),
-  buildFavicons = require('./src/buildFavicons'),
   serve = require('./src/serve'),
   appVersion = require('../package').version;
 
@@ -29,11 +28,6 @@ const commandLine = yargs
     'production': {
       default: false,
       describe: 'turns on minification and inlining of "critical path css"',
-      type: 'boolean'
-    },
-    'favicons': {
-      default: false,
-      describe: 'turns on the creation of favicons',
       type: 'boolean'
     },
     'baseUrl': {
@@ -67,7 +61,6 @@ const config = {
   appVersion: appVersion,
   watch: cmdArgumentsValues.watch,
   production: cmdArgumentsValues.production,
-  favicons: cmdArgumentsValues.favicons,
   errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   environment: {
@@ -79,7 +72,7 @@ const tasks = [
   buildJs(config),
   buildCss(config),
   buildSvg(config),
-  buildHtml(config, buildInlineCss(config), buildFavicons(config))
+  buildHtml(config, buildInlineCss(config))
 ];
 
 if (cmdArgumentsValues.serve) {
