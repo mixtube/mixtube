@@ -13,15 +13,15 @@
     "npm": ">= 3"
   },
   "scripts": {
-    "preinstall:app": "cd app && npm install",
-    "preinstall:build": "cd build && npm install",
-    "preinstall": "npm-run-all --parallel preinstall:*",
+    "install:app": "cd app && npm install",
+    "install:build": "cd build && npm install",
+    "postinstall": "npm-run-all --parallel install:*",
     "start": "npm run debug",
     "debug": "npm run gulp-build -- --watch --serve",
     "deploy:gh": "npm run gulp-build -- deploy:gh --baseUrl /mixtube/ --production",
     "gulp-build": "build/node_modules/.bin/gulp --cwd build build"
   },
-  "devDependencies": {
+  "dependencies": {
     "npm-run-all": "^3.1.0"
   }
 }
