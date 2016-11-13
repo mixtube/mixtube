@@ -47,6 +47,10 @@ const commandLine = yargs
     'analyticsTrackerPath': {
       describe: 'overrides the default analytics tracker implementation',
       type: 'string'
+    },
+    'injectHeadPath': {
+      describe: 'appends the given snippet to the HTML index file\'s head section',
+      type: 'string'
     }
   });
 
@@ -63,6 +67,7 @@ const config = {
   production: cmdArgumentsValues.production,
   errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
+  injectHeadPath: cmdArgumentsValues.injectHeadPath,
   environment: {
     YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
   }

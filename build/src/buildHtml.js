@@ -10,7 +10,7 @@ const gulp = require('gulp'),
 
 /**
  *
- * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, watch: boolean, production: boolean}} config
+ * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, injectHeadPath: string, watch: boolean, production: boolean}} config
  * @param {function} buildInlineCssFactory
  * @returns {function}
  */
@@ -59,19 +59,21 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory) {
         baseUrl: config.htmlBaseUrl
       }));
 
-    if (typeof inlineCss !== 'undefined') {
-      const htmlReplaceOptions = {
-        cssInline: {
-          src: inlineCss,
-          tpl: '<style>%s</style>'
-        }
-      };
+    const htmlReplaceOptions = {};
 
-      htmlStream = htmlStream
-        .pipe(htmlReplace(htmlReplaceOptions));
+    if (typeof config.injectHeadPath !== 'undefined') {
+      htmlReplaceOptions.headInject = gulp.src(config.injectHeadPath);
+    }
+
+    if (typeof inlineCss !== 'undefined') {
+      htmlReplaceOptions.cssInline = {
+        src: inlineCss,
+        tpl: '<style>%s</style>'
+      };
     }
 
     htmlStream = htmlStream
+      .pipe(htmlReplace(htmlReplaceOptions))
       .pipe(gulp.dest(config.publicDirPath));
 
     if (stream) {
