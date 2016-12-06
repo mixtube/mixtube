@@ -56,7 +56,8 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory) {
   function generateHtml(inlineCss, stream) {
     let htmlStream = gulp.src(htmlSource)
       .pipe(template({
-        baseUrl: config.htmlBaseUrl
+        baseUrl: config.htmlBaseUrl,
+        appVersion: config.appVersion
       }));
 
     const htmlReplaceOptions = {};

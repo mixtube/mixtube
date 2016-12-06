@@ -11,7 +11,7 @@ const gulp = require('gulp'),
   buildHtml = require('./src/buildHtml'),
   buildInlineCss = require('./src/buildInlineCss'),
   serve = require('./src/serve'),
-  appVersion = require('../package').version;
+  packageVersion = require('../package').version;
 
 const commandLine = yargs
   .options({
@@ -29,6 +29,11 @@ const commandLine = yargs
       default: false,
       describe: 'turns on minification and inlining of "critical path css"',
       type: 'boolean'
+    },
+    'appVersion': {
+      default: packageVersion,
+      describe: 'specifies the version number for the app',
+      type: 'string'
     },
     'baseUrl': {
       default: '/',
@@ -62,15 +67,13 @@ const config = {
   htmlBaseUrl: cmdArgumentsValues.baseUrl,
   appName: 'MixTube',
   appColor: '#8EC447',
-  appVersion: appVersion,
+  appVersion: cmdArgumentsValues.appVersion,
   watch: cmdArgumentsValues.watch,
   production: cmdArgumentsValues.production,
   errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
-  environment: {
-    YOUTUBE_API_KEY: process.env.MIXTUBE_YOUTUBE_API_KEY
-  }
+  youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
 };
 
 const tasks = [

@@ -17,7 +17,7 @@ const gulp = require('gulp'),
   noop = require('lodash.noop');
 
 /**
- * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, errorTrackerPath: ?string, analyticsTrackerPath: ?string, environment: Object}} config
+ * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, appVersion: string, youtubeApiKey: string, errorTrackerPath: ?string, analyticsTrackerPath: ?string}} config
  * @returns {function}
  */
 module.exports = function makeBuildJs(config) {
@@ -37,7 +37,7 @@ module.exports = function makeBuildJs(config) {
       }
 
       // overriding trackers path to custom factories file when specified
-      var mods = [];
+      const mods = [];
       if(config.errorTrackerPath) {
         mods.push(pathmodify.mod.re(/.*delegates\/errorTracker(\.js)?$/, config.errorTrackerPath));
       }
@@ -68,10 +68,15 @@ module.exports = function makeBuildJs(config) {
       }
     }
 
+    const environment = {
+      APP_VERSION: config.appVersion,
+      YOUTUBE_API_KEY: config.youtubeApiKey
+    };
+
     return merge(
-      runBrowserify(`${config.appDirPath}/src/scripts/main.js`, 'main.js', runBrowserifyOptions, config.environment),
+      runBrowserify(`${config.appDirPath}/src/scripts/main.js`, 'main.js', runBrowserifyOptions, environment),
       runBrowserify(`${config.appDirPath}/src/scripts/components/capabilities/videoCallPlayTest.js`,
-        'components/capabilities/videoCallPlayTest.js', runBrowserifyOptions, config.environment)
+        'components/capabilities/videoCallPlayTest.js', runBrowserifyOptions, environment)
     );
   };
 };

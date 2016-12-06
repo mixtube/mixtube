@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html ng-controller="RootCtrl as rootCtrl">
+<html ng-controller="RootCtrl as rootCtrl" data-appVersion="<%= appVersion %>">
 <head>
   <base href="<%= baseUrl %>">
   <!--hopefully triggers GPU Rasterization on Chrome-->
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0">
 
   <title ng-bind="'MixTube' + (rootCtrl.queueLoading ? ' (loading)' : '')">MixTube</title>
