@@ -42,7 +42,7 @@ You can provides different arguments to turn on / off certain behaviours:
 - **production** turns on minification and inlining of "critical path css" (`boolean`, `false` by default)
 - **publicDirPath** specifies the output directory for the build (`string`, `public` by default)
 - **baseUrl** specifies the base URL to use for all relative URLs (`string`, `/` by default)
-- **errorTrackerPath** overrides the default error tracker implementation (`string`). A console logging implementation
+- **errorsTrackerPath** overrides the default error tracker implementation (`string`). A console logging implementation
 will be use if the argument is not defined
 - **analyticsTrackerPath** overrides the default analytics tracker implementation (`string`). A noop default
 implementation will be use if the argument is not defined

@@ -70,7 +70,7 @@ const config = {
   appVersion: cmdArgumentsValues.appVersion,
   watch: cmdArgumentsValues.watch,
   production: cmdArgumentsValues.production,
-  errorTrackerPath: cmdArgumentsValues.errorTrackerPath,
+  errorsTrackerPath: cmdArgumentsValues.errorsTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY

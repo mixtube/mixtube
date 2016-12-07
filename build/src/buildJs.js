@@ -38,8 +38,8 @@ module.exports = function makeBuildJs(config) {
 
       // overriding trackers path to custom factories file when specified
       const mods = [];
-      if(config.errorTrackerPath) {
-        mods.push(pathmodify.mod.re(/.*delegates\/errorTracker(\.js)?$/, config.errorTrackerPath));
+      if(config.errorsTrackerPath) {
+        mods.push(pathmodify.mod.re(/.*delegates\/errorsTracker(\.js)?$/, config.errorsTrackerPath));
       }
       if(config.analyticsTrackerPath) {
         mods.push(pathmodify.mod.re(/.*delegates\/analyticsTracker(\.js)?$/, config.analyticsTrackerPath))
