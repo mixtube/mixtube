@@ -1,18 +1,17 @@
-'use strict';
-
 const gulp = require('gulp'),
-  gutil = require('gulp-util'),
   sourcemaps = require('gulp-sourcemaps'),
-  sass = require('gulp-sass'),
   postcss = require('gulp-postcss'),
   autoprefixer = require('autoprefixer'),
   csswring = require('csswring'),
-  bourbon = require('node-bourbon'),
   plumber = require('gulp-plumber'),
-  ReplaySubject = require('rx').ReplaySubject;
+  ReplaySubject = require('rx').ReplaySubject,
+  mixtubeSass = require('./gulpMixtubeSass'),
+  concatDest = require('./gulpConcatDest');
 
+
+'use strict';
 /**
- * @param {{appDirPath: string, watch: boolean, production: boolean}} config
+ * @param {{appDirPath: string, appColor: string, watch: boolean, production: boolean}} config
  * @returns {function}
  */
 module.exports = function makeBuildInlineCss(config) {
@@ -41,13 +40,12 @@ module.exports = function makeBuildInlineCss(config) {
     function runInlineCssPipeline() {
       return gulp.src(inlineCssSource)
         .pipe(plumber())
-        .pipe(sass({includePaths: bourbon.includePaths}))
+        .pipe(mixtubeSass({
+          appDirPath: config.appDirPath,
+          variables: { 'color-accent': config.appColor }
+        }))
         .pipe(postcss(cssPostproConf))
-        .pipe(gutil.buffer((err, files) => {
-          subject.onNext(files.map(file => {
-            return file.contents.toString();
-          }).join(''));
-        }));
+        .pipe(concatDest((err, content) => subject.onNext(content)));
     }
   };
 };

@@ -17,7 +17,7 @@ const gulp = require('gulp'),
   noop = require('lodash.noop');
 
 /**
- * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, appVersion: string, youtubeApiKey: string, errorTrackerPath: ?string, analyticsTrackerPath: ?string}} config
+ * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, appVersion: string, youtubeApiKey: string, errorsTrackerPath: ?string, analyticsTrackerPath: ?string}} config
  * @returns {function}
  */
 module.exports = function makeBuildJs(config) {

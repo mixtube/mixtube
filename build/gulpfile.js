@@ -13,48 +13,60 @@ const gulp = require('gulp'),
   serve = require('./src/serve'),
   packageVersion = require('../package').version;
 
+const appDirPath = '../app';
+
 const commandLine = yargs
   .options({
-    'watch': {
+    watch: {
       default: false,
       describe: 'watches for source changes and automatically rebuild',
       type: 'boolean'
     },
-    'serve': {
+    serve: {
       default: false,
       describe: 'turns on the local server',
       type: 'boolean'
     },
-    'production': {
+    production: {
       default: false,
       describe: 'turns on minification and inlining of "critical path css"',
       type: 'boolean'
     },
-    'appVersion': {
+    appVersion: {
       default: packageVersion,
       describe: 'specifies the version number for the app',
       type: 'string'
     },
-    'baseUrl': {
+    baseUrl: {
       default: '/',
       describe: 'specifies the base URL to use for all relative URLs',
       type: 'string'
     },
-    'publicDirPath': {
+    publicDirPath: {
       default: 'public',
       describe: 'specifies the output directory for the build',
       type: 'string'
     },
-    'errorTrackerPath': {
+    errorTrackerPath: {
       describe: 'overrides the default error tracker implementation',
       type: 'string'
     },
-    'analyticsTrackerPath': {
+    analyticsTrackerPath: {
       describe: 'overrides the default analytics tracker implementation',
       type: 'string'
     },
-    'injectHeadPath': {
+    injectHeadPath: {
       describe: 'appends the given snippet to the HTML index file\'s head section',
+      type: 'string'
+    },
+    svgLogoPath: {
+      default: `${appDirPath}/src/images/mt-empty-logo.svg`,
+      describe: 'specifies the logo of the application',
+      type: 'string'
+    },
+    appColor: {
+      default: 'hsl(199, 100%, 50%)',
+      describe: 'specifies the accent color for the whole application',
       type: 'string'
     }
   });
@@ -62,17 +74,17 @@ const commandLine = yargs
 const cmdArgumentsValues = commandLine.argv;
 
 const config = {
-  appDirPath: '../app',
+  appDirPath,
   publicDirPath: cmdArgumentsValues.publicDirPath,
   htmlBaseUrl: cmdArgumentsValues.baseUrl,
-  appName: 'MixTube',
-  appColor: '#8EC447',
+  appColor: cmdArgumentsValues.appColor,
   appVersion: cmdArgumentsValues.appVersion,
   watch: cmdArgumentsValues.watch,
   production: cmdArgumentsValues.production,
   errorsTrackerPath: cmdArgumentsValues.errorsTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
+  svgLogoPath: cmdArgumentsValues.svgLogoPath,
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
 };
 

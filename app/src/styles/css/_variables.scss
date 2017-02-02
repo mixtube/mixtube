@@ -33,7 +33,8 @@ $color-primary: hsl(240, 3%, 20%);
 $color-lighter: hsl(240, 3%, 30%);
 $color-contrast: hsl(240, 3%, 98%);
 
-$color-accent: hsl(85, 51%, 52%);
+// $color-accent is overridden at build time (see appColor)
+$color-accent: red;
 $color-accent-error: hsl(8, 66%, 43%);
 
 $color-text: hsla(0, 0%, 100%, .87);
