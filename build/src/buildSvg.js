@@ -7,13 +7,10 @@ const gulp = require('gulp'),
   path = require('path');
 
 /**
- * @param {{appDirPath: string, publicDirPath: string, svgLogoPath: string, watch: boolean, production: boolean}} config
+ * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean}} config
  * @returns {function}
  */
 module.exports = function makeBuildSvg(config) {
-
-  const resolvedLogoPath = path.resolve(config.svgLogoPath);
-
   const svgPaths = [
     'node_modules/Ionicons/src/ios-search.svg',
     'node_modules/Ionicons/src/ios-close.svg',
@@ -23,7 +20,6 @@ module.exports = function makeBuildSvg(config) {
     'src/images/mt-play-circle.svg',
     'src/images/mt-pause-circle.svg'
   ].map(path => `${config.appDirPath}/${path}`);
-  svgPaths.push(config.svgLogoPath);
 
   return function buildSvg() {
 
@@ -34,17 +30,7 @@ module.exports = function makeBuildSvg(config) {
     return runSvgPipeline();
 
     function runSvgPipeline() {
-      return gulp.src(svgPaths, {
-        // forces gulp to set a base (any base would work here)
-        // it is just to get dirname in gulp rename so that we can resolve the absolute logo path
-        base: '.'
-      })
-        .pipe(rename(file => {
-          // counter intuitive but by renaming the file we change the id of the resulting sprite
-          if (path.resolve(file.dirname, file.basename + file.extname) === resolvedLogoPath) {
-            file.basename = 'mt-logo';
-          }
-        }))
+      return gulp.src(svgPaths)
         .pipe(svgmin({
             js2svg: {
               pretty: !config.production

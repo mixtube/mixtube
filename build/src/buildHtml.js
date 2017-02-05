@@ -10,7 +10,7 @@ const gulp = require('gulp'),
 
 /**
  *
- * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, injectHeadPath: string, watch: boolean, production: boolean}} config
+ * @param {{appDirPath: string, publicDirPath: string, htmlBaseUrl: string, appVersion: string, logoUrl: string, injectHeadPath: string, watch: boolean, production: boolean}} config
  * @param {function} buildInlineCssFactory
  * @returns {function}
  */
@@ -57,7 +57,8 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory) {
     let htmlStream = gulp.src(htmlSource)
       .pipe(template({
         baseUrl: config.htmlBaseUrl,
-        appVersion: config.appVersion
+        appVersion: config.appVersion,
+        logoUrl: config.logoUrl
       }));
 
     const htmlReplaceOptions = {};

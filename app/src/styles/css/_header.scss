@@ -1,5 +1,4 @@
 @import 'bourbon';
-
 @import 'variables';
 @import 'utils';
 
@@ -65,6 +64,11 @@
     // make sure the default line height doesn't make the container to high
     line-height: 0;
     padding: 0 2 * $grid-size;
+  }
+
+  .mt-header__app-title__logo {
+    height: 4 * $grid-size;
+    width: 4 * $grid-size;
   }
 
   .mt-header__playback-button {

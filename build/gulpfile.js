@@ -2,7 +2,9 @@
 
 const gulp = require('gulp'),
   yargs = require('yargs'),
+  path = require('path'),
   clean = require('./src/clean'),
+  copyLogo = require('./src/copyLogo'),
   pushGhPages = require('./src/pushGhPages'),
   checkJS = require('./src/checkJs'),
   buildJs = require('./src/buildJs'),
@@ -59,7 +61,7 @@ const commandLine = yargs
       describe: 'appends the given snippet to the HTML index file\'s head section',
       type: 'string'
     },
-    svgLogoPath: {
+    logoPath: {
       default: `${appDirPath}/src/images/mt-empty-logo.svg`,
       describe: 'specifies the logo of the application',
       type: 'string'
@@ -84,7 +86,8 @@ const config = {
   errorsTrackerPath: cmdArgumentsValues.errorsTrackerPath,
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
-  svgLogoPath: cmdArgumentsValues.svgLogoPath,
+  logoPath: cmdArgumentsValues.logoPath,
+  logoUrl: path.basename(cmdArgumentsValues.logoPath),
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
 };
 
@@ -102,6 +105,7 @@ if (cmdArgumentsValues.serve) {
 const build = gulp.series(
   checkJS(config),
   clean(config),
+  copyLogo(config),
   gulp.parallel(tasks));
 
 const deployGh = gulp.series(
