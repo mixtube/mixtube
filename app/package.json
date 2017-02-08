@@ -1,0 +1,21 @@
+{
+  "name": "mixtube-app",
+  "description": "Mixtube application module",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jraoult/mixtube.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "Ionicons": "jraoult/ionicons#npm",
+    "angular": "^1.4.5",
+    "angular-animate": "^1.4.5",
+    "angular-aria": "^1.4.5",
+    "fg-loadcss": "^1.2.1",
+    "keymaster": "^1.6.2",
+    "lodash": "^4.15.0",
+    "mixtube-playback": "mixtube/mixtube-playback#v1.0.1",
+    "scroll-into-view": "^1.5.0"
+  }
+}

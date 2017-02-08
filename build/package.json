@@ -1,0 +1,53 @@
+{
+  "name": "mixtube-build",
+  "description": "Mixtube build module",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jraoult/mixtube.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 6",
+    "npm": ">= 3"
+  },
+  "dependencies": {
+    "autoprefixer": "^6.0.1",
+    "brfs": "^1.4.0",
+    "browser-sync": "^2.2.1",
+    "browserify": "^13.0.1",
+    "bundle-collapser": "^1.1.4",
+    "compression": "^1.4.4",
+    "csswring": "^5.0.0",
+    "del": "^2.0.1",
+    "end-of-stream": "^1.1.0",
+    "envify": "^3.4.0",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-html-replace": "^1.6.1",
+    "gulp-jshint": "^2.0.0",
+    "gulp-ng-annotate": "^2.0.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-postcss": "^6.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace-task": "^0.11.0",
+    "gulp-sass": "^2.0.1",
+    "gulp-sourcemaps": "^1.5.0",
+    "gulp-svgmin": "^1.2.3",
+    "gulp-svgstore": "^6.1.0",
+    "gulp-template": "^4.0.0",
+    "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.2",
+    "jshint": "^2.9.1-rc1",
+    "jshint-stylish": "^2.0.0",
+    "lodash.noop": "^3.0.1",
+    "merge-stream": "^1.0.0",
+    "node-bourbon": "^4.2.3",
+    "pathmodify": "^0.5.0",
+    "rx": "^4.0.7",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.0.0",
+    "watchify": "^3.2.2",
+    "yargs": "^5.0.0"
+  }
+}

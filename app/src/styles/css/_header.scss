@@ -1,0 +1,205 @@
+@import 'bourbon';
+@import 'variables';
+@import 'utils';
+
+@mixin header() {
+
+  $padding-search-input: 0 6 * $grid-size 0 $grid-size;
+
+  .mt-header {
+    @include position(absolute, 0px 0px 0px 0px);
+    z-index: 1;
+    overflow: visible; // lets show the header shadow
+  }
+
+  //fake background so that we can animate the header background color by using opacity
+  .mt-header__bg {
+    @include position(absolute, 0px 0px 0px 0px);
+
+    background-color: $color-primary;
+    @include z-depth($depth-header);
+
+    @include mt-horizontal-screen() {
+      transition-property: transform, opacity;
+      transition-duration: $transition-duration;
+      transition-timing-function: $timing-function-ease-in-out, linear;
+
+      &.idle {
+        opacity: 0;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  .mt-header__container {
+    height: 100%;
+    width: 100%;
+
+    // brings the container forward of the background
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    > .start {
+      flex: 1;
+
+      display: flex;
+    }
+
+    > .end {
+      flex: 1;
+    }
+
+    // a container that is positioned at the right of the header
+    > .floating {
+      @include position(absolute, 0px 0px 0px auto);
+
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .mt-header__app-title {
+    // make sure the default line height doesn't make the container to high
+    line-height: 0;
+    padding: 0 2 * $grid-size;
+  }
+
+  .mt-header__app-title__logo {
+    height: 4 * $grid-size;
+    width: 4 * $grid-size;
+  }
+
+  .mt-header__playback-button {
+    position: relative;
+
+    .facet {
+      // center the icon
+      display: flex;
+
+      // facets stacks but only one is visible at the time
+      &:not(:first-child) {
+        position: absolute;
+        top: 0;
+      }
+    }
+
+    .facet__animation-toggle {
+      transform: scale(.5);
+      opacity: 0;
+
+      transition-duration: $transition-duration;
+      transition-property: transform, opacity;
+      transition-timing-function: $timing-function-ease-in-out, linear;
+
+      &.toggle {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  }
+
+  // Search input styles
+  //
+  // We need a little bit of a hack here because:
+  //  - we need to focus the input field on user action for mobile browsers to accept the focus action and show the virtual keyboard
+  //  - we can't animate and focus an input because it creates glitches (at least in Chrome): the browser will move the
+  //    focused input inside the viewport to make it visible
+  //  - we want an cross browser way to fix that
+  // So thanks to the following styles and the mtSearchInput directive:
+  //  - we append a transparent (opacity: 0) "real" input next to a "fake" one (basically a div) to a translated container
+  //    so that it is outside of the viewport
+  //  - on user action we translate the container inside the view, we focus the real input and animate the fake one
+  //  - at the end of the fake input animation we make the real one visible (opacity: 1)
+
+  .mt-search-input__button {
+    position: relative;
+
+    margin-right: 2 * $grid-size;
+
+    z-index: 1;
+
+    .facet {
+      // center the icon
+      display: flex;
+
+      // facets stacks but only one is visible at the time
+      &:not(:first-child) {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+    }
+
+    .facet__animation-toggle {
+      transform: scale(.5);
+      opacity: 0;
+
+      transition-duration: $transition-duration;
+      transition-property: transform, opacity;
+      transition-timing-function: $timing-function-ease-in-out, linear;
+
+      &.toggle {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  }
+
+  // the container, will be translated but not animated
+  .mt-search-input {
+    @include position(absolute, 0px 0px 0px auto);
+
+    max-width: $width-breakpoint-single-column-layout;
+    padding: $padding-search-input;
+
+    color: $color-text;
+
+    display: flex;
+    align-items: center;
+  }
+
+  // the real input, is made transparent and becomes opaque at the end
+  .mt-search-input__field {
+    @extend %mt-chromeless-input;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    z-index: 1;
+
+    background-color: $color-lighter;
+    font: inherit;
+    color: inherit;
+
+    // overrides placeholder to be sure that it is coherent with the fake field pseudo placeholder
+    &::placeholder {
+      @include mt-placeholder();
+    }
+  }
+
+  // the animated fake field gives the illusion that the real input is moving
+  .mt-search-input__fake-field {
+    @include position(absolute, 0px 0px 0px 0px);
+    padding: $padding-search-input;
+
+    background-color: $color-lighter;
+
+    // for fake placeholder alignment
+    display: flex;
+    align-items: center; // align-self seems to not work for :before pseudo element in IE11
+
+    // simulates the real input placeholder until the real input is made visible
+    &.empty:before {
+      content: attr(data-mt-placeholder);
+
+      @include mt-placeholder();
+    }
+  }
+
+  // make sure the fake filed doesn't overflow
+  .mt-search-input__fake-field__text {
+    display: inline-block;
+  }
+}
