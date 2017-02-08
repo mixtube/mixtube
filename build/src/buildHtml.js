@@ -61,7 +61,9 @@ module.exports = function makeBuildHtml(config, buildInlineCssFactory) {
         logoUrl: config.logoUrl
       }));
 
-    const htmlReplaceOptions = {};
+    const htmlReplaceOptions = {
+      loadCssScript: gulp.src(`${config.appDirPath}/node_modules/fg-loadcss/src/loadCSS.js`)
+    };
 
     if (typeof config.injectHeadPath !== 'undefined') {
       htmlReplaceOptions.headInject = gulp.src(config.injectHeadPath);
