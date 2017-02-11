@@ -5,7 +5,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/jraoult/mixtube.git"
+    "url": "https://github.com/mixtube/mixtube.git"
   },
   "license": "MIT",
   "engines": {
