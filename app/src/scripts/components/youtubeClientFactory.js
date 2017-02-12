@@ -62,7 +62,7 @@ function youtubeClientFactory($http, $q, configuration) {
     return $http.jsonp('https://www.googleapis.com/youtube/v3/videos', {
       params: {
         id: videosIds.join(','),
-        part: 'snippet,statistics,contentDetails',
+        part: 'snippet,statistics,contentDetails,status',
         callback: 'JSON_CALLBACK',
         key: configuration.youtubeAPIKey
       }
@@ -88,7 +88,8 @@ function youtubeClientFactory($http, $q, configuration) {
             thumbnailUrl: item.snippet.thumbnails.medium.url,
             publisherName: item.snippet.channelTitle,
             duration: convertISO8601DurationToMillis(item.contentDetails.duration),
-            viewCount: parseInt(item.statistics.viewCount, 10)
+            viewCount: parseInt(item.statistics.viewCount, 10),
+            embeddable: item.status.embeddable
           };
         });
 
@@ -135,7 +136,7 @@ function youtubeClientFactory($http, $q, configuration) {
         q: queryString,
         type: 'video',
         part: 'snippet',
-        order: 'relevance',
+        videoEmbeddable: true,
         pageToken: pageSpec.pageId,
         maxResults: pageSpec.pageSize,
         callback: 'JSON_CALLBACK',

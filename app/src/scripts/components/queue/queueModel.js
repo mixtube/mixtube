@@ -15,6 +15,8 @@ function Video() {
   this.duration = null;
   /** @type {number} */
   this.viewCount = null;
+  /** @type {boolean} */
+  this.embeddable = false;
   /** @type {string} */
   this.publisherName = null;
   /** @type {string} */
