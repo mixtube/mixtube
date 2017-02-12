@@ -25,7 +25,7 @@ function scrollableDirective($timeout, animationsConfig) {
   function containsY(container, content) {
     var containerRect = container[0].getBoundingClientRect();
     var contentRect = content[0].getBoundingClientRect();
-    return containerRect.top < contentRect.top && contentRect.bottom < containerRect.bottom;
+    return containerRect.top <= contentRect.top && contentRect.bottom <= containerRect.bottom;
   }
 
   return {
