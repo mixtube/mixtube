@@ -104,13 +104,17 @@ function queueManagerFactory($q, youtubeClient) {
     queue.entries.splice(position, 1);
   }
 
+  function isEntryPlayable(entry) {
+    return !entry.skippedAtRuntime && entry.video.embeddable;
+  }
+
   function closestValidEntryByIndex(fromIndex) {
     var validEntry = null;
 
     if (fromIndex !== -1) {
       while (!validEntry && fromIndex < queue.entries.length) {
         var entry = queue.entries[fromIndex];
-        if (entry.skippedAtRuntime) {
+        if (!isEntryPlayable(entry)) {
           fromIndex++;
         } else {
           validEntry = entry;
@@ -154,6 +158,16 @@ function queueManagerFactory($q, youtubeClient) {
      * @return {mt.QueueEntry} the next entry or null if none
      */
     closestValidEntryByIndex: closestValidEntryByIndex,
+
+    /**
+     * Tells if the given entry is playable.
+     *
+     * It is influenced by the "skippedAtRuntime" flag and the "embeddable" flag.
+     *
+     * @param {mt.QueueEntry} entry
+     * @return boolean
+     */
+    isEntryPlayable: isEntryPlayable,
 
     /**
      * Deserialize the queue from the given string, load the entry details from remote providers and "extends"

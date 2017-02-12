@@ -119,13 +119,16 @@
         <div>
           <div class="mt-queue__entry mt-js-animation__queue-entry"
                ng-repeat="entry in rootCtrl.getQueue().entries"
-               ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: entry.skippedAtRuntime}"
+               ng-class="{active: entry === rootCtrl.getRunningQueueEntry(), broken: !queueCtrl.isPlayable(entry)}"
                mt-anchor="{{entry.id}}">
             <div class="mt-queue__entry__thumbnail" ng-click="queueCtrl.playQueueEntry($index)"
                  ng-disabled="!rootCtrl.shouldShowPlaybackControls()">
               <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                    class="image"></div>
-              <p class="mt-queue__entry__broken-message">Couldn't load this video</p>
+              <p class="mt-queue__entry__broken-message" ng-if="entry.skippedAtRuntime">We couldn't load this video</p>
+              <p class="mt-queue__entry__broken-message"  ng-if="!entry.video.embeddable">
+                This video can only be watched on {{rootCtrl.providerIdToName(entry.video.provider)}}
+              </p>
 
               <div class="mt-queue__entry__spinner-container">
                 <mt-spinner class="mt-queue__entry__spinner"
@@ -157,9 +160,9 @@
          ng-show="searchResultsCtrl.shouldShowSearchResultPanel()"
          mt-interactive-chrome="searchResultsCtrl.shouldShowSearchResultPanel()">
       <div class="mt-search">
-        <div class="mt-search__provider" ng-repeat="(pId, pLabel) in {youtube: 'YouTube'}">
+        <div class="mt-search__provider" ng-repeat="pId in ['youtube']">
           <div class="mt-search__provider__header">
-            <h3>Results from {{pLabel}}:</h3>
+            <h3>Results from {{rootCtrl.providerIdToName(pId)}}:</h3>
 
             <mt-spinner class="mt-search__provider__header__spinner"
                         ng-show="searchResultsCtrl.pending[pId]"></mt-spinner>
@@ -215,17 +218,16 @@
 
           <div class="mt-search__message mt-js-animation__fold" ng-if="searchResultsCtrl.error[pId]">
             <p class="mt-search__message__padding">
-              Sorry, an error occured while searching for videos on {{pLabel}}. Please check your network
-              connection or try again later.
+              Sorry, an error occured while searching for videos on {{rootCtrl.providerIdToName(pId)}}. Please check
+              your network connection or try again later.
             </p>
           </div>
 
           <div class="mt-search__message mt-js-animation__fold"
                ng-if="searchResultsCtrl.noneFound[pId]">
             <p class="mt-search__message__padding">
-              Sorry, no video found on {{pLabel}} for "{{searchResultsCtrl.getSearchTerm()}}". Please try
-              with another
-              title.
+              Sorry, no video found on {{rootCtrl.providerIdToName(pId)}} for "{{searchResultsCtrl.getSearchTerm()}}".
+              Please try with another title.
             </p>
           </div>
 

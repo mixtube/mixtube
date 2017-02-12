@@ -33,6 +33,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   rootCtrl.getQueue = getQueue;
   rootCtrl.getRunningQueueEntry = getRunningQueueEntry;
   rootCtrl.getLoadingQueueEntry = getLoadingQueueEntry;
+  rootCtrl.providerIdToName = providerIdToName;
   rootCtrl.isPlaying = isPlaying;
   rootCtrl.shouldIdleChrome = shouldIdleChrome;
   rootCtrl.shouldShowScene = shouldShowScene;
@@ -64,6 +65,14 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
 
   function getLoadingQueueEntry() {
     return orchestrator.loadingQueueEntry;
+  }
+
+  function providerIdToName(provider) {
+    if (provider === 'youtube') {
+      return 'YouTube';
+    } else {
+      return 'Unknown Provider';
+    }
   }
 
   function isPlaying() {
@@ -469,6 +478,7 @@ function QueueCtrl(orchestrator, queueManager, analyticsTracker) {
 
   queueCtrl.playQueueEntry = playQueueEntry;
   queueCtrl.removeQueueEntry = removeQueueEntry;
+  queueCtrl.isPlayable = isPlayable;
 
   /**
    * @param {number} queueIndex
@@ -486,6 +496,13 @@ function QueueCtrl(orchestrator, queueManager, analyticsTracker) {
     queueManager.removeEntry(queueEntry);
 
     analyticsTracker.track('Removed video from queue', {queueLength: queueManager.queue.entries.length});
+  }
+
+  /**
+   * @param {mt.QueueEntry} queueEntry
+   */
+  function isPlayable(queueEntry) {
+    return queueManager.isEntryPlayable(queueEntry);
   }
 }
 
