@@ -1,7 +1,7 @@
 {
   "name": "mixtube",
   "description": "Mixtube umbrella module",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "repository": {
     "type": "git",
