@@ -105,7 +105,7 @@ function queueManagerFactory($q, youtubeClient) {
   }
 
   function isEntryPlayable(entry) {
-    return !entry.skippedAtRuntime && entry.video.embeddable;
+    return !entry.skippedAtRuntime && entry.video.embeddable && !entry.video.blacklisted;
   }
 
   function closestValidEntryByIndex(fromIndex) {

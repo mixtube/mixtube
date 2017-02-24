@@ -28,6 +28,7 @@ function RootCtrl($scope, $location, $timeout, $templateCache, keyboardShortcutM
   var modalOpen = false;
 
   rootCtrl.queueLoading = false;
+  rootCtrl.hostname = $location.host();
 
   rootCtrl.isSearchShown = isSearchShown;
   rootCtrl.getQueue = getQueue;
