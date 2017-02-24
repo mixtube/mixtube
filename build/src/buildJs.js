@@ -12,7 +12,7 @@ const gulp = require('gulp'),
   collapse = require('bundle-collapser/plugin'),
   pathmodify = require('pathmodify'),
   uglify = require('gulp-uglify'),
-  ngAnnotate = require('gulp-ng-annotate'),
+  babel = require('gulp-babel'),
   brfs = require('brfs'),
   noop = require('lodash.noop');
 
@@ -24,49 +24,38 @@ module.exports = function makeBuildJs(config) {
 
   return function buildJs() {
     const runBrowserifyOptions = {
-      configureBundle: noop,
-      pipelineFn: noop,
       watch: config.watch,
-      production: config.production
-    };
+      production: config.production,
+      configureBundle(bundle) {
+        if (config.production) {
+          // convert bundle paths to IDS to save bytes in browserify bundles
+          bundle.plugin(collapse);
+        }
 
-    runBrowserifyOptions.configureBundle = (bundle) => {
-      if (config.production) {
-        // convert bundle paths to IDS to save bytes in browserify bundles
-        bundle.plugin(collapse);
-      }
-
-      // overriding trackers path to custom factories file when specified
-      const mods = [];
-      if(config.errorsTrackerPath) {
-        mods.push(pathmodify.mod.re(/.*delegates\/errorsTracker(\.js)?$/, config.errorsTrackerPath));
-      }
-      if(config.analyticsTrackerPath) {
-        mods.push(pathmodify.mod.re(/.*delegates\/analyticsTracker(\.js)?$/, config.analyticsTrackerPath))
-      }
-      bundle.plugin(pathmodify, {mods: mods});
-    };
-
-    if (config.production) {
-      runBrowserifyOptions.pipelineFn = function prodPipelineFn(pipeline) {
+        // overriding trackers path to custom factories file when specified
+        const mods = [];
+        if (config.errorsTrackerPath) {
+          mods.push(pathmodify.mod.re(/.*delegates\/errorsTracker(\.js)?$/, config.errorsTrackerPath));
+        }
+        if (config.analyticsTrackerPath) {
+          mods.push(pathmodify.mod.re(/.*delegates\/analyticsTracker(\.js)?$/, config.analyticsTrackerPath))
+        }
+        bundle.plugin(pathmodify, { mods: mods });
+      },
+      pipelineFn(pipeline) {
         return pipeline
           .pipe(buffer())
-          .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(ngAnnotate())
-          .pipe(uglify())
+          .pipe(sourcemaps.init({ loadMaps: true }))
+          .pipe(babel({
+            compact: false,
+            plugins: [['angularjs-annotate', { 'explicitOnly': true }]]
+          }))
+          .pipe(config.production ? uglify() : gutil.noop())
           .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(config.publicDirPath));
       }
-    } else {
-      runBrowserifyOptions.pipelineFn = function devPipelineFn(pipeline) {
-        return pipeline
-          .pipe(buffer())
-          .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(ngAnnotate())
-          .pipe(sourcemaps.write())
-          .pipe(gulp.dest(config.publicDirPath));
-      }
-    }
+    };
+
 
     const environment = {
       APP_VERSION: config.appVersion,
