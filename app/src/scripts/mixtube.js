@@ -16,11 +16,11 @@ function mixtube(environment, delegates) {
     .constant('environment', environment)
     .value('analyticsTracker', delegates.analyticsTracker)
     .value('errorsTracker', delegates.errorsTracker)
-    .config(function($locationProvider) {
+    .config(/* @ngInject*/ function($locationProvider) {
       $locationProvider.html5Mode(true);
     })
-    .config(function($provide) {
-      $provide.decorator('$exceptionHandler', function($delegate) {
+    .config(/* @ngInject*/ function($provide) {
+      $provide.decorator('$exceptionHandler', /* @ngInject*/ function($delegate) {
         return function exceptionHandlerDecorator(exception, cause) {
           delegates.errorsTracker.track(exception);
           $delegate(exception, cause);
@@ -28,7 +28,7 @@ function mixtube(environment, delegates) {
       });
     })
 
-    .run(function($rootScope, $controller, configuration) {
+    .run(/* @ngInject*/ function($rootScope, $controller, configuration) {
       // make sure the scope always has the props property
       $rootScope.props = {};
 
