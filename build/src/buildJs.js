@@ -46,10 +46,7 @@ module.exports = function makeBuildJs(config) {
         return pipeline
           .pipe(buffer())
           .pipe(sourcemaps.init({ loadMaps: true }))
-          .pipe(babel({
-            compact: false,
-            plugins: [['angularjs-annotate', { 'explicitOnly': true }]]
-          }))
+          .pipe(ngAnnotate())
           .pipe(config.production ? uglify() : gutil.noop())
           .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(config.publicDirPath));
@@ -100,4 +97,14 @@ function runBrowserify(inputPath, outputPath, options, environment) {
         .pipe(source(outputPath))
     );
   }
+}
+
+/**
+ * Adds Angular annotation for strict DI.
+ */
+function ngAnnotate() {
+  return babel({
+    compact: false,
+    plugins: [['angularjs-annotate', { 'explicitOnly': true }]]
+  });
 }
