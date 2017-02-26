@@ -4,7 +4,7 @@ var angular = require('angular'),
   defaults = require('lodash/defaults'),
   has = require('lodash/has'),
   map = require('lodash/map'),
-  parseQueryString = require('query-string').parse;
+  keyBy = require('lodash/keyBy');
 
 // @ngInject
 function youtubeClientFactory($http, $q, configuration) {
@@ -49,28 +49,6 @@ function youtubeClientFactory($http, $q, configuration) {
   }
 
   /**
-   * Get video info from an undocumented YouTube API.
-   *
-   * It is used to check if the current domain is blacklisted for the given video id.
-   *
-   * @param {string} videoId
-   * @param {string} origin the domain where we want to play the video
-   * @returns {Promise}
-   */
-  function getVideoInfo(videoId, origin) {
-    return $http.get('https://cors-anywhere.herokuapp.com/https://www.youtube.com/get_video_info', {
-      params: {
-        html5: '1',
-        video_id: videoId,
-        eurl: origin
-      }
-    })
-      .then(function(infoQs) {
-        return parseQueryString(infoQs.data);
-      });
-  }
-
-  /**
    * @param {Array.<string>} videosIds
    * @returns {Promise}
    */
@@ -104,9 +82,8 @@ function youtubeClientFactory($http, $q, configuration) {
         }
       })
       .then(function(data) {
-        var videosDetailsById = {};
-        data.items.forEach(function(item) {
-          videosDetailsById[item.id] = {
+        const details = data.items.map(function(item) {
+          return {
             provider: 'youtube',
             id: item.id,
             title: item.snippet.title,
@@ -118,19 +95,26 @@ function youtubeClientFactory($http, $q, configuration) {
           };
         });
 
-        return videosDetailsById;
+        return keyBy(details, 'id');
       });
   }
 
+  /**
+   * Get the given videos ids extra info.
+   *
+   * Useful to check if a given video is playable from the current origin.
+   *
+   * @param {Array.<string>} videosIds
+   * @returns {Promise.<Array.<{id: string, status: string, errorcode: string}>>}
+   */
   function fetchVideosInfoById(videosIds) {
-    var videosInfoById = {};
-    return $q.all(videosIds.map(function(videoId) {
-      return getVideoInfo(videoId, location.hostname)
-        .then(function(info) {
-          videosInfoById[videoId] = { blacklisted: info.status === 'fail' && info.errorcode === '150' };
-        });
-    })).then(function() {
-      return videosInfoById;
+    return $http.get('https://localhost.mixtube.io:3002/v1/youtube/extra/videos', {
+      params: {
+       id: videosIds.join(','),
+        origin: location.origin
+      }
+    }).then(function(res) {
+      return keyBy(res.data, 'id');
     });
   }
 
@@ -215,9 +199,7 @@ function youtubeClientFactory($http, $q, configuration) {
             thumbnailUrl: item.snippet.thumbnails.medium.url,
             // a reminder that the channelTitle returned by YT search API is wrong
             // publisherName: item.snippet.channelTitle,
-            provider: 'youtube',
-            // temporary store the channel, used after to add the video channel name
-            __youtubeChannelId: item.snippet.channelId
+            provider: 'youtube'
           };
         });
 
