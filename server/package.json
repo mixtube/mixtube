@@ -3,9 +3,13 @@
   "main": "index.js",
   "description": "Mixtube server side component",
   "private": true,
+  "engines": {
+    "node": ">=7.5.0"
+  },
   "scripts": {
     "start": "node $NODE_DEBUG_OPTION index.js",
-    "debug": "browser-sync start --no-open --https --proxy 'http://localhost:4000' | npm run start"
+    "debug": "browser-sync start --no-open --https --proxy 'http://localhost:8080' | npm run start",
+    "deploy": "gcloud app deploy  --project mixtube-io-fad1c"
   },
   "devDependencies": {
     "browser-sync": "^2.18.8"
