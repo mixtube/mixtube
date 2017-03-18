@@ -17,7 +17,8 @@ const gulp = require('gulp'),
   noop = require('lodash.noop');
 
 /**
- * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, appVersion: string, youtubeApiKey: string, errorsTrackerPath: ?string, analyticsTrackerPath: ?string}} config
+ * @param {{appDirPath: string, publicDirPath: string, watch: boolean, production: boolean, appVersion: string,
+ * youtubeApiKey: string, youtubeExtraVideosInfoUrl: string, errorsTrackerPath: ?string, analyticsTrackerPath: ?string}} config
  * @returns {function}
  */
 module.exports = function makeBuildJs(config) {
@@ -56,7 +57,8 @@ module.exports = function makeBuildJs(config) {
 
     const environment = {
       APP_VERSION: config.appVersion,
-      YOUTUBE_API_KEY: config.youtubeApiKey
+      YOUTUBE_API_KEY: config.youtubeApiKey,
+      YOUTUBE_EXTRA_VIDEOS_INFO_URL: config.youtubeExtraVideosInfoUrl
     };
 
     return merge(

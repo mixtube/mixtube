@@ -21,6 +21,9 @@ function configurationFactory($location, environment) {
     get youtubeAPIKey() {
       return environment.youtubeAPIKey;
     },
+    get youtubeExtraVideosInfoUrl() {
+      return environment.youtubeExtraVideosInfoUrl;
+    },
     get maxSearchResults() {
       return 20;
     },

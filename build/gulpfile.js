@@ -70,6 +70,10 @@ const commandLine = yargs
       default: 'hsl(199, 100%, 50%)',
       describe: 'specifies the accent color for the whole application',
       type: 'string'
+    },
+    youtubeExtraVideosInfoUrl: {
+      describe: 'specifies the YouTube extra info endpoint URL. I none provided it is simply ignored',
+      type: 'string'
     }
   });
 

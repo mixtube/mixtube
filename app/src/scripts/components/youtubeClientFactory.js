@@ -108,7 +108,11 @@ function youtubeClientFactory($http, $q, configuration) {
    * @returns {Promise.<Array.<{id: string, status: string, errorcode: string}>>}
    */
   function fetchVideosInfoById(videosIds) {
-    return $http.get('https://localhost.mixtube.io:3002/v1/youtube/extra/videos', {
+    if(!configuration.youtubeExtraVideosInfoUrl) {
+      return $q.resolve({});
+    }
+
+    return $http.get(configuration.youtubeExtraVideosInfoUrl, {
       params: {
        id: videosIds.join(','),
         origin: location.origin
@@ -134,6 +138,7 @@ function youtubeClientFactory($http, $q, configuration) {
         var videosDetailsById = args[1];
 
         videos.forEach(function(video) {
+          // videos details can be undefined if no extra video info url is provided
           angular.extend(video, videosInfoById[video.id], videosDetailsById[video.id]);
         });
 
