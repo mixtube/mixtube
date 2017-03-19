@@ -91,6 +91,7 @@ const config = {
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
   logoPath: cmdArgumentsValues.logoPath,
+  youtubeExtraVideosInfoUrl: cmdArgumentsValues.youtubeExtraVideosInfoUrl,
   logoUrl: path.basename(cmdArgumentsValues.logoPath),
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
 };
