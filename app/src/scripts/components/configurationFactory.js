@@ -22,6 +22,9 @@ function configurationFactory($location, environment) {
       return environment.youtubeAPIKey;
     },
     get youtubeExtraVideosInfoUrl() {
+      if (has(debugParams, 'youtubeExtraVideosInfoUrl')) {
+        return debugParams.youtubeExtraVideosInfoUrl;
+      }
       return environment.youtubeExtraVideosInfoUrl;
     },
     get maxSearchResults() {
