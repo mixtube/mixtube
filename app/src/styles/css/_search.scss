@@ -3,6 +3,40 @@
 @import 'variables';
 @import 'utils';
 
+// helper to set the media queries breakpoints to have a nice results grid
+// ideally we would have element query on the result panel but it doesn't exist yet so we need to "statically"
+// calculate the remaining space
+@mixin mt-result-breakpoint($promoted-count, $regular-count, $width-offset) {
+
+  // the idea is to make sure we never expand the gutter between the promoted result
+  $width-breakpoint: $width-offset + $promoted-count * $grid-size + ($promoted-count - 1) * $width-thumbnail-original;
+
+  @media screen and (min-width: max($width-breakpoint, $width-breakpoint-single-column-layout)) {
+
+    .mt-js-results:before {
+      content: '{"promotedCount": #{$promoted-count}, "regularCount": #{$regular-count}}';
+    }
+
+    .mt-result {
+      width: 100% / $regular-count;
+    }
+
+    .mt-result__container {
+      max-width: $width-thumbnail-original;
+    }
+
+    .mt-result__thumbnail {
+      height: $height-thumbnail-original;
+      padding-top: 0; // stops the fluid height behavior of the thumbnail
+    }
+
+    // the first three children of the first page are "promoted"
+    .mt-results__page:first-child .mt-result:nth-child(-n + #{$promoted-count}) {
+      width: 100% /  $promoted-count;
+    }
+  }
+}
+
 @mixin search {
 
   .mt-search {
@@ -83,7 +117,7 @@
       display: block;
       @include position(absolute, $height-thumbnail-original / 4 0px 0px 0px);
 
-      background: linear-gradient(to bottom, hsla(0, 0%, 0%, 0) 0%, hsla(0, 0%, 0%, 0.7) 70%, hsla(0, 0%, 0%, 0.7) 100%);
+      background-image: linear-gradient(to bottom, hsla(0, 0%, 0%, 0) 0%, hsla(0, 0%, 0%, 0.7) 70%, hsla(0, 0%, 0%, 0.7) 100%);
     }
   }
 
@@ -169,13 +203,39 @@
     }
   }
 
-  .mt-result__data {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 2 * $grid-size;
+  .mt-result__text {
+    @include position(absolute, 0px 0px 0px 0px);
+    padding: 0 2 * $grid-size;
 
-    //background: rgba($color-background, .3);
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      padding: 2 * $grid-size 0;
+
+      &:last-child {
+        padding-top: 0;
+      }
+    }
+
+    &.broken {
+      background-color: rgba($color-accent-error, $opacity-ratio-overlay);
+    }
+  }
+
+  .mt-result__broken-message {
+    flex: 1;
+
+    color: $color-text;
+
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+
+    @include mt-horizontal-screen() {
+      font: $font-smaller;
+    }
   }
 
   .mt-result__data__item {
@@ -257,39 +317,5 @@
     width: 2 * $grid-size;
     height: 2 * $grid-size;
     margin-left: $grid-size;
-  }
-}
-
-// helper to set the media queries breakpoints to have a nice results grid
-// ideally we would have element query on the result panel but it doesn't exist yet so we need to "statically"
-// calculate the remaining space
-@mixin mt-result-breakpoint($promoted-count, $regular-count, $width-offset) {
-
-  // the idea is to make sure we never expand the gutter between the promoted result
-  $width-breakpoint: $width-offset + $promoted-count * $grid-size + ($promoted-count - 1) * $width-thumbnail-original;
-
-  @media screen and (min-width: max($width-breakpoint, $width-breakpoint-single-column-layout)) {
-
-    .mt-js-results:before {
-      content: '{"promotedCount": #{$promoted-count}, "regularCount": #{$regular-count}}';
-    }
-
-    .mt-result {
-      width: 100% / $regular-count;
-    }
-
-    .mt-result__container {
-      max-width: $width-thumbnail-original;
-    }
-
-    .mt-result__thumbnail {
-      height: $height-thumbnail-original;
-      padding-top: 0; // stops the fluid height behavior of the thumbnail
-    }
-
-    // the first three children of the first page are "promoted"
-    .mt-results__page:first-child .mt-result:nth-child(-n + #{$promoted-count}) {
-      width: 100% /  $promoted-count;
-    }
   }
 }
