@@ -5,7 +5,8 @@ var mixtube = require('./mixtube'),
   errorsTracker = require('./delegates/errorsTracker');
 
 mixtube({
-  youtubeAPIKey: process.env.YOUTUBE_API_KEY
+  youtubeAPIKey: process.env.YOUTUBE_API_KEY,
+  youtubeExtraVideosInfoUrl: process.env.YOUTUBE_EXTRA_VIDEOS_INFO_URL
 }, {
   analyticsTracker: analyticsTracker(),
   // log collected exception to the browser console by default

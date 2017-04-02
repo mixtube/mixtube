@@ -17,6 +17,8 @@ function Video() {
   this.viewCount = null;
   /** @type {boolean} */
   this.embeddable = false;
+  /** @type {boolean} */
+  this.blacklisted = false;
   /** @type {string} */
   this.publisherName = null;
   /** @type {string} */

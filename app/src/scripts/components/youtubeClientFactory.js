@@ -3,7 +3,8 @@
 var angular = require('angular'),
   defaults = require('lodash/defaults'),
   has = require('lodash/has'),
-  map = require('lodash/map');
+  map = require('lodash/map'),
+  keyBy = require('lodash/keyBy');
 
 // @ngInject
 function youtubeClientFactory($http, $q, configuration) {
@@ -47,13 +48,11 @@ function youtubeClientFactory($http, $q, configuration) {
     return (hours * 3600 + minutes * 60 + seconds) * 1000;
   }
 
-  function extendVideosWithDetails(videos) {
-    if (videos.length > MAX_RESULTS_LIMIT) {
-      throw new Error('YouTube API can not list more than ' + MAX_RESULTS_LIMIT + ' videos. Please reduce the videos ids list.');
-    }
-
-    var videosIds = map(videos, 'id');
-
+  /**
+   * @param {Array.<string>} videosIds
+   * @returns {Promise}
+   */
+  function getVideosDetails(videosIds) {
     // We have to use JSONP here
     //  - IE11 manages CORS request if originating page and requested resource have the same protocol
     //  - googleapi.com only accept https protocol
@@ -66,7 +65,11 @@ function youtubeClientFactory($http, $q, configuration) {
         callback: 'JSON_CALLBACK',
         key: configuration.youtubeAPIKey
       }
-    })
+    });
+  }
+
+  function fetchVideosDetailsById(videosIds) {
+    return getVideosDetails(videosIds)
       .then(function(response) {
         var data = response.data;
 
@@ -79,9 +82,8 @@ function youtubeClientFactory($http, $q, configuration) {
         }
       })
       .then(function(data) {
-        var videoDetailsById = {};
-        data.items.forEach(function(item) {
-          videoDetailsById[item.id] = {
+        const details = data.items.map(function(item) {
+          return {
             provider: 'youtube',
             id: item.id,
             title: item.snippet.title,
@@ -93,35 +95,77 @@ function youtubeClientFactory($http, $q, configuration) {
           };
         });
 
-        return videoDetailsById;
-      })
-      .then(function(videoDetailsById) {
-        // extend the video with the details
-        videos.forEach(function(video) {
-          angular.extend(video, videoDetailsById[video.id]);
-        });
-
-        return videos;
+        return keyBy(details, 'id');
       });
   }
 
-  function listVideosByIds(ids) {
+  /**
+   * Get the given videos ids extra info.
+   *
+   * Useful to check if a given video is playable from the current origin.
+   *
+   * @param {Array.<string>} videosIds
+   * @returns {Promise.<Object.<{id: string, blacklisted: boolean}>>}
+   */
+  function fetchVideosInfoById(videosIds) {
+    if(!configuration.youtubeExtraVideosInfoUrl) {
+      return $q.resolve({});
+    }
+
+    return $http.get(configuration.youtubeExtraVideosInfoUrl, {
+      params: {
+        id: videosIds.join(','),
+        origin: location.origin
+      }
+    }).then(function(res) {
+      return keyBy(res.data, 'id');
+    });
+  }
+
+  function extendVideosWithPromiseResults(videos, promise) {
+    if (videos.length > MAX_RESULTS_LIMIT) {
+      throw new Error('YouTube API can not list more than ' + MAX_RESULTS_LIMIT + ' videos. Please reduce the videos ids list.');
+    }
+
+    return promise.then(function(videosExtra) {
+      videos.forEach(function(video) {
+        // videos details can be undefined if no extra video info url is provided
+        angular.extend(video, videosExtra[video.id]);
+      });
+
+      return videos;
+    });
+  }
+
+  function listVideosByIds(ids, notifyCb) {
     // prepare an array of pseudo videos that have only the id property defined
     var videos = ids.map(function(id) {
-      return {id: id};
+      return { id: id };
     });
 
-    var pagesPromises = [];
+    var pagesDetailsPromises = [];
+    var pagesInfoPromises = [];
 
     var pagesCount = videos.length / MAX_RESULTS_LIMIT;
     for (var pageIdx = 0; pageIdx < pagesCount; pageIdx++) {
 
       var pageStart = pageIdx * MAX_RESULTS_LIMIT;
       var videosPaged = videos.slice(pageStart, Math.min(pageStart + MAX_RESULTS_LIMIT, videos.length));
-      pagesPromises.push(extendVideosWithDetails(videosPaged));
+      var videosIds = map(videosPaged, 'id');
+
+      pagesDetailsPromises.push(extendVideosWithPromiseResults(videosPaged, fetchVideosDetailsById(videosIds)));
+      pagesInfoPromises.push(extendVideosWithPromiseResults(videosPaged, fetchVideosInfoById(videosIds)));
     }
 
-    return $q.all(pagesPromises)
+    var allPagesDetailsPromise = $q.all(pagesDetailsPromises);
+    var allPagesInfoPromise = $q.all(pagesInfoPromises);
+
+    // early notification to allow progressive rendering
+    allPagesDetailsPromise.then(function() {
+      notifyCb(videos);
+    });
+
+    return $q.all([allPagesDetailsPromise, allPagesInfoPromise])
       .then(function() {
         return videos;
       });
@@ -129,7 +173,7 @@ function youtubeClientFactory($http, $q, configuration) {
 
   function searchVideosByQuery(queryString, pageSpec, notifyCb) {
 
-    pageSpec = defaults({}, pageSpec, {pageId: null, pageSize: MAX_RESULTS_LIMIT});
+    pageSpec = defaults({}, pageSpec, { pageId: null, pageSize: MAX_RESULTS_LIMIT });
 
     return $http.jsonp('https://www.googleapis.com/youtube/v3/search', {
       params: {
@@ -163,22 +207,22 @@ function youtubeClientFactory($http, $q, configuration) {
             thumbnailUrl: item.snippet.thumbnails.medium.url,
             // a reminder that the channelTitle returned by YT search API is wrong
             // publisherName: item.snippet.channelTitle,
-            provider: 'youtube',
-            // temporary store the channel, used after to add the video channel name
-            __youtubeChannelId: item.snippet.channelId
+            provider: 'youtube'
           };
         });
 
-        // first batch of results just notify (will call the progress handler)
-        notifyCb({videos: videos, nextPageId: data.nextPageToken});
+        var videosIds = map(videos, 'id');
 
-        return {videos: videos, nextPageToken: data.nextPageToken};
-      })
-      .then(function(param) {
-        return extendVideosWithDetails(param.videos)
-          .then(function(videos) {
-            return {videos: videos, nextPageId: param.nextPageToken};
-          });
+        // first batch of results just notify (will call the progress handler)
+        notifyCb({ videos: videos, nextPageId: data.nextPageToken });
+
+        // the search is done when both extra info chunks have been fully fetched
+        return $q.all([
+          extendVideosWithPromiseResults(videos, fetchVideosDetailsById(videosIds)),
+          extendVideosWithPromiseResults(videos, fetchVideosInfoById(videosIds))
+        ]).then(function() {
+          return { videos: videos, nextPageToken: data.nextPageToken };
+        });
       });
   }
 
@@ -202,6 +246,7 @@ function youtubeClientFactory($http, $q, configuration) {
      * least the id. That doesn't mean that it was found, check properties values to know if it was.
      *
      * @param {Array.<string>} ids the list of youtube videos ids
+     * @param {function} notifyCb a callback to be called with the temporary result to enable progressive rendering
      * @return {Promise} a promise resolved with Array.<mt.Video>
      */
     listVideosByIds: listVideosByIds,
@@ -219,6 +264,7 @@ function youtubeClientFactory($http, $q, configuration) {
      * @param {string} queryString the query as used for a classic youtube search
      * @param {{pageId: string=, pageSize: number}} pageSpec parameters for paging (default to
      * {@link configuration.maxSearchResults})
+     * @param {function} notifyCb a callback to be called with the temporary result to enable progressive rendering
      * @return {promise.<{videos: Array.<mt.Video>, netPageId: string}>} resolved when finished.
      * Intermediary states are delivered through the promise's progress callback.
      */

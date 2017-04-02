@@ -125,9 +125,14 @@
                  ng-disabled="!rootCtrl.shouldShowPlaybackControls()">
               <div ng-style="{'background-image': 'url({{entry.video.thumbnailUrl}})'}"
                    class="image"></div>
-              <p class="mt-queue__entry__broken-message" ng-if="entry.skippedAtRuntime">We couldn't load this video</p>
-              <p class="mt-queue__entry__broken-message"  ng-if="!entry.video.embeddable">
-                This video can only be watched on {{rootCtrl.providerIdToName(entry.video.provider)}}
+              <p class="mt-queue__entry__broken-message" ng-if="!queueCtrl.isPlayable(entry)">
+                <span ng-if="entry.skippedAtRuntime">We couldn't load this video</span>
+                <span ng-if="!entry.video.embeddable">
+                  This video can only be watched on {{rootCtrl.providerIdToName(entry.video.provider)}}
+                </span>
+                <span ng-if="entry.video.blacklisted">
+                  This video can't be watched on {{rootCtrl.hostname}}
+                </span>
               </p>
 
               <div class="mt-queue__entry__spinner-container">
@@ -200,16 +205,24 @@
                       </div>
                     </div>
                   </div>
-                  <ul class="mt-result__data">
-                    <li class="mt-result__data__item head" title="{{searchResult.title}}">
-                      <span class="mt-result__data__title">{{searchResult.title}}</span>
-                      <span class="mt-result__data__duration">{{searchResult.duration | mtDuration:'shortTime'}}</span>
-                    </li>
-                    <li class="mt-result__data__item mt-result__data__publisher"
-                        ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">
-                      by {{searchResult.publisherName}}
-                    </li>
-                  </ul>
+                  <div class="mt-result__text" ng-class="{broken: searchResult.blacklisted}">
+                    <p class="mt-result__broken-message">
+                      <span ng-if="searchResult.blacklisted">
+                        This video can't be watched on {{rootCtrl.hostname}}
+                      </span>
+                    </p>
+                    <ul class="mt-result__data">
+                      <li class="mt-result__data__item head" title="{{searchResult.title}}">
+                        <span class="mt-result__data__title">{{searchResult.title}}</span>
+                        <span
+                            class="mt-result__data__duration">{{searchResult.duration | mtDuration:'shortTime'}}</span>
+                      </li>
+                      <li class="mt-result__data__item mt-result__data__publisher"
+                          ng-style="{visibility: searchResult.publisherName ? 'visible' : 'hidden'}">
+                        by {{searchResult.publisherName}}
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>

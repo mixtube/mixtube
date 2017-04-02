@@ -70,6 +70,10 @@ const commandLine = yargs
       default: 'hsl(199, 100%, 50%)',
       describe: 'specifies the accent color for the whole application',
       type: 'string'
+    },
+    youtubeExtraVideosInfoUrl: {
+      describe: 'specifies the YouTube extra info endpoint URL. I none provided it is simply ignored',
+      type: 'string'
     }
   });
 
@@ -87,6 +91,7 @@ const config = {
   analyticsTrackerPath: cmdArgumentsValues.analyticsTrackerPath,
   injectHeadPath: cmdArgumentsValues.injectHeadPath,
   logoPath: cmdArgumentsValues.logoPath,
+  youtubeExtraVideosInfoUrl: cmdArgumentsValues.youtubeExtraVideosInfoUrl,
   logoUrl: path.basename(cmdArgumentsValues.logoPath),
   youtubeApiKey: process.env.MIXTUBE_YOUTUBE_API_KEY
 };

@@ -62,8 +62,8 @@ function queueManagerFactory($q, youtubeClient) {
       }
     }
 
-    return youtubeClient.listVideosByIds(youtubeVideosIds)
-      .then(function(videos) {
+    return $q(function(resolve, reject) {
+      youtubeClient.listVideosByIds(youtubeVideosIds, function progressCb(videos) {
         videos.forEach(function(video) {
           var queueEntry = new QueueEntry();
           queueEntry.id = uniqueId();
@@ -79,13 +79,15 @@ function queueManagerFactory($q, youtubeClient) {
         // replacing the queue object prevents the Angular digest / watch mechanism to work
         // by extending the object it allows it to detect the changes
         angular.extend(queue, newQueue);
+        resolve(queue);
       })
-      .catch(function(ytError) {
-        error = new Error('Unable to load a queue because of an Youtube error');
-        error.code = DeserializationErrorCodes.PROVIDER_LOADING_FAILURE;
-        error.nativeError = ytError;
-        return $q.reject(error);
-      });
+        .catch(function(ytError) {
+          error = new Error('Unable to load a queue because of an Youtube error');
+          error.code = DeserializationErrorCodes.PROVIDER_LOADING_FAILURE;
+          error.nativeError = ytError;
+          reject(error);
+        });
+    });
   }
 
   function appendVideo(video) {
@@ -105,7 +107,7 @@ function queueManagerFactory($q, youtubeClient) {
   }
 
   function isEntryPlayable(entry) {
-    return !entry.skippedAtRuntime && entry.video.embeddable;
+    return !entry.skippedAtRuntime && entry.video.embeddable && !entry.video.blacklisted;
   }
 
   function closestValidEntryByIndex(fromIndex) {
