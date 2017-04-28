@@ -4,7 +4,10 @@ var angular = require('angular'),
   defaults = require('lodash/defaults'),
   has = require('lodash/has'),
   map = require('lodash/map'),
-  keyBy = require('lodash/keyBy');
+  keyBy = require('lodash/keyBy'),
+  memoize = require('lodash/memoize'),
+  onIdle = require('on-idle'),
+  drmChecker = require('mixtube-playback').drmChecker;
 
 // @ngInject
 function youtubeClientFactory($http, $q, configuration) {
@@ -34,6 +37,29 @@ function youtubeClientFactory($http, $q, configuration) {
    */
   var ISO8601_REGEXP = /PT(?:(\d*)H)?(?:(\d*)M)?(?:(\d*)S)?/;
 
+  var _drmChecker;
+
+  activate();
+
+  function activate() {
+    _drmChecker = drmChecker({
+      max: 2,
+      elementProducer: function defaultElementProducer() {
+        var elmt = document.createElement('div');
+
+        Object.assign(elmt.style, {
+          width: '1px',
+          height: '1px',
+          position: 'absolute',
+          top: '-100px',
+          opacity: 0
+        });
+        document.body.appendChild(elmt);
+        return elmt;
+      }
+    });
+  }
+
   /**
    * Converts a ISO8601 duration string to a duration in milliseconds.
    *
@@ -46,6 +72,20 @@ function youtubeClientFactory($http, $q, configuration) {
     var minutes = parseInt(execResult[2]) || 0;
     var seconds = parseInt(execResult[3]) || 0;
     return (hours * 3600 + minutes * 60 + seconds) * 1000;
+  }
+
+  function checkDrm(id) {
+    return new $q(function(resolve, reject) {
+      // only trigger this expensive call when there is some room for it
+      onIdle(function() {
+        _drmChecker.checkDrm({provider: 'youtube', id: id})
+          .then(function(drmReport) {
+            return {id: id, blacklisted: !drmReport.playable};
+          })
+          .then(resolve)
+          .catch(reject);
+      });
+    });
   }
 
   /**
@@ -99,29 +139,6 @@ function youtubeClientFactory($http, $q, configuration) {
       });
   }
 
-  /**
-   * Get the given videos ids extra info.
-   *
-   * Useful to check if a given video is playable from the current origin.
-   *
-   * @param {Array.<string>} videosIds
-   * @returns {Promise.<Object.<{id: string, blacklisted: boolean}>>}
-   */
-  function fetchVideosInfoById(videosIds) {
-    if(!configuration.youtubeExtraVideosInfoUrl) {
-      return $q.resolve({});
-    }
-
-    return $http.get(configuration.youtubeExtraVideosInfoUrl, {
-      params: {
-        id: videosIds.join(','),
-        origin: location.origin
-      }
-    }).then(function(res) {
-      return keyBy(res.data, 'id');
-    });
-  }
-
   function extendVideosWithPromiseResults(videos, promise) {
     if (videos.length > MAX_RESULTS_LIMIT) {
       throw new Error('YouTube API can not list more than ' + MAX_RESULTS_LIMIT + ' videos. Please reduce the videos ids list.');
@@ -140,7 +157,7 @@ function youtubeClientFactory($http, $q, configuration) {
   function listVideosByIds(ids, notifyCb) {
     // prepare an array of pseudo videos that have only the id property defined
     var videos = ids.map(function(id) {
-      return { id: id };
+      return {id: id};
     });
 
     var pagesDetailsPromises = [];
@@ -154,7 +171,6 @@ function youtubeClientFactory($http, $q, configuration) {
       var videosIds = map(videosPaged, 'id');
 
       pagesDetailsPromises.push(extendVideosWithPromiseResults(videosPaged, fetchVideosDetailsById(videosIds)));
-      pagesInfoPromises.push(extendVideosWithPromiseResults(videosPaged, fetchVideosInfoById(videosIds)));
     }
 
     var allPagesDetailsPromise = $q.all(pagesDetailsPromises);
@@ -217,12 +233,10 @@ function youtubeClientFactory($http, $q, configuration) {
         notifyCb({ videos: videos, nextPageId: data.nextPageToken });
 
         // the search is done when both extra info chunks have been fully fetched
-        return $q.all([
-          extendVideosWithPromiseResults(videos, fetchVideosDetailsById(videosIds)),
-          extendVideosWithPromiseResults(videos, fetchVideosInfoById(videosIds))
-        ]).then(function() {
-          return { videos: videos, nextPageToken: data.nextPageToken };
-        });
+        return extendVideosWithPromiseResults(videos, fetchVideosDetailsById(videosIds))
+          .then(function() {
+            return {videos: videos, nextPageToken: data.nextPageToken};
+          });
       });
   }
 
@@ -238,6 +252,16 @@ function youtubeClientFactory($http, $q, configuration) {
     get maxResultsLimit() {
       return MAX_RESULTS_LIMIT;
     },
+
+    /**
+     * Check the DRM info for the given video id.
+     *
+     * It tries to call the drm checker only when there is some frame time available (leveraging requestIdleCallback).
+     *
+     * @param {string} id
+     * @returns {Promise.<{id: string, blacklisted: boolean}>}
+     */
+    checkDrm: memoize(checkDrm),
 
     /**
      * Lists the videos for the given ids.

@@ -8,7 +8,7 @@ var angular = require('angular'),
   has = require('lodash/has');
 
 // @ngInject
-function queueManagerFactory($q, youtubeClient) {
+function queueManagerFactory($q, youtubeClient, errorsTracker) {
 
   // initialize queue
   var queue = new Queue();
@@ -79,6 +79,10 @@ function queueManagerFactory($q, youtubeClient) {
         // replacing the queue object prevents the Angular digest / watch mechanism to work
         // by extending the object it allows it to detect the changes
         angular.extend(queue, newQueue);
+
+        // dispatch DRM check and extend queue entries progressively
+        queue.entries.forEach(checkEntryDrm);
+
         resolve(queue);
       })
         .catch(function(ytError) {
@@ -90,11 +94,27 @@ function queueManagerFactory($q, youtubeClient) {
     });
   }
 
+  /**
+   * Checks the entry video DRM info and extends the entry with blacklisted status.
+   *
+   * {mt.QueueEntry} entry
+   */
+  function checkEntryDrm(entry) {
+    youtubeClient.checkDrm(entry.video.id)
+      .then(function(report) {
+        angular.extend(entry.video, {blacklisted: report.blacklisted});
+      })
+      .catch(function(error) {
+        errorsTracker.track(error);
+      });
+  }
+
   function appendVideo(video) {
     var queueEntry = new QueueEntry();
     queueEntry.id = uniqueId();
     queueEntry.video = video;
     queue.entries.push(queueEntry);
+    checkEntryDrm(queueEntry);
     return queueEntry;
   }
 

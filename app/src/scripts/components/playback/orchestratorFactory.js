@@ -3,7 +3,7 @@
 var angular = require('angular'),
   difference = require('lodash/difference'),
   includes = require('lodash/includes'),
-  mixtubePlayback = require('mixtube-playback');
+  engine = require('mixtube-playback').engine;
 
 // @ngInject
 function orchestratorFactory($rootScope, $timeout, queueManager, notificationCentersRegistry, scenesRegistry,
@@ -42,7 +42,7 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
             _playbackState = state;
 
             // when the playbacks stops we need to tell that the last playing video is not playing anymore
-            if (_playbackState === mixtubePlayback.States.stopped) {
+            if (_playbackState === engine.States.stopped) {
               _playingEntry = null;
             }
           });
@@ -96,7 +96,7 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
         };
       }
 
-      _playback = mixtubePlayback(playbackConfig);
+      _playback = engine(playbackConfig);
 
       $rootScope.$watchCollection(function() {
         return queueManager.queue.entries;
@@ -124,16 +124,16 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
     } else {
       _playback.skip(entry);
 
-      if (_playbackState !== mixtubePlayback.States.playing) {
+      if (_playbackState !== engine.States.playing) {
         _playback.play();
       }
     }
   }
 
   function togglePlayback() {
-    if (_playbackState === mixtubePlayback.States.playing) {
+    if (_playbackState === engine.States.playing) {
       _playback.pause();
-    } else if (_playbackState === mixtubePlayback.States.paused) {
+    } else if (_playbackState === engine.States.paused) {
       _playback.play();
     } else if (queueManager.queue.entries.length) {
       // stopped or pristine
@@ -172,14 +172,14 @@ function orchestratorFactory($rootScope, $timeout, queueManager, notificationCen
      * @returns {boolean}
      */
     get playing() {
-      return _playbackState === mixtubePlayback.States.playing;
+      return _playbackState === engine.States.playing;
     },
 
     /**
      * @returns {boolean}
      */
     get stopped() {
-      return _playbackState === mixtubePlayback.States.stopped;
+      return _playbackState === engine.States.stopped;
     },
 
     /**
