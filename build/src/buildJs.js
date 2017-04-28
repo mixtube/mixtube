@@ -11,8 +11,8 @@ const gulp = require('gulp'),
   envify = require('envify/custom'),
   collapse = require('bundle-collapser/plugin'),
   pathmodify = require('pathmodify'),
-  uglify = require('gulp-uglify'),
   babel = require('gulp-babel'),
+  babili = require('gulp-babili'),
   brfs = require('brfs'),
   noop = require('lodash.noop');
 
@@ -48,7 +48,7 @@ module.exports = function makeBuildJs(config) {
           .pipe(buffer())
           .pipe(sourcemaps.init({ loadMaps: true }))
           .pipe(ngAnnotate())
-          .pipe(config.production ? uglify() : gutil.noop())
+          .pipe(config.production ? babili() : gutil.noop())
           .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(config.publicDirPath));
       }
