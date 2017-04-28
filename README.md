@@ -48,7 +48,6 @@ will be use if the argument is not defined
 - **analyticsTrackerPath** overrides the default analytics tracker implementation (`string`). A noop default
 implementation will be use if the argument is not defined
 - **logoPath**: specifies the logo of the application (`string`, `src/images/mt-empty-logo.svg` by default)
-- **youtubeExtraVideosInfoUrl**: specifies the YouTube extra info endpoint URL. I none provided it is simply ignored (`string`)
 
 You can always get the descriptions of the build options by invoking:
 
